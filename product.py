@@ -53,4 +53,4 @@ class product_product(osv.osv):
 	_columns = {
 		'variant_codex_id': fields.integer('MySQL Product ID'),
 	}
-
+	
