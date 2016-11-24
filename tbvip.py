@@ -274,13 +274,12 @@ class tbvip_data_synchronizer(osv.osv):
 				for value in variant_data[variant_name]:
 					value_ids.append(attribute_dict[variant_name]['values'][value])
 				attribute_line_ids.append([0,False,{
-					'attribute_id': attribute_dict[variant_name]['id'],
-					'value_ids': value_ids,
+					'attribute_id': attribute_dict[variant_name]['id'], 
+					'value_ids': [[6,False,value_ids]]
 				}])
 			product_obj.write(cr, uid, [product.id], {
 				'attribute_line_ids': attribute_line_ids
 			})
-			
 		print '%s finished' % datetime.now()
 		
 		# mysql_bridge_obj.mysql_close()

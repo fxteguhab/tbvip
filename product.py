@@ -27,5 +27,18 @@ class product_template(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'codex_id': fields.integer('MySQL Product ID'),
+		'master_codex_id': fields.integer('MySQL Product ID'),
 	}
+	
+# ==========================================================================================================================
+
+class product_product(osv.osv):
+	
+	_inherit = 'product.product'
+	
+# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'variant_codex_id': fields.integer('MySQL Product ID'),
+	}
+	
