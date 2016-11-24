@@ -153,14 +153,14 @@ class tbvip_data_synchronizer(osv.osv):
 				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
 			else:
 				fails.append("Variant %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
-	
+		
 	# SYNC PRODUCT NON-ANAK VARIANT -------------------------------------------------------------------------------------------
 	
 		print '%s start taking care of products' % datetime.now()
 		for product in product_buffer:
 			group_id = product['group_id']
 			data = product['data']
-			if group_id in variant_codex_ids: continue
+			if group_id in variant_codex_ids or data['codex_id'] in variant_codex_ids: continue
 			categ_id = mysql_bridge_obj.get_id_from_old_new_map(category_map_codex_ids, category_map_ids, group_id)
 			if categ_id:
 				data.update({
@@ -171,6 +171,7 @@ class tbvip_data_synchronizer(osv.osv):
 				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
 			else:
 				fails.append("Product %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
+		
 		print '%s start taking care of anak variants' % datetime.now()
 
 	# UPDATE ATRIBUT+VALUE VARIANT BESERTA PRODUK ANAK VARIANT ----------------------------------------------------------------
