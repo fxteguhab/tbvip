@@ -101,7 +101,6 @@ class tbvip_data_synchronizer(osv.osv):
 		category_obj = self.pool.get('product.category')
 		product_obj = self.pool.get('product.product')
 	# ambil datanya
-		print '%s querying database' % datetime.now()
 		cursor = mysql_bridge_obj.mysql_connect()
 		cursor.execute("SELECT name, group_id, type, item_id FROM t_item_codex WHERE non_active=0")
 		print '%s start taking care of categories' % datetime.now()
@@ -121,7 +120,6 @@ class tbvip_data_synchronizer(osv.osv):
 					data.update({
 						'parent_id': categ_saleable_id
 					})
-				print "Category: %s" % data
 				mysql_bridge_obj.update_insert(cr, uid, 'product.category', product['item_id'], category_map_codex_ids, category_map_ids, data)
 			elif datatype == 'product':
 				product_buffer.append({
@@ -149,18 +147,18 @@ class tbvip_data_synchronizer(osv.osv):
 					'categ_id': categ_id,
 					'type': 'product',
 				})
-				print "Variant: %s" % data
+				print "Kepala variant: %s" % data
 				mysql_bridge_obj.update_insert(cr, uid, 'product.product', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
 			else:
 				fails.append("Variant %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
 	
 	# SYNC PRODUCT NON-ANAK VARIANT -------------------------------------------------------------------------------------------
-	
+
 		print '%s start taking care of products' % datetime.now()
 		for product in product_buffer:
 			group_id = product['group_id']
 			data = product['data']
-			if group_id in variant_codex_ids: continue
+			if group_id in variant_codex_ids or data['codex_id'] in variant_codex_ids: continue
 			categ_id = mysql_bridge_obj.get_id_from_old_new_map(category_map_codex_ids, category_map_ids, group_id)
 			if categ_id:
 				data.update({
@@ -171,6 +169,7 @@ class tbvip_data_synchronizer(osv.osv):
 				mysql_bridge_obj.update_insert(cr, uid, 'product.product', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
 			else:
 				fails.append("Product %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
+		
 		print '%s start taking care of anak variants' % datetime.now()
 
 	# UPDATE ATRIBUT+VALUE VARIANT BESERTA PRODUK ANAK VARIANT ----------------------------------------------------------------
@@ -259,14 +258,21 @@ class tbvip_data_synchronizer(osv.osv):
 			if attribute.name not in attribute_dict: attribute_dict.update({attribute.name: {'id': attribute.id, 'values': {}}})
 			for value in attribute.value_ids:
 				attribute_dict[attribute.name]['values'].update({value.name: value.id})
+		for key in attribute_dict:
+			print "========================================================================"
+			print attribute_dict[key]
+
 	# update parent variant dengan menambahkan atribut beserta kemungkinan valuenya
 		parent_product_item_ids = product_group_attributes.keys()
 		product_obj = self.pool.get('product.product')
+		product_tmpl_obj = self.pool.get('product.template')
 		product_ids = product_obj.search(cr, uid, [('codex_id','in',parent_product_item_ids)])
 		dummy = []
 		for product in product_obj.browse(cr, uid, product_ids):
-			if product.id in dummy: continue
-			if product.id not in dummy: dummy.append(product.id)
+			product_id = product.product_tmpl_id.id
+			if product_id in dummy: continue
+			if len(product.attribute_line_ids) > 0: continue # hanya update variant yang belum ada saja
+			if product_id not in dummy: dummy.append(product_id)
 			variant_data = product_group_attributes[str(product.codex_id)]
 			attribute_line_ids = []
 			for variant_name in variant_data:
@@ -274,10 +280,11 @@ class tbvip_data_synchronizer(osv.osv):
 				for value in variant_data[variant_name]:
 					value_ids.append(attribute_dict[variant_name]['values'][value])
 				attribute_line_ids.append([0,False,{
-					'attribute_id': attribute_dict[variant_name]['id'],
-					'value_ids': value_ids,
+					'attribute_id': attribute_dict[variant_name]['id'], 
+					'value_ids': [[6,False,value_ids]]
 				}])
-			product_obj.write(cr, uid, [product.id], {
+			print attribute_line_ids
+			product_tmpl_obj.write(cr, uid, [product_id], {
 				'attribute_line_ids': attribute_line_ids
 			})
 			
