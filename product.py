@@ -27,8 +27,20 @@ class product_template(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'master_codex_id': fields.integer('MySQL Product ID'),
+		'codex_id': fields.integer('MySQL Product ID'),
 	}
+	
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(product_template, self).create(cr, uid, vals, context)
+	# waktu create product baru, samakan variant_codex_id anak-anaknya dengan codex_id parent
+		new_data = self.browse(cr, uid, new_id, context=context)
+		product_obj = self.pool.get('product.product')
+		for variant in new_data.product_variant_ids:
+			product_obj.write(cr, uid, [variant.id], {
+				'variant_codex_id': new_data.codex_id,
+			})
+		return new_id
+			
 	
 # ==========================================================================================================================
 
@@ -41,4 +53,4 @@ class product_product(osv.osv):
 	_columns = {
 		'variant_codex_id': fields.integer('MySQL Product ID'),
 	}
-	
+

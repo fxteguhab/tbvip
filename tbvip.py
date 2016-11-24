@@ -67,7 +67,7 @@ class tbvip_data_synchronizer(osv.osv):
 		mysql_bridge_obj = self.pool.get('tbvip.mysql.bridge')
 		
 		category_map_codex_ids, category_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.category', 'codex_id')
-		product_map_codex_ids, product_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.product', 'codex_id')
+		product_map_codex_ids, product_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.template', 'codex_id')
 		
 		def perform_product_data_conversion(product):
 			categ_id = mysql_bridge_obj.get_id_from_old_new_map(category_map_codex_ids, category_map_ids, product['group_id'])
@@ -99,7 +99,7 @@ class tbvip_data_synchronizer(osv.osv):
 
 	# ambil dulu codex2 id category sekarang, untuk menunjukkan id apa saja yang sudah pernah di-sync sebelumnya
 		category_obj = self.pool.get('product.category')
-		product_obj = self.pool.get('product.product')
+		product_template_obj = self.pool.get('product.template')
 	# ambil datanya
 		print '%s querying database' % datetime.now()
 		cursor = mysql_bridge_obj.mysql_connect()
@@ -150,7 +150,7 @@ class tbvip_data_synchronizer(osv.osv):
 					'type': 'product',
 				})
 				print "Variant: %s" % data
-				mysql_bridge_obj.update_insert(cr, uid, 'product.product', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
+				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
 			else:
 				fails.append("Variant %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
 	
@@ -168,7 +168,7 @@ class tbvip_data_synchronizer(osv.osv):
 					'type': 'product',
 				})
 				print "Product: %s" % data
-				mysql_bridge_obj.update_insert(cr, uid, 'product.product', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
+				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
 			else:
 				fails.append("Product %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
 		print '%s start taking care of anak variants' % datetime.now()
@@ -261,11 +261,11 @@ class tbvip_data_synchronizer(osv.osv):
 				attribute_dict[attribute.name]['values'].update({value.name: value.id})
 	# update parent variant dengan menambahkan atribut beserta kemungkinan valuenya
 		parent_product_item_ids = product_group_attributes.keys()
-		product_obj = self.pool.get('product.product')
-		product_ids = product_obj.search(cr, uid, [('codex_id','in',parent_product_item_ids)])
+		product_ids = product_template_obj.search(cr, uid, [('codex_id','in',parent_product_item_ids)])
 		dummy = []
-		for product in product_obj.browse(cr, uid, product_ids):
+		for product in product_template_obj.browse(cr, uid, product_ids):
 			if product.id in dummy: continue
+			if len(product.attribute_line_ids) > 0: continue # hanya update variant yang belum ada saja
 			if product.id not in dummy: dummy.append(product.id)
 			variant_data = product_group_attributes[str(product.codex_id)]
 			attribute_line_ids = []
@@ -277,7 +277,7 @@ class tbvip_data_synchronizer(osv.osv):
 					'attribute_id': attribute_dict[variant_name]['id'], 
 					'value_ids': [[6,False,value_ids]]
 				}])
-			product_obj.write(cr, uid, [product.id], {
+			product_template_obj.write(cr, uid, [product.id], {
 				'attribute_line_ids': attribute_line_ids
 			})
 		print '%s finished' % datetime.now()
