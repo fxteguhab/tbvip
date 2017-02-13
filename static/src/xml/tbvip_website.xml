@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+	
+	<t t-name="website_tbvip_kontra_bon_filter">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="state">State</label>
+					<select id="state" class="form-control">
+						<option value="all">[All status]</option>
+						<option value="draft">Draft</option>
+						<option value="giro">Giro filled, unpaid</option>
+						<option value="posted">Paid</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="time_range">Time Range</label>
+					<select id="time_range" class="form-control">
+						<option value="all">[All time - Slow!]</option>
+						<option value="this_month">This month</option>
+						<option value="last_month">Last month</option>
+						<option value="last_3month">Last three months</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-1 form-group">
+				<button type="button" id="btn_filter" class="btn btn-success btn-block">Filter</button>
+			</div>
+		</div>
+	</t>
+	
+	<t t-name="website_tbvip_kontra_bon_list">
+		<div class="website_list_container">
+			<t t-foreach="kontra" t-as="single_kontra">
+				<div class="row single_kontra" attr-data-kontra_id="single_kontra.kontra_id">
+					<div class="col-xs-6"><t t-esc="single_kontra.supplier" /></div>
+					<div class="col-xs-6 right"><t t-esc="single_kontra.tanggal_kontra" /></div>
+				</div>
+				<div class="detail_container" />
+			</t>
+		</div>
+	</t>
+	
+
+</templates>

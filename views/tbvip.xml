@@ -1,0 +1,26 @@
+<openerp>
+	<data>
+
+		<template id="assets_frontend" inherit_id="website.assets_frontend" name="tbvip">
+			<xpath expr="." position="inside">
+				<link rel='stylesheet' href='/tbvip/static/src/css/tbvip.css'/>
+				<link rel='stylesheet' href='/tbvip/static/src/css/website_list.css'/>
+				<script type="text/javascript" src="/tbvip/static/src/js/website_tbvip.js"></script>
+			</xpath>
+		</template>
+		
+		<template id="website_tbvip_list_with_filter" name="List with Filter">
+			<t t-call="website.layout">
+				<div t-att-id="container_id">
+					<div class="container"> 
+						<div id="message_container"></div>
+						<h1><t t-esc="page_title" /></h1>
+						<div id="filter_container" />
+					</div>
+					<div id="list_container"></div>
+				</div>
+			</t>
+		</template>
+		
+	</data>
+</openerp>

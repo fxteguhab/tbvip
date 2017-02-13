@@ -40,7 +40,6 @@ class product_template(osv.osv):
 				'variant_codex_id': new_data.codex_id,
 			})
 		return new_id
-			
 	
 # ==========================================================================================================================
 
@@ -51,6 +50,5 @@ class product_product(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'variant_codex_id': fields.integer('MySQL Product ID'),
+		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
 	}
-	

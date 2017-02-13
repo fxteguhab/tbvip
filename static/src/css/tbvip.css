@@ -1,0 +1,72 @@
+.oe_website_login_container {
+	width: 100%;
+	max-width: 400px;
+}
+
+.oe_website_login_container > form {
+	margin: 12px;
+}
+
+.p16 {
+	padding: 16px;
+}
+
+.oe_callout {
+	padding: 20px;
+	border: 1px solid #EEEEEE;
+	border-left-width: 5px;
+}
+
+.oe_callout h4 {
+	margin: 0px 0px 5px 0px;
+}
+
+.oe_callout_info {
+	border-left-color: #1b809e;
+}
+
+.oe_callout_info h4 {
+	color: #1b809e;
+	margin: 0px 0px 5px 0px;
+}
+
+.oe_callout_danger {
+	border-left-color: #ce4844;
+}
+
+.oe_callout_danger h4 {
+	color: #ce4844;
+}
+
+#attendance_container, #message_container {
+	max-width: 480px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.table > tbody > tr > td.expense_cell {
+  border-top: 0 none;
+  padding: 0 8px;
+}
+
+.table > tbody > tr > td.expense_cell input {
+  border: 0 none;
+  padding: 3px 0;
+  width: 100%;
+	margin-bottom: 6px;
+}
+
+.expense_subtotal {
+  float: right;
+}
+
+.help_menu_label {
+	background:#FEF3D3;
+	color:#CC0000;
+}
+
+.help_field_label {
+	color:#C4A840;
+	font-weight:bold;
+}
+

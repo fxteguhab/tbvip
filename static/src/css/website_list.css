@@ -1,0 +1,17 @@
+.website_list_container {
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+.website_list_container div.row {
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.website_list_container div.row div[class^="col-"] {
+	padding: 10px;
+}
+
+.website_list_container div.row:hover {
+	background-color: #EEEEEE;
+}
