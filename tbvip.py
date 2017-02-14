@@ -1,7 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
-import mysql.connector
+#import mysql.connector
 import csv
 import os
 
