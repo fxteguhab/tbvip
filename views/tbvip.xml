@@ -22,40 +22,5 @@
 			</t>
 		</template>
 		
-		
-		<!-- PURCHASE -->
-		
-		<record model="ir.ui.view" id="tbvip_purchase_needs_form">
-			<field name="name">tbvip.purchase.needs.form</field>
-			<field name="model">tbvip.purchase.needs</field>
-			<field name="arch" type="xml">
-				<form string="needs" version="7.0">
-					<group col="2">
-						<group>
-							<field name="supplier_id"/>
-							<field name="target_date"/>
-							<field name="need_line_ids"/>
-							<field name="state"/>
-							<field name="fullfilment_rate"/>
-						</group>
-					</group>
-				</form>
-			</field>
-		</record>
-		
-		<record model="ir.ui.view" id="tbvip_purchase_needs_tree">
-			<field name="name">tbvip.purchase.needs.tree</field>
-			<field name="model">tbvip.purchase.needs</field>
-			<field name="arch" type="xml">
-				<tree string="needs" version="7.0">
-					<field name="supplier_id"/>
-					<field name="target_date"/>
-					<field name="need_line_ids"/>
-					<field name="state"/>
-					<field name="fullfilment_rate"/>
-				</tree>
-			</field>
-		</record>
-		
 	</data>
 </openerp>
