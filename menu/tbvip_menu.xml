@@ -13,7 +13,6 @@
 			<field name="res_model">tbvip.purchase.needs</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">form</field>
-			<field name="target">new</field>	
 		</record>	
 		
 		<!--         -->
@@ -33,7 +32,7 @@
 		<!--                -->
 		
 		<!-- PURCHASE -->
-		<menuitem sequence="0" id="tbvip.tbvip_menu_purchase_needs" name="Needs" parent="tbvip.tbvip_menu_purchase" action="simu.simu_action_calendar_event"/>
+		<menuitem sequence="0" id="tbvip.tbvip_menu_purchase_needs" name="Needs" parent="tbvip.tbvip_menu_purchase" action="tbvip.tbvip_action_purchase_needs"/>
 		
 	</data>
 </openerp>

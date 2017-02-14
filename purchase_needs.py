@@ -1,4 +1,16 @@
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
+from openerp.osv.osv import osv_memory
+from datetime import datetime
+from openerp.report import report_sxw
+from openerp import SUPERUSER_ID
+from openerp import http
+from openerp.http import request
+import re
+import xlwt
+import StringIO
+import base64
+import os
 
 _PURCHASE_NEEDS_STATE = (
 	('draft', 'Draft'),
