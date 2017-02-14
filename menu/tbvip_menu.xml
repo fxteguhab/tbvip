@@ -8,5 +8,32 @@
 			<field name="sequence" type="int">58</field>
 		</record>		
 		
+		<record id="tbvip_action_purchase_needs" model="ir.actions.act_window">
+			<field name="name">Purchase Needs</field>
+			<field name="res_model">tbvip.purchase.needs</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>	
+		</record>	
+		
+		<!--         -->
+		<!-- LEVEL-1 -->
+		<!--         -->
+		
+		<menuitem sequence="0" id="tbvip.tbvip_menu" name="TB VIP" />
+
+		<!--                   -->
+		<!-- LEVEL-2 MENU NAME -->
+		<!--                   -->
+
+		<menuitem sequence="0" id="tbvip.tbvip_menu_purchase" name="Purchase" parent="tbvip.tbvip_menu"/>
+		
+		<!--                -->
+		<!-- MENU BREAKDOWN -->
+		<!--                -->
+		
+		<!-- PURCHASE -->
+		<menuitem sequence="0" id="tbvip.tbvip_menu_purchase_needs" name="Needs" parent="tbvip.tbvip_menu_purchase" action="simu.simu_action_calendar_event"/>
+		
 	</data>
 </openerp>
