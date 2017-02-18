@@ -28,6 +28,7 @@ class product_template(osv.osv):
 	
 	_columns = {
 		'codex_id': fields.integer('MySQL Product ID'),
+		'discount': fields.char('Discount'),
 	}
 	
 	def create(self, cr, uid, vals, context={}):
