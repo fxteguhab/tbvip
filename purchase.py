@@ -30,6 +30,7 @@ class purchase_order(osv.osv):
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
+		'need_id': fields.many2one('purchase.needs', 'Purchase Needs'),
 	}
 
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
