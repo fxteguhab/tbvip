@@ -8,6 +8,9 @@
                 <field name="date_order" position="after">
                     <field name="branch_id"/>
                 </field>
+                <field name="price_unit" position="after">
+                    <field name="price_unit_nett" modifiers="{'readonly': True}"/>
+                </field>
             </field>
         </record>
     </data>
