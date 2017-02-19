@@ -11,6 +11,9 @@
                 <field name="price_unit" position="after">
                     <field name="price_unit_nett" modifiers="{'readonly': True}"/>
                 </field>
+                <field name="price_unit" position="replace">
+                    <field name="price_unit" invisible="1"/>
+                </field>
             </field>
         </record>
     </data>

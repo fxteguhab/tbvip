@@ -76,6 +76,9 @@ class purchase_order_line(osv.osv):
 			purchase_date = datetime.strptime(data.date_order,'%Y-%m-%d %H:%M:%S')
 			result[data.id] = purchase_date.hour * 3600 + purchase_date.minute * 60
 		return result
+
+	def _calc_line_base_price(self, cr, uid, line, context=None):
+		return line.price_unit_nett
 	
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
