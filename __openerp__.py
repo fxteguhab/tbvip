@@ -12,7 +12,7 @@
 		"base","board","web","website",
 		"chjs_custom_view",
 		"account_accountant","stock","sale","purchase","fleet","hr",
-		"purchase_needs"
+		"purchase_needs", "purchase_sale_discount"
 	],
 	'sequence': 150,
 	'data': [
