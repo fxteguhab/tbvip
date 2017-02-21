@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
+from openerp import SUPERUSER_ID
 
 # ==========================================================================================================================
 
@@ -62,13 +63,67 @@ class purchase_order_line(osv.osv):
 	
 	_inherit = 'purchase.order.line'
 
+# OVERRIDES ----------------------------------------------------------------------------------------------------------------
+
+	# to also update the price_unit_nett when the product_id is changed
+	# def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# 						partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+	# 						name=False, price_unit=False, state='draft', context=None):
+	# 	result = super(purchase_order_line, self).onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# 									  partner_id, date_order, fiscal_position_id, date_planned,
+	# 									  name, price_unit, state, context)
+	# 	result['value'].update({'price_unit_nett': self._calculate_price_unit_nett(cr, uid, ids)})
+	# 	return result
+
+	def create(self, cr, uid, data, context=None):
+		new_order_line = super(purchase_order_line, self).create(cr, uid, data, context)
+		if 'product_id' in data and data['product_id'] and 'price_unit' in data and data['price_unit']:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, data['product_id'])
+			if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+				purchase_order_obj = self.pool.get('purchase.order')
+				purchase_order = purchase_order_obj.browse(cr, uid, data['order_id'])
+				# message post to SUPERUSER
+				purchase_order_obj.message_post(cr, SUPERUSER_ID, purchase_order.id,
+					body=_("Ada perubahan harga beli untuk produk "+product.name+" di PO "+purchase_order.name), context=context)
+				# message post to all users in group Purchases Manager
+				group_obj = self.pool.get('res.groups')
+				purchase_group_ids = group_obj.search(cr, uid, [('category_id.name', '=', 'Purchases'),('name', '=', 'Manager')])
+				for user in group_obj.browse(cr, uid, purchase_group_ids).users:
+					purchase_order_obj.message_post(cr, user.id, purchase_order.id,
+						body=_("Ada perubahan harga beli untuk produk "+product.name+" di PO "+purchase_order.name), context=context)
+		return new_order_line
+
+	def write(self, cr, uid, ids, data, context=None):
+		edited_order_line = super(purchase_order_line,self).write(cr, uid, ids, data, context)
+		if 'product_id' in data and data['product_id'] and 'price_unit' in data and data['price_unit']:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, data['product_id'])
+			if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+				purchase_order_obj = self.pool.get('purchase.order')
+				purchase_order = purchase_order_obj.browse(cr, uid, data['order_id'])
+				# message post to SUPERUSER
+				purchase_order_obj.message_post(cr, SUPERUSER_ID, purchase_order.id,
+												body=_("Ada perubahan harga beli untuk produk "+product.name+" di PO "+purchase_order.name), context=context)
+				# message post to all users in group Purchases Manager
+				group_obj = self.pool.get('res.groups')
+				purchase_group_ids = group_obj.search(cr, uid, [('category_id.name', '=', 'Purchases'),('name', '=', 'Manager')])
+				for user in group_obj.browse(cr, uid, purchase_group_ids).users:
+					purchase_order_obj.message_post(cr, user.id, purchase_order.id,
+													body=_("Ada perubahan harga beli untuk produk "+product.name+" di PO "+purchase_order.name), context=context)
+		return edited_order_line
+
 # FIELD FUNCTION METHODS ---------------------------------------------------------------------------------------------------
 
-	def _price_unit_nett(self, cr, uid, ids, field_name, arg, context={}):
+	def _price_unit_nett(self, cr, uid, ids, field_name={}, arg={}, context={}):
+		print "I am called"
 		result = {}
 		for data in self.browse(cr, uid, ids):
-			result[data.id] = data.price_unit - (data.disc1 + data.disc2 + data.disc3 + data.disc4 + data.disc5)
+			result[data.id] = self._calculate_price_unit_nett(cr, uid, ids, data)
 		return result
+
+	def _calculate_price_unit_nett(self, cr, uid, ids, data):
+		return data.price_unit - (data.disc1 + data.disc2 + data.disc3 + data.disc4 + data.disc5)
 	
 	def _purchase_hour(self, cr, uid, ids, field_name, arg, context={}):
 		result = {}
