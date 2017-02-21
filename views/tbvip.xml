@@ -21,6 +21,26 @@
 				</div>
 			</t>
 		</template>
-		
+
+		<record id="tbvip_branch_form" model="ir.ui.view">
+			<field name="name">tbvip.branch.form</field>
+			<field name="model">tbvip.branch</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="name"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="tbvip_branch_tree" model="ir.ui.view">
+			<field name="name">tbvip.branch.tree</field>
+			<field name="model">tbvip.branch</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+				</tree>
+			</field>
+		</record>
 	</data>
 </openerp>

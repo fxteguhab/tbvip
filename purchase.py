@@ -23,7 +23,9 @@ class purchase_order(osv.osv):
 	
 	_columns = {
 		'mysql_purchase_id': fields.integer('MySQL Purchase ID'),
-		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True), 
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True,
+									 states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)],
+											 'done': [('readonly', True)]}),
 		'cashier': fields.char('Cashier'),
 		'general_discount': fields.float('Discount'),
 		'alert': fields.function(_alert, method=True, type='integer', string="Alert", store=True),
