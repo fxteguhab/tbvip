@@ -14,10 +14,16 @@ class purchase_needs(osv.Model):
         """
         po_vals = super(purchase_needs, self)._pool_generate_po_vals(cr, uid, context, need)
         # Get default product discount for each product on need line then append it on vals
-        # for order_line in po_vals['order_line']:
-        #     discount = self.pool.get('product.supplierinfo')\
-        #         .browse(cr, uid, order_line[2]['product_id']).default_discount
-        #     order_line[2].append(discount)
+        partner_id = po_vals['partner_id']
+        for order_line in po_vals['order_line']:
+            discount = False
+            supplier_ids = self.pool.get('product.product')\
+                .browse(cr, uid, order_line[2]['product_id']).seller_ids
+            # Search if this need supplier is this product's supplier, if yes then update the default discount
+            for supplier_id in supplier_ids:
+                if supplier_id.name.id == partner_id:
+                    discount = supplier_id.default_discount
+            order_line[2].update({'discount_string': discount})
         return po_vals
 
     def _calculate_discount(self, discount_string, price):
