@@ -8,13 +8,18 @@
                 <field name="partner_id" position="before">
                     <field name="branch_id"/>
                 </field>
+                <field name="date_planned" position="replace">
+                    <field name="date_planned" invisible="1"/>
+                </field>
+                <field name="taxes_id" position="replace">
+                    <field name="date_planned" invisible="1"/>
+                </field>
+				<!--TO BE DELETED!-->
                 <field name="price_unit" position="after">
-                    <field name="discount_string"/>
+                    <field name="discount_string" on_change="onchange_discount_string(discount_string)"/>
                     <field name="price_unit_nett" modifiers="{'readonly': True}"/>
                 </field>
-                <!--<field name="price_unit" position="replace">
-                    <field name="price_unit" invisible="1"/>
-                </field>!-->
+				<!--TO BE DELETED!-->
             </field>
         </record>
         <record model="ir.ui.view" id="purchase_order_tree_inherit">
