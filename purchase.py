@@ -39,22 +39,16 @@ class purchase_order(osv.osv):
 
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(purchase_order, self).create(cr, uid, vals, context=context)
-	# langsung confirm purchasenya bila diinginkan. otomatis dia bikin satu invoice dan satu incoming goods
+		# langsung confirm purchasenya bila diinginkan. otomatis dia bikin satu invoice dan satu incoming goods
 		if context.get('direct_confirm', False):
 			purchase_data = self.browse(cr, uid, new_id)
 			self.signal_workflow(cr, uid, [new_id], 'purchase_confirm', context)
-		# langsung validate juga invoicenya
+			# langsung validate juga invoicenya
 			invoice_obj = self.pool.get('account.invoice')
 			for invoice in purchase_data.invoice_ids:
 				invoice_obj.write(cr, uid, [invoice.id], {
 					'date_invoice': purchase_data.date_order,
 				})
 				invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
-	# langsung terima juga barangnya
-	# 	if context.get('direct_receive', False):
-	# 		purchase_data = self.browse(cr, uid, new_id)
-	# 		receive_obj = self.pool.get('stock.picking')
-	# 		picking_ids = [picking.id for picking in purchase_data.picking_ids]
-	# 		receive_obj.action_done(cr, uid, picking_ids)
 		return new_id
 

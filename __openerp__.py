@@ -27,6 +27,7 @@
 		'views/purchase_needs_view.xml',
 		'views/tbvip.xml',
 		'menu/tbvip_menu.xml',
+		'workflows/purchase_workflow.xml',
 	],
 	'demo': [
 	],
