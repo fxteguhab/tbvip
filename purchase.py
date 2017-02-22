@@ -7,6 +7,9 @@ from datetime import datetime, date, timedelta
 class purchase_order(osv.osv):
 	
 	_inherit = 'purchase.order'
+
+	#Attributes
+	_max_discount = 3
 	
 # FIELD FUNCTION METHODS ---------------------------------------------------------------------------------------------------
 
