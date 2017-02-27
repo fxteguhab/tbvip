@@ -1,16 +1,15 @@
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-from datetime import datetime, date, timedelta
+
 
 # ==========================================================================================================================
 
 class purchase_order(osv.osv):
-	
 	_inherit = 'purchase.order'
 	
-# FIELD FUNCTION METHODS ---------------------------------------------------------------------------------------------------
-
+	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
+	
 	def _alert(self, cr, uid, ids, field_name, arg, context={}):
 		result = {}
 		for data in self.browse(cr, uid, ids):
@@ -19,8 +18,8 @@ class purchase_order(osv.osv):
 				max_alert = max(max_alert, line.alert)
 			result[data.id] = max_alert
 		return result
-		
-# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'mysql_purchase_id': fields.integer('MySQL Purchase ID'),
@@ -35,9 +34,9 @@ class purchase_order(osv.osv):
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
 		'need_id': fields.many2one('purchase.needs', 'Purchase Needs'),
 	}
-
-# OVERRIDES ----------------------------------------------------------------------------------------------------------------
-
+	
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(purchase_order, self).create(cr, uid, vals, context=context)
 		# langsung confirm purchasenya bila diinginkan. otomatis dia bikin satu invoice dan satu incoming goods
@@ -53,13 +52,15 @@ class purchase_order(osv.osv):
 				invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
 		return new_id
 
+
 # ==========================================================================================================================
 
 
 class purchase_order_line(osv.osv):
-
 	_inherit = 'purchase.order.line'
-
+	
+	# METHODS ---------------------------------------------------------------------------------------------------------------
+	
 	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
 		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
 			purchase_order_obj = self.pool.get('purchase.order')
@@ -76,7 +77,9 @@ class purchase_order_line(osv.osv):
 			purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
 											body=_("There is a change on cost price for %s in %s Purchase Order")
 												 % (product.name, purchase_order.name))
-
+	
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
 	def create(self, cr, uid, data, context=None):
 		new_order_line = super(purchase_order_line, self).create(cr, uid, data, context)
 		if 'product_id' in data and data['product_id'] and 'price_unit' in data and data['price_unit']:
@@ -84,9 +87,9 @@ class purchase_order_line(osv.osv):
 			product = product_obj.browse(cr, uid, data['product_id'])
 			self._message_cost_price_changed(cr, uid, data, product, data['order_id'], context)
 		return new_order_line
-
+	
 	def write(self, cr, uid, ids, data, context=None):
-		edited_order_line = super(purchase_order_line,self).write(cr, uid, ids, data, context)
+		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, data, context)
 		for id in ids:
 			if 'price_unit' in data and data['price_unit']:
 				product_obj = self.pool.get('product.product')

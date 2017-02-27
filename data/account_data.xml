@@ -4,6 +4,6 @@
 		<record id="account.account_payment_term_net" model="account.payment.term">
 			<field name="name">30</field>
 		</record>
-		
+
 	</data>
 </openerp>
