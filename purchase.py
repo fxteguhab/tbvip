@@ -49,7 +49,7 @@ class purchase_order(osv.osv):
 				invoice_obj.write(cr, uid, [invoice.id], {
 					'date_invoice': purchase_data.date_order,
 				})
-				invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
+				# invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
 		return new_id
 
 
