@@ -12,7 +12,7 @@
 		"base","board","web","website",
 		"chjs_custom_view",
 		"account_accountant","stock","sale","purchase","fleet","hr",
-		"purchase_needs",
+		"purchase_needs", "purchase_sale_discount",
 	],
 	'sequence': 150,
 	'data': [
@@ -22,8 +22,12 @@
 		'data/fleet_data.xml',
 		'data/tbvip_data.xml',
 		'views/employee_view.xml',
+		'views/purchase_view.xml',
+		'views/product_view.xml',
+		'views/purchase_needs_view.xml',
 		'views/tbvip.xml',
 		'menu/tbvip_menu.xml',
+		'workflows/purchase_workflow.xml',
 	],
 	'demo': [
 	],

@@ -8,19 +8,41 @@
 				<script type="text/javascript" src="/tbvip/static/src/js/website_tbvip.js"></script>
 			</xpath>
 		</template>
-		
+
 		<template id="website_tbvip_list_with_filter" name="List with Filter">
 			<t t-call="website.layout">
 				<div t-att-id="container_id">
-					<div class="container"> 
+					<div class="container">
 						<div id="message_container"></div>
-						<h1><t t-esc="page_title" /></h1>
-						<div id="filter_container" />
+						<h1>
+							<t t-esc="page_title"/>
+						</h1>
+						<div id="filter_container"/>
 					</div>
 					<div id="list_container"></div>
 				</div>
 			</t>
 		</template>
-		
+
+		<record id="tbvip_branch_form" model="ir.ui.view">
+			<field name="name">tbvip.branch.form</field>
+			<field name="model">tbvip.branch</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="name"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="tbvip_branch_tree" model="ir.ui.view">
+			<field name="name">tbvip.branch.tree</field>
+			<field name="model">tbvip.branch</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+				</tree>
+			</field>
+		</record>
 	</data>
 </openerp>
