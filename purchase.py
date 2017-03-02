@@ -51,7 +51,17 @@ class purchase_order(osv.osv):
 				})
 				# invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
 		return new_id
-
+	
+	def picking_done(self, cr, uid, ids, context=None):
+		"""
+		Overrides picking_done to also mark the picking as transfered
+		"""
+		picking_ids = []
+		for po in self.browse(cr, uid, ids, context=context):
+			picking_ids += [picking.id for picking in po.picking_ids]
+		picking_obj = self.pool.get('stock.picking')
+		picking_obj.do_transfer(cr, uid, picking_ids)
+		return super(purchase_order, self).picking_done(cr, uid, ids, context)
 
 # ==========================================================================================================================
 
