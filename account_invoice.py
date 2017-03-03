@@ -11,6 +11,8 @@ class account_invoice(models.Model):
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	discount_amount = fields.Float(string='Discount Amount')
+	check_maturity_date = fields.Date(string='Check Maturity Date',
+									  readonly=True, states={'draft': [('readonly', False)]})
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 
