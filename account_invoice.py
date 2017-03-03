@@ -10,7 +10,7 @@ class account_invoice(models.Model):
 
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-	discount_amount = fields.Float(string='Discount Amount')
+	discount_amount = fields.Float(string='Discount')
 	check_maturity_date = fields.Date(string='Check Maturity Date',
 									  readonly=True, states={'draft': [('readonly', False)]})
 	
@@ -26,11 +26,12 @@ class account_invoice_line(models.Model):
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 	@api.depends('price_unit', 'discount_amount')
 	def _compute_discount_amount_percentage(self):
-		self.discount = (self.discount_amount / self.price_unit) * 100.0
+		if(self.price_unit != 0):
+			self.discount = (self.discount_amount / self.price_unit) * 100.0
+		else:
+			self.discount = 0.0
 
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-	discount_amount = fields.Float(string='Discount Amount')
+	discount_amount = fields.Float(string='Discount')
 	discount = fields.Float(string='Discount (%)', digits= dp.get_precision('Discount'),
 							compute=_compute_discount_amount_percentage, default=0.0)
-
-	# OVERRIDES -------------------------------------------------------------------------------------------------------------

@@ -62,6 +62,24 @@ class purchase_order(osv.osv):
 		picking_obj = self.pool.get('stock.picking')
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
+	
+	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
+		"""
+		Overrides _prepare_inv_line to includes discount in invoice lines
+		"""
+		result = super(purchase_order, self)._prepare_inv_line(cr, uid, account_id, order_line, context)
+		result['discount_amount'] = order_line.discount1 + order_line.discount2 +order_line.discount3 +order_line.discount4 + \
+									order_line.discount5 + order_line.discount6 +order_line.discount7 +order_line.discount8
+		return result
+	
+	def _prepare_invoice(self, cr, uid, order, line_ids, context=None):
+		"""
+		Overrides _prepare_invoice to includes discount in invoice
+		"""
+		result = super(purchase_order, self)._prepare_invoice(cr, uid, order, line_ids, context)
+		result['discount_amount'] = order.purchase_discount_amount
+		return result
+	
 
 # ==========================================================================================================================
 
