@@ -1,9 +1,12 @@
-from openerp.osv import osv, fields
-from openerp.tools.translate import _
-from datetime import datetime, date, timedelta
-#import mysql.connector
+import calendar
 import csv
 import os
+from datetime import datetime, date, timedelta
+
+from dateutil.relativedelta import relativedelta
+from openerp.models import BaseModel
+from openerp.osv import osv, fields
+
 
 # ==========================================================================================================================
 
@@ -137,7 +140,7 @@ class tbvip_data_synchronizer(osv.osv):
 			datatype, is_variant, data = perform_product_data_conversion(product)
 			if datatype == 'category':
 			# khusus group dengan parent 0, masukkan langsung ke All/ Saleable
-				if product['group_id'] == 0: 
+				if product['group_id'] == 0:
 					data.update({
 						'parent_id': categ_saleable_id
 					})
@@ -149,7 +152,7 @@ class tbvip_data_synchronizer(osv.osv):
 					'group_id': product['group_id'],
 					'data': data,
 				})
-			# apakah di aaktif atau tidak 
+			# apakah di aaktif atau tidak
 				if product['non_active'] == 0:
 					active_product_codex_ids.append(product['item_id'])
 				else:
@@ -157,7 +160,7 @@ class tbvip_data_synchronizer(osv.osv):
 				
 	# SYNC KEPALA PRODUCT VARIANT ---------------------------------------------------------------------------------------------
 	
-	# pengambilan mapping juga diulang karena di atas sudah ada perubahan karena write (misal pindah kategori) 
+	# pengambilan mapping juga diulang karena di atas sudah ada perubahan karena write (misal pindah kategori)
 	# atau create (ada category baru)
 		print '%s start taking care of variants' % datetime.now()
 		variant_codex_ids = []
@@ -238,7 +241,7 @@ class tbvip_data_synchronizer(osv.osv):
 			if variant1 not in attributes: attributes.update({variant1: {'name': variant1, 'value_ids': []}})
 			attributes[variant1]['value_ids'].append(variant_value1)
 		# pasangkan antara item_id parent variant dengan atribut dan kemungkinan value nya
-			if not product_group_attributes.get(parent_variant_id, False): 
+			if not product_group_attributes.get(parent_variant_id, False):
 				product_group_attributes.update({parent_variant_id: {}})
 			if not product_group_attributes[parent_variant_id].get(variant1, False):
 				product_group_attributes[parent_variant_id].update({variant1: []})
@@ -302,7 +305,7 @@ class tbvip_data_synchronizer(osv.osv):
 				for value in variant_data[variant_name]:
 					value_ids.append(attribute_dict[variant_name]['values'][value])
 				attribute_line_ids.append([0,False,{
-					'attribute_id': attribute_dict[variant_name]['id'], 
+					'attribute_id': attribute_dict[variant_name]['id'],
 					'value_ids': [[6,False,value_ids]]
 				}])
 			print "sampe ke mau write product %s" % product.name
@@ -445,7 +448,7 @@ class tbvip_data_synchronizer(osv.osv):
 					discount1 = float(line['disc'])
 					if discount1 > 0:
 						discount_mode = 'amount'
-					else: 
+					else:
 						discount_mode = None
 				except ValueError:
 					discount1 = line['cost'] - line['nett']
@@ -534,113 +537,168 @@ class tbvip_website_handler(osv.osv):
 	_name = 'tbvip.website.handler'
 	_description = 'Model for handling website-based requests'
 	_auto = False
-
-	def load_kontra_bon(self, env, domain, context={}):
-		uid = env.uid
-
-	# direct mysql query
-
-	# ambil filter dari domain
-		supplier = domain.get('supplier','').strip()
-		if supplier == '-': supplier = ''
-		state = domain.get('state','all')
-		time_range = domain.get('time_range','all')
-		print supplier, state, time_range
-	# bikin string buat WHERE clause
-		wherestr = []
-		if state != 'all':
-			if state == 'draft':
-				wherestr.append("paid = 0")
-				wherestr.append("(no_giro IS NULL OR no_giro = '')")
-			elif state == 'giro':
-				wherestr.append("paid = 0")
-				wherestr.append("(no_giro IS NOT NULL AND no_giro <> '')")
-			elif state == 'paid':
-				wherestr.append("paid = 1")
-		if time_range != 'all':
-			now = datetime.now()
-			if time_range == 'this_month':
-				date = now.strftime('%Y-%m-01')
-				wherestr.append("tanggal_kontra >= '%s'" % date)
-			elif time_range == 'last_month':
-				date_from = (now - timedelta(days=30)).strftime('%Y-%m-01')
-				date_to = (datetime.strptime(now.strftime('%Y-%m-01'),"%Y-%m-%d") - timedelta(minute=1)).strftime('%Y-%m-%d')
-				wherestr.append("tanggal_kontra >= '%s'" % date_from)
-				wherestr.append("tanggal_kontra <= '%s'" % date_to)
-			elif time_range == 'last_3month':
-				date_from = (now - timedelta(days=90)).strftime('%Y-%m-01')
-				date_to = (datetime.strptime(now.strftime('%Y-%m-01'),"%Y-%m-%d") - timedelta(minute=1)).strftime('%Y-%m-%d')
-				wherestr.append("tanggal_kontra >= '%s'" % date_from)
-				wherestr.append("tanggal_kontra <= '%s'" % date_to)
-
-	# ambil datanya
-		mysql_bridge_obj = env['tbvip.mysql.bridge']
-		cursor = mysql_bridge_obj.mysql_connect()
-		print """
-			SELECT 
-				mst.kontra_bon_id,
-				(SELECT invoice FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS invoice,
-				(SELECT total FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS total_purchase,
-				tanggal_kontra,
-				(SELECT name FROM t_supplier supplier WHERE supplier.supplier_id = mst.supplier_id) AS supplier,
-				mst.total AS total_kontra,
-				bank,
-				no_giro,
-				tanggal_giro,
-				value_giro,
-				paid,
-				keterangan 
-			FROM t_detail_kontra_bon det, t_master_kontra_bon mst 
-			WHERE 
-				det.kontra_bon_id = mst.kontra_bon_id AND %s 
-			ORDER BY 
-				supplier, tanggal_kontra DESC 
-		""" % " AND ".join(wherestr)
-		cursor.execute("""
-			SELECT 
-				mst.kontra_bon_id,
-				(SELECT invoice FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS invoice,
-				(SELECT total FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS total_purchase,
-				tanggal_kontra,
-				(SELECT name FROM t_supplier supplier WHERE supplier.supplier_id = mst.supplier_id) AS supplier,
-				mst.total AS total_kontra,
-				bank,
-				no_giro,
-				tanggal_giro,
-				value_giro,
-				paid,
-				keterangan 
-			FROM t_detail_kontra_bon det, t_master_kontra_bon mst 
-			WHERE 
-				det.kontra_bon_id = mst.kontra_bon_id AND %s 
-			ORDER BY 
-				supplier, tanggal_kontra DESC 
-		""" % " AND ".join(wherestr))
 	
-	# convert datanya supaya satu kontra bon = satu baris, 
-		result = {}
-		for kontra in cursor.fetchall():
-			key = kontra['kontra_bon_id']
-			if key not in result: 
-				result.update({key : {
-					'id': key,
-					'tanggal_kontra': kontra['tanggal_kontra'] and kontra['tanggal_kontra'].strftime("%d/%m/%Y") or "",
-					'supplier': kontra['supplier'],
-					'total_kontra': kontra['total_kontra'],
-					'bank': kontra['bank'],
-					'no_giro': kontra['no_giro'],
-					'tanggal_giro': kontra['tanggal_giro'] and kontra['tanggal_giro'].strftime("%d/%m/%Y") or "",
-					'value_giro': kontra['value_giro'],
-					'paid': kontra['paid'],
-					'keterangan': kontra['keterangan'],
-					'kontra_lines': []
-					}
-					})
-			result[key]['kontra_lines'].append({
-				'invoice': kontra['invoice'],
-				'total_purchase': kontra['total_purchase'],
-				})
-		return sorted(result.values(), key=lambda kontra: kontra['supplier'])
+	def load_kontra_bon(self, env, domain, context={}):
+		pass
+		args = []
+		# Pool domains
+		args.extend(self._kontra_bon_pool_supplier(domain))
+		args.extend(self._kontra_bon_pool_state(domain))
+		args.extend(self._kontra_bon_pool_date(domain))
+		
+		AccountVoucher = self.env['account.voucher']
+		vouchers = AccountVoucher.search(args)
+		result = []
+		for voucher in vouchers:
+			# TODO Complete data
+			record = {'id': voucher.id, 'partner_id': voucher.partner_id.name, 'date': voucher.date}
+			result.append(record)
+		
+		return result
+	
+	def _kontra_bon_pool_supplier(self, domain):
+		args = []
+		supplier = domain.get('supplier', '').strip()
+		supplier = supplier if supplier != '-' else ''
+		return args
+	
+	def _kontra_bon_pool_state(self, domain):
+		args = []
+		state = domain.get('state', '').strip()
+		if state == 'draft':
+			args.append(['state', '=', 'draft'])
+			args.append(['reference', '=', 'False'])
+		elif state == 'giro':
+			args.append(['state', '=', 'draft'])
+			args.append(['reference', '!=', 'False'])
+		elif state == 'posted':
+			args.append(['state', '=', 'posted'])
+		return args
+
+	def _kontra_bon_pool_date(self, domain):
+		args = []
+		time_range = domain.get('time_range', '').strip()
+		if time_range != '':
+			date_start = ''
+			date_end = date.today().strftime('%Y-%m-%d')
+			if time_range == 'this_month':
+				date_start = date.today().strftime('%Y-%m-01')
+			elif time_range == 'last_month':
+				date_start = (date.today() + relativedelta(months=-1)).strftime('%Y-%m-%d')
+			elif time_range == 'last_3month':
+				date_start = (date.today() + relativedelta(months=-3)).strftime('%Y-%m-%d')
+			if date_start:
+				args.append(['date', '>=', date_start])
+			if date_end:
+				args.append(['date', '<=', date_end])
+		return args
+
+	# def load_kontra_bon(self, env, domain, context={}):
+	# 	uid = env.uid
+	#
+	# # direct mysql query
+	#
+	# # ambil filter dari domain
+	# 	supplier = domain.get('supplier','').strip()
+	# 	if supplier == '-': supplier = ''
+	# 	state = domain.get('state','all')
+	# 	time_range = domain.get('time_range','all')
+	# 	print supplier, state, time_range
+	# # bikin string buat WHERE clause
+	# 	wherestr = []
+	# 	if state != 'all':
+	# 		if state == 'draft':
+	# 			wherestr.append("paid = 0")
+	# 			wherestr.append("(no_giro IS NULL OR no_giro = '')")
+	# 		elif state == 'giro':
+	# 			wherestr.append("paid = 0")
+	# 			wherestr.append("(no_giro IS NOT NULL AND no_giro <> '')")
+	# 		elif state == 'paid':
+	# 			wherestr.append("paid = 1")
+	# 	if time_range != 'all':
+	# 		now = datetime.now()
+	# 		if time_range == 'this_month':
+	# 			date = now.strftime('%Y-%m-01')
+	# 			wherestr.append("tanggal_kontra >= '%s'" % date)
+	# 		elif time_range == 'last_month':
+	# 			date_from = (now - timedelta(days=30)).strftime('%Y-%m-01')
+	# 			date_to = (datetime.strptime(now.strftime('%Y-%m-01'),"%Y-%m-%d") - timedelta(minute=1)).strftime('%Y-%m-%d')
+	# 			wherestr.append("tanggal_kontra >= '%s'" % date_from)
+	# 			wherestr.append("tanggal_kontra <= '%s'" % date_to)
+	# 		elif time_range == 'last_3month':
+	# 			date_from = (now - timedelta(days=90)).strftime('%Y-%m-01')
+	# 			date_to = (datetime.strptime(now.strftime('%Y-%m-01'),"%Y-%m-%d") - timedelta(minute=1)).strftime('%Y-%m-%d')
+	# 			wherestr.append("tanggal_kontra >= '%s'" % date_from)
+	# 			wherestr.append("tanggal_kontra <= '%s'" % date_to)
+	#
+	# # ambil datanya
+	# 	mysql_bridge_obj = env['tbvip.mysql.bridge']
+	# 	cursor = mysql_bridge_obj.mysql_connect()
+	# 	print """
+	# 		SELECT
+	# 			mst.kontra_bon_id,
+	# 			(SELECT invoice FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS invoice,
+	# 			(SELECT total FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS total_purchase,
+	# 			tanggal_kontra,
+	# 			(SELECT name FROM t_supplier supplier WHERE supplier.supplier_id = mst.supplier_id) AS supplier,
+	# 			mst.total AS total_kontra,
+	# 			bank,
+	# 			no_giro,
+	# 			tanggal_giro,
+	# 			value_giro,
+	# 			paid,
+	# 			keterangan
+	# 		FROM t_detail_kontra_bon det, t_master_kontra_bon mst
+	# 		WHERE
+	# 			det.kontra_bon_id = mst.kontra_bon_id AND %s
+	# 		ORDER BY
+	# 			supplier, tanggal_kontra DESC
+	# 	""" % " AND ".join(wherestr)
+	# 	cursor.execute("""
+	# 		SELECT
+	# 			mst.kontra_bon_id,
+	# 			(SELECT invoice FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS invoice,
+	# 			(SELECT total FROM t_master_purchase22 purchase WHERE purchase.purchase_id = det.purchase_id) AS total_purchase,
+	# 			tanggal_kontra,
+	# 			(SELECT name FROM t_supplier supplier WHERE supplier.supplier_id = mst.supplier_id) AS supplier,
+	# 			mst.total AS total_kontra,
+	# 			bank,
+	# 			no_giro,
+	# 			tanggal_giro,
+	# 			value_giro,
+	# 			paid,
+	# 			keterangan
+	# 		FROM t_detail_kontra_bon det, t_master_kontra_bon mst
+	# 		WHERE
+	# 			det.kontra_bon_id = mst.kontra_bon_id AND %s
+	# 		ORDER BY
+	# 			supplier, tanggal_kontra DESC
+	# 	""" % " AND ".join(wherestr))
+	#
+	# # convert datanya supaya satu kontra bon = satu baris,
+	# 	result = {}
+	# 	for kontra in cursor.fetchall():
+	# 		key = kontra['kontra_bon_id']
+	# 		if key not in result:
+	# 			result.update({key : {
+	# 				'id': key,
+	# 				'tanggal_kontra': kontra['tanggal_kontra'] and kontra['tanggal_kontra'].strftime("%d/%m/%Y") or "",
+	# 				'supplier': kontra['supplier'],
+	# 				'total_kontra': kontra['total_kontra'],
+	# 				'bank': kontra['bank'],
+	# 				'no_giro': kontra['no_giro'],
+	# 				'tanggal_giro': kontra['tanggal_giro'] and kontra['tanggal_giro'].strftime("%d/%m/%Y") or "",
+	# 				'value_giro': kontra['value_giro'],
+	# 				'paid': kontra['paid'],
+	# 				'keterangan': kontra['keterangan'],
+	# 				'kontra_lines': []
+	# 				}
+	# 				})
+	# 		result[key]['kontra_lines'].append({
+	# 			'invoice': kontra['invoice'],
+	# 			'total_purchase': kontra['total_purchase'],
+	# 			})
+	# 	return sorted(result.values(), key=lambda kontra: kontra['supplier'])
 
 		"""
 		domain = []

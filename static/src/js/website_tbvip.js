@@ -76,6 +76,20 @@ $(document).ready(function () {
 			$("#list_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_list',{
 				kontra: data,
 			}));
+            var accordion = document.getElementsByClassName("accordion");
+            var i;
+
+            for (i = 0; i < accordion.length; i++) {
+                accordion[i].onclick = function() {
+                    this.classList.toggle("active");
+                    var accordionDetail = this.nextElementSibling;
+                    if (accordionDetail.style.maxHeight){
+                        accordionDetail.style.maxHeight = null;
+                    } else {
+                        accordionDetail.style.maxHeight = accordionDetail.scrollHeight + "px";
+                    }
+                }
+            }
 		}
 
 	//karena ini list with filter, masukin form filter
@@ -91,3 +105,4 @@ $(document).ready(function () {
 		
 	});
 });
+

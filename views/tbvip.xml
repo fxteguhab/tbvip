@@ -18,8 +18,9 @@
 							<t t-esc="page_title"/>
 						</h1>
 						<div id="filter_container"/>
+						<div id="list_container">
+						</div>
 					</div>
-					<div id="list_container"></div>
 				</div>
 			</t>
 		</template>
