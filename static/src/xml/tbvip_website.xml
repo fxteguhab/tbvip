@@ -37,20 +37,33 @@
 	<t t-name="website_tbvip_kontra_bon_list">
 		<div class="website_list_container">
 			<t t-foreach="kontra" t-as="single_kontra">
-				<div class="row single_kontra accordion" attr-data-kontra_id="single_kontra.kontra_id">
-					<div class="col-xs-6" style="font-weight: bold;"><t t-esc="single_kontra['partner_id']"/></div>
-					<div class="col-xs-6 right"><t t-esc="single_kontra['date']"/></div>
+				<div class="row row_hoverable single_kontra accordion" attr-data-kontra_id="single_kontra.kontra_id">
+					<div class="col-md-6">
+						<t t-esc="single_kontra['date']"/> - <b><t t-esc="single_kontra['partner_id']"/></b>
+					</div>
+					<div class="col-md-6 accordion_header_toggle text-right">
+						<t t-esc="single_kontra['line_dr_ids_length']"/> Bon - Rp. <b><t t-esc="single_kontra['line_dr_ids_total']"/></b>
+					</div>
 				</div>
 				<div class="detail_container accordion_detail">
-					<table class="dataTable">
-					<tr t-foreach="kontraLine" t-as="single_kontra['kontra_line']">
-						<!--TODO Complete View-->
-						<th>Firstname</th>
-						<th>Lastname</th>
-						<th>Age</th>
-					</tr>
-					</table>
-					HAHA
+					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">
+						<div class="row">
+							<div class="row">
+								<div class="col-xs-6">
+									<div style="height: 50%;">
+										<b><t t-esc="kontra_line['move_line_id']"/></b>
+									</div>
+									<div style="height: 50%;">
+									Due: <t t-esc="kontra_line['date_due']"/>
+									</div>
+								</div>
+								<div class="col-xs-6 text-right line_voucher_price">
+									Rp. <t t-esc="kontra_line['amount_unreconciled']"/>
+								</div>
+							</div>
+						</div>
+						<hr style="margin-top: 5px; margin-bottom: 0px"/>
+					</t>
 				</div>
 			</t>
 		</div>

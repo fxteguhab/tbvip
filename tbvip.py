@@ -551,7 +551,22 @@ class tbvip_website_handler(osv.osv):
 		result = []
 		for voucher in vouchers:
 			# TODO Complete data
-			record = {'id': voucher.id, 'partner_id': voucher.partner_id.name, 'date': voucher.date}
+			line_dr_ids = []
+			line_dr_ids_total = 0
+			for line_dr in voucher.line_dr_ids:
+				line = {}
+				line.update({'move_line_id': line_dr.move_line_id.name})
+				line.update({'date_due': line_dr.date_due})
+				line.update({'amount_unreconciled':line_dr.amount_unreconciled})
+				line_dr_ids_total += line_dr.amount_unreconciled
+				line_dr_ids.append(line)
+			record = {'id': voucher.id,
+					  'partner_id': voucher.partner_id.name,
+					  'date': voucher.date,
+					  'line_dr_ids': line_dr_ids,
+					  'line_dr_ids_length': len(voucher.line_dr_ids),
+					  'line_dr_ids_total': line_dr_ids_total,
+					  }
 			result.append(record)
 		
 		return result
