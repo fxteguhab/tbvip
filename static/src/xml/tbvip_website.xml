@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <templates xml:space="preserve">
 	
 	<t t-name="website_tbvip_kontra_bon_filter">
@@ -23,6 +22,16 @@
 						<option value="this_month">This month</option>
 						<option value="last_month">Last month</option>
 						<option value="last_3month">Last three months</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="supplier">Supplier</label>
+					<select id="supplier" class="form-control">
+                        <t t-foreach="suppliers" t-as="supplier">
+                            <option t-attf-value="{{supplier.id}}"><t t-esc="supplier.name"/></option>
+                        </t>
 					</select>
 				</div>
 			</div>
@@ -68,6 +77,4 @@
 			</t>
 		</div>
 	</t>
-	
-
 </templates>

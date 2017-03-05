@@ -50,8 +50,7 @@ $(document).ready(function () {
 		var message_container = $("#message_container");
 		
 		function kontra_bon_get_data() {
-			//var supplier = $("#supplier").val().toUpperCase();
-			var supplier = "-";
+			var supplier = $("#supplier").val().toUpperCase();
 			var state = $("#state").val();
 			var time_range = $("#time_range").val();
 			$.ajax({
@@ -92,13 +91,32 @@ $(document).ready(function () {
             }
 		}
 
-	//karena ini list with filter, masukin form filter
-	setTimeout(function() {
-		$("#filter_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_filter'));
-	},1000)
+        //karena ini list with filter, masukin form filter
+        $.get('/tbvip/kontra_bon/fetch_suppliers', null, function(suppliers){
+            if(suppliers == null || suppliers == undefined) {
+                result = "";
+            } else {
+                suppliers = suppliers.slice(0, -1);
+                arrSuppliers = suppliers.split(";");
+                result = "[";
+                for(i=0; i<arrSuppliers.length; i++) {
+                    if(i != 0) result += ","
+                    supplier = arrSuppliers[i].split(",")
+                    id = supplier[0];
+                    name = supplier[1];
+                    result += "{\"id\":\"" + id + "\",\"name\":\"" + name + "\"}";
+                }
+                result += "]"
+            }
+            alert(result)
+            setTimeout(function() {
+                $("#filter_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_filter',{
+                    'suppliers': JSON.parse(result)
+                }));
+            },1000)
+        });
 	
-	//handle event di semua kemungkinan div yang muncul
-		
+	    //handle event di semua kemungkinan div yang muncul
 		$(purchase_kontra_bon).on("click", "#btn_filter", function () {
 			kontra_bon_get_data();
 		});
