@@ -546,8 +546,8 @@ class tbvip_website_handler(osv.osv):
 		args.extend(self._kontra_bon_pool_state(domain))
 		args.extend(self._kontra_bon_pool_date(domain))
 		
-		AccountVoucher = self.env['account.voucher']
-		vouchers = AccountVoucher.search(args)
+		account_voucher = self.env['account.voucher']
+		vouchers = account_voucher.search(args)
 		result = []
 		for voucher in vouchers:
 			# TODO Complete data
@@ -574,7 +574,8 @@ class tbvip_website_handler(osv.osv):
 	def _kontra_bon_pool_supplier(self, domain):
 		args = []
 		supplier = domain.get('supplier', '').strip()
-		supplier = supplier if supplier != '-' else ''
+		supplier = supplier.encode('ascii','ignore')
+		args.append(['partner_id.id', '=', supplier]);
 		return args
 	
 	def _kontra_bon_pool_state(self, domain):

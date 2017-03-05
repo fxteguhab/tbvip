@@ -108,7 +108,6 @@ $(document).ready(function () {
                 }
                 result += "]"
             }
-            alert(result)
             setTimeout(function() {
                 $("#filter_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_filter',{
                     'suppliers': JSON.parse(result)
