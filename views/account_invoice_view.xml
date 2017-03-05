@@ -15,6 +15,31 @@
 				<field name="journal_id" position="after">
 					<field name="check_maturity_date" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
 				</field>
+				<button name="invoice_open" position="attributes">
+					<attribute name="confirm">
+						Are you sure you this invoice is ready to be validated?
+					</attribute>
+				</button>
+				<button string='Ask Refund' position="attributes">
+					<attribute name="confirm">
+						Are you sure you want to ask refund for this invoice?
+					</attribute>
+				</button>
+				<button name="invoice_cancel" position="attributes">
+					<attribute name="confirm">
+						Are you sure you want to cancel this invoice?
+					</attribute>
+				</button>
+				<button name="action_cancel_draft" position="attributes">
+					<attribute name="confirm">
+						Are you sure you want to set this invoice as draft?
+					</attribute>
+				</button>
+				<button string='Re-Open' position="attributes">
+					<attribute name="confirm">
+						Are you sure you want to re-open this invoice?
+					</attribute>
+				</button>
 			</field>
 		</record>
 	</data>
