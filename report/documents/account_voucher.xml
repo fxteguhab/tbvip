@@ -18,82 +18,98 @@
 							<p t-field="o.partner_id"/>
 						</div>
 						<div class="col-xs-3">
-							<strong>Total Amount Unreconciled:</strong>
-							<p t-field="o.total_amount_unreconciled"/>
+							<strong>Payment Ref:</strong>
+							<p t-field="o.reference"/>
+						</div>
+						<div class="col-xs-3">
+							<strong>Memo:</strong>
+							<p t-field="o.name"/>
 						</div>
 					</div>
 
 					<table class="table table-condensed">
 						<thead>
 							<tr>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Name</strong>
+								<th>
+									<strong>Journal Item</strong>
 								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Untax Amount</strong>
+								<th>
+									<strong>Date</strong>
 								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Amount</strong>
-								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Type</strong>
-								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Date Original</strong>
-								</th>
-								<th style = " vertical-align: top" class="text-center">
+								<th>
 									<strong>Date Due</strong>
 								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Amount Unreconciled</strong>
+								<th class="text-right">
+									<strong>Original Amount</strong>
 								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Company</strong>
+								<th class="text-right">
+									<strong>Open Balance</strong>
 								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>Currency</strong>
-								</th>
-								<th style = " vertical-align: top" class="text-center">
-									<strong>State</strong>
+								<th class="text-right">
+									<strong>Amount</strong>
 								</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr t-foreach="o.line_dr_ids" t-as="line">
 								<td>
-									<span t-field="line.name"/>
+									<span t-field="line.move_line_id.name"/>
 								</td>
-								<td class="text-right">
-									<span t-field="line.untax_amount"/>
-								</td>
-								<td class="text-right">
-									<span t-field="line.amount"/>
-								</td>
-								<td class="text-center">
-									<span t-field="line.type"/>
-								</td>
-								<td class="text-right">
+								<td>
 									<span t-field="line.date_original"/>
 								</td>
-								<td class="text-right">
+								<td>
 									<span t-field="line.date_due"/>
 								</td>
 								<td class="text-right">
-									<span t-field="line.amount_unreconciled"/>
+									<span t-field="line.amount_original"
+										  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
 								</td>
-								<td>
-									<span t-field="line.company_id"/>
+								<td class="text-right">
+									<span t-field="line.amount_unreconciled"
+										  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
 								</td>
-								<td class="text-center">
-									<span t-field="line.currency_id"/>
-								</td>
-								<td class="text-center">
-									<span t-field="line.state"/>
+								<td class="text-right">
+									<span t-field="line.amount"
+										  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
 								</td>
 							</tr>
 						</tbody>
 					</table>
 
+					<div class="row">
+						<div class="col-xs-4 pull-right">
+							<table class="table table-condensed">
+								<tr class="border-black">
+									<td>
+										<strong>Total Amount</strong>
+									</td>
+									<td class="text-right">
+										<span t-field="o.paid_amount_in_company_currency"
+											  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<strong>Total Voucher</strong>
+									</td>
+									<td class="text-right">
+										<span t-field="o.amount"
+											  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+								<tr class="border-black">
+									<td>
+										Difference Amount
+									</td>
+									<td class="text-right">
+										<span t-field="o.writeoff_amount"
+											  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
 				</div>
 			</t>
 		</template>

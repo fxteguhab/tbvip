@@ -26,7 +26,7 @@
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
 		'views/tbvip.xml',
-		'report/account_voucher_report.xml',
+		'report/account_report.xml',
 		'report/documents/account_voucher.xml',
 		'menu/tbvip_menu.xml',
 		'workflows/purchase_workflow.xml',
