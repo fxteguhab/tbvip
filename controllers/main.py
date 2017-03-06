@@ -43,12 +43,15 @@ class website_tbvip(http.Controller):
 	@http.route('/tbvip/kontra_bon/fetch_suppliers', type='http', auth="user", website=True)
 	def purchase_kontra_bon_fetch_suppliers(self, **kwargs):
 		account_vouchers = http.request.env['account.voucher']
-		result = '';
 		list_id = '';
+		result = "[";
 		for record in account_vouchers.search([]):
-			id = record.partner_id.id
+			id = str(record.partner_id.id)
 			name = record.partner_id.name
-			if(str(id) not in list_id.split(";")):
-				list_id += str(id) + ";"
-				result += str(id) + "," + name + ";";
+			if id not in list_id.split(";"):
+				if result != "[":
+					result += ", "
+				list_id += id + ";"
+				result += "{\"id\":\"" + id + "\",\"name\":\"" + name + "\"}";
+		result += "]"
 		return result

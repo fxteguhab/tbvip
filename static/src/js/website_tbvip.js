@@ -93,24 +93,9 @@ $(document).ready(function () {
 
         //karena ini list with filter, masukin form filter
         $.get('/tbvip/kontra_bon/fetch_suppliers', null, function(suppliers){
-            if(suppliers == null || suppliers == undefined) {
-                result = "";
-            } else {
-                suppliers = suppliers.slice(0, -1);
-                arrSuppliers = suppliers.split(";");
-                result = "[";
-                for(i=0; i<arrSuppliers.length; i++) {
-                    if(i != 0) result += ","
-                    supplier = arrSuppliers[i].split(",")
-                    id = supplier[0];
-                    name = supplier[1];
-                    result += "{\"id\":\"" + id + "\",\"name\":\"" + name + "\"}";
-                }
-                result += "]"
-            }
             setTimeout(function() {
                 $("#filter_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_filter',{
-                    'suppliers': JSON.parse(result)
+                    'suppliers': JSON.parse(suppliers)
                 }));
             },1000)
         });
