@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<template id="report_account_voucher_document">
+			<t t-call="report.external_layout">
+				<div class="page">
+					<div class="oe_structure"/>
+
+					<h2>Voucher</h2>
+
+					<div class="row mt32 mb32">
+						<div class="col-xs-3">
+							<strong>Date:</strong>
+							<p t-field="o.date"/>
+						</div>
+						<div class="col-xs-3">
+							<strong>Supplier:</strong>
+							<p t-field="o.partner_id"/>
+						</div>
+						<div class="col-xs-3">
+							<strong>Total Amount Unreconciled:</strong>
+							<p t-field="o.total_amount_unreconciled"/>
+						</div>
+					</div>
+
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Name</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Untax Amount</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Amount</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Type</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Date Original</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Date Due</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Amount Unreconciled</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Company</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>Currency</strong>
+								</th>
+								<th style = " vertical-align: top" class="text-center">
+									<strong>State</strong>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr t-foreach="o.line_dr_ids" t-as="line">
+								<td>
+									<span t-field="line.name"/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.untax_amount"/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.amount"/>
+								</td>
+								<td class="text-center">
+									<span t-field="line.type"/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.date_original"/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.date_due"/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.amount_unreconciled"/>
+								</td>
+								<td>
+									<span t-field="line.company_id"/>
+								</td>
+								<td class="text-center">
+									<span t-field="line.currency_id"/>
+								</td>
+								<td class="text-center">
+									<span t-field="line.state"/>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+				</div>
+			</t>
+		</template>
+
+		<template id="report_account_voucher">
+			<t t-call="report.html_container">
+				<t t-foreach="doc_ids" t-as="doc_id">
+					<t t-raw="translate_doc(doc_id, doc_model, 'create_uid.lang', 'tbvip.report_account_voucher_document')"/>
+				</t>
+			</t>
+		</template>
+	</data>
+</openerp>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<report string="Voucher" id="action_report_account_voucher" model="account.voucher" report_type="qweb-pdf"
+				name="tbvip.report_account_voucher" file="tbvip.report_account_voucher"/>
+	</data>
+</openerp>
