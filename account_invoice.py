@@ -20,9 +20,10 @@ class account_invoice(models.Model):
 	@api.depends('invoice_line.price_subtotal', 'tax_line.amount', 'discount_amount')
 	def _compute_amount(self):
 		super(account_invoice, self)._compute_amount()
-		self.amount_total = self.amount_total - self.discount_amount
-		# if self.amount_total < 0:
-		# 	raise except_orm('Warning!','Discount should be less than or equals to the total amount.')
+		if self.amount_total - self.discount_amount < 0:
+			raise except_orm('Warning!','Discount should be less than or equals to the subtotal amount.')
+		else:
+			self.amount_total -= self.discount_amount
 
 # ==========================================================================================================================
 
