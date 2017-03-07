@@ -6,7 +6,7 @@
 			<field name="inherit_id" ref="account.invoice_supplier_form"/>
 			<field name="arch" type="xml">
 				<field name="discount" position="replace">
-					<field name="discount_amount" modifiers="{'readonly':[('state', '!=', 'draft')]}"/>
+					<field name="discount_amount_line" modifiers="{'readonly':[('state', '!=', 'draft')]}"/>
 				</field>
 				<field name="amount_tax" position="after">
 					<field name="discount_amount" widget="monetary" options="{'currency_field': 'currency_id'}"
