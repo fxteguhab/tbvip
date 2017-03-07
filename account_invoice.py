@@ -21,7 +21,7 @@ class account_invoice(models.Model):
 		super(account_invoice, self)._compute_amount()
 		if self.amount_total:
 			if self.amount_total - self.discount_amount < 0:
-				raise except_orm('Warning!','Discount should be less than or equals to the subtotal amount.')
+				raise except_orm('Warning!','Total amount should not be less than zero.')
 			else:
 				self.amount_total -= self.discount_amount
 		else:
