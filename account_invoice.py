@@ -1,4 +1,4 @@
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 import openerp.addons.decimal_precision as dp
 from openerp.exceptions import except_orm
 
@@ -7,25 +7,26 @@ from openerp.exceptions import except_orm
 class account_invoice(models.Model):
 	_inherit = 'account.invoice'
 	
-	# METHODS ------------------------------------------------------------------------------------------------
-	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
 	discount_amount = fields.Float(string='Discount')
 	check_maturity_date = fields.Date(string='Check Maturity Date',
 									  readonly=True, states={'draft': [('readonly', False)]})
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
 	@api.one
-	@api.depends('invoice_line.price_subtotal', 'tax_line.amount', 'discount_amount')
+	@api.depends('discount_amount')
 	def _compute_amount(self):
 		super(account_invoice, self)._compute_amount()
 		if self.amount_total:
 			if self.amount_total - self.discount_amount < 0:
-				raise except_orm('Warning!','Total amount should not be less than zero.')
+				raise except_orm(_('Warning!'), _('Total amount should not be less than zero.'))
 			else:
 				self.amount_total -= self.discount_amount
 		else:
 			self.discount_amount = 0
+			
 # ==========================================================================================================================
 
 
@@ -33,6 +34,7 @@ class account_invoice_line(models.Model):
 	_inherit = 'account.invoice.line'
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
+	
 	@api.depends('price_unit', 'discount_amount_line')
 	def _compute_discount_amount_line_percentage(self):
 		"""
