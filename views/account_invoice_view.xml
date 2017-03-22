@@ -1,0 +1,36 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="invoice_supplier_form_inherit">
+			<field name="name">account.invoice.supplier.form.inherit</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_supplier_form"/>
+			<field name="arch" type="xml">
+				<field name="discount" position="replace">
+					<field name="discount_amount_line" modifiers="{'readonly':[('state', '!=', 'draft')]}"/>
+				</field>
+				<field name="amount_tax" position="after">
+					<field name="discount_amount" widget="monetary" options="{'currency_field': 'currency_id'}"
+						   attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+				</field>
+				<field name="journal_id" position="after">
+					<field name="check_maturity_date" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
+				</field>
+				<button name="invoice_open" position="attributes">
+					<attribute name="confirm">
+						Are you sure you this invoice is ready to be validated?
+					</attribute>
+				</button>
+				<button name="invoice_cancel" position="attributes">
+					<attribute name="confirm">
+						Are you sure you want to cancel this invoice?
+					</attribute>
+				</button>
+				<button name="action_cancel_draft" position="attributes">
+					<attribute name="confirm">
+						Are you sure you want to set this invoice as draft?
+					</attribute>
+				</button>
+			</field>
+		</record>
+	</data>
+</openerp>

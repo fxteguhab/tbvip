@@ -39,3 +39,19 @@ class website_tbvip(http.Controller):
 				'data': result,
 			}
 		return json.dumps(response)
+	
+	@http.route('/tbvip/kontra_bon/fetch_suppliers', type='http', auth="user", website=True)
+	def purchase_kontra_bon_fetch_suppliers(self, **kwargs):
+		account_vouchers = http.request.env['account.voucher']
+		list_id = '';
+		result = "[";
+		for record in account_vouchers.search([]):
+			id = str(record.partner_id.id)
+			name = record.partner_id.name
+			if id not in list_id.split(";"):
+				if result != "[":
+					result += ", "
+				list_id += id + ";"
+				result += "{\"id\":\"" + id + "\",\"name\":\"" + name + "\"}";
+		result += "]"
+		return result

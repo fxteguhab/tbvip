@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<template id="report_account_voucher_document">
+			<t t-call="report.external_layout">
+				<div class="page">
+					<div class="oe_structure"/>
+
+					<h2>Voucher</h2>
+
+					<div class="row mt32 mb32">
+						<div class="col-xs-3">
+							<strong>Date:</strong>
+							<p t-field="o.date"/>
+						</div>
+						<div class="col-xs-3">
+							<strong>Supplier:</strong>
+							<p t-field="o.partner_id"/>
+						</div>
+						<div class="col-xs-3">
+							<strong>Payment Ref:</strong>
+							<p t-field="o.reference"/>
+						</div>
+						<div class="col-xs-3">
+							<strong>Memo:</strong>
+							<p t-field="o.name"/>
+						</div>
+					</div>
+
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th>
+									<strong>Journal Item</strong>
+								</th>
+								<th>
+									<strong>Date</strong>
+								</th>
+								<th>
+									<strong>Date Due</strong>
+								</th>
+								<th class="text-right">
+									<strong>Original Amount</strong>
+								</th>
+								<th class="text-right">
+									<strong>Open Balance</strong>
+								</th>
+								<th class="text-right">
+									<strong>Amount</strong>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr t-foreach="o.line_dr_ids" t-as="line">
+								<td>
+									<span t-field="line.move_line_id.name"/>
+								</td>
+								<td>
+									<span t-field="line.date_original"/>
+								</td>
+								<td>
+									<span t-field="line.date_due"/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.amount_original"
+										  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.amount_unreconciled"
+										  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+								</td>
+								<td class="text-right">
+									<span t-field="line.amount"
+										  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<div class="row">
+						<div class="col-xs-4 pull-right">
+							<table class="table table-condensed">
+								<tr class="border-black">
+									<td>
+										<strong>Total Amount</strong>
+									</td>
+									<td class="text-right">
+										<span t-field="o.paid_amount_in_company_currency"
+											  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<strong>Total Voucher</strong>
+									</td>
+									<td class="text-right">
+										<span t-field="o.amount"
+											  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+								<tr class="border-black">
+									<td>
+										Difference Amount
+									</td>
+									<td class="text-right">
+										<span t-field="o.writeoff_amount"
+											  t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</t>
+		</template>
+
+		<template id="report_account_voucher">
+			<t t-call="report.html_container">
+				<t t-foreach="doc_ids" t-as="doc_id">
+					<t t-raw="translate_doc(doc_id, doc_model, 'create_uid.lang', 'tbvip.report_account_voucher_document')"/>
+				</t>
+			</t>
+		</template>
+	</data>
+</openerp>

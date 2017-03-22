@@ -9,9 +9,48 @@
 }
 
 .website_list_container div.row div[class^="col-"] {
-	padding: 10px;
+    padding: 10px;
 }
 
-.website_list_container div.row:hover {
+.website_list_container div.row_hoverable:hover {
 	background-color: #EEEEEE;
+}
+
+.website_list_container div.row_hoverable{
+	background-color: #f5f5f5;
+    border-radius: 2px;
+}
+
+.website_list_container .accordion_detail{
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.2s ease-out;
+}
+
+.website_list_container .accordion .accordion_header_toggle:after {
+	content: '\002B';
+	color: #777;
+	font-weight: bold;
+	float: right;
+	margin-left: 10px;
+}
+
+.website_list_container .accordion.active .accordion_header_toggle:after {
+	content: "\2212";
+}
+
+.website_list_container .line_voucher_price {
+	font-size: larger;
+	font-weight: bold
+}
+
+@media (max-width: 767px) {
+	.website_list_container .accordion_header_toggle {
+		text-align:left;
+		padding-top: 0 !important;
+	}
+	.website_list_container .line_voucher_price {
+		font-size: small;
+		font-weight: bold
+	}
 }

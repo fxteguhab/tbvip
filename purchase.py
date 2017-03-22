@@ -51,7 +51,35 @@ class purchase_order(osv.osv):
 				})
 				# invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
 		return new_id
-
+	
+	def picking_done(self, cr, uid, ids, context=None):
+		"""
+		Overrides picking_done to also mark the picking as transfered
+		"""
+		picking_ids = []
+		for po in self.browse(cr, uid, ids, context=context):
+			picking_ids += [picking.id for picking in po.picking_ids]
+		picking_obj = self.pool.get('stock.picking')
+		picking_obj.do_transfer(cr, uid, picking_ids)
+		return super(purchase_order, self).picking_done(cr, uid, ids, context)
+	
+	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
+		"""
+		Overrides _prepare_inv_line to include discount in invoice lines
+		"""
+		result = super(purchase_order, self)._prepare_inv_line(cr, uid, account_id, order_line, context)
+		result['discount_amount'] = order_line.discount1 + order_line.discount2 +order_line.discount3 +order_line.discount4 + \
+									order_line.discount5 + order_line.discount6 +order_line.discount7 +order_line.discount8
+		return result
+	
+	def _prepare_invoice(self, cr, uid, order, line_ids, context=None):
+		"""
+		Overrides _prepare_invoice to include discount in invoice
+		"""
+		result = super(purchase_order, self)._prepare_invoice(cr, uid, order, line_ids, context)
+		result['discount_amount'] = order.purchase_discount_amount
+		return result
+	
 # ==========================================================================================================================
 
 
