@@ -30,6 +30,7 @@ class purchase_needs(osv.Model):
 			order_line[2].update({'discount_string': discount})
 		return po_vals
 	
+	# JUNED: ini method buat apa ya? kok saya ngga liat dipanggil di mana2...	
 	def _calculate_discount(self, discount_string, price):
 		result = [0, 0, 0, 0, 0]
 		discounts = discount_string.split("+")
