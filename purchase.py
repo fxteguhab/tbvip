@@ -43,7 +43,7 @@ class purchase_order(osv.osv):
 		if context.get('direct_confirm', False):
 			purchase_data = self.browse(cr, uid, new_id)
 			self.signal_workflow(cr, uid, [new_id], 'purchase_confirm', context)
-			# langsung validate juga invoicenya
+		# samakan tanggal invoice dengan tanggal PO, jadi tidak default tanggal hari ini
 			invoice_obj = self.pool.get('account.invoice')
 			for invoice in purchase_data.invoice_ids:
 				invoice_obj.write(cr, uid, [invoice.id], {
@@ -52,13 +52,12 @@ class purchase_order(osv.osv):
 				# invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
 		return new_id
 
-
 # ==========================================================================================================================
 
 
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
-	
+
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 	
 	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
