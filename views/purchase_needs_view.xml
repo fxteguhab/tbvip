@@ -5,7 +5,7 @@
 			<field name="model">purchase.needs</field>
 			<field name="inherit_id" ref="purchase_needs.purchase_needs_form"/>
 			<field name="arch" type="xml">
-				<field name="fulfillment_rate" position="after">
+				<field name="selection_rate" position="after">
 					<field name="branch_id"/>
 				</field>
 			</field>

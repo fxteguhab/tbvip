@@ -28,6 +28,7 @@ class purchase_needs(osv.Model):
 				if supplier_id.name.id == partner_id:
 					discount = supplier_id.default_discount
 			order_line[2].update({'discount_string': discount})
+		po_vals['branch_id'] = need.branch_id.id
 		return po_vals
 	
 	def _calculate_discount(self, discount_string, price):
