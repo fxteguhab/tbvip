@@ -9,19 +9,19 @@ class account_invoice(models.Model):
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
-	discount_amount = fields.Float(string='Discount')
+	discount_amount = fields.Float(string='Discount') # JUNED: ini mending ke purchase_sales_discount deh 
 	check_maturity_date = fields.Date(string='Check Maturity Date',
-									  readonly=True, states={'draft': [('readonly', False)]})
+		readonly=True, states={'draft': [('readonly', False)]}) # JUNED: maaf salah tulis di 004, seharusnya ini ada di account.voucher bukan account.invoice. tolong pindahkan beserta definisi field ini di viewnya
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 	
 	@api.one
 	@api.depends('discount_amount')
-	def _compute_amount(self):
+	def _compute_amount(self): # JUNED: ini juga ke purchase_sales_discount
 		super(account_invoice, self)._compute_amount()
 		if self.amount_total:
 			if self.amount_total - self.discount_amount < 0:
-				raise except_orm(_('Warning!'), _('Total amount should not be less than zero.'))
+				raise except_orm(_('Warning!'), _('Total amount after discount should not be less than zero.'))
 			else:
 				self.amount_total -= self.discount_amount
 		else:
@@ -30,7 +30,7 @@ class account_invoice(models.Model):
 # ==========================================================================================================================
 
 
-class account_invoice_line(models.Model):
+class account_invoice_line(models.Model): # JUNED: ini juga ke purchase_sales_line
 	_inherit = 'account.invoice.line'
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
