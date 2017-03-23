@@ -21,7 +21,6 @@
 		'data/account_data.xml',
 		'data/fleet_data.xml',
 		'data/tbvip_data.xml',
-		'views/account_invoice_view.xml',
 		'views/employee_view.xml',
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',

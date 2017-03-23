@@ -27,12 +27,11 @@ class purchase_order(osv.osv):
 									 states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)],
 											 'done': [('readonly', True)]}),
 		'cashier': fields.char('Cashier'),
-		'general_discount': fields.float('Discount'),
+		'general_discount': fields.float('Discount'), # JUNED: tidak perlu ada di sini lagi, sudah ada module purchase_sales_discount
 		'alert': fields.function(_alert, method=True, type='integer', string="Alert", store=True),
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
-		'need_id': fields.many2one('purchase.needs', 'Purchase Needs'),
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -43,7 +42,7 @@ class purchase_order(osv.osv):
 		if context.get('direct_confirm', False):
 			purchase_data = self.browse(cr, uid, new_id)
 			self.signal_workflow(cr, uid, [new_id], 'purchase_confirm', context)
-			# langsung validate juga invoicenya
+		# samakan tanggal invoice dengan tanggal PO, jadi tidak default tanggal hari ini
 			invoice_obj = self.pool.get('account.invoice')
 			for invoice in purchase_data.invoice_ids:
 				invoice_obj.write(cr, uid, [invoice.id], {
@@ -63,6 +62,9 @@ class purchase_order(osv.osv):
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
 	
+# JUNED: setelah saya pikirin lebih baik kalau _prepare_inv_line dan _prepare_invoice dipindah ke puchase_sales_discount
+# gimana menurut kalian? pertimbangan saya kedua method ini masih terkait diskon, jadi dipindah supaya module 
+# purchase_sales_discount lebih independen dan tetap akurat.
 	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
 		"""
 		Overrides _prepare_inv_line to include discount in invoice lines
@@ -80,13 +82,12 @@ class purchase_order(osv.osv):
 		result['discount_amount'] = order.purchase_discount_amount
 		return result
 	
-
 # ==========================================================================================================================
 
 
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
-	
+
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 	
 	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
@@ -103,24 +104,34 @@ class purchase_order_line(osv.osv):
 				partner_ids += [user.partner_id.id]
 			partner_ids = list(set(partner_ids))
 			purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
-											body=_("There is a change on cost price for %s in %s Purchase Order")
-												 % (product.name, purchase_order.name))
+											body=_("There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
+												 % (product.name, purchase_order.name,product.standard_price,data['price_unit']))
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 	
-	def create(self, cr, uid, data, context=None):
-		new_order_line = super(purchase_order_line, self).create(cr, uid, data, context)
-		if 'product_id' in data and data['product_id'] and 'price_unit' in data and data['price_unit']:
+	def create(self, cr, uid, vals, context=None):
+		new_order_line = super(purchase_order_line, self).create(cr, uid, vals, context)
+		if vals.get('product_id', False) and vals.get('price_unit', False):
 			product_obj = self.pool.get('product.product')
-			product = product_obj.browse(cr, uid, data['product_id'])
-			self._message_cost_price_changed(cr, uid, data, product, data['order_id'], context)
+			product = product_obj.browse(cr, uid, vals['product_id'])
+			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
 		return new_order_line
 	
-	def write(self, cr, uid, ids, data, context=None):
-		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, data, context)
+	def write(self, cr, uid, ids, vals, context=None):
+		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
 		for id in ids:
-			if 'price_unit' in data and data['price_unit']:
+			if vals.get('price_unit', False):
 				product_obj = self.pool.get('product.product')
 				product = product_obj.browse(cr, uid, self.browse(cr, uid, id).product_id.id)
-				self._message_cost_price_changed(cr, uid, data, product, self.browse(cr, uid, id).order_id.id, context)
+				self._message_cost_price_changed(cr, uid, vals, product, self.browse(cr, uid, id).order_id.id, context)
 		return edited_order_line
+
+	# JUNED: versi yang lebih baik, tolong yang di atas diganti setelah memahami berikut ini:
+	"""
+		product_obj = self.pool.get('product.product')
+		if vals.get('price_unit', False):
+			for purchase_line in self.browse(cr, uid, ids):
+				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
+		ngga banyak browse, ngga bolak balik query database
+		ingat browse itu mengambil semua vals m2o dan o2m, menggurita sampai ke model paling atas/paling bawah
+	"""
