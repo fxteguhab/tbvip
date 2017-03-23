@@ -26,12 +26,12 @@
 		</record>
 
 		<record id="purchase.purchase_rfq" model="ir.actions.act_window">
-			<field name="context">{'direct_confirm':True}</field>
+			<!--<field name="context">{'direct_confirm':True}</field>-->
 			<field name="name">Draft Purchase Order</field>
 		</record>
 
 		<record id="purchase.purchase_form_action" model="ir.actions.act_window">
-			<field name="context">{'direct_confirm':True}</field>
+			<!--<field name="context">{'direct_confirm':True}</field>-->
 		</record>
 	</data>
 </openerp>
