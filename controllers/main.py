@@ -54,21 +54,22 @@ class website_tbvip(http.Controller):
 	
 	@http.route('/tbvip/kontra_bon/fetch_suppliers', type='http', auth="user", website=True)
 	def purchase_kontra_bon_fetch_suppliers(self, **kwargs):
-	# JUNED: ada pendekatan yang jauh lebih baik daripada meng-concat string pakai , [ ] ; dsb. 
+	# TIMTBVIP: sudah diubah caranya
+	# ada pendekatan yang jauh lebih baik daripada meng-concat string pakai , [ ] ; dsb.
 	# idenya, kamu bikin list seperti biasa (dalam hal ini list of dict {id, name})
 	# lalu dengan mudahnya tinggal panggil json.dumps() dan tada! kamu langsung punya JSON string
 	# https://docs.python.org/2/library/json.html
 	# tolong ini diganti dan di-note buat ke depannya
 		account_vouchers = http.request.env['account.voucher']
-		list_id = '';
-		result = "[";
+		result = [];
+		list_id = [];
 		for record in account_vouchers.search([]):
 			id = str(record.partner_id.id)
 			name = record.partner_id.name
-			if id not in list_id.split(";"):
-				if result != "[":
-					result += ", "
-				list_id += id + ";"
-				result += "{\"id\":\"" + id + "\",\"name\":\"" + name + "\"}";
-		result += "]"
-		return result
+			if id not in list_id:
+				list_id.append(id);
+				result.append({
+					'id': id,
+					'name': name,
+				});
+		return json.dumps(result)
