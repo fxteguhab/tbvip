@@ -119,14 +119,12 @@ class purchase_order_line(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
-		for id in ids:
-			if vals.get('price_unit', False):
-				product_obj = self.pool.get('product.product')
-				product = product_obj.browse(cr, uid, self.browse(cr, uid, id).product_id.id)
-				self._message_cost_price_changed(cr, uid, vals, product, self.browse(cr, uid, id).order_id.id, context)
+		if vals.get('price_unit', False):
+			for purchase_line in self.browse(cr, uid, ids):
+				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
 
-	# JUNED: versi yang lebih baik, tolong yang di atas diganti setelah memahami berikut ini:
+	# TIMTBVIP: versi yang lebih baik, tolong yang di atas diganti setelah memahami berikut ini:
 	"""
 		product_obj = self.pool.get('product.product')
 		if vals.get('price_unit', False):
@@ -135,3 +133,14 @@ class purchase_order_line(osv.osv):
 		ngga banyak browse, ngga bolak balik query database
 		ingat browse itu mengambil semua vals m2o dan o2m, menggurita sampai ke model paling atas/paling bawah
 	"""
+	# Tadinya...
+	# """
+	# def write(self, cr, uid, ids, vals, context=None):
+	# 	edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
+	# 	for id in ids:
+	# 		if vals.get('price_unit', False):
+	# 			product_obj = self.pool.get('product.product')
+	# 			product = product_obj.browse(cr, uid, self.browse(cr, uid, id).product_id.id)
+	# 			self._message_cost_price_changed(cr, uid, vals, product, self.browse(cr, uid, id).order_id.id, context)
+	# 	return edited_order_line
+	# """
