@@ -29,7 +29,9 @@
 		'views/tbvip.xml',
 		'report/account_report.xml',
 		'report/documents/account_voucher.xml',
+		'report/purchase_report.xml',
 		'menu/tbvip_menu.xml',
+		'menu/purchase_menu.xml',
 		'workflows/purchase_workflow.xml',
 	],
 	'demo': [
