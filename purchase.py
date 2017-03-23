@@ -99,7 +99,6 @@ class purchase_order(osv.osv):
 		result['discount_amount'] = order.purchase_discount_amount
 		return result
 
-
 # ==========================================================================================================================
 
 
@@ -108,6 +107,14 @@ class purchase_order_line(osv.osv):
 	
 	WATCHED_FIELDS_FROM_PO = ['product_id', 'product_qty', 'price_unit', 'discount_string']
 	SOURCE = [('needs', 'Needs'), ('manual', 'Manual'), ('owner', 'Owner')]
+	
+	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
+	
+	def _date_order(self, cr, uid, ids, field_name, arg, context={}):
+		result = {}
+		for data in self.browse(cr, uid, ids):
+			result[data.id] = data.order_id.date_order
+		return result
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 	
@@ -134,6 +141,7 @@ class purchase_order_line(osv.osv):
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
+		'date_order': fields.function(_date_order, method=True, type="datetime", string="Order Date"),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------

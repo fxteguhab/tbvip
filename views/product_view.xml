@@ -10,7 +10,7 @@
 						<field name="purchase_order_line_ids">
 							<tree>
 								<field name="partner_id" string="Supplier"/>
-								<field name="date_planned" string="Date"/>
+								<field name="date_order"/>
 								<field name="price_unit"/>
 								<field name="discount_string"/>
 								<field name="product_qty"/>

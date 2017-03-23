@@ -28,14 +28,15 @@ class product_template(osv.osv):
 		result = {}
 		for data in self.browse(cr, uid, ids):
 			order_line_obj = self.pool.get('purchase.order.line')
-			order_line_ids = order_line_obj.search(cr, uid, [('product_id', '=', data.id)], order='date_planned desc',)
+			order_line_ids = order_line_obj.search(cr, uid, [('product_id', '=', data.id)])
 			supplier_ids = []
 			unique_supplier_order_line_ids = []
-			for order_line_id in order_line_ids:
-				order_line = order_line_obj.browse(cr, uid, order_line_id)
+			order_lines = order_line_obj.browse(cr, uid, order_line_ids)
+			order_lines = order_lines.sorted(key=lambda r: r.date_order, reverse=True)
+			for order_line in order_lines:
 				if order_line.partner_id.id not in supplier_ids:
 					supplier_ids.append(order_line.partner_id.id)
-					unique_supplier_order_line_ids.append(order_line_id)
+					unique_supplier_order_line_ids.append(order_line.id)
 			result[data.id] = unique_supplier_order_line_ids
 		return result
 	
