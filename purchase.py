@@ -107,6 +107,7 @@ class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
 	
 	WATCHED_FIELDS_FROM_PO = ['product_id', 'product_qty', 'price_unit', 'discount_string']
+	SOURCE = [('needs', 'Needs'), ('manual', 'Manual'), ('owner', 'Owner')]
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 	
@@ -128,6 +129,18 @@ class purchase_order_line(osv.osv):
 												"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
 												 % (product.name, purchase_order.name, product.standard_price,
 													data['price_unit']))
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'source': fields.selection(SOURCE, 'Source'),
+	}
+	
+	# DEFAULTS --------------------------------------------------------------------------------------------------------------
+	
+	_defaults = {
+		'source': 'manual',
+	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 	
