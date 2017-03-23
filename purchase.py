@@ -27,7 +27,8 @@ class purchase_order(osv.osv):
 									 states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)],
 											 'done': [('readonly', True)]}),
 		'cashier': fields.char('Cashier'),
-		'general_discount': fields.float('Discount'), # JUNED: tidak perlu ada di sini lagi, sudah ada module purchase_sales_discount
+		# TIMTBVIP: tidak perlu ada di sini lagi, sudah ada module purchase_sales_discount
+		# Tadinya ada 'general_discount': fields.float('Discount'), 
 		'alert': fields.function(_alert, method=True, type='integer', string="Alert", store=True),
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
