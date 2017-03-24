@@ -47,6 +47,9 @@
 		<div class="website_list_container">
 			<t t-foreach="kontra" t-as="single_kontra">
 				<div class="row row_hoverable single_kontra accordion" attr-data-kontra_id="single_kontra.kontra_id">
+					<div id="id" style="display: none;">
+						<t t-esc="single_kontra['id']"/>
+					</div>
 					<div class="col-md-6">
 						<t t-esc="single_kontra['date']"/> - <b><t t-esc="single_kontra['partner_id']"/></b>
 					</div>
@@ -55,6 +58,36 @@
 					</div>
 				</div>
 				<div class="detail_container accordion_detail">
+					<h4>Payment</h4>
+					<div class="row">
+						<div class="col-md-3">
+							<div class="form-group">
+								<label for="reference">Reference</label>
+								<input type="text" id="reference"/>
+							</div>
+							<div class="form-group">
+								<label for="amount">Amount</label>
+								<input type="number" id="amount" t-attf-value="{{single_kontra['line_dr_ids_total']}}"/>
+							</div>
+						</div>
+						<div class="col-md-3">
+							<div class="form-group">
+								<label for="journal_id">Journal</label>
+								<select id="journal_id" class="form-control">
+									<t t-foreach="journals" t-as="journal">
+										<option t-attf-value="{{journal.id}}"><t t-esc="journal.name"/></option>
+									</t>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="check_maturity_date">Check Maturity Date</label>
+								<input type="date" id="check_maturity_date"/>
+							</div>
+						</div>
+					</div>
+					<button type="button" id="btn_pay" class="btn btn-success">Pay</button>
+					<hr/>
+
 					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">
 						<div class="row">
 							<div class="row">

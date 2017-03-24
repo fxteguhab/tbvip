@@ -31,6 +31,7 @@ class website_tbvip(http.Controller):
 				auth="user", website=True)
 	def purchase_kontra_bon_fetch_list(self, supplier, state, time_range, **kwargs):
 		env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
+		result = []
 		# set filter pencarian voucher
 		domain = {
 			'supplier': supplier,
@@ -38,7 +39,23 @@ class website_tbvip(http.Controller):
 			'time_range': time_range,
 		}
 		handler_obj = env['tbvip.website.handler']
-		result = handler_obj.load_kontra_bon(env, domain)
+		result.append(handler_obj.load_kontra_bon(env, domain))
+		
+		#get journals
+		account_journals = http.request.env['account.journal']
+		result_journal = []
+		list_id_journal = [];
+		for record in account_journals.search([('type', '=', 'bank')]):
+			id = str(record.id)
+			name = record.name
+			if id not in list_id_journal:
+				list_id_journal.append(id);
+				result_journal.append({
+					'id': id,
+					'name': name,
+				});
+		result.append(result_journal)
+		
 		# return hasilnya
 		if len(result) == 0:
 			response = {
@@ -50,7 +67,8 @@ class website_tbvip(http.Controller):
 				'status': 'ok',
 				'data': result,
 			}
-		return json.dumps(response)
+		res = json.dumps(response)
+		return res
 	
 	@http.route('/tbvip/kontra_bon/fetch_suppliers', type='http', auth="user", website=True)
 	def purchase_kontra_bon_fetch_suppliers(self, **kwargs):
@@ -62,12 +80,12 @@ class website_tbvip(http.Controller):
 	# tolong ini diganti dan di-note buat ke depannya
 		account_vouchers = http.request.env['account.voucher']
 		result = [];
-		list_id = [];
+		list_id_supplier = [];
 		for record in account_vouchers.search([]):
 			id = str(record.partner_id.id)
 			name = record.partner_id.name
-			if id not in list_id:
-				list_id.append(id);
+			if id not in list_id_supplier:
+				list_id_supplier.append(id);
 				result.append({
 					'id': id,
 					'name': name,

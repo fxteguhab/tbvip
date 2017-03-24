@@ -73,7 +73,8 @@ $(document).ready(function () {
 
 		function kontra_bon_display_list(data) {
 			$("#list_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_list',{
-				kontra: data,
+				kontra: data[0],
+				journals: data[1]
 			}));
 			var accordion = document.getElementsByClassName("accordion");
 			var i;
@@ -91,11 +92,14 @@ $(document).ready(function () {
 			}
 		}
 
+		function kontra_bon_pay() {
+		}
+
 	//karena ini list with filter, masukin form filter
-		$.get('/tbvip/kontra_bon/fetch_suppliers', null, function(suppliers){
+		$.get('/tbvip/kontra_bon/fetch_suppliers', null, function(data){
 			setTimeout(function() {
 				$("#filter_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_filter',{
-					'suppliers': JSON.parse(suppliers)
+					'suppliers': JSON.parse(data)
 				}));
 			},1000)
 		});
@@ -104,7 +108,10 @@ $(document).ready(function () {
 		$(purchase_kontra_bon).on("click", "#btn_filter", function () {
 			kontra_bon_get_data();
 		});
-		
+
+		$(purchase_kontra_bon).on("click", "#btn_pay", function () {
+			kontra_bon_pay();
+		});
 	});
 });
 
