@@ -23,6 +23,7 @@
 		'data/tbvip_data.xml',
 		'views/account_voucher_view.xml',
 		'views/employee_view.xml',
+		'views/product_view.xml',
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
 		'views/tbvip.xml',
