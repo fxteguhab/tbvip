@@ -33,7 +33,7 @@ class purchase_needs(osv.Model):
 		po_vals['branch_id'] = need.branch_id.id
 		return po_vals
 	
-	# JUNED: ini method buat apa ya? kok saya ngga liat dipanggil di mana2...
+	# ini method buat apa ya? kok saya ngga liat dipanggil di mana2...
 	# TIMTBVIP: Lupa dihapus methodnya ko
 	# def _calculate_discount(self, discount_string, price):
 	# 	result = [0, 0, 0, 0, 0]
