@@ -539,8 +539,8 @@ class tbvip_website_handler(osv.osv):
 	_auto = False
 	
 	def load_kontra_bon(self, env, domain, context={}):
-		#TODO
-	# JUNED: untuk filter draft masih salah, dalam artian kalaupun ada untuk supplier tertentu
+	# TIMTBVIP: DONE
+	# untuk filter draft masih salah, dalam artian kalaupun ada untuk supplier tertentu
 	# yang statusnya draft dan reference nya kosong, ketika difilter kok ngga keluar?
 		args = []
 		# Pool domains
@@ -582,7 +582,7 @@ class tbvip_website_handler(osv.osv):
 		args = []
 		supplier = domain.get('supplier', '').strip()
 		supplier = supplier.encode('ascii','ignore')
-		if isinstance(supplier, int):
+		if supplier.isdigit():
 			args.append(['partner_id.id', '=', supplier]);
 		return args
 	
@@ -591,10 +591,10 @@ class tbvip_website_handler(osv.osv):
 		state = domain.get('state', '').strip()
 		if state == 'draft':
 			args.append(['state', '=', 'draft'])
-			args.append(['reference', '=', 'False'])
+			args.append(['reference', '=', False])
 		elif state == 'giro':
 			args.append(['state', '=', 'draft'])
-			args.append(['reference', '!=', 'False'])
+			args.append(['reference', '!=', False])
 		elif state == 'posted':
 			args.append(['state', '=', 'posted'])
 		return args
