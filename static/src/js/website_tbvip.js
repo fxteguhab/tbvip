@@ -95,6 +95,9 @@ $(document).ready(function () {
 		function kontra_bon_pay() {
 		}
 
+		function kontra_bon_cancel() {
+		}
+
 	//karena ini list with filter, masukin form filter
 		$.get('/tbvip/kontra_bon/fetch_suppliers', null, function(data){
 			setTimeout(function() {
@@ -109,8 +112,12 @@ $(document).ready(function () {
 			kontra_bon_get_data();
 		});
 
-		$(purchase_kontra_bon).on("click", "#btn_pay", function () {
+		$(purchase_kontra_bon).on("click", "#btn_save", function () {
 			kontra_bon_pay();
+		});
+
+		$(purchase_kontra_bon).on("click", "#btn_save", function () {
+			kontra_bon_cancel();
 		});
 	});
 });
