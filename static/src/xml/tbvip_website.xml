@@ -29,6 +29,7 @@
 				<div class="form-group">
 					<label for="supplier">Supplier</label>
 					<select id="supplier" class="form-control">
+						<option value="all">[All Supplier]</option>
                         <t t-foreach="suppliers" t-as="supplier">
                             <option t-attf-value="{{supplier.id}}"><t t-esc="supplier.name"/></option>
                         </t>
@@ -54,7 +55,7 @@
 						<t t-esc="single_kontra['date']"/> - <b><t t-esc="single_kontra['partner_id']"/></b>
 					</div>
 					<div class="col-md-6 accordion_header_toggle text-right">
-						<t t-esc="single_kontra['line_dr_ids_length']"/> Bon - Rp. <b><t t-esc="single_kontra['line_dr_ids_total']"/></b>
+						<t t-esc="single_kontra['line_dr_ids_length']"/> Bon - <span class="rupiah"><b><t t-esc="single_kontra['amount']"/></b></span>
 					</div>
 				</div>
 				<div class="detail_container accordion_detail">
@@ -92,8 +93,8 @@
 									Due: <t t-esc="kontra_line['date_due']"/>
 									</div>
 								</div>
-								<div class="col-xs-6 text-right line_voucher_price">
-									Rp. <t t-esc="kontra_line['amount_unreconciled']"/>
+								<div class="col-xs-6 text-right line_voucher_price rupiah">
+									<t t-esc="kontra_line['amount']"/>
 								</div>
 							</div>
 						</div>
