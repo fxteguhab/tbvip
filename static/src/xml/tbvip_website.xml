@@ -63,7 +63,7 @@
 					<table>
 						<tr>
 							<td><label for="reference">Reference</label></td>
-							<td><input type="text" id="reference"/></td>
+							<td><input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"/></td>
 							<td><label for="journal_id">Journal</label></td>
 							<td>
 								<select id="journal_id" class="form-control">
@@ -75,9 +75,9 @@
 						</tr>
 						<tr>
 							<td><label for="amount">Amount</label></td>
-							<td><input type="number" id="amount" t-attf-value="{{single_kontra['line_dr_ids_total']}}"/></td>
+							<td><input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"/></td>
 							<td><label for="check_maturity_date">Check Maturity Date</label></td>
-							<td><input type="date" id="check_maturity_date"/></td>
+							<td><input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"/></td>
 						</tr>
 					</table>
 					<button type="button" id="btn_save" class="btn btn-success">Save</button>
