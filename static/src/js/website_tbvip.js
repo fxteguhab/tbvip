@@ -43,7 +43,20 @@ $(document).ready(function () {
 	function clear_message(container) {
 		container.fadeOut().html('');
 	}
-	
+
+	function addCommas(nStr) {
+        nStr += '';
+        x = nStr.split(',');
+        x1 = x[0];
+        x2 = x.length > 1 ? ',' + x[1] : '';
+        var rgx = /(\d+)(\d{3})/;
+        while (rgx.test(x1)) {
+            x1 = x1.replace(rgx, '$1' + '.' + '$2');
+        }
+        return x1 + x2;
+    }
+
+
 	$('#kontra_bon_wrap').each(function () {
 		
 		var purchase_kontra_bon = this;
@@ -53,6 +66,7 @@ $(document).ready(function () {
 			var supplier = $("#supplier").val().toUpperCase();
 			var state = $("#state").val();
 			var time_range = $("#time_range").val();
+            $(".website_list_container").empty();
 			$.ajax({
 				dataType: "json",
 				url: '/tbvip/kontra_bon/fetch_data/'+supplier+'/'+state+'/'+time_range,
@@ -70,6 +84,7 @@ $(document).ready(function () {
 				},
 			});
 		}
+
 
 		function kontra_bon_display_list(data) {
 			$("#list_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_list',{
@@ -89,7 +104,11 @@ $(document).ready(function () {
 					}
 				}
 			}
+            $(".rupiah").each(function() {
+                $(this).text("Rp. " + addCommas($(this).text()));
+            });
 		}
+
 
 	//karena ini list with filter, masukin form filter
 		$.get('/tbvip/kontra_bon/fetch_suppliers', null, function(suppliers){

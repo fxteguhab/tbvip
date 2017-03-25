@@ -4,18 +4,18 @@ from openerp import http
 from openerp.http import request
 from openerp.tools.translate import _
 
-# JUNED: numpang nulis di sini karena di XML ngga bisa. ini semua terkait tampilan modul website kontra bon:
+# TIMTBVIP: All Done
 # - untuk pilihan supplier tolong ditambahin "[All Suppliers]" yang mana tidak memfilter kontra bon
-# berdasarkan supplier tertentu
-# - judul (di tab browser) untuk kontra bon masih "List with Filter", tolong ganti jadi Kontra Bon
+# berdasarkan supplier tertentu DONE
+# - judul (di tab browser) untuk kontra bon masih "List with Filter", tolong ganti jadi Kontra Bon DONE
 # - tampilan angka tolong pakai pemisah ribuan. di JS udah ada function buat memformat itu, mungkin
-# bisa dipake
-# - format tanggal DD/MM/YYYY
-# - Nilai yang ditampilkan di list invoice adalah Amount bukan Original Amount, demikian juga total yayng di kepala accordion nya
-# - di detail payment tampilkan hanya invoice yang Amount-nya > 0
+# bisa dipake DONE
+# - format tanggal DD/MM/YYYY DONE
+# - Nilai yang ditampilkan di list invoice adalah Amount bukan Original Amount, demikian juga total yayng di kepala accordion nya DONE
+# - di detail payment tampilkan hanya invoice yang Amount-nya > 0 DONE
 # - sebelum manggil kontra_bon_fetch_data, kosongkan dulu div yang buat nampilin data. hal ini supaya 
-# ketika search tidak mengembalikan apa2 jangan sampe masih ada data sisa search sebelumnya
-# - di list invoice, bila Due kosong keluarnya jangan "false" tapi "-" (strip) aja
+# ketika search tidak mengembalikan apa2 jangan sampe masih ada data sisa search sebelumnya DONE
+# - di list invoice, bila Due kosong keluarnya jangan "false" tapi "-" (strip) aja DONE
 
 class website_tbvip(http.Controller):
 	@http.route('/tbvip/kontra_bon', type='http', auth="user", website=True)

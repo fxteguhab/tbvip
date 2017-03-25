@@ -539,6 +539,7 @@ class tbvip_website_handler(osv.osv):
 	_auto = False
 	
 	def load_kontra_bon(self, env, domain, context={}):
+		#TODO
 	# JUNED: untuk filter draft masih salah, dalam artian kalaupun ada untuk supplier tertentu
 	# yang statusnya draft dan reference nya kosong, ketika difilter kok ngga keluar?
 		args = []
@@ -551,32 +552,38 @@ class tbvip_website_handler(osv.osv):
 		vouchers = account_voucher.search(args)
 		result = []
 		for voucher in vouchers:
-			# TODO Complete data
 			line_dr_ids = []
-			line_dr_ids_total = 0
+			included_line_counter = 0
 			for line_dr in voucher.line_dr_ids:
 				line = {}
-				line.update({'move_line_id': line_dr.move_line_id.name})
-				line.update({'date_due': line_dr.date_due})
-				line.update({'amount_unreconciled':line_dr.amount_unreconciled})
-				line_dr_ids_total += line_dr.amount_unreconciled
-				line_dr_ids.append(line)
+				if line_dr.amount > 0:
+					line.update({'move_line_id': line_dr.move_line_id.name})
+					line.update({'date_due': self._format_date(line_dr.date_due)})
+					line.update({'amount': line_dr.amount})
+					line_dr_ids.append(line)
+					included_line_counter += 1
 			record = {'id': voucher.id,
 					  'partner_id': voucher.partner_id.name,
-					  'date': voucher.date,
+					  'date': self._format_date(voucher.date),
 					  'line_dr_ids': line_dr_ids,
-					  'line_dr_ids_length': len(voucher.line_dr_ids),
-					  'line_dr_ids_total': line_dr_ids_total,
+					  'line_dr_ids_length': included_line_counter,
+					  'amount': voucher.amount,
 					  }
 			result.append(record)
-		
 		return result
+	
+	def _format_date(self, date_string):
+		if date_string:
+			return datetime.strptime(date_string, '%Y-%m-%d').strftime('%d-%m-%Y')
+		else:
+			return '-'
 	
 	def _kontra_bon_pool_supplier(self, domain):
 		args = []
 		supplier = domain.get('supplier', '').strip()
 		supplier = supplier.encode('ascii','ignore')
-		args.append(['partner_id.id', '=', supplier]);
+		if isinstance(supplier, int):
+			args.append(['partner_id.id', '=', supplier]);
 		return args
 	
 	def _kontra_bon_pool_state(self, domain):
