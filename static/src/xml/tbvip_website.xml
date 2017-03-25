@@ -82,6 +82,7 @@
 					</table>
 					<button type="button" id="btn_save" class="btn btn-success">Save</button>
 					<button type="button" id="btn_cancel" class="btn btn-danger">Cancel</button>
+					<hr/>
 					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">
 						<div class="row">
 							<div class="row">

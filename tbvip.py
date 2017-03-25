@@ -556,21 +556,31 @@ class tbvip_website_handler(osv.osv):
 			included_line_counter = 0
 			for line_dr in voucher.line_dr_ids:
 				line = {}
+				line_total_amount = 0
 				if line_dr.amount > 0:
 					line.update({'move_line_id': line_dr.move_line_id.name})
 					line.update({'date_due': self._format_date(line_dr.date_due)})
 					line.update({'amount': line_dr.amount})
 					line_dr_ids.append(line)
+					line_total_amount += line_dr.amount
 					included_line_counter += 1
+			if voucher.amount == 0:
+				amount = line_total_amount
+			else:
+				amount = voucher.amount
+			if voucher.reference == False:
+				reference = ''
+			else:
+				reference = voucher.reference
 			record = {'id': voucher.id,
 					  'partner_id': voucher.partner_id.name,
 					  'date': self._format_date(voucher.date),
 					  'line_dr_ids': line_dr_ids,
 					  'line_dr_ids_length': included_line_counter,
-					  'amount': voucher.amount,
+					  'amount': amount,
 					  'journal_id': voucher.journal_id.name,
-					  'reference': voucher.reference,
-					  'check_maturity_date': voucher.check_maturity_date,
+					  'reference': reference,
+					  'check_maturity_date': self._format_date(voucher.check_maturity_date),
 					  }
 			result.append(record)
 		return result
