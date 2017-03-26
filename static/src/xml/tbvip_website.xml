@@ -48,7 +48,7 @@
 		<div class="website_list_container">
 			<t t-foreach="kontra" t-as="single_kontra">
 				<div class="row row_hoverable single_kontra accordion" t-att-data-id="single_kontra.id">
-					<!--<div id="id" style="display: none;"> ID nya bisa diambil di div yang diatas dengan attribute data-id-->
+					<!--<div id="id" style="display: none;"> TODO: SAM, ID nya bisa diambil di div yang diatas dengan attribute data-id-->
 						<!--<t t-esc="single_kontra['id']"/>-->
 					<!--</div>-->
 					<div class="col-md-6">
