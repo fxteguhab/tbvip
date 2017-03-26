@@ -100,8 +100,10 @@
 										   t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
 								</div>
 							</div>
-						<button type="button" id="btn_save" class="btn btn-success">Save</button>
-						<button type="button" id="btn_cancel" class="btn btn-link">Cancel</button>
+						<div class="row header_footer">
+							<button type="button" id="btn_save" class="btn btn-success col-sm-1">Save</button>
+							<button type="button" id="btn_cancel" class="btn btn-link col-sm-1">Cancel</button>
+						</div>
 					</div>
 					<hr style="margin-top: 5px; margin-bottom: 0px; border-width: 2px;"/>
 					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">

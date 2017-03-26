@@ -576,7 +576,7 @@ class tbvip_website_handler(osv.osv):
 					  'amount': voucher.amount,
 					  'journal_id': voucher.journal_id.name,
 					  'reference': reference,
-					  'check_maturity_date': voucher.check_maturity_date,
+					  'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',
 					  }
 			result.append(record)
 		return result

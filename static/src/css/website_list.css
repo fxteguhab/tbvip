@@ -53,6 +53,9 @@
 .website_list_container .payment_header label {
 	margin-bottom: 0px;
 }
+.website_list_container .payment_header .header_footer {
+	margin-top: 10px;
+}
 
 @media (max-width: 767px) {
 	.website_list_container .accordion_header_toggle {
