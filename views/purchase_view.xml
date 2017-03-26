@@ -11,6 +11,12 @@
 				<xpath expr="//label[@string='Request for Quotation ']" position="attributes">
 					<attribute name="string">Draft Purchase Order</attribute>
 				</xpath>
+				<xpath expr="//field[@name='product_uom']" position="attributes">
+					<attribute name="string">UoM</attribute>
+				</xpath>
+				<xpath expr="//field[@name='price_subtotal']" position="after">
+					<field name="source" readonly="1" />
+				</xpath>
 			</field>
 		</record>
 
@@ -26,12 +32,8 @@
 		</record>
 
 		<record id="purchase.purchase_rfq" model="ir.actions.act_window">
-			<!--<field name="context">{'direct_confirm':True}</field>-->
-			<field name="name">Draft Purchase Order</field>
+			<field name="name">Draft Purchase Orders</field>
 		</record>
 
-		<record id="purchase.purchase_form_action" model="ir.actions.act_window">
-			<!--<field name="context">{'direct_confirm':True}</field>-->
-		</record>
 	</data>
 </openerp>

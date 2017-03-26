@@ -33,20 +33,3 @@ class purchase_needs(osv.Model):
 		po_vals['branch_id'] = need.branch_id.id
 		return po_vals
 	
-	# ini method buat apa ya? kok saya ngga liat dipanggil di mana2...
-	# TIMTBVIP: Lupa dihapus methodnya ko
-	# def _calculate_discount(self, discount_string, price):
-	# 	result = [0, 0, 0, 0, 0]
-	# 	discounts = discount_string.split("+")
-	# 	counter = 0
-	# 	for discount in discounts:
-	# 		value = 0
-	# 		if discount[-1:] == "%":
-	# 			value = (price * (float(discount[:-1]))) / 100.00
-	# 			price -= value
-	# 		else:
-	# 			value = float(discount)
-	# 			price -= value
-	# 		result[counter] = value
-	# 		counter += 1
-	# 	return result

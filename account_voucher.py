@@ -27,6 +27,4 @@ class account_voucher(osv.osv):
 		'check_maturity_date': fields.date(string='Check Maturity Date',
 										  readonly=True, states={'draft': [('readonly', False)]}),
 	}
-	# TIMTBVIP: [DONE] maaf salah tulis di 004, seharusnya ini ada di account.voucher bukan account.invoice.
-	# tolong pindahkan beserta definisi field ini di viewnya
 

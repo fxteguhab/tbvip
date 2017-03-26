@@ -30,9 +30,9 @@
 					<label for="supplier">Supplier</label>
 					<select id="supplier" class="form-control">
 						<option value="all">[All Supplier]</option>
-                        <t t-foreach="suppliers" t-as="supplier">
-                            <option t-attf-value="{{supplier.id}}"><t t-esc="supplier.name"/></option>
-                        </t>
+						<t t-foreach="suppliers" t-as="supplier">
+							<option t-attf-value="{{supplier.id}}"><t t-esc="supplier.name"/></option>
+						</t>
 					</select>
 				</div>
 			</div>

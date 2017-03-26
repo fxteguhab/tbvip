@@ -539,9 +539,6 @@ class tbvip_website_handler(osv.osv):
 	_auto = False
 	
 	def load_kontra_bon(self, domain, context={}):
-	# TIMTBVIP: DONE
-	# untuk filter draft masih salah, dalam artian kalaupun ada untuk supplier tertentu
-	# yang statusnya draft dan reference nya kosong, ketika difilter kok ngga keluar?
 		args = []
 		# Pool domains
 		args.extend(self._kontra_bon_pool_supplier(domain))

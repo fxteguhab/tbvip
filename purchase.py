@@ -28,8 +28,6 @@ class purchase_order(osv.osv):
 									 states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)],
 											 'done': [('readonly', True)]}),
 		'cashier': fields.char('Cashier'),
-		# TIMTBVIP: tidak perlu ada di sini lagi, sudah ada module purchase_sales_discount
-		# Tadinya ada 'general_discount': fields.float('Discount'), 
 		'alert': fields.function(_alert, method=True, type='integer', string="Alert", store=True),
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
@@ -78,11 +76,6 @@ class purchase_order(osv.osv):
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
 	
-# setelah saya pikirin lebih baik kalau _prepare_inv_line dan _prepare_invoice dipindah ke puchase_sales_discount
-# gimana menurut kalian? pertimbangan saya kedua method ini masih terkait diskon, jadi dipindah supaya module 
-# purchase_sales_discount lebih independen dan tetap akurat.
-# TIMTBVIP: Setuju ko, karena tidak ada juga hal2 yang berkaitan khusus untuk tbvip yg ngebuat ini harus ada di modul tbvip. Moved
-
 # ==========================================================================================================================
 
 
@@ -172,23 +165,4 @@ class purchase_order_line(osv.osv):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
 	
-	# TIMTBVIP: versi yang lebih baik, tolong yang di atas diganti setelah memahami berikut ini:
-	"""
-		product_obj = self.pool.get('product.product')
-		if vals.get('price_unit', False):
-			for purchase_line in self.browse(cr, uid, ids):
-				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
-		ngga banyak browse, ngga bolak balik query database
-		ingat browse itu mengambil semua vals m2o dan o2m, menggurita sampai ke model paling atas/paling bawah
-	"""
-	# Tadinya...
-	# """
-	# def write(self, cr, uid, ids, vals, context=None):
-	# 	edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
-	# 	for id in ids:
-	# 		if vals.get('price_unit', False):
-	# 			product_obj = self.pool.get('product.product')
-	# 			product = product_obj.browse(cr, uid, self.browse(cr, uid, id).product_id.id)
-	# 			self._message_cost_price_changed(cr, uid, vals, product, self.browse(cr, uid, id).order_id.id, context)
-	# 	return edited_order_line
-	# """
+	
