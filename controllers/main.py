@@ -15,7 +15,7 @@ class website_tbvip(http.Controller):
 		})
 	
 	@http.route('/tbvip/kontra_bon/fetch_data/<string:supplier>/<string:state>/<string:time_range>', type='http',
-				auth="user", website=True)
+		auth="user", website=True)
 	def purchase_kontra_bon_fetch_list(self, supplier, state, time_range, **kwargs):
 		# env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
 		result = []
@@ -28,7 +28,7 @@ class website_tbvip(http.Controller):
 		handler_obj = http.request.env['tbvip.website.handler']
 		result.append(handler_obj.load_kontra_bon(domain))
 		
-		#get journals
+		# get journals
 		account_journals = http.request.env['account.journal']
 		result_journal = []
 		list_id_journal = [];
@@ -73,3 +73,48 @@ class website_tbvip(http.Controller):
 				});
 		result = sorted(result, key=lambda supplier: supplier['name'])
 		return json.dumps(result)
+	
+	@http.route(
+		'/tbvip/kontra_bon/save/<string:id>/<string:reference>/<string:amount>/<string:journal_id>/<string:check_maturity_date>',
+		type='http', auth="user", website=True)
+	def purchase_kontra_bon_save(self, id, reference, amount, journal_id, check_maturity_date, **kwargs):
+		result = []
+		domain = {
+			'id': id,
+			'reference': reference,
+			'amount': amount,
+			'journal_id': journal_id,
+		}
+		if check_maturity_date != "null":
+			domain['check_maturity_date'] = check_maturity_date
+		handler_obj = http.request.env['tbvip.website.handler']
+		result.append(handler_obj.save_kontra_bon(domain))
+		
+		# get journals
+		account_journals = http.request.env['account.journal']
+		result_journal = []
+		list_id_journal = [];
+		for record in account_journals.search([('type', '=', 'bank')]):
+			id = str(record.id)
+			name = record.name
+			if id not in list_id_journal:
+				list_id_journal.append(id);
+				result_journal.append({
+					'id': id,
+					'name': name,
+				});
+		result.append(result_journal)
+		
+		# return hasilnya
+		if len(result) == 0:
+			response = {
+				'status': 'ok',
+				'info': _('The search returns no result.')
+			}
+		else:
+			response = {
+				'status': 'ok',
+				'data': result,
+			}
+		res = json.dumps(response)
+		return res

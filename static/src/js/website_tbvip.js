@@ -110,7 +110,35 @@ $(document).ready(function () {
             });
 		}
 
-        function kontra_bon_pay() {
+        function kontra_bon_save(save_button) {
+            var id = $("#id").attr("data-id");
+            var reference = $("#reference").val();
+            var amount = $("#amount").val();
+            var journal_id = $("#journal_id").val();
+            var check_maturity_date = $("#check_maturity_date").val();
+            if (check_maturity_date.length == 0) {
+                check_maturity_date = null;
+            }
+            $.ajax({
+                dataType: "json",
+                url: '/tbvip/kontra_bon/save/'+id+'/'+reference+'/'+amount+'/'+journal_id+'/'+check_maturity_date,
+                method: 'POST',
+                success: function(response) {
+                    if (response.error) {
+                        display_message(message_container, response.error, "error", 0);
+                        return;
+                    }
+                    if (response.info) {
+                        display_message(message_container, response.info, "info");
+                        return;
+                    }
+                    var parent_div = save_button.parent().closest('div');
+                    parent_div.find("input").each(function( index ) {
+                        $(this).attr("default_value", $(this).attr("value"));
+                    })
+                    alert("Save Success");
+                },
+            });
         }
 
 		function kontra_bon_cancel(cancel_button) {
@@ -135,7 +163,7 @@ $(document).ready(function () {
 		});
 
 		$(purchase_kontra_bon).on("click", "#btn_save", function () {
-			kontra_bon_pay();
+			kontra_bon_save($(this));
 		});
 
 		$(purchase_kontra_bon).on("click", "#btn_cancel", function () {

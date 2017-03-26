@@ -9,9 +9,9 @@
 	'maintainer': 'Christyan Juniady and Associates',
 	'website': 'http://www.chjs.biz',
 	'depends': [
-		"base","board","web","website",
+		"base", "board", "web", "website",
 		"chjs_custom_view",
-		"account_accountant","stock","sale","purchase","fleet","hr",
+		"account_accountant", "stock", "sale", "purchase", "fleet", "hr",
 		"purchase_needs", "purchase_sale_discount",
 	],
 	'sequence': 150,

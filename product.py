@@ -45,7 +45,7 @@ class product_template(osv.osv):
 	_columns = {
 		'codex_id': fields.integer('MySQL Product ID'),
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
-												   string="Last Purchase", relation="purchase.order.line"),
+			string="Last Purchase", relation="purchase.order.line"),
 	}
 	
 	def create(self, cr, uid, vals, context={}):
