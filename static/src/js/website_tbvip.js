@@ -111,11 +111,12 @@ $(document).ready(function () {
 		}
 
         function kontra_bon_save(save_button) {
-            var id = $("#id").attr("data-id");
-            var reference = $("#reference").val();
-            var amount = $("#amount").val();
-            var journal_id = $("#journal_id").val();
-            var check_maturity_date = $("#check_maturity_date").val();
+            var parent_div = save_button.parent().parent();
+            var id = parent_div.parent().find("#id").attr("data-id");
+            var reference = parent_div.find("#reference").val();
+            var amount = parent_div.find("#amount").val();
+            var journal_id = parent_div.find("#journal_id").val();
+            var check_maturity_date = parent_div.find("#check_maturity_date").val();
             if (reference.length == 0) {
                 reference = null;
             }
@@ -133,7 +134,6 @@ $(document).ready(function () {
                 url: '/tbvip/kontra_bon/save/'+id+'/'+reference+'/'+amount+'/'+journal_id+'/'+check_maturity_date,
                 method: 'POST',
                 success: function(response) {
-                    var parent_div = save_button.parent().closest('div');
                     parent_div.find("input").each(function( index ) {
                         $(this).attr("default_value", $(this).attr("value"));
                     })

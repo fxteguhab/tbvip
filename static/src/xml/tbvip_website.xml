@@ -47,7 +47,7 @@
 	<t t-name="website_tbvip_kontra_bon_list">
 		<div class="website_list_container">
 			<t t-foreach="kontra" t-as="single_kontra">
-				<div id="id" class="row row_hoverable single_kontra accordion" t-att-data-id="single_kontra.id">
+				<div class="row row_hoverable single_kontra accordion">
 					<div class="col-md-6">
 						<t t-esc="single_kontra['date']"/> - <b><t t-esc="single_kontra['partner_id']"/></b>
 					</div>
@@ -55,8 +55,8 @@
 						<t t-esc="single_kontra['line_dr_ids_length']"/> Bon - <span class="rupiah"><b><t t-esc="single_kontra['amount']"/></b></span>
 					</div>
 				</div>
-				<div class="detail_container accordion_detail">
-					<div class="payment_header">
+				<div class="detail_container accordion_detail" >
+					<div id="id" class="payment_header" t-att-data-id="single_kontra.id">
 						<h4>Payment</h4>
 							<div class="row">
 								<div class="col-xs-12 col-sm-2">
