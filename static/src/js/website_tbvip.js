@@ -88,7 +88,7 @@ $(document).ready(function () {
 
 		function kontra_bon_display_list(data) {
 			$("#list_container", purchase_kontra_bon).html(qweb.render('website_tbvip_kontra_bon_list',{
-				kontra: data[0],
+				'kontra': data[0],
 				journals: data[1]
 			}));
 			var accordion = document.getElementsByClassName("accordion");
@@ -113,7 +113,11 @@ $(document).ready(function () {
         function kontra_bon_pay() {
         }
 
-		function kontra_bon_cancel() {
+		function kontra_bon_cancel(cancel_button) {
+            var parent_div = cancel_button.parent().closest('div');
+            parent_div.find("input").each(function( index ) {
+                $(this).attr("value", $(this).attr("default_value"));
+            })
 		}
 
 	//karena ini list with filter, masukin form filter
@@ -134,8 +138,8 @@ $(document).ready(function () {
 			kontra_bon_pay();
 		});
 
-		$(purchase_kontra_bon).on("click", "#btn_save", function () {
-			kontra_bon_cancel();
+		$(purchase_kontra_bon).on("click", "#btn_cancel", function () {
+			kontra_bon_cancel($(this));
 		});
 	});
 });

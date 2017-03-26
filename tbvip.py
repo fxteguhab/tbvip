@@ -564,10 +564,6 @@ class tbvip_website_handler(osv.osv):
 					line_dr_ids.append(line)
 					line_total_amount += line_dr.amount
 					included_line_counter += 1
-			if voucher.amount == 0:
-				amount = line_total_amount
-			else:
-				amount = voucher.amount
 			if voucher.reference == False:
 				reference = ''
 			else:
@@ -577,10 +573,10 @@ class tbvip_website_handler(osv.osv):
 					  'date': self._format_date(voucher.date),
 					  'line_dr_ids': line_dr_ids,
 					  'line_dr_ids_length': included_line_counter,
-					  'amount': amount,
+					  'amount': voucher.amount,
 					  'journal_id': voucher.journal_id.name,
 					  'reference': reference,
-					  'check_maturity_date': self._format_date(voucher.check_maturity_date),
+					  'check_maturity_date': voucher.check_maturity_date,
 					  }
 			result.append(record)
 		return result
