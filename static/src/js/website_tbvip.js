@@ -143,7 +143,7 @@ $(document).ready(function () {
         }
 
 		function kontra_bon_cancel(cancel_button) {
-            var parent_div = cancel_button.parent().closest('div');
+            var parent_div = cancel_button.parent().parent();
             parent_div.find("input").each(function( index ) {
                 $(this).attr("value", $(this).attr("default_value"));
             })
