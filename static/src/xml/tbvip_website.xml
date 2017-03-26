@@ -64,6 +64,7 @@
 								</div>
 								<div class="col-xs-12 col-sm-4">
 									<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
+										   t-attf-style="{{single_kontra['style_input']}}"
 										   t-attf-default_value="{{single_kontra['reference']}}" class="form-control"/>
 								</div>
 								<div class="col-sm-1"/>
@@ -71,7 +72,7 @@
 									<label for="journal_id">Journal</label>
 								</div>
 								<div class="col-xs-12 col-sm-3">
-									<select id="journal_id" class="form-control">
+									<select id="journal_id" class="form-control" t-attf-style="{{single_kontra['style_input']}}">
 										<t t-foreach="journals" t-as="journal">
 											<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
 												<t t-esc="journal.name"/>
@@ -86,6 +87,7 @@
 								</div>
 								<div class="col-xs-12 col-sm-4">
 									<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
+										   t-attf-style="{{single_kontra['style_input']}}"
 										   t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
 								</div>
 								<div class="col-sm-1"/>
@@ -94,12 +96,15 @@
 								</div>
 								<div class="col-xs-12 col-sm-3">
 									<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
+										   t-attf-style="{{single_kontra['style_input']}}"
 										   t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
 								</div>
 							</div>
 						<div class="row header_footer">
-							<button type="button" id="btn_save" class="btn btn-success col-sm-1">Save</button>
-							<button type="button" id="btn_cancel" class="btn btn-link col-sm-1">Cancel</button>
+							<button t-attf-style="{{single_kontra['style_button']}}" type="button" id="btn_save"
+									class="btn btn-success col-sm-1">Save</button>
+							<button t-attf-style="{{single_kontra['style_button']}}" type="button" id="btn_cancel"
+									class="btn btn-link col-sm-1">Cancel</button>
 						</div>
 					</div>
 					<hr style="margin-top: 5px; margin-bottom: 0px; border-width: 2px;"/>
