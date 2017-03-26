@@ -39,7 +39,7 @@
 		</div>
 		<div class="row">
 			<div class="col-md-1 form-group">
-				<button type="button" id="btn_filter" class="btn btn-success btn-block">Filter</button>
+				<button type="button" id="btn_filter" class="btn btn-primary">Filter</button>
 			</div>
 		</div>
 	</t>
@@ -47,10 +47,10 @@
 	<t t-name="website_tbvip_kontra_bon_list">
 		<div class="website_list_container">
 			<t t-foreach="kontra" t-as="single_kontra">
-				<div class="row row_hoverable single_kontra accordion" attr-data-kontra_id="single_kontra.kontra_id">
-					<div id="id" style="display: none;">
-						<t t-esc="single_kontra['id']"/>
-					</div>
+				<div class="row row_hoverable single_kontra accordion" t-att-data-id="single_kontra.id">
+					<!--<div id="id" style="display: none;"> ID nya bisa diambil di div yang diatas dengan attribute data-id-->
+						<!--<t t-esc="single_kontra['id']"/>-->
+					<!--</div>-->
 					<div class="col-md-6">
 						<t t-esc="single_kontra['date']"/> - <b><t t-esc="single_kontra['partner_id']"/></b>
 					</div>
@@ -59,29 +59,51 @@
 					</div>
 				</div>
 				<div class="detail_container accordion_detail">
-					<h4>Payment</h4>
-					<table>
-						<tr>
-							<td><label for="reference">Reference</label></td>
-							<td><input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"/></td>
-							<td><label for="journal_id">Journal</label></td>
-							<td>
-								<select id="journal_id" class="form-control">
-									<t t-foreach="journals" t-as="journal">
-										<option t-attf-value="{{journal.id}}"><t t-esc="journal.name"/></option>
-									</t>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<td><label for="amount">Amount</label></td>
-							<td><input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"/></td>
-							<td><label for="check_maturity_date">Check Maturity Date</label></td>
-							<td><input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"/></td>
-						</tr>
-					</table>
-					<button type="button" id="btn_save" class="btn btn-success">Save</button>
-					<button type="button" id="btn_cancel" class="btn btn-danger">Cancel</button>
+					<div class="payment_header">
+						<h4>Payment</h4>
+							<div class="row">
+								<div class="col-xs-12 col-sm-2">
+									<label for="reference">Reference</label>
+								</div>
+								<div class="col-xs-12 col-sm-4">
+									<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
+										   t-attf-default_value="{{single_kontra['reference']}}" class="form-control"/>
+								</div>
+								<div class="col-sm-1"/>
+								<div class="col-xs-12 col-sm-2">
+									<label for="journal_id">Journal</label>
+								</div>
+								<div class="col-xs-12 col-sm-3">
+									<select id="journal_id" class="form-control">
+										<t t-foreach="journals" t-as="journal">
+											<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
+												<t t-esc="journal.name"/>
+											</option>
+										</t>
+									</select>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 col-sm-2">
+									<label for="amount">Amount</label>
+								</div>
+								<div class="col-xs-12 col-sm-4">
+									<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
+										   t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
+								</div>
+								<div class="col-sm-1"/>
+								<div class="col-xs-12 col-sm-2">
+									<label for="check_maturity_date">Check Maturity Date</label>
+								</div>
+								<div class="col-xs-12 col-sm-3">
+									<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
+										   t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
+								</div>
+							</div>
+						<button type="button" id="btn_save" class="btn btn-success">Save</button>
+						<button type="button" id="btn_cancel" class="btn btn-link">Cancel</button>
+					</div>
+					<hr style="margin-top: 5px; margin-bottom: 0px; border-width: 2px;"/>
 					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">
 						<div class="row">
 							<div class="row">

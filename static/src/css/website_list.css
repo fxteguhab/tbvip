@@ -44,6 +44,16 @@
 	font-weight: bold
 }
 
+.website_list_container .payment_header {
+	padding: 10px;
+}
+.website_list_container .payment_header div[class^="col-"] {
+	padding: 5px !important;
+}
+.website_list_container .payment_header label {
+	margin-bottom: 0px;
+}
+
 @media (max-width: 767px) {
 	.website_list_container .accordion_header_toggle {
 		text-align:left;

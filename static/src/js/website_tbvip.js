@@ -110,6 +110,9 @@ $(document).ready(function () {
             });
 		}
 
+        function kontra_bon_pay() {
+        }
+
 		function kontra_bon_cancel() {
 		}
 
