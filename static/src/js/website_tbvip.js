@@ -110,6 +110,9 @@ $(document).ready(function () {
             });
 		}
 
+		function kontra_bon_pay() {
+		}
+
 		function kontra_bon_cancel() {
 		}
 
@@ -131,7 +134,7 @@ $(document).ready(function () {
 			kontra_bon_pay();
 		});
 
-		$(purchase_kontra_bon).on("click", "#btn_save", function () {
+		$(purchase_kontra_bon).on("click", "#btn_cancel", function () {
 			kontra_bon_cancel();
 		});
 	});
