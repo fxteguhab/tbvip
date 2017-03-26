@@ -97,14 +97,23 @@ class website_tbvip(http.Controller):
 				type='http', auth="user", website=True)
 	def purchase_kontra_bon_save(self, id, reference, amount, journal_id, check_maturity_date, **kwargs):
 		result = []
-		domain = {
-			'id': id,
-			'reference': reference,
-			'amount': amount,
-			'journal_id': journal_id,
-		}
+		domain = {'id': id}
+		if reference != "null":
+			domain['reference'] = reference
+		else:
+			domain['reference'] = ''
+		if amount != "null":
+			domain['amount'] = amount
+		else:
+			domain['amount'] = ''
+		if journal_id != "null":
+			domain['journal_id'] = journal_id
+		else:
+			domain['journal_id'] = ''
 		if check_maturity_date != "null":
 			domain['check_maturity_date'] = check_maturity_date
+		else:
+			domain['check_maturity_date'] = ''
 		handler_obj = http.request.env['tbvip.website.handler']
 		result.append(handler_obj.save_kontra_bon(domain))
 		

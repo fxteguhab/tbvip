@@ -116,6 +116,15 @@ $(document).ready(function () {
             var amount = $("#amount").val();
             var journal_id = $("#journal_id").val();
             var check_maturity_date = $("#check_maturity_date").val();
+            if (reference.length == 0) {
+                reference = null;
+            }
+            if (amount.length == 0) {
+                amount = null;
+            }
+            if (journal_id.length == 0) {
+                journal_id = null;
+            }
             if (check_maturity_date.length == 0) {
                 check_maturity_date = null;
             }
@@ -124,14 +133,6 @@ $(document).ready(function () {
                 url: '/tbvip/kontra_bon/save/'+id+'/'+reference+'/'+amount+'/'+journal_id+'/'+check_maturity_date,
                 method: 'POST',
                 success: function(response) {
-                    if (response.error) {
-                        display_message(message_container, response.error, "error", 0);
-                        return;
-                    }
-                    if (response.info) {
-                        display_message(message_container, response.info, "info");
-                        return;
-                    }
                     var parent_div = save_button.parent().closest('div');
                     parent_div.find("input").each(function( index ) {
                         $(this).attr("default_value", $(this).attr("value"));
