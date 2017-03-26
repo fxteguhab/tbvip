@@ -538,7 +538,7 @@ class tbvip_website_handler(osv.osv):
 	_description = 'Model for handling website-based requests'
 	_auto = False
 	
-	def load_kontra_bon(self, env, domain, context={}):
+	def load_kontra_bon(self, domain, context={}):
 	# TIMTBVIP: DONE
 	# untuk filter draft masih salah, dalam artian kalaupun ada untuk supplier tertentu
 	# yang statusnya draft dan reference nya kosong, ketika difilter kok ngga keluar?

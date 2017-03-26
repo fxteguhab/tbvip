@@ -30,7 +30,7 @@ class website_tbvip(http.Controller):
 	@http.route('/tbvip/kontra_bon/fetch_data/<string:supplier>/<string:state>/<string:time_range>', type='http',
 				auth="user", website=True)
 	def purchase_kontra_bon_fetch_list(self, supplier, state, time_range, **kwargs):
-		env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
+		# env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
 		result = []
 		# set filter pencarian voucher
 		domain = {
@@ -38,8 +38,8 @@ class website_tbvip(http.Controller):
 			'state': state,
 			'time_range': time_range,
 		}
-		handler_obj = env['tbvip.website.handler']
-		result.append(handler_obj.load_kontra_bon(env, domain))
+		handler_obj = http.request.env['tbvip.website.handler']
+		result.append(handler_obj.load_kontra_bon(domain))
 		
 		#get journals
 		account_journals = http.request.env['account.journal']
