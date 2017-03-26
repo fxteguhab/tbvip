@@ -5,9 +5,9 @@ from openerp.osv import osv, fields
 
 class account_voucher(osv.osv):
 	_inherit = 'account.voucher'
-
+	
 	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
-
+	
 	def _total_amount_unreconciled(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		account_voucher_line_obj = self.pool.get('account.voucher.line')
@@ -23,10 +23,10 @@ class account_voucher(osv.osv):
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'total_amount_unreconciled': fields.function(_total_amount_unreconciled, string="Total Amount Reconciled", type='float', store=True),
+		'total_amount_unreconciled': fields.function(_total_amount_unreconciled, string="Total Amount Reconciled",
+			type='float', store=True),
 		'check_maturity_date': fields.date(string='Check Maturity Date',
-										  readonly=True, states={'draft': [('readonly', False)]}),
+			readonly=True, states={'draft': [('readonly', False)]}),
 	}
 	# TIMTBVIP: [DONE] maaf salah tulis di 004, seharusnya ini ada di account.voucher bukan account.invoice.
 	# tolong pindahkan beserta definisi field ini di viewnya
-

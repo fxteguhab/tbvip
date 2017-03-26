@@ -4,6 +4,7 @@ from openerp import http
 from openerp.http import request
 from openerp.tools.translate import _
 
+
 # TIMTBVIP: All Done
 # - untuk pilihan supplier tolong ditambahin "[All Suppliers]" yang mana tidak memfilter kontra bon
 # berdasarkan supplier tertentu DONE
@@ -28,7 +29,7 @@ class website_tbvip(http.Controller):
 		})
 	
 	@http.route('/tbvip/kontra_bon/fetch_data/<string:supplier>/<string:state>/<string:time_range>', type='http',
-				auth="user", website=True)
+		auth="user", website=True)
 	def purchase_kontra_bon_fetch_list(self, supplier, state, time_range, **kwargs):
 		# env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
 		result = []
@@ -41,7 +42,7 @@ class website_tbvip(http.Controller):
 		handler_obj = http.request.env['tbvip.website.handler']
 		result.append(handler_obj.load_kontra_bon(domain))
 		
-		#get journals
+		# get journals
 		account_journals = http.request.env['account.journal']
 		result_journal = []
 		list_id_journal = [];
@@ -92,9 +93,9 @@ class website_tbvip(http.Controller):
 				});
 		return json.dumps(result)
 	
-	
-	@http.route('/tbvip/kontra_bon/save/<string:id>/<string:reference>/<string:amount>/<string:journal_id>/<string:check_maturity_date>',
-				type='http', auth="user", website=True)
+	@http.route(
+		'/tbvip/kontra_bon/save/<string:id>/<string:reference>/<string:amount>/<string:journal_id>/<string:check_maturity_date>',
+		type='http', auth="user", website=True)
 	def purchase_kontra_bon_save(self, id, reference, amount, journal_id, check_maturity_date, **kwargs):
 		result = []
 		domain = {'id': id}
@@ -117,7 +118,7 @@ class website_tbvip(http.Controller):
 		handler_obj = http.request.env['tbvip.website.handler']
 		result.append(handler_obj.save_kontra_bon(domain))
 		
-		#get journals
+		# get journals
 		account_journals = http.request.env['account.journal']
 		result_journal = []
 		list_id_journal = [];
