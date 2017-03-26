@@ -25,8 +25,8 @@ class purchase_order(osv.osv):
 	_columns = {
 		'mysql_purchase_id': fields.integer('MySQL Purchase ID'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True,
-									 states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)],
-											 'done': [('readonly', True)]}),
+			states={'confirmed': [('readonly', True)], 'approved': [('readonly', True)],
+				'done': [('readonly', True)]}),
 		'cashier': fields.char('Cashier'),
 		# TIMTBVIP: tidak perlu ada di sini lagi, sudah ada module purchase_sales_discount
 		# Tadinya ada 'general_discount': fields.float('Discount'), 
@@ -36,18 +36,18 @@ class purchase_order(osv.osv):
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
 		
 		'partner_ref': fields.char('Supplier Reference', states={'confirmed': [('readonly', True)],
-																 'approved': [('readonly', True)],
-																 'done': [('readonly', True)]},
-								   copy=False, track_visibility='always',
-								   help="Reference of the sales order or bid sent by your supplier. "
-										"It's mainly used to do the matching when you receive the "
-										"products as this reference is usually written on the "
-										"delivery order sent by your supplier.", ),
+			'approved': [('readonly', True)],
+			'done': [('readonly', True)]},
+			copy=False, track_visibility='always',
+			help="Reference of the sales order or bid sent by your supplier. "
+				 "It's mainly used to do the matching when you receive the "
+				 "products as this reference is usually written on the "
+				 "delivery order sent by your supplier.", ),
 		'date_order': fields.datetime('Order Date', required=True, states={'confirmed': [('readonly', True)],
-																		   'approved': [('readonly', True)]},
-									  select=True, copy=False, track_visibility='always',
-									  help="Depicts the date where the Quotation should be validated and "
-										   "converted into a Purchase Order, by default it's the creation date.", ),
+			'approved': [('readonly', True)]},
+			select=True, copy=False, track_visibility='always',
+			help="Depicts the date where the Quotation should be validated and "
+				 "converted into a Purchase Order, by default it's the creation date.", ),
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -77,7 +77,8 @@ class purchase_order(osv.osv):
 		picking_obj = self.pool.get('stock.picking')
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
-	
+
+
 # setelah saya pikirin lebih baik kalau _prepare_inv_line dan _prepare_invoice dipindah ke puchase_sales_discount
 # gimana menurut kalian? pertimbangan saya kedua method ini masih terkait diskon, jadi dipindah supaya module 
 # purchase_sales_discount lebih independen dan tetap akurat.
@@ -91,7 +92,7 @@ class purchase_order_line(osv.osv):
 	
 	WATCHED_FIELDS_FROM_PO = ['product_id', 'product_qty', 'price_unit', 'discount_string']
 	SOURCE = [('needs', 'Needs'), ('manual', 'Manual'), ('owner', 'Owner')]
-
+	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
 	
 	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
@@ -101,17 +102,17 @@ class purchase_order_line(osv.osv):
 			# message post to SUPERUSER and all users in group Purchases Manager
 			group_obj = self.pool.get('res.groups')
 			purchase_manager_group_ids = group_obj.search(cr, uid,
-														  [('category_id.name', '=', 'Purchases'),
-														   ('name', '=', 'Manager')])
+				[('category_id.name', '=', 'Purchases'),
+					('name', '=', 'Manager')])
 			partner_ids = [SUPERUSER_ID]
 			for user in group_obj.browse(cr, uid, purchase_manager_group_ids).users:
 				partner_ids += [user.partner_id.id]
 			partner_ids = list(set(partner_ids))
 			purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
-											body=_(
-												"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
-												 % (product.name, purchase_order.name, product.standard_price,
-													data['price_unit']))
+				body=_(
+					"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
+					 % (product.name, purchase_order.name, product.standard_price,
+				data['price_unit']))
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	

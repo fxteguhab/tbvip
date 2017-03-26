@@ -11,20 +11,19 @@ from openerp.osv import osv, fields
 # ==========================================================================================================================
 
 class tbvip_branch(osv.osv):
-	
 	_name = 'tbvip.branch'
 	_description = 'Store branches'
-
+	
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
-
+	
 	_columns = {
 		'name': fields.char('Branch Name', required=True),
 	}
-	
+
+
 # ==========================================================================================================================
 
 class tbvip_mysql_bridge(osv.osv):
-	
 	_name = 'tbvip.mysql.bridge'
 	_auto = False
 	
@@ -32,14 +31,15 @@ class tbvip_mysql_bridge(osv.osv):
 	_cursor = None
 	
 	def mysql_connect(self):
-		self._conn = mysql.connector.connect(user='tbvip', password='hegemoni', database='invent_db', host='invent-db.c0rnoufuieno.ap-southeast-1.rds.amazonaws.com')
+		self._conn = mysql.connector.connect(user='tbvip', password='hegemoni', database='invent_db',
+			host='invent-db.c0rnoufuieno.ap-southeast-1.rds.amazonaws.com')
 		self._cursor = self._conn.cursor(dictionary=True)
 		return self._cursor
 	
 	def mysql_close(self):
 		self._cursor.close()
 		self._conn.close()
-		
+	
 	def get_old_new_id_map(self, cr, uid, model_name, old_column_name):
 		model_obj = self.pool.get(model_name)
 		model_ids = model_obj.search(cr, uid, [], context={'active_test': False})
@@ -58,24 +58,24 @@ class tbvip_mysql_bridge(osv.osv):
 			return None
 	
 	def update_insert(self, cr, uid, model_name, old_key_value, map_old_ids, map_ids, data, context={}):
-		if not context: context={}
+		if not context: context = {}
 		model_obj = self.pool.get(model_name)
-	# coba cari codex_id di data yang sudah ada
+		# coba cari codex_id di data yang sudah ada
 		try:
-		# kalau ketemu, berarti write
+			# kalau ketemu, berarti write
 			idx = map_old_ids.index(old_key_value)
 			model_obj.write(cr, uid, [map_ids[idx]], data, context=context)
 			return map_ids[idx]
 		except ValueError:
-			if context.get('create_defaults'): # create_defaults berisi field-field default untuk create, bila perlu
+			if context.get('create_defaults'):  # create_defaults berisi field-field default untuk create, bila perlu
 				data.update(context.get('create_defaults'))
-		# kalau ngga ketemu, bikin baru deh
+			# kalau ngga ketemu, bikin baru deh
 			return model_obj.create(cr, uid, data)
+
 
 # ==========================================================================================================================
 
 class tbvip_data_synchronizer(osv.osv):
-	
 	_name = 'tbvip.data.synchronizer'
 	_description = 'Data synchronizer between AWS database and Odoo'
 	_auto = False
@@ -86,22 +86,25 @@ class tbvip_data_synchronizer(osv.osv):
 		
 		mysql_bridge_obj = self.pool.get('tbvip.mysql.bridge')
 		
-		category_map_codex_ids, category_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.category', 'codex_id')
+		category_map_codex_ids, category_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.category',
+			'codex_id')
 		product_map_codex_ids, product_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.template', 'codex_id')
 		
 		def perform_product_data_conversion(product):
-			categ_id = mysql_bridge_obj.get_id_from_old_new_map(category_map_codex_ids, category_map_ids, product['group_id'])
+			categ_id = mysql_bridge_obj.get_id_from_old_new_map(category_map_codex_ids, category_map_ids,
+				product['group_id'])
 			result = {
 				'name': product['name'],
 				'codex_id': product['item_id'],
 			}
 			datatype = ""
-			is_variant = (product['type'] == 'g' and (product['name'].find('VARIANT') != -1 or product['name'].find('VARIAN') != -1))
+			is_variant = (
+			product['type'] == 'g' and (product['name'].find('VARIANT') != -1 or product['name'].find('VARIAN') != -1))
 			if product['type'] == 'i' or is_variant:
 				datatype = 'product'
 				result.update({
 					'categ_id': categ_id,
-					#'active': True, DO NOT UNCOMMENT! It took me three days in five dates to add that one # at this line. What a persistent and stubborn bug!
+					# 'active': True, DO NOT UNCOMMENT! It took me three days in five dates to add that one # at this line. What a persistent and stubborn bug!
 					# dll seperti harga, dsb
 				})
 			else:
@@ -111,12 +114,11 @@ class tbvip_data_synchronizer(osv.osv):
 					'type': 'normal',
 				})
 			return datatype, is_variant, result
-			
-			
+		
 		print '%s start cron sync category product' % datetime.now()
 		
-	# SYNC CATEGORY -----------------------------------------------------------------------------------------------------------
-
+# SYNC CATEGORY -----------------------------------------------------------------------------------------------------------
+		
 	# ambil dulu codex2 id category sekarang, untuk menunjukkan id apa saja yang sudah pernah di-sync sebelumnya
 		category_obj = self.pool.get('product.category')
 		product_template_obj = self.pool.get('product.template')
@@ -145,7 +147,8 @@ class tbvip_data_synchronizer(osv.osv):
 						'parent_id': categ_saleable_id
 					})
 				print "Category: %s" % data
-				mysql_bridge_obj.update_insert(cr, uid, 'product.category', product['item_id'], category_map_codex_ids, category_map_ids, data)
+				mysql_bridge_obj.update_insert(cr, uid, 'product.category', product['item_id'], category_map_codex_ids,
+					category_map_ids, data)
 			elif datatype == 'product':
 				product_buffer.append({
 					'is_variant': is_variant,
@@ -158,13 +161,14 @@ class tbvip_data_synchronizer(osv.osv):
 				else:
 					nonactive_product_codex_ids.append(product['item_id'])
 				
-	# SYNC KEPALA PRODUCT VARIANT ---------------------------------------------------------------------------------------------
-	
+# SYNC KEPALA PRODUCT VARIANT ---------------------------------------------------------------------------------------------
+				
 	# pengambilan mapping juga diulang karena di atas sudah ada perubahan karena write (misal pindah kategori)
 	# atau create (ada category baru)
 		print '%s start taking care of variants' % datetime.now()
 		variant_codex_ids = []
-		category_map_codex_ids, category_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.category', 'codex_id')
+		category_map_codex_ids, category_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.category',
+			'codex_id')
 		for product in product_buffer:
 			is_variant = product['is_variant']
 			group_id = product['group_id']
@@ -178,12 +182,13 @@ class tbvip_data_synchronizer(osv.osv):
 					'type': 'product',
 				})
 				print "Variant: %s" % data
-				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
+				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids,
+					product_map_ids, data, context=context)
 			else:
-				fails.append("Variant %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
+				fails.append("Variant %s (%s) missing group_id %s" % (data['name'], data['codex_id'], group_id))
+			
+# SYNC PRODUCT NON-ANAK VARIANT -------------------------------------------------------------------------------------------
 		
-	# SYNC PRODUCT NON-ANAK VARIANT -------------------------------------------------------------------------------------------
-	
 		print '%s start taking care of products' % datetime.now()
 		for product in product_buffer:
 			group_id = product['group_id']
@@ -196,14 +201,15 @@ class tbvip_data_synchronizer(osv.osv):
 					'type': 'product',
 				})
 				print "Product: %s" % data
-				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids, product_map_ids, data, context=context)
+				mysql_bridge_obj.update_insert(cr, uid, 'product.template', data['codex_id'], product_map_codex_ids,
+					product_map_ids, data, context=context)
 			else:
-				fails.append("Product %s (%s) missing group_id %s" % (data['name'],data['codex_id'],group_id))
+				fails.append("Product %s (%s) missing group_id %s" % (data['name'], data['codex_id'], group_id))
 		
 		print '%s start taking care of anak variants' % datetime.now()
-
-	# UPDATE ATRIBUT+VALUE VARIANT BESERTA PRODUK ANAK VARIANT ----------------------------------------------------------------
-
+		
+# UPDATE ATRIBUT+VALUE VARIANT BESERTA PRODUK ANAK VARIANT ----------------------------------------------------------------
+		
 	# ambil dari file anak_variant, produk2 variant beserta atribut2 dan value2 variantnya
 		try:
 			sep = os.sep
@@ -211,11 +217,11 @@ class tbvip_data_synchronizer(osv.osv):
 			basepath = ''
 			for slicer in temp[:-1]:
 				basepath = basepath + slicer + sep
-			fullpath = basepath+'/tbvip/static/anak_variant.csv'
-			fullpath = fullpath.replace('/',sep)
-			f = open(fullpath,'rb')
+			fullpath = basepath + '/tbvip/static/anak_variant.csv'
+			fullpath = fullpath.replace('/', sep)
+			f = open(fullpath, 'rb')
 		except:
-			raise osv.except_osv("Sync Error","Source variant file not found.")
+			raise osv.except_osv("Sync Error", "Source variant file not found.")
 		try:
 			variant_lines = []
 			reader = csv.reader(f)
@@ -224,7 +230,7 @@ class tbvip_data_synchronizer(osv.osv):
 				variant_lines.append(row)
 		except:
 			f.close()
-			raise osv.except_osv("Sync Error","Unable to open source variant.")
+			raise osv.except_osv("Sync Error", "Unable to open source variant.")
 		finally:
 			f.close()
 	# bikin variant yang belum ada
@@ -257,7 +263,8 @@ class tbvip_data_synchronizer(osv.osv):
 			attributes[variant]['value_ids'] = list(set(attributes[variant]['value_ids']))
 		for parent_variant_id in product_group_attributes:
 			for variant in product_group_attributes[parent_variant_id]:
-				product_group_attributes[parent_variant_id][variant] = list(set(product_group_attributes[parent_variant_id][variant]))
+				product_group_attributes[parent_variant_id][variant] = list(
+					set(product_group_attributes[parent_variant_id][variant]))
 	# ambil yang udah ada
 		existing = []
 		attribute_ids = attribute_obj.search(cr, uid, [])
@@ -272,7 +279,7 @@ class tbvip_data_synchronizer(osv.osv):
 			sequence = 1
 			values = []
 			for value in value_ids:
-				values.append([0,False,{
+				values.append([0, False, {
 					'sequence': sequence,
 					'name': value,
 				}])
@@ -285,18 +292,19 @@ class tbvip_data_synchronizer(osv.osv):
 		attribute_ids = attribute_obj.search(cr, uid, [])
 		attribute_dict = {}
 		for attribute in attribute_obj.browse(cr, uid, attribute_ids):
-			if attribute.name not in attribute_dict: attribute_dict.update({attribute.name: {'id': attribute.id, 'values': {}}})
+			if attribute.name not in attribute_dict: attribute_dict.update(
+				{attribute.name: {'id': attribute.id, 'values': {}}})
 			for value in attribute.value_ids:
 				attribute_dict[attribute.name]['values'].update({value.name: value.id})
-
+			
 	# update parent variant dengan menambahkan atribut beserta kemungkinan valuenya
 		parent_product_item_ids = product_group_attributes.keys()
-		product_ids = product_template_obj.search(cr, uid, [('codex_id','in',parent_product_item_ids)])
+		product_ids = product_template_obj.search(cr, uid, [('codex_id', 'in', parent_product_item_ids)])
 		dummy = []
 		for product in product_template_obj.browse(cr, uid, product_ids):
 			if product.id in dummy: continue
 			print product.name, product.attribute_line_ids
-			if len(product.attribute_line_ids) > 0: continue # hanya update variant yang belum ada saja
+			if len(product.attribute_line_ids) > 0: continue  # hanya update variant yang belum ada saja
 			if product.id not in dummy: dummy.append(product.id)
 			variant_data = product_group_attributes[str(product.codex_id)]
 			attribute_line_ids = []
@@ -304,9 +312,9 @@ class tbvip_data_synchronizer(osv.osv):
 				value_ids = []
 				for value in variant_data[variant_name]:
 					value_ids.append(attribute_dict[variant_name]['values'][value])
-				attribute_line_ids.append([0,False,{
+				attribute_line_ids.append([0, False, {
 					'attribute_id': attribute_dict[variant_name]['id'],
-					'value_ids': [[6,False,value_ids]]
+					'value_ids': [[6, False, value_ids]]
 				}])
 			print "sampe ke mau write product %s" % product.name
 			product_template_obj.write(cr, uid, [product.id], {
@@ -322,15 +330,16 @@ class tbvip_data_synchronizer(osv.osv):
 		for codex_id in nonactive_product_codex_ids:
 			cr.execute("UPDATE product_template SET active=False WHERE codex_id='%s'" % codex_id)
 			cr.execute("UPDATE product_product SET active=False WHERE variant_codex_id='%s'" % codex_id)
-	
+		
 		print '%s finished' % datetime.now()
-
+	
 # SUPPLIER -----------------------------------------------------------------------------------------------------------------
 	
 	def cron_sync_supplier(self, cr, uid, context={}):
 		
 		mysql_bridge_obj = self.pool.get('tbvip.mysql.bridge')
-		partner_map_codex_ids, partner_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'res.partner', 'mysql_partner_id')
+		partner_map_codex_ids, partner_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'res.partner',
+			'mysql_partner_id')
 		
 		def perform_supplier_data_conversion(partner):
 			return {
@@ -344,10 +353,10 @@ class tbvip_data_synchronizer(osv.osv):
 				'fax': partner['fax'],
 				'website': partner['website'],
 				'email': partner['email'],
-				'ref': "%s%s" % (partner['cp'],(partner['cp_phone'] and (" / " + partner['cp_phone']) or "")),
+				'ref': "%s%s" % (partner['cp'], (partner['cp_phone'] and (" / " + partner['cp_phone']) or "")),
 				'comment': partner['description'],
 			}
-			
+		
 	# ambil datanya
 		cursor = mysql_bridge_obj.mysql_connect()
 		cursor.execute("SELECT * FROM t_supplier")
@@ -355,14 +364,16 @@ class tbvip_data_synchronizer(osv.osv):
 	# insert/update supplier
 		for supplier in cursor.fetchall():
 			data = perform_supplier_data_conversion(supplier)
-			mysql_bridge_obj.update_insert(cr, uid, 'res.partner', data['mysql_partner_id'], partner_map_codex_ids, partner_map_ids, data)
+			mysql_bridge_obj.update_insert(cr, uid, 'res.partner', data['mysql_partner_id'], partner_map_codex_ids,
+				partner_map_ids, data)
 		
 # EMPLOYEE -----------------------------------------------------------------------------------------------------------------
 	
 	def cron_sync_employee(self, cr, uid, context={}):
 		
 		mysql_bridge_obj = self.pool.get('tbvip.mysql.bridge')
-		employee_map_codex_ids, employee_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'hr.employee', 'mysql_employee_id')
+		employee_map_codex_ids, employee_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'hr.employee',
+			'mysql_employee_id')
 		
 		def perform_employee_data_conversion(employee):
 			return {
@@ -373,7 +384,7 @@ class tbvip_data_synchronizer(osv.osv):
 				'birthday': employee['dob'] == '0000-00-00' and None or employee['dob'],
 				'notes': employee['description'],
 			}
-			
+		
 	# ambil datanya
 		cursor = mysql_bridge_obj.mysql_connect()
 		cursor.execute("SELECT * FROM t_employee")
@@ -381,26 +392,30 @@ class tbvip_data_synchronizer(osv.osv):
 	# insert/update employee
 		for employee in cursor.fetchall():
 			data = perform_employee_data_conversion(employee)
-			mysql_bridge_obj.update_insert(cr, uid, 'hr.employee', data['mysql_employee_id'], employee_map_codex_ids, employee_map_ids, data)
+			mysql_bridge_obj.update_insert(cr, uid, 'hr.employee', data['mysql_employee_id'], employee_map_codex_ids,
+				employee_map_ids, data)
 		
 		print "selesai sync employee"
-
+	
 # PURCHASE ORDER DAN SUPPLIER INVOICE --------------------------------------------------------------------------------------
-
+	
 	def cron_sync_purchase(self, cr, uid, context={}):
 		
 		mysql_bridge_obj = self.pool.get('tbvip.mysql.bridge')
 		
-		employee_map_codex_ids, employee_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'hr.employee', 'mysql_employee_id')
-		product_map_codex_ids, product_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.product', 'variant_codex_id')
-		partner_map_codex_ids, partner_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'res.partner', 'mysql_partner_id')
-
+		employee_map_codex_ids, employee_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'hr.employee',
+			'mysql_employee_id')
+		product_map_codex_ids, product_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'product.product',
+			'variant_codex_id')
+		partner_map_codex_ids, partner_map_ids = mysql_bridge_obj.get_old_new_id_map(cr, uid, 'res.partner',
+			'mysql_partner_id')
+		
 		vehicle_obj = self.pool.get('fleet.vehicle')
 		vehicle_ids = vehicle_obj.search(cr, uid, [])
 		vehicle_map = {}
 		for vehicle in vehicle_obj.browse(cr, uid, vehicle_ids):
 			vehicle_map.update({vehicle.license_plate: vehicle.id})
-			
+		
 	# ambil term 30 hari
 		model_obj = self.pool.get('ir.model.data')
 		model, payment_30_id = model_obj.get_object_reference(cr, uid, 'account', 'account_payment_term_net')
@@ -409,22 +424,25 @@ class tbvip_data_synchronizer(osv.osv):
 		model, branch_49_id = model_obj.get_object_reference(cr, uid, 'tbvip', 'tbvip_branch_49')
 	# ambil default stock location WH/Stock
 		model, wh_stock_id = model_obj.get_object_reference(cr, uid, 'stock', 'stock_location_stock')
-	
+		
 	# ambil semua pricelist_id setiap supplier. ini dibutuhkan ketika create PO
 		pricelist_ids = {}
 		partner_obj = self.pool.get('res.partner')
-		partner_ids = partner_obj.search(cr, uid, [('supplier','=',True)])
+		partner_ids = partner_obj.search(cr, uid, [('supplier', '=', True)])
 		for partner in partner_obj.browse(cr, uid, partner_ids):
 			pricelist_ids.update({partner.id: partner.property_product_pricelist_purchase.id})
-			
+		
 		def perform_purchase_data_conversion(purchase):
-			partner_id = mysql_bridge_obj.get_id_from_old_new_map(partner_map_codex_ids, partner_map_ids, purchase['supplier_id'])
-			driver_id = mysql_bridge_obj.get_id_from_old_new_map(employee_map_codex_ids, employee_map_ids, purchase['driver'])
+			partner_id = mysql_bridge_obj.get_id_from_old_new_map(partner_map_codex_ids, partner_map_ids,
+				purchase['supplier_id'])
+			driver_id = mysql_bridge_obj.get_id_from_old_new_map(employee_map_codex_ids, employee_map_ids,
+				purchase['driver'])
 			try:
 				discount = float(purchase['disc'])
 			except ValueError:
 				discount = 0
-			date_order = (purchase['input_date'] == '0000-00-00' or not purchase['input_date']) and purchase['invoice_date'] or purchase['input_date']
+			date_order = (purchase['input_date'] == '0000-00-00' or not purchase['input_date']) and purchase[
+				'invoice_date'] or purchase['input_date']
 			result = {
 				'mysql_purchase_id': purchase['mysql_purchase_id'],
 				'location_id': wh_stock_id,
@@ -437,13 +455,14 @@ class tbvip_data_synchronizer(osv.osv):
 				'general_discount': discount,
 				'notes': purchase['keterangan'],
 				'adm_point': purchase['poin'],
-				'pickup_vehicle_id': vehicle_map.get(purchase['mobil'], None), # mapping ke vehicle map
+				'pickup_vehicle_id': vehicle_map.get(purchase['mobil'], None),  # mapping ke vehicle map
 				'driver_id': driver_id and driver_id or None,
 				'order_line': [],
 			}
 			order_lines = []
 			for line in purchase['purchase_lines']:
-				product_id = mysql_bridge_obj.get_id_from_old_new_map(product_map_codex_ids, product_map_ids, line['item_id'])
+				product_id = mysql_bridge_obj.get_id_from_old_new_map(product_map_codex_ids, product_map_ids,
+					line['item_id'])
 				try:
 					discount1 = float(line['disc'])
 					if discount1 > 0:
@@ -453,7 +472,7 @@ class tbvip_data_synchronizer(osv.osv):
 				except ValueError:
 					discount1 = line['cost'] - line['nett']
 					discount_mode = line['disc']
-				order_lines.append([0,False,{
+				order_lines.append([0, False, {
 					'mysql_purchase_det_id': line['mysql_purchase_det_id'],
 					'name': '-',
 					'date_planned': date_order,
@@ -466,9 +485,9 @@ class tbvip_data_synchronizer(osv.osv):
 				}])
 			result['order_line'] = order_lines
 			return result
-
+		
 		print "start syncing purchases: %s" % datetime.now()
-	
+		
 	# ambil semua mysql_id yang sudah ada di odoo. hal ini untuk mencegah purchase data yang sama diimport > 1 kali
 	# asumsikan bahwa data yang ada di AWS sudah fixed alias ngga diedit2 lagi
 		existing_ids = []
@@ -476,7 +495,7 @@ class tbvip_data_synchronizer(osv.osv):
 		for row in cr.dictfetchall():
 			if row['mysql_purchase_id'] == 0: continue
 			existing_ids.append(str(row['mysql_purchase_id']))
-	
+		
 	# ambil datanya
 	# tabel sumber ada dua di mysql nya, jadi di sini kita ambil gabungan dulu
 		purchase_data = []
@@ -490,18 +509,19 @@ class tbvip_data_synchronizer(osv.osv):
 				det.purchase_id = mst.purchase_id AND 
 				mst.invoice_date >= '%s' %s
 			ORDER BY invoice_date DESC
-		""" % (from_date,(existing_ids and 'AND mst.purchase_id NOT IN (%s)' % existing_join or "")))
+		""" % (from_date, (existing_ids and 'AND mst.purchase_id NOT IN (%s)' % existing_join or "")))
 		for row in cursor.fetchall():
 			row.update({'branch_id': branch_22_id})
 			purchase_data.append(row)
-	
+		
 	# convert data sehingga satu purchase punya satu baris data saja, dengan di dalamnya ada purchase detail
 		purchase_data_convert = {}
-		master_keys = ['invoice','branch_id','supplier_id','input_date','invoice_date','validity','invoice','cashier','payment','pay_id','disc','total','keterangan','alert','lunas','sisa_total','poin','mobil','driver']
-		detail_keys = ['item_id','qty','cost','disc','nett','total','minute','alert']
+		master_keys = ['invoice', 'branch_id', 'supplier_id', 'input_date', 'invoice_date', 'validity', 'invoice', 'cashier',
+			'payment', 'pay_id', 'disc', 'total', 'keterangan', 'alert', 'lunas', 'sisa_total', 'poin', 'mobil', 'driver']
+		detail_keys = ['item_id', 'qty', 'cost', 'disc', 'nett', 'total', 'minute', 'alert']
 		for row in purchase_data:
 			key = int(row['purchase_id'])
-			if not purchase_data_convert.get(key,False):
+			if not purchase_data_convert.get(key, False):
 				purchase_data_convert.update({key: {
 					'mysql_purchase_id': key,
 					'purchase_lines': []
@@ -514,26 +534,26 @@ class tbvip_data_synchronizer(osv.osv):
 			for detail in detail_keys:
 				detail_data.update({detail: row[detail]})
 			purchase_data_convert[key]['purchase_lines'].append(detail_data)
-	
+		
 	# convert menjadi data yang siap diinsert ke odoo
 		purchase_obj = self.pool.get('purchase.order')
 		i = 1
 		total = len(purchase_data_convert.keys())
 		for purchase in purchase_data_convert:
-			print "%s of %s" % (i,total)
+			print "%s of %s" % (i, total)
 			data = perform_purchase_data_conversion(purchase_data_convert[purchase])
 			purchase_obj.create(cr, uid, data, context={
 				'direct_confirm': True,
 				'direct_receive': True,
 			})
 			i += 1
-	
+		
 	# ambil kontra bon yang sudah ada
 		
 		print "selesai sync purchase: %s" % datetime.now()
 
-class tbvip_website_handler(osv.osv):
 
+class tbvip_website_handler(osv.osv):
 	_name = 'tbvip.website.handler'
 	_description = 'Model for handling website-based requests'
 	_auto = False
@@ -543,7 +563,7 @@ class tbvip_website_handler(osv.osv):
 	# untuk filter draft masih salah, dalam artian kalaupun ada untuk supplier tertentu
 	# yang statusnya draft dan reference nya kosong, ketika difilter kok ngga keluar?
 		args = []
-		# Pool domains
+	# Pool domains
 		args.extend(self._kontra_bon_pool_supplier(domain))
 		args.extend(self._kontra_bon_pool_state(domain))
 		args.extend(self._kontra_bon_pool_date(domain))
@@ -569,15 +589,15 @@ class tbvip_website_handler(osv.osv):
 			else:
 				reference = voucher.reference
 			record = {'id': voucher.id,
-					  'partner_id': voucher.partner_id.name,
-					  'date': self._format_date(voucher.date),
-					  'line_dr_ids': line_dr_ids,
-					  'line_dr_ids_length': included_line_counter,
-					  'amount': voucher.amount,
-					  'journal_id': voucher.journal_id.name,
-					  'reference': reference,
-					  'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',
-					  }
+				'partner_id': voucher.partner_id.name,
+				'date': self._format_date(voucher.date),
+				'line_dr_ids': line_dr_ids,
+				'line_dr_ids_length': included_line_counter,
+				'amount': voucher.amount,
+				'journal_id': voucher.journal_id.name,
+				'reference': reference,
+				'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',
+			}
 			result.append(record)
 		return result
 	
@@ -590,7 +610,7 @@ class tbvip_website_handler(osv.osv):
 	def _kontra_bon_pool_supplier(self, domain):
 		args = []
 		supplier = domain.get('supplier', '').strip()
-		supplier = supplier.encode('ascii','ignore')
+		supplier = supplier.encode('ascii', 'ignore')
 		if supplier.isdigit():
 			args.append(['partner_id.id', '=', supplier]);
 		return args
@@ -607,7 +627,7 @@ class tbvip_website_handler(osv.osv):
 		elif state == 'posted':
 			args.append(['state', '=', 'posted'])
 		return args
-
+	
 	def _kontra_bon_pool_date(self, domain):
 		args = []
 		time_range = domain.get('time_range', '').strip()
@@ -630,7 +650,7 @@ class tbvip_website_handler(osv.osv):
 		account_voucher = self.env['account.voucher']
 		vouchers = account_voucher.search([('id', '=', domain.get('id', ''))])
 		return vouchers.write(domain)
-
+		
 	# def load_kontra_bon(self, env, domain, context={}):
 	# 	uid = env.uid
 	#
@@ -737,7 +757,7 @@ class tbvip_website_handler(osv.osv):
 	# 			'total_purchase': kontra['total_purchase'],
 	# 			})
 	# 	return sorted(result.values(), key=lambda kontra: kontra['supplier'])
-
+	
 		"""
 		domain = []
 		if state != 'all':
@@ -786,15 +806,3 @@ class tbvip_website_handler(osv.osv):
 		for row in posted: voucher_list.append(row)
 		for row in canceled: voucher_list.append(row)
 		"""
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-	
