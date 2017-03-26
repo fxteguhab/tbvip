@@ -625,6 +625,11 @@ class tbvip_website_handler(osv.osv):
 			if date_end:
 				args.append(['date', '<=', date_end])
 		return args
+	
+	def save_kontra_bon(self, domain, context={}):
+		account_voucher = self.env['account.voucher']
+		vouchers = account_voucher.search([('id', '=', domain.get('id', ''))])
+		return vouchers.write(domain)
 
 	# def load_kontra_bon(self, env, domain, context={}):
 	# 	uid = env.uid
