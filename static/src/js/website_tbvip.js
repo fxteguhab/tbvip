@@ -61,6 +61,7 @@ $(document).ready(function () {
 		
 		var purchase_kontra_bon = this;
 		var message_container = $("#message_container");
+		var kontra_bon_list = [];
 		
 		function kontra_bon_get_data() {
 			var supplier = $("#supplier").val().toUpperCase();
@@ -80,6 +81,9 @@ $(document).ready(function () {
 						display_message(message_container, response.info, "info");
 						return;
 					}
+					$.each(response.data[0], function(key, value) {
+					    kontra_bon_list[value.id] = value;
+                    });
 					kontra_bon_display_list(response.data);
 				},
 			});
@@ -122,10 +126,15 @@ $(document).ready(function () {
 		function kontra_bon_save(save_button) {
 			var parent_div = save_button.parent().parent();
 			var id = parent_div.parent().find("#id").attr("data-id");
-			var reference = parent_div.find("#reference").val();
-			var amount = parent_div.find("#amount").val();
-			var journal_id = parent_div.find("#journal_id").val();
-			var check_maturity_date = parent_div.find("#check_maturity_date").val();
+		    kontra_bon_list[id].reference = parent_div.find("#reference").val()
+		    kontra_bon_list[id].amount = parent_div.find("#amount").val()
+		    kontra_bon_list[id].journal_id = parent_div.find("#journal_id").val()
+		    kontra_bon_list[id].check_maturity_date = parent_div.find("#check_maturity_date").val()
+
+			var reference = kontra_bon_list[id].reference;
+			var amount = kontra_bon_list[id].amount;
+			var journal_id = kontra_bon_list[id].journal_id;
+			var check_maturity_date = kontra_bon_list[id].check_maturity_date;
 			if (reference.length == 0) {
 				reference = null;
 			}
@@ -157,9 +166,11 @@ $(document).ready(function () {
 
 		function kontra_bon_cancel(cancel_button) {
 			var parent_div = cancel_button.parent().parent();
-			parent_div.find("input").each(function( index ) {
-				$(this).attr("value", $(this).attr("default_value"));
-			})
+			var id = parent_div.parent().find("#id").attr("data-id");
+			parent_div.find("#reference").val(kontra_bon_list[id].reference);
+			parent_div.find("#amount").val(kontra_bon_list[id].amount);
+			parent_div.find("#journal_id").val(kontra_bon_list[id].journal_id);
+			parent_div.find("#check_maturity_date").val(kontra_bon_list[id].check_maturity_date);
 		}
 
 	//karena ini list with filter, masukin form filter
