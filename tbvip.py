@@ -588,6 +588,7 @@ class tbvip_website_handler(osv.osv):
 				'line_dr_ids': line_dr_ids,
 				'line_dr_ids_length': included_line_counter,
 				'amount': voucher.amount,
+				'line_total_amount': line_total_amount,
 				'journal_id': voucher.journal_id.id,
 				'reference': voucher.reference if voucher.reference else '',
 				'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',

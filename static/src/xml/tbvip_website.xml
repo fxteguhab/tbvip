@@ -52,7 +52,7 @@
 						<t t-esc="single_kontra['date']"/> - <b><t t-esc="single_kontra['partner_id']"/></b>
 					</div>
 					<div class="col-md-6 accordion_header_toggle text-right">
-						<t t-esc="single_kontra['line_dr_ids_length']"/> Bon - <span class="rupiah"><b><t t-esc="single_kontra['amount']"/></b></span>
+						<t t-esc="single_kontra['line_dr_ids_length']"/> Bon - <span class="rupiah"><b><t t-esc="single_kontra['line_total_amount']"/></b></span>
 					</div>
 				</div>
 				<div class="detail_container accordion_detail" >
