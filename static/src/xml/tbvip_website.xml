@@ -135,20 +135,25 @@
 						</t>
 					</div>
 					<hr style="margin-top: 5px; margin-bottom: 0px; border-width: 2px;"/>
+					<t t-if="single_kontra['line_dr_ids'].length == 0">
+						<div class="row">
+							<div class="col-xs-12" style="text-align: center; color: darkgray;">
+								<h4>Data Kosong</h4>
+							</div>
+						</div>
+					</t>
 					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">
 						<div class="row">
-							<div class="row">
-								<div class="col-xs-6">
-									<div style="height: 50%;">
-										<b><t t-esc="kontra_line['move_line_id']"/></b>
-									</div>
-									<div style="height: 50%;">
-									Due: <t t-esc="kontra_line['date_due']"/>
-									</div>
+							<div class="col-xs-6">
+								<div style="height: 50%;">
+									<b><t t-esc="kontra_line['move_line_id']"/></b>
 								</div>
-								<div class="col-xs-6 text-right line_voucher_price rupiah">
-									<t t-esc="kontra_line['amount']"/>
+								<div style="height: 50%;">
+								Due: <t t-esc="kontra_line['date_due']"/>
 								</div>
+							</div>
+							<div class="col-xs-6 text-right line_voucher_price rupiah">
+								<t t-esc="kontra_line['amount']"/>
 							</div>
 						</div>
 						<hr style="margin-top: 5px; margin-bottom: 0px"/>
