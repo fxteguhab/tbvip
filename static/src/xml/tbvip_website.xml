@@ -63,22 +63,39 @@
 									<label for="reference">Reference</label>
 								</div>
 								<div class="col-xs-12 col-sm-4">
-									<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
-										   t-attf-style="{{single_kontra['style_input']}}"
-										   t-attf-default_value="{{single_kontra['reference']}}" class="form-control"/>
+									<t t-if="single_kontra['state'] == 'draft'">
+										<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
+											t-attf-default_value="{{single_kontra['reference']}}" class="form-control"/>
+									</t>
+									<t t-if="single_kontra['state'] != 'draft'">
+										<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
+											t-attf-default_value="{{single_kontra['reference']}}" class="form-control"
+											readonly="readonly"/>
+									</t>
 								</div>
 								<div class="col-sm-1"/>
 								<div class="col-xs-12 col-sm-2">
 									<label for="journal_id">Journal</label>
 								</div>
 								<div class="col-xs-12 col-sm-3">
-									<select id="journal_id" class="form-control" t-attf-style="{{single_kontra['style_input']}}">
-										<t t-foreach="journals" t-as="journal">
-											<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
-												<t t-esc="journal.name"/>
-											</option>
-										</t>
-									</select>
+									<t t-if="single_kontra['state'] == 'draft'">
+										<select id="journal_id" class="form-control">
+											<t t-foreach="journals" t-as="journal">
+												<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
+													<t t-esc="journal.name"/>
+												</option>
+											</t>
+										</select>
+									</t>
+									<t t-if="single_kontra['state'] != 'draft'">
+										<select id="journal_id" class="form-control" style="pointer-events: none;">
+											<t t-foreach="journals" t-as="journal">
+												<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
+													<t t-esc="journal.name"/>
+												</option>
+											</t>
+										</select>
+									</t>
 								</div>
 							</div>
 							<div class="row">
@@ -86,26 +103,38 @@
 									<label for="amount">Amount</label>
 								</div>
 								<div class="col-xs-12 col-sm-4">
-									<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
-										t-attf-style="{{single_kontra['style_input']}}"
-										t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
+									<t t-if="single_kontra['state'] == 'draft'">
+										<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
+											t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
+									</t>
+									<t t-if="single_kontra['state'] != 'draft'">
+										<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
+											t-attf-default_value="{{single_kontra['amount']}}" class="form-control"
+												readonly="readonly"/>
+									</t>
 								</div>
 								<div class="col-sm-1"/>
 								<div class="col-xs-12 col-sm-2">
 									<label for="check_maturity_date">Check Maturity Date</label>
 								</div>
 								<div class="col-xs-12 col-sm-3">
-									<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
-										t-attf-style="{{single_kontra['style_input']}}"
-										t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
+									<t t-if="single_kontra['state'] == 'draft'">
+										<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
+											t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
+									</t>
+									<t t-if="single_kontra['state'] != 'draft'">
+										<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
+											t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"
+											readonly="readonly"/>
+									</t>
 								</div>
 							</div>
-						<div class="row header_footer form-group">
-							<button t-attf-style="{{single_kontra['style_button']}}" type="button" id="btn_save"
-									class="btn btn-success col-xs-12">Save</button>
-							<button t-attf-style="{{single_kontra['style_button']}}" type="button" id="btn_cancel"
-									class="btn col-xs-12 btn-link">Cancel</button>
-						</div>
+						<t t-if="single_kontra['state'] == 'draft'">
+							<div class="row header_footer form-group">
+								<button type="button" id="btn_save" class="btn btn-success col-xs-12">Save</button>
+								<button type="button" id="btn_cancel" class="btn col-xs-12 btn-link">Cancel</button>
+							</div>
+						</t>
 					</div>
 					<hr style="margin-top: 5px; margin-bottom: 0px; border-width: 2px;"/>
 					<t t-foreach="single_kontra['line_dr_ids']" t-as="kontra_line">

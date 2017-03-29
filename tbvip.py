@@ -581,27 +581,17 @@ class tbvip_website_handler(osv.osv):
 					line_dr_ids.append(line)
 					line_total_amount += line_dr.amount
 					included_line_counter += 1
-			if voucher.reference == False:
-				reference = ''
-			else:
-				reference = voucher.reference
-			if voucher.state != 'draft':
-				style_button = 'display: none;' # JUNED: NOOOO!!!!
-				style_input = 'pointer-events: none;' # JUNED: NOOOO!!!!
-			else:
-				style_button = '' # JUNED: NOOOO!!!!
-				style_input = '' # JUNED: NOOOO!!!!
-			record = {'id': voucher.id,
+			record = {
+				'id': voucher.id,
 				'partner_id': voucher.partner_id.name,
 				'date': self._format_date(voucher.date),
 				'line_dr_ids': line_dr_ids,
 				'line_dr_ids_length': included_line_counter,
 				'amount': voucher.amount,
 				'journal_id': voucher.journal_id.name,
-				'reference': reference,
+				'reference': voucher.reference if voucher.reference else '',
 				'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',
-				'style_button': style_button, # JUNED: NOOOO!!!!
-				'style_input': style_input # JUNED: NOOOO!!!!
+				'state': voucher.state
 			}
 			result.append(record)
 		return result
