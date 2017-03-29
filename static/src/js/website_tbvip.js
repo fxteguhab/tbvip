@@ -44,17 +44,17 @@ $(document).ready(function () {
 		container.fadeOut().html('');
 	}
 
-	function addCommas(nStr) { //JUNEd: use formatMoney instead
-				nStr += '';
-				x = nStr.split(',');
-				x1 = x[0];
-				x2 = x.length > 1 ? ',' + x[1] : '';
-				var rgx = /(\d+)(\d{3})/;
-				while (rgx.test(x1)) {
-						x1 = x1.replace(rgx, '$1' + '.' + '$2');
-				}
-				return x1 + x2;
-		}
+	// function addCommas(nStr) { //TIMTBVIP: DONE use formatMoney instead
+	// 	nStr += '';
+	// 	x = nStr.split(',');
+	// 	x1 = x[0];
+	// 	x2 = x.length > 1 ? ',' + x[1] : '';
+	// 	var rgx = /(\d+)(\d{3})/;
+	// 	while (rgx.test(x1)) {
+	// 			x1 = x1.replace(rgx, '$1' + '.' + '$2');
+	// 	}
+	// 	return x1 + x2;
+	// }
 
 
 	$('#kontra_bon_wrap').each(function () {
@@ -91,14 +91,14 @@ $(document).ready(function () {
 				'kontra': data[0],
 				'journals': data[1],
 			}));
-			$(".accordion").click(function(event) {
-				var div = $(event.target).next();
-				if (div.is('.visible')) {
-					div.removeClass('visible').addClass('hidden');
-				} else {
-					div.removeClass('hidden').setClasS('visible');
-				}
-			});
+			// $(".accordion").click(function(event) {
+			// 	var div = $(event.target).next();
+			// 	if (div.is('.visible')) {
+			// 		div.removeClass('visible').addClass('hidden');
+			// 	} else {
+			// 		div.removeClass('hidden').setClasS('visible');
+			// 	}
+			// });
 			var accordion = document.getElementsByClassName("accordion"); //JUNED: change to jquery stylr
 			var i;
 		//JUNED: kalau ngga ada data, tampilkan di div yang seharusnya buat tabel, pesan bahwa data kosong.
@@ -115,7 +115,7 @@ $(document).ready(function () {
 				}
 			}
 			$(".rupiah").each(function() {
-					$(this).text("Rp. " + addCommas($(this).text()));
+					$(this).text("Rp. " + (+$(this).text()).formatMoney(2, ',', '.'));
 			});
 		}
 
