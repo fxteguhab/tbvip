@@ -131,35 +131,23 @@ $(document).ready(function () {
 		    kontra_bon_list[id].journal_id = parent_div.find("#journal_id").val()
 		    kontra_bon_list[id].check_maturity_date = parent_div.find("#check_maturity_date").val()
 
-			var reference = kontra_bon_list[id].reference;
-			var amount = kontra_bon_list[id].amount;
-			var journal_id = kontra_bon_list[id].journal_id;
-			var check_maturity_date = kontra_bon_list[id].check_maturity_date;
-			if (reference.length == 0) {
-				reference = null;
-			}
-			if (amount.length == 0) {
-				amount = null;
-			}
-			if (journal_id.length == 0) {
-				journal_id = null;
-			}
-			if (check_maturity_date.length == 0) {
-				check_maturity_date = null;
-			}
+			var jsonString = JSON.stringify({
+			    'id': id,
+			    'reference': kontra_bon_list[id].reference.length == 0? '' : kontra_bon_list[id].reference,
+			    'amount': kontra_bon_list[id].amount.length == 0? '' : kontra_bon_list[id].amount,
+			    'journal_id': kontra_bon_list[id].journal_id.length == 0? '' : kontra_bon_list[id].journal_id,
+			    'check_maturity_date': kontra_bon_list[id].check_maturity_date.length == 0? '' : kontra_bon_list[id].check_maturity_date,
+			});
 		//JUNED: kasih loading indicator
 			$.ajax({
 				dataType: "json",
-			//JUNED: not recommended. sebaiknya form values dikirim dalam satu string JSON, jangan dipisah2 gini
+			//TIMTBVIP: not recommended. sebaiknya form values dikirim dalam satu string JSON, jangan dipisah2 gini
 			//kalau nantinya di kasus lain jumlah field formnya banyak gimana?
-				url: '/tbvip/kontra_bon/save/'+id+'/'+reference+'/'+amount+'/'+journal_id+'/'+check_maturity_date,
+				url: '/tbvip/kontra_bon/save/'+jsonString,
 				method: 'POST',
 				success: function(response) {
-				//JUNED: baik berhasil save maupun tidak, tampilkan pesan yang sesuai
-					parent_div.find("input").each(function( index ) {
-						$(this).attr("default_value", $(this).attr("value"));
-					})
-					alert("Save Success");
+				//TIMTBVIP: baik berhasil save maupun tidak, tampilkan pesan yang sesuai
+				    alert(response.info);
 				},
 			});
 		}
