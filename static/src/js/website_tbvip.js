@@ -101,7 +101,7 @@ $(document).ready(function () {
 			// });
 			var accordion = document.getElementsByClassName("accordion"); //JUNED: change to jquery stylr
 			var i;
-		//JUNED: kalau ngga ada data, tampilkan di div yang seharusnya buat tabel, pesan bahwa data kosong.
+		//TIMTBVIP: DONE kalau ngga ada data, tampilkan di div yang seharusnya buat tabel, pesan bahwa data kosong.
 		//JUNED: perbanyak comment please
 			for (i = 0; i < accordion.length; i++) { //JUNED: change to jquery style
 				accordion[i].onclick = function() {

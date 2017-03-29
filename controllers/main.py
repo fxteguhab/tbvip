@@ -28,28 +28,27 @@ class website_tbvip(http.Controller):
 		handler_obj = http.request.env['tbvip.website.handler']
 		result.append(handler_obj.load_kontra_bon(domain))
 		
-		# get journals
-		account_journals = http.request.env['account.journal']
-		result_journal = []
-		list_id_journal = [];
-		for record in account_journals.search([('type', '=', 'bank')]):
-			id = str(record.id)
-			name = record.name
-			if id not in list_id_journal:
-				list_id_journal.append(id);
-				result_journal.append({
-					'id': id,
-					'name': name,
-				});
-		result.append(result_journal)
-		
 		# return hasilnya
-		if len(result) == 0:
+		if len(result[0]) == 0:
 			response = {
 				'status': 'ok',
 				'info': _('The search returns no result.')
 			}
 		else:
+			# get journals
+			account_journals = http.request.env['account.journal']
+			result_journal = []
+			list_id_journal = [];
+			for record in account_journals.search([('type', '=', 'bank')]):
+				id = str(record.id)
+				name = record.name
+				if id not in list_id_journal:
+					list_id_journal.append(id);
+					result_journal.append({
+						'id': id,
+						'name': name,
+					});
+			result.append(result_journal)
 			response = {
 				'status': 'ok',
 				'data': result,

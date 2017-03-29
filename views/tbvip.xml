@@ -13,11 +13,11 @@
 			<t t-call="website.layout">
 				<div t-att-id="container_id">
 					<div class="container">
-						<div id="message_container"></div>
 						<h1>
 							<t t-esc="page_title"/>
 						</h1>
 						<div id="filter_container"/>
+						<div id="message_container"/>
 						<div id="list_container">
 						</div>
 					</div>
