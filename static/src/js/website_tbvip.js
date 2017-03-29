@@ -95,31 +95,18 @@ $(document).ready(function () {
 				'kontra': data[0],
 				'journals': data[1],
 			}));
-			// $(".accordion").click(function(event) {
-			// 	var div = $(event.target).next();
-			// 	if (div.is('.visible')) {
-			// 		div.removeClass('visible').addClass('hidden');
-			// 	} else {
-			// 		div.removeClass('hidden').setClasS('visible');
-			// 	}
-			// });
 			var accordion = document.getElementsByClassName("accordion"); //JUNED: change to jquery stylr
 			var i;
 		//TIMTBVIP: DONE kalau ngga ada data, tampilkan di div yang seharusnya buat tabel, pesan bahwa data kosong.
 		//JUNED: perbanyak comment please
-			for (i = 0; i < accordion.length; i++) { //JUNED: change to jquery style
-				accordion[i].onclick = function() {
-					this.classList.toggle("active");
-					var accordionDetail = this.nextElementSibling;
-					if (accordionDetail.style.maxHeight){
-						accordionDetail.style.maxHeight = null;
-					} else {
-						accordionDetail.style.maxHeight = accordionDetail.scrollHeight + "px";
-					}
-				}
+			$(".accordion").click(function(event) {
+			$(this).toggleClass("active");
+			var detail = $(this).next();
+			if (detail.css("maxHeight") != "0px"){
+				detail.css("maxHeight", "0px");
+			} else {
+				detail.css("maxHeight", detail.prop("scrollHeight")+ "px");
 			}
-			$(".rupiah").each(function() {
-					$(this).text("Rp. " + (+$(this).text()).formatMoney(2, ',', '.'));
 			});
 		}
 
