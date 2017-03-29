@@ -65,12 +65,11 @@
 								<div class="col-xs-12 col-sm-4">
 									<t t-if="single_kontra['state'] == 'draft'">
 										<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
-											t-attf-default_value="{{single_kontra['reference']}}" class="form-control"/>
+											class="form-control"/>
 									</t>
 									<t t-if="single_kontra['state'] != 'draft'">
 										<input type="text" id="reference" t-attf-value="{{single_kontra['reference']}}"
-											t-attf-default_value="{{single_kontra['reference']}}" class="form-control"
-											readonly="readonly"/>
+											class="form-control" readonly="readonly"/>
 									</t>
 								</div>
 								<div class="col-sm-1"/>
@@ -79,18 +78,19 @@
 								</div>
 								<div class="col-xs-12 col-sm-3">
 									<t t-if="single_kontra['state'] == 'draft'">
-										<select id="journal_id" class="form-control">
+										<select id="journal_id" class="form-control" t-attf-selected="{{single_kontra['journal_id']}}">
 											<t t-foreach="journals" t-as="journal">
-												<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
+												<option t-attf-value="{{journal.id}}">
 													<t t-esc="journal.name"/>
 												</option>
 											</t>
 										</select>
 									</t>
 									<t t-if="single_kontra['state'] != 'draft'">
-										<select id="journal_id" class="form-control" style="pointer-events: none;">
+										<select id="journal_id" class="form-control" t-attf-selected="{{single_kontra['journal_id']}}"
+												style="pointer-events: none;">
 											<t t-foreach="journals" t-as="journal">
-												<option t-attf-value="{{journal.id}}" t-attf-default_value="{{journal.id}}">
+												<option t-attf-value="{{journal.id}}">
 													<t t-esc="journal.name"/>
 												</option>
 											</t>
@@ -105,12 +105,11 @@
 								<div class="col-xs-12 col-sm-4">
 									<t t-if="single_kontra['state'] == 'draft'">
 										<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
-											t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
+											class="form-control"/>
 									</t>
 									<t t-if="single_kontra['state'] != 'draft'">
 										<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
-											t-attf-default_value="{{single_kontra['amount']}}" class="form-control"
-												readonly="readonly"/>
+											class="form-control" readonly="readonly"/>
 									</t>
 								</div>
 								<div class="col-sm-1"/>
@@ -120,12 +119,11 @@
 								<div class="col-xs-12 col-sm-3">
 									<t t-if="single_kontra['state'] == 'draft'">
 										<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
-											t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
+											class="form-control"/>
 									</t>
 									<t t-if="single_kontra['state'] != 'draft'">
 										<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
-											t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"
-											readonly="readonly"/>
+												class="form-control" readonly="readonly"/>
 									</t>
 								</div>
 							</div>
