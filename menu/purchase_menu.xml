@@ -2,7 +2,7 @@
 <openerp>
 	<data>
 		<record model="ir.ui.menu" id="purchase.menu_purchase_rfq">
-			<field name="name">Draft Purchase Order</field>
+			<field name="name">Draft Purchase Orders</field>
 		</record>
 	</data>
 </openerp>

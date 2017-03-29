@@ -586,11 +586,11 @@ class tbvip_website_handler(osv.osv):
 			else:
 				reference = voucher.reference
 			if voucher.state != 'draft':
-				style_button = 'display: none;'
-				style_input = 'pointer-events: none;'
+				style_button = 'display: none;' # JUNED: NOOOO!!!!
+				style_input = 'pointer-events: none;' # JUNED: NOOOO!!!!
 			else:
-				style_button = ''
-				style_input = ''
+				style_button = '' # JUNED: NOOOO!!!!
+				style_input = '' # JUNED: NOOOO!!!!
 			record = {'id': voucher.id,
 				'partner_id': voucher.partner_id.name,
 				'date': self._format_date(voucher.date),
@@ -600,8 +600,8 @@ class tbvip_website_handler(osv.osv):
 				'journal_id': voucher.journal_id.name,
 				'reference': reference,
 				'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',
-				'style_button': style_button,
-				'style_input': style_input
+				'style_button': style_button, # JUNED: NOOOO!!!!
+				'style_input': style_input # JUNED: NOOOO!!!!
 			}
 			result.append(record)
 		return result

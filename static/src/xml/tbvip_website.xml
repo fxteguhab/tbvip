@@ -87,8 +87,8 @@
 								</div>
 								<div class="col-xs-12 col-sm-4">
 									<input type="number" id="amount" t-attf-value="{{single_kontra['amount']}}"
-										   t-attf-style="{{single_kontra['style_input']}}"
-										   t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
+										t-attf-style="{{single_kontra['style_input']}}"
+										t-attf-default_value="{{single_kontra['amount']}}" class="form-control"/>
 								</div>
 								<div class="col-sm-1"/>
 								<div class="col-xs-12 col-sm-2">
@@ -96,15 +96,15 @@
 								</div>
 								<div class="col-xs-12 col-sm-3">
 									<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
-										   t-attf-style="{{single_kontra['style_input']}}"
-										   t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
+										t-attf-style="{{single_kontra['style_input']}}"
+										t-attf-default_value="{{single_kontra['check_maturity_date']}}" class="form-control"/>
 								</div>
 							</div>
-						<div class="row header_footer">
+						<div class="row header_footer form-group">
 							<button t-attf-style="{{single_kontra['style_button']}}" type="button" id="btn_save"
-									class="btn btn-success col-sm-1">Save</button>
+									class="btn btn-success col-xs-12">Save</button>
 							<button t-attf-style="{{single_kontra['style_button']}}" type="button" id="btn_cancel"
-									class="btn btn-link col-sm-1">Cancel</button>
+									class="btn col-xs-12 btn-link">Cancel</button>
 						</div>
 					</div>
 					<hr style="margin-top: 5px; margin-bottom: 0px; border-width: 2px;"/>
