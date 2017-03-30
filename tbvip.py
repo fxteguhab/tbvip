@@ -571,6 +571,7 @@ class tbvip_website_handler(osv.osv):
 		for voucher in vouchers:
 			line_dr_ids = []
 			included_line_counter = 0
+			line_total_amount = 0
 			for line_dr in voucher.line_dr_ids:
 				line = {}
 				line_total_amount = 0
