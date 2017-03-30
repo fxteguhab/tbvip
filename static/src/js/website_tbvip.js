@@ -125,7 +125,7 @@ $(document).ready(function () {
 			    'reference': kontra_bon_list[id].reference.length == 0? '' : kontra_bon_list[id].reference,
 			    'amount': kontra_bon_list[id].amount.length == 0? '' : kontra_bon_list[id].amount,
 			    'journal_id': kontra_bon_list[id].journal_id.length == 0? '' : kontra_bon_list[id].journal_id,
-			    'check_maturity_date': kontra_bon_list[id].check_maturity_date.length == 0? '' : kontra_bon_list[id].check_maturity_date,
+			    'check_maturity_date': kontra_bon_list[id].check_maturity_date.length == 0? null : kontra_bon_list[id].check_maturity_date,
 			});
 			$.ajax({
 				dataType: "json",

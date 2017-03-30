@@ -1,10 +1,15 @@
 .loading_div {
-    background-color: rgba(180,180,180,0.6);
+    z-index: 1100;
+    border: none;
+    margin: 0px;
+    padding: 0px;
     width: 100%;
-    height: auto;
-    bottom: 0px;
+    height: 100%;
     top: 0px;
-    left: 0;
+    left: 0px;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.6;
+    cursor: wait;
     position: fixed;
 }
 
