@@ -162,4 +162,10 @@
 			</t>
 		</div>
 	</t>
+
+	<t t-name="website_tbvip_loading_div">
+		<div class="loading_div">
+			<div class="loader"/>
+		</div>
+	</t>
 </templates>

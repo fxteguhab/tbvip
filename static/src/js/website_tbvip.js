@@ -111,6 +111,8 @@ $(document).ready(function () {
 		}
 
 		function kontra_bon_save(save_button) {
+		//TIMTBVIP: kasih loading indicator
+			$("body").append(qweb.render('website_tbvip_loading_div'));
 			var parent_div = save_button.parent().parent();
 			var id = parent_div.parent().find("#id").attr("data-id");
 		    kontra_bon_list[id].reference = parent_div.find("#reference").val()
@@ -125,7 +127,6 @@ $(document).ready(function () {
 			    'journal_id': kontra_bon_list[id].journal_id.length == 0? '' : kontra_bon_list[id].journal_id,
 			    'check_maturity_date': kontra_bon_list[id].check_maturity_date.length == 0? '' : kontra_bon_list[id].check_maturity_date,
 			});
-		//JUNED: kasih loading indicator
 			$.ajax({
 				dataType: "json",
 			//TIMTBVIP: not recommended. sebaiknya form values dikirim dalam satu string JSON, jangan dipisah2 gini
@@ -135,6 +136,7 @@ $(document).ready(function () {
 				success: function(response) {
 				//TIMTBVIP: baik berhasil save maupun tidak, tampilkan pesan yang sesuai
 				    alert(response.info);
+			        $(".loading_div").remove();
 				},
 			});
 		}
