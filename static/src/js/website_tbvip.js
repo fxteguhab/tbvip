@@ -95,8 +95,6 @@ $(document).ready(function () {
 				'kontra': data[0],
 				'journals': data[1],
 			}));
-			var accordion = document.getElementsByClassName("accordion"); //JUNED: change to jquery stylr
-			var i;
 		//TIMTBVIP: DONE kalau ngga ada data, tampilkan di div yang seharusnya buat tabel, pesan bahwa data kosong.
 		//JUNED: perbanyak comment please
 			$(".accordion").click(function(event) {
