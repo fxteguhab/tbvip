@@ -4,7 +4,9 @@
 		<template id="assets_frontend" inherit_id="website.assets_frontend" name="tbvip">
 			<xpath expr="." position="inside">
 				<link rel='stylesheet' href='/tbvip/static/src/css/tbvip.css'/>
+				<link rel='stylesheet' href='/tbvip/static/src/css/website_helper.css'/>
 				<link rel='stylesheet' href='/tbvip/static/src/css/website_list.css'/>
+				<script type="text/javascript" src="/tbvip/static/src/js/website_helper.js"></script>
 				<script type="text/javascript" src="/tbvip/static/src/js/website_tbvip.js"></script>
 			</xpath>
 		</template>
