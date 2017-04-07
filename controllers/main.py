@@ -80,11 +80,13 @@ class website_tbvip(http.Controller):
 		if result:
 			response = {
 				'status': 'ok',
-				'info': _('Save Success')
+				'info': _('Save Success'),
+				'success' : True,
 			}
 		else:
 			response = {
 				'status': 'ok',
-				'info': _('Save Failed')
+				'info': _('Save Failed'),
+				'success' : False,
 			}
 		return json.dumps(response)

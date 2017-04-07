@@ -134,6 +134,9 @@ $(document).ready(function () {
 				success: function(response) {
 				//TIMTBVIP: baik berhasil save maupun tidak, tampilkan pesan yang sesuai
 				    alert(response.info);
+				    if(response.success){
+				    	kontra_bon_get_data();
+				    }
 			        $(".loading_div").remove();
 				},
 			});
