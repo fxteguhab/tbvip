@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="act_auto_open" model="workflow.transition">
+			<field name="wkf_id" ref="account.wkf"/>
+			<field name="act_from" ref="account.act_draft"/>
+			<field name="act_to" ref="account.act_open"/>
+			<field name="signal">from_po</field>
+		</record>
+	</data>
+</openerp>

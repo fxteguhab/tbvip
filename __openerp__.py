@@ -21,6 +21,7 @@
 		'data/account_data.xml',
 		'data/fleet_data.xml',
 		'data/tbvip_data.xml',
+		'views/account_invoice_view.xml',
 		'views/account_voucher_view.xml',
 		'views/employee_view.xml',
 		'views/product_view.xml',
@@ -32,6 +33,7 @@
 		'report/purchase_report.xml',
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
+		'workflows/invoice_workflow.xml',
 		'workflows/purchase_workflow.xml',
 	],
 	'demo': [

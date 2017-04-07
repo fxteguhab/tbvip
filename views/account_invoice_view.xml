@@ -1,0 +1,14 @@
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_invoice_supplier_form_inherit">
+            <field name="name">account.invoice.supplier.form.inherit</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <button name="invoice_cancel" position="replace">
+                    <button name="invoice_cancel" states="draft,proforma2,open" string="Cancel Invoice" groups="account.group_account_invoice"/>
+                </button>
+            </field>
+        </record>
+    </data>
+</openerp>
