@@ -82,7 +82,11 @@ $(document).ready(function () {
 				url: '/tbvip/kontra_bon/save/'+json_string,
 				method: 'POST',
 				success: function(response) {
-					alert(response.info);
+				//TIMTBVIP: baik berhasil save maupun tidak, tampilkan pesan yang sesuai
+				    alert(response.info);
+				    if(response.success){
+				    	kontra_bon_get_data();
+				    }
 					Loading.hide();
 				},
 			});
