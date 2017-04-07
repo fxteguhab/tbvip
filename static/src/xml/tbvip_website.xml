@@ -114,9 +114,18 @@
 								</div>
 								<div class="col-sm-1"/>
 								<div class="col-xs-12 col-sm-2">
-									<label for="check_maturity_date">Check Maturity Date</label>
+									<label for="amount">Account No.</label>
 								</div>
 								<div class="col-xs-12 col-sm-3">
+									<input type="number" id="amount" t-attf-value="{{single_kontra['bank_acc']}}"
+										class="form-control" readonly="readonly"/>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 col-sm-2">
+									<label for="check_maturity_date">Check Maturity Date</label>
+								</div>
+								<div class="col-xs-12 col-sm-4">
 									<t t-if="single_kontra['state'] == 'draft'">
 										<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
 											class="form-control"/>
@@ -125,6 +134,14 @@
 										<input type="date" id="check_maturity_date" t-attf-value="{{single_kontra['check_maturity_date']}}"
 												class="form-control" readonly="readonly"/>
 									</t>
+								</div>
+								<div class="col-sm-1"/>
+								<div class="col-xs-12 col-sm-2">
+									<label for="amount">Holder Name</label>
+								</div>
+								<div class="col-xs-12 col-sm-3">
+									<input type="number" id="amount" t-attf-value="{{single_kontra['bank_holder']}}"
+										class="form-control" readonly="readonly"/>
 								</div>
 							</div>
 						<t t-if="single_kontra['state'] == 'draft'">

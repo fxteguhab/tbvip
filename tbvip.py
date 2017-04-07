@@ -582,6 +582,12 @@ class tbvip_website_handler(osv.osv):
 					line_dr_ids.append(line)
 					line_total_amount += line_dr.amount
 					included_line_counter += 1
+		# Get bank details
+			bank_acc = "-"
+			bank_holder = "-"
+			if len(voucher.bank_id) > 0:
+				bank_acc = voucher.bank_id.acc_number
+				bank_holder = voucher.bank_id.partner_id.name
 			record = {
 				'id': voucher.id,
 				'partner_id': voucher.partner_id.name,
@@ -593,7 +599,9 @@ class tbvip_website_handler(osv.osv):
 				'journal_id': voucher.journal_id.id,
 				'reference': voucher.reference if voucher.reference else '',
 				'check_maturity_date': voucher.check_maturity_date if voucher.check_maturity_date else '',
-				'state': voucher.state
+				'state': voucher.state,
+				'bank_acc': bank_acc,
+				'bank_holder': bank_holder,
 			}
 			result.append(record)
 		return result
@@ -609,7 +617,7 @@ class tbvip_website_handler(osv.osv):
 		supplier = domain.get('supplier', '').strip()
 		supplier = supplier.encode('ascii', 'ignore')
 		if supplier.isdigit():
-			args.append(['partner_id.id', '=', supplier]);
+			args.append(['partner_id.id', '=', supplier])
 		return args
 	
 	def _kontra_bon_pool_state(self, domain):
