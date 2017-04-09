@@ -117,7 +117,7 @@
 									<label for="amount">Account No.</label>
 								</div>
 								<div class="col-xs-12 col-sm-3">
-									<input type="number" id="amount" t-attf-value="{{single_kontra['bank_acc']}}"
+									<input t-attf-value="{{single_kontra['bank_acc']}}"
 										class="form-control" readonly="readonly"/>
 								</div>
 							</div>
@@ -140,7 +140,7 @@
 									<label for="amount">Holder Name</label>
 								</div>
 								<div class="col-xs-12 col-sm-3">
-									<input type="number" id="amount" t-attf-value="{{single_kontra['bank_holder']}}"
+									<input t-attf-value="{{single_kontra['bank_holder']}}"
 										class="form-control" readonly="readonly"/>
 								</div>
 							</div>
