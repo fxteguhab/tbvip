@@ -32,7 +32,6 @@ class purchase_order(osv.osv):
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
-		'discount_algorithm': fields.boolean('Discount from Subtotal'),
 		'partner_ref': fields.char('Supplier Reference', states={'confirmed': [('readonly', True)],
 			'approved': [('readonly', True)],
 			'done': [('readonly', True)]},
@@ -110,6 +109,7 @@ class purchase_order_line(osv.osv):
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
+		'discount_algorithm': fields.boolean('Discount from Subtotal'),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -165,9 +165,10 @@ class purchase_order_line(osv.osv):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
 	
-	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, discount_string, discount_from_subtotal, context={}):
+	def onchange_order_line_count_discount(self, cr, uid, ids, product_qty, price_unit, discount_string, product_uom,
+			product_id, discount_from_subtotal, context={}):
 		result = super(purchase_order_line, self).onchange_order_line(cr, uid, ids, product_qty, price_unit,
-			discount_string, context=context)
+			discount_string, product_uom, product_id, context=context)
 	# Recount discount
 		discounts = discount_utility.calculate_discount(discount_string, price_unit, self._max_discount)
 		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
@@ -177,7 +178,7 @@ class purchase_order_line(osv.osv):
 		price_subtotal = result['value']['price_subtotal']
 		order_lines = self.browse(cr, uid, ids)
 		for order_line in order_lines:
-			discount_from_subtotal = order_line.order_id.discount_algorithm
+			discount_from_subtotal = order_line.discount_algorithm
 		# Count subtotal
 		if discount_from_subtotal:
 			price_unit_nett = price_unit

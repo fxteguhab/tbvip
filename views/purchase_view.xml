@@ -8,6 +8,9 @@
 				<field name="partner_id" position="before">
 					<field name="branch_id"/>
 				</field>
+				<field name="price_unit" position="before">
+					<field name="discount_algorithm" invisible="1"/>
+				</field>
 				<xpath expr="//label[@string='Request for Quotation ']" position="attributes">
 					<attribute name="string">Draft Purchase Order</attribute>
 				</xpath>
