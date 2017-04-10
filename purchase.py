@@ -2,7 +2,7 @@
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-
+import discount_utility
 
 # ==========================================================================================================================
 
@@ -165,4 +165,28 @@ class purchase_order_line(osv.osv):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
 	
-	
+	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, discount_string, discount_from_subtotal, context={}):
+		result = super(purchase_order_line, self).onchange_order_line(cr, uid, ids, product_qty, price_unit,
+			discount_string, context=context)
+	# Recount discount
+		discounts = discount_utility.calculate_discount(discount_string, price_unit, self._max_discount)
+		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
+						 discounts[6] + discounts[7]
+	# Tentuin cara perhitungan diskon mau dikurangi dari price_unit_nett atau dari subtotal
+		price_unit_nett = result['value']['price_unit_nett']
+		price_subtotal = result['value']['price_subtotal']
+		order_lines = self.browse(cr, uid, ids)
+		for order_line in order_lines:
+			discount_from_subtotal = order_line.order_id.discount_algorithm
+		# Count subtotal
+		if discount_from_subtotal:
+			price_unit_nett = price_unit
+			price_subtotal = (product_qty * price_unit) - total_discount
+		else:
+			price_unit_nett = price_unit - total_discount
+			price_subtotal = product_qty * (price_unit - total_discount)
+		result['value'].update({
+			'price_unit_nett': price_unit_nett,
+			'price_subtotal': price_subtotal
+		})
+		return result
