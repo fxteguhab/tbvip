@@ -2,6 +2,7 @@
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
 import discount_utility
 
 # ==========================================================================================================================
@@ -105,11 +106,33 @@ class purchase_order_line(osv.osv):
 					 % (product.name, purchase_order.name, product.standard_price,
 				data['price_unit']))
 	
+	def _amount_line_discount(self, cr, uid, ids, prop, arg, context=None):
+		res = super(purchase_order_line, self)._amount_line(cr, uid, ids, prop, arg, context)
+		cur_obj=self.pool.get('res.currency')
+		tax_obj = self.pool.get('account.tax')
+		for line in self.browse(cr, uid, ids, context=context):
+			line_price = line.price_unit if line.discount_algorithm else self._calc_line_base_price(cr, uid, line,
+				context=context)
+			line_qty = self._count_qty_with_uom(cr, uid, line.product_id.id, line.product_uom.id, line.product_qty)
+			taxes = tax_obj.compute_all(cr, uid, line.taxes_id, line_price,
+				line_qty, line.product_id,
+				line.order_id.partner_id)
+			cur = line.order_id.pricelist_id.currency_id
+			# taxes['total'] = (line.line_qty * line.price_unit) - total_discount if line.discount_algorithm else
+			discounts = discount_utility.calculate_discount(line.discount_string, line_price, self._max_discount)
+			total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
+							discounts[6] + discounts[7]
+			if line.discount_algorithm:
+				taxes['total'] = taxes['total'] - total_discount
+			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+		return res
+	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
 		'discount_algorithm': fields.boolean('Discount from Subtotal'),
+		'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
