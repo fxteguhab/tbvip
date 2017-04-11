@@ -156,6 +156,13 @@ class purchase_order_line(osv.osv):
 		purchase_order_obj.message_post(cr, uid, line.order_id.id, body=message)
 		pass
 	
+	def _count_qty_with_uom(self, cr, uid, product_id, product_uom, product_qty):
+		product_uom_obj = self.pool.get('product.uom')
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
+		product_qty = product_uom_obj._compute_qty(cr, uid, product_uom, product_qty, product.product_tmpl_id.uom_po_id.id)
+		return product_qty
+	
 	def write(self, cr, uid, ids, vals, context=None):
 		for id in ids:
 			self._message_line_changes(cr, uid, vals, id, context=None)
@@ -174,10 +181,7 @@ class purchase_order_line(osv.osv):
 		discounts = discount_utility.calculate_discount(valid_discount_string, price_unit, self._max_discount)
 		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
 						 discounts[6] + discounts[7]
-		product_uom_obj = self.pool.get('product.uom')
-		product_obj = self.pool.get('product.product')
-		product = product_obj.browse(cr, uid, product_id)
-		qty = product_uom_obj._compute_qty(cr, uid, product_uom, product_qty, product.product_tmpl_id.uom_po_id.id)
+		qty = self._count_qty_with_uom(cr, uid, product_id, product_uom, product_qty)
 		return {
 			'value': {
 				'price_unit_nett': price_unit - total_discount,
@@ -189,6 +193,8 @@ class purchase_order_line(osv.osv):
 			product_id, discount_from_subtotal, context={}):
 		result = self.onchange_order_line(cr, uid, ids, product_qty, price_unit,
 			discount_string, product_uom, product_id, context=context)
+	# Recount qty
+		product_qty = self._count_qty_with_uom(cr, uid, product_id, product_uom, product_qty)
 	# Recount discount
 		discounts = discount_utility.calculate_discount(discount_string, price_unit, self._max_discount)
 		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
