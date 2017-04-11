@@ -220,10 +220,10 @@ class purchase_order_line(osv.osv):
 	
 	def onchange_product_uom_purchases_sale_discount(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, discount_string,date_order=False, fiscal_position_id=False, date_planned=False,
-			name=False, price_unit=False, state='draft',context=None):
+			name=False, price_unit=False, state='draft', discount_algorithm=False, context=None):
 		result = super(purchase_order_line, self).onchange_product_uom(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order, fiscal_position_id, date_planned,
 			name, price_unit, state, context)
-		result['value'].update(self.onchange_order_line(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id))
-		result = self.onchange_order_line(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id)
+		result['value'].update(self.onchange_order_line_count_discount(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id, discount_algorithm))
+		result = self.onchange_order_line_count_discount(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id, discount_algorithm)
 		return result
