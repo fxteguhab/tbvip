@@ -5,6 +5,12 @@
 			<field name="model">purchase.order</field>
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
+				<field name="product_uom" position="replace">
+					<field name="product_uom"
+							on_change="onchange_product_uom_purchases_sale_discount(parent.pricelist_id,
+							product_id,product_qty,product_uom,parent.partner_id,
+							discount_string,parent.date_order,parent.fiscal_position,date_planned,name,price_unit,parent.state,context)"/>
+				</field>
 				<field name="partner_id" position="before">
 					<field name="branch_id"/>
 				</field>

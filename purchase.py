@@ -165,9 +165,29 @@ class purchase_order_line(osv.osv):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
 	
+	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, discount_string, product_uom, product_id,context={}):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(
+				discount_string, price_unit, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		discounts = discount_utility.calculate_discount(valid_discount_string, price_unit, self._max_discount)
+		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
+						 discounts[6] + discounts[7]
+		product_uom_obj = self.pool.get('product.uom')
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
+		qty = product_uom_obj._compute_qty(cr, uid, product_uom, product_qty, product.product_tmpl_id.uom_po_id.id)
+		return {
+			'value': {
+				'price_unit_nett': price_unit - total_discount,
+				'price_subtotal': qty * (price_unit - total_discount)
+			}
+		}
+	
 	def onchange_order_line_count_discount(self, cr, uid, ids, product_qty, price_unit, discount_string, product_uom,
 			product_id, discount_from_subtotal, context={}):
-		result = super(purchase_order_line, self).onchange_order_line(cr, uid, ids, product_qty, price_unit,
+		result = self.onchange_order_line(cr, uid, ids, product_qty, price_unit,
 			discount_string, product_uom, product_id, context=context)
 	# Recount discount
 		discounts = discount_utility.calculate_discount(discount_string, price_unit, self._max_discount)
@@ -190,4 +210,14 @@ class purchase_order_line(osv.osv):
 			'price_unit_nett': price_unit_nett,
 			'price_subtotal': price_subtotal
 		})
+		return result
+	
+	def onchange_product_uom_purchases_sale_discount(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, discount_string,date_order=False, fiscal_position_id=False, date_planned=False,
+			name=False, price_unit=False, state='draft',context=None):
+		result = super(purchase_order_line, self).onchange_product_uom(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order, fiscal_position_id, date_planned,
+			name, price_unit, state, context)
+		result['value'].update(self.onchange_order_line(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id))
+		result = self.onchange_order_line(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id)
 		return result
