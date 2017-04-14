@@ -3,7 +3,7 @@ from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-import discount_utility
+import openerp.addons.purchase_sale_discount.discount_utility as discount_utility
 
 # ==========================================================================================================================
 
