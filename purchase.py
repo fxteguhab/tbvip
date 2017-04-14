@@ -130,7 +130,6 @@ class purchase_order_line(osv.osv):
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
-		'discount_algorithm': fields.boolean('Discount from Subtotal'),
 		# 'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
 	}
 	

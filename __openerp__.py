@@ -28,7 +28,6 @@
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
 		'views/tbvip.xml',
-		'views/res_config_view.xml',
 		'report/account_report.xml',
 		'report/documents/account_voucher.xml',
 		'report/purchase_report.xml',
