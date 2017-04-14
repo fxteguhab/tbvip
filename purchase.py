@@ -106,33 +106,33 @@ class purchase_order_line(osv.osv):
 					 % (product.name, purchase_order.name, product.standard_price,
 				data['price_unit']))
 	
-	def _amount_line_discount(self, cr, uid, ids, prop, arg, context=None):
-		res = super(purchase_order_line, self)._amount_line(cr, uid, ids, prop, arg, context)
-		cur_obj=self.pool.get('res.currency')
-		tax_obj = self.pool.get('account.tax')
-		for line in self.browse(cr, uid, ids, context=context):
-			line_price = line.price_unit if line.discount_algorithm else self._calc_line_base_price(cr, uid, line,
-				context=context)
-			line_qty = self._count_qty_with_uom(cr, uid, line.product_id.id, line.product_uom.id, line.product_qty)
-			taxes = tax_obj.compute_all(cr, uid, line.taxes_id, line_price,
-				line_qty, line.product_id,
-				line.order_id.partner_id)
-			cur = line.order_id.pricelist_id.currency_id
-			# taxes['total'] = (line.line_qty * line.price_unit) - total_discount if line.discount_algorithm else
-			discounts = discount_utility.calculate_discount(line.discount_string, line_price, self._max_discount)
-			total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
-							discounts[6] + discounts[7]
-			if line.discount_algorithm:
-				taxes['total'] = taxes['total'] - total_discount
-			res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
-		return res
+	# def _amount_line_discount(self, cr, uid, ids, prop, arg, context=None):
+	# 	res = super(purchase_order_line, self)._amount_line(cr, uid, ids, prop, arg, context)
+	# 	cur_obj=self.pool.get('res.currency')
+	# 	tax_obj = self.pool.get('account.tax')
+	# 	for line in self.browse(cr, uid, ids, context=context):
+	# 		line_price = line.price_unit if line.discount_algorithm else self._calc_line_base_price(cr, uid, line,
+	# 			context=context)
+	# 		line_qty = self._count_qty_with_uom(cr, uid, line.product_id.id, line.product_uom.id, line.product_qty)
+	# 		taxes = tax_obj.compute_all(cr, uid, line.taxes_id, line_price,
+	# 			line_qty, line.product_id,
+	# 			line.order_id.partner_id)
+	# 		cur = line.order_id.pricelist_id.currency_id
+	# 		# taxes['total'] = (line.line_qty * line.price_unit) - total_discount if line.discount_algorithm else
+	# 		discounts = discount_utility.calculate_discount(line.discount_string, line_price, self._max_discount)
+	# 		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
+	# 						discounts[6] + discounts[7]
+	# 		if line.discount_algorithm:
+	# 			taxes['total'] = taxes['total'] - total_discount
+	# 		res[line.id] = cur_obj.round(cr, uid, cur, taxes['total'])
+	# 	return res
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
 		'discount_algorithm': fields.boolean('Discount from Subtotal'),
-		'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
+		# 'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -179,12 +179,12 @@ class purchase_order_line(osv.osv):
 		purchase_order_obj.message_post(cr, uid, line.order_id.id, body=message)
 		pass
 	
-	def _count_qty_with_uom(self, cr, uid, product_id, product_uom, product_qty):
-		product_uom_obj = self.pool.get('product.uom')
-		product_obj = self.pool.get('product.product')
-		product = product_obj.browse(cr, uid, product_id)
-		product_qty = product_uom_obj._compute_qty(cr, uid, product_uom, product_qty, product.product_tmpl_id.uom_po_id.id)
-		return product_qty
+	# def _count_qty_with_uom(self, cr, uid, product_id, product_uom, product_qty):
+	# 	product_uom_obj = self.pool.get('product.uom')
+	# 	product_obj = self.pool.get('product.product')
+	# 	product = product_obj.browse(cr, uid, product_id)
+	# 	product_qty = product_uom_obj._compute_qty(cr, uid, product_uom, product_qty, product.product_tmpl_id.uom_po_id.id)
+	# 	return product_qty
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for id in ids:
@@ -195,7 +195,7 @@ class purchase_order_line(osv.osv):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
 	
-	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, discount_string, product_uom, product_id,context={}):
+	def onchange_order_line(self, cr, uid, ids, product_qty, price_unit, discount_string, context={}):
 		try:
 			valid_discount_string = discount_utility.validate_discount_string(
 				discount_string, price_unit, self._max_discount)
@@ -204,7 +204,7 @@ class purchase_order_line(osv.osv):
 		discounts = discount_utility.calculate_discount(valid_discount_string, price_unit, self._max_discount)
 		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
 						 discounts[6] + discounts[7]
-		qty = self._count_qty_with_uom(cr, uid, product_id, product_uom, product_qty)
+		qty = product_qty #
 		return {
 			'value': {
 				'price_unit_nett': price_unit - total_discount,
@@ -216,8 +216,8 @@ class purchase_order_line(osv.osv):
 			product_id, discount_from_subtotal, context={}):
 		result = self.onchange_order_line(cr, uid, ids, product_qty, price_unit,
 			discount_string, product_uom, product_id, context=context)
-	# Recount qty
-		product_qty = self._count_qty_with_uom(cr, uid, product_id, product_uom, product_qty)
+	# # Recount qty
+	# 	product_qty = self._count_qty_with_uom(cr, uid, product_id, product_uom, product_qty)
 	# Recount discount
 		discounts = discount_utility.calculate_discount(discount_string, price_unit, self._max_discount)
 		total_discount = discounts[0] + discounts[1] + discounts[2] + discounts[3] + discounts[4] + discounts[5] + \
@@ -241,12 +241,12 @@ class purchase_order_line(osv.osv):
 		})
 		return result
 	
-	def onchange_product_uom_purchases_sale_discount(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-			partner_id, discount_string,date_order=False, fiscal_position_id=False, date_planned=False,
-			name=False, price_unit=False, state='draft', discount_algorithm=False, context=None):
-		result = super(purchase_order_line, self).onchange_product_uom(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-			partner_id, date_order, fiscal_position_id, date_planned,
-			name, price_unit, state, context)
-		result['value'].update(self.onchange_order_line_count_discount(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id, discount_algorithm))
-		result = self.onchange_order_line_count_discount(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id, discount_algorithm)
-		return result
+	# def onchange_product_uom_purchases_sale_discount(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# 		partner_id, discount_string,date_order=False, fiscal_position_id=False, date_planned=False,
+	# 		name=False, price_unit=False, state='draft', discount_algorithm=False, context=None):
+	# 	result = super(purchase_order_line, self).onchange_product_uom(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# 		partner_id, date_order, fiscal_position_id, date_planned,
+	# 		name, price_unit, state, context)
+	# 	result['value'].update(self.onchange_order_line_count_discount(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id, discount_algorithm))
+	# 	result = self.onchange_order_line_count_discount(cr, uid, ids, qty, price_unit, discount_string, uom_id, product_id, discount_algorithm)
+	# 	return result
