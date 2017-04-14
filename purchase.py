@@ -215,7 +215,7 @@ class purchase_order_line(osv.osv):
 	def onchange_order_line_count_discount(self, cr, uid, ids, product_qty, price_unit, discount_string, product_uom,
 			product_id, discount_from_subtotal, context={}):
 		result = self.onchange_order_line(cr, uid, ids, product_qty, price_unit,
-			discount_string, product_uom, product_id, context=context)
+			discount_string, context=context)
 	# # Recount qty
 	# 	product_qty = self._count_qty_with_uom(cr, uid, product_id, product_uom, product_qty)
 	# Recount discount
