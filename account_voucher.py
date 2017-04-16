@@ -28,6 +28,8 @@ class account_voucher(osv.osv):
 			for partner_data in res_partner_obj.browse(cr, uid, account_voucher_data.partner_id.id):
 				if len(partner_data.bank_ids) > 0:
 					result[account_voucher_data.id] = partner_data.bank_ids[0].id
+				else:
+					result[account_voucher_data.id] = None
 		return result
 				
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
