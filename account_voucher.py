@@ -39,5 +39,5 @@ class account_voucher(osv.osv):
 			type='float', store=True),
 		'check_maturity_date': fields.date(string='Check Maturity Date',
 			readonly=True, states={'draft': [('readonly', False)]}),
-		'bank_id': fields.function(_bank_ids, string="Bank Account", type='many2one', relation="res.partner.bank", store=True),
+		'bank_id': fields.function(_bank_ids, string="Bank Account", type='many2one', relation="res.partner.bank"),
 	}
