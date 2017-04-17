@@ -60,8 +60,6 @@ class purchase_order(osv.osv):
 				invoice_obj.write(cr, uid, [invoice.id], {
 					'date_invoice': purchase_data.date_order,
 				})
-				invoice.signal_workflow('from_po')
-			# invoice_obj.signal_workflow(cr, uid, [invoice.id], 'invoice_open', context)
 		return new_id
 	
 	def picking_done(self, cr, uid, ids, context=None):
@@ -74,6 +72,18 @@ class purchase_order(osv.osv):
 		picking_obj = self.pool.get('stock.picking')
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
+	
+	def action_invoice_create(self, cr, uid, ids, context=None):
+		"""Overrides so that on creating invoice from confirming a PO, the invoice is set as open
+		:param ids: list of ids of purchase orders.
+		:return: ID of created invoice.
+		:rtype: int
+		"""
+		result = super(purchase_order, self).action_invoice_create(cr, uid, ids, context)
+		invoice_obj = self.pool.get('account.invoice')
+		for invoice in invoice_obj.browse(cr, uid, [result]):
+			invoice.signal_workflow('invoice_open')
+		return result
 
 # ==========================================================================================================================
 

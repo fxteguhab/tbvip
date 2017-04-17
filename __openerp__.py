@@ -33,7 +33,6 @@
 		'report/purchase_report.xml',
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
-		'workflows/invoice_workflow.xml',
 		'workflows/purchase_workflow.xml',
 	],
 	'demo': [
