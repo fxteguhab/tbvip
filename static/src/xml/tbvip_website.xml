@@ -78,11 +78,18 @@
 								</div>
 								<div class="col-xs-12 col-sm-3">
 									<t t-if="single_kontra['state'] == 'draft'">
-										<select id="journal_id" class="form-control" t-attf-selected="{{single_kontra['journal_id']}}">
+										<select id="journal_id" class="form-control">
 											<t t-foreach="journals" t-as="journal">
-												<option t-attf-value="{{journal.id}}">
-													<t t-esc="journal.name"/>
-												</option>
+												<t t-if="journal.id == single_kontra['journal_id']">
+													<option t-attf-value="{{journal.id}}" selected="selected">
+														<t t-esc="journal.name"/>
+													</option>
+												</t>
+												<t t-if="journal.id != single_kontra['journal_id']">
+													<option t-attf-value="{{journal.id}}">
+														<t t-esc="journal.name"/>
+													</option>
+												</t>
 											</t>
 										</select>
 									</t>

@@ -12,7 +12,7 @@
 		"base", "board", "web", "website",
 		"chjs_custom_view",
 		"account_accountant", "stock", "sale", "purchase", "fleet", "hr",
-		"purchase_needs", "purchase_sale_discount",
+		"purchase_needs", "purchase_sale_discount", "account_cancel",
 	],
 	'sequence': 150,
 	'data': [
@@ -28,13 +28,11 @@
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
 		'views/tbvip.xml',
-		'views/res_config_view.xml',
 		'report/account_report.xml',
 		'report/documents/account_voucher.xml',
 		'report/purchase_report.xml',
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
-		'workflows/invoice_workflow.xml',
 		'workflows/purchase_workflow.xml',
 	],
 	'demo': [
