@@ -14,18 +14,19 @@
 						<group col="4">
 							<group>
 								<field name="name"/>
-								<field name="move_from"/>
+								<field name="move_from_id"/>
 							</group>
 							<group>
 								<field name="usage_date"/>
-								<field name="usage_by"/>
+								<field name="usage_by_id"/>
 							</group>
 						</group>
-						<field name="bonus_usage_line">
+						<field name="bonus_usage_line_ids">
 							<tree editable="bottom">
-								<field name="product_id" on_change="onchange_product_id(product_id)" domain="[('is_sup_bonus', '=', True)]"/>
+								<field name="product_id" on_change="onchange_product_id(product_id)"
+										domain="[('is_sup_bonus', '=', True)]" options="{'no_create': 1}"/>
 								<field name="qty"/>
-								<field name="unit_of_measure" on_change="onchange_unit_of_measure(unit_of_measure, product_id)"/>
+								<field name="uom_id" on_change="onchange_uom_id(uom_id, product_id)"/>
 							</tree>
 						</field>
 					</sheet>
@@ -40,8 +41,8 @@
 				<tree>
 					<field name="name"/>
 					<field name="usage_date"/>
-					<field name="usage_by"/>
-					<field name="move_from"/>
+					<field name="usage_by_id"/>
+					<field name="move_from_id"/>
 				</tree>
 			</field>
 		</record>

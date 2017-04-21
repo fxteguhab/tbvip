@@ -27,9 +27,9 @@ class stock_bonus_usage(osv.osv):
 	_columns = {
 		'usage_date': fields.datetime('Usage Date', required=True),
 		'name': fields.char('Name', required=True),
-		'usage_by': fields.many2one('res.users', 'Usage By', required=True),
-		'move_from': fields.many2one('stock.location', 'Move From', required=True),
-		'bonus_usage_line': fields.one2many('stock.bonus.usage.line', 'bonus_usage_id', 'Usage'),
+		'usage_by_id': fields.many2one('res.users', 'Usage By', required=True),
+		'move_from_id': fields.many2one('stock.location', 'Move From', required=True),
+		'bonus_usage_line_ids': fields.one2many('stock.bonus.usage.line', 'bonus_usage_id', 'Usage'),
 		'state': fields.selection([
 			('draft','Draft'),
 			('approved','Approved'),
@@ -40,7 +40,7 @@ class stock_bonus_usage(osv.osv):
 	
 	_defaults = {
 		'usage_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
-		'usage_by': lambda self, cr, uid, ctx: uid,
+		'usage_by_id': lambda self, cr, uid, ctx: uid,
 		'state': 'draft',
 	}
 	
@@ -49,7 +49,7 @@ class stock_bonus_usage(osv.osv):
 	def _usage_line_min(self, cr, uid, ids, context=None):
 		# Cek bonus usage line harus ada minimal 1 baris
 		for bonus_usage in self.browse(cr, uid, ids, context):
-			if len(bonus_usage.bonus_usage_line) == 0:
+			if len(bonus_usage.bonus_usage_line_ids) == 0:
 				return False
 		return True
 	
@@ -58,31 +58,50 @@ class stock_bonus_usage(osv.osv):
 		quant_obj = self.pool["stock.quant"]
 		uom_obj = self.pool["product.uom"]
 		for bonus_usage in self.browse(cr, uid, ids, context):
-			for line in bonus_usage.bonus_usage_line:
-				domain = [('location_id', '=', bonus_usage.move_from.id), ('product_id','=', line.product_id.id)]
+			for line in bonus_usage.bonus_usage_line_ids:
+				domain = [('location_id', '=', bonus_usage.move_from_id.id), ('product_id','=', line.product_id.id)]
 				quant_ids = quant_obj.search(cr, uid, domain, context=context)
 				quants = quant_obj.browse(cr, uid, quant_ids, context=context)
 				tot_qty = sum([x.qty for x in quants])
-				if line.unit_of_measure and line.product_id.uom_id.id != line.unit_of_measure.id:
-					tot_qty = uom_obj._compute_qty_obj(cr, uid, line.product_id.uom_id, tot_qty, line.unit_of_measure, context=context)
+				if line.uom_id and line.product_id.uom_id.id != line.uom_id.id:
+					tot_qty = uom_obj._compute_qty_obj(cr, uid, line.product_id.uom_id, tot_qty, line.uom_id, context=context)
 				if tot_qty < line.qty:
 					return False
 		return True
 	
 	_constraints = [
-		(_usage_line_min, _('You must have at least one usage line.'), ['bonus_usage_line']),
-		(_move_from_min_qty, _('The location does not have that many product.'), ['move_from', 'bonus_usage_line']),
+		(_usage_line_min, _('You must have at least one usage line.'), ['bonus_usage_line_ids']),
+		(_move_from_min_qty, _('The location does not have that many product.'), ['move_from_id', 'bonus_usage_line_ids']),
 	]
 	
 	# ACTION ----------------------------------------------------------------------------------------------------------------
 	
 	def action_approve (self, cr, uid, ids, context=None):
-		return
+		move_obj = self.pool.get('stock.move')
+		model_obj = self.pool.get('ir.model.data')
+		model, location_bonus_usage_id = model_obj.get_object_reference(cr, uid, 'tbvip', 'stock_location_bonus_usage')
+		for bonus_usage in self.browse(cr, uid, ids, context=context):
+			for bonus_usage_line in bonus_usage.bonus_usage_line_ids:
+				if bonus_usage_line.qty < 0:
+					raise osv.except_osv(_('Warning'), _('You cannot set a negative product quantity in bonus usage line:\n\t%s - qty: %s' % (bonus_usage_line.product_id.name, bonus_usage_line.qty)))
+				vals = {
+					'name': bonus_usage.name,
+					'date': bonus_usage.usage_date,
+					'location_id': bonus_usage.move_from_id.id,
+					'location_dest_id': location_bonus_usage_id,
+					'product_id': bonus_usage_line.product_id.id,
+					'product_uom_qty': bonus_usage_line.qty,
+					'product_uom': bonus_usage_line.uom_id.id,
+					'product_tmpl_id': bonus_usage_line.product_id.product_tmpl_id.id,
+				}
+				new_move_id = move_obj.create(cr, uid, vals, context=context)
+				move_obj.action_done(cr, uid, new_move_id, context=context)
+			self.write(cr, uid, [bonus_usage.id], {'state': 'approved'}, context=context)
+		return True
 	
 	def action_reject (self, cr, uid, ids, context=None):
-		for bonus_usages in self.browse(cr, uid, ids, context):
-			for bonus_usage in bonus_usages:
-				bonus_usage.state = 'rejected'
+		for bonus_usage in self.browse(cr, uid, ids, context):
+			self.write(cr, uid, [bonus_usage.id], {'state': 'rejected'}, context=context)
 		return
 
 # ==========================================================================================================================
@@ -98,29 +117,29 @@ class stock_bonus_usage_line(osv.osv):
 		'bonus_usage_id': fields.many2one('stock.bonus.usage', 'Bonus Usage'),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Qty', required=True),
-		'unit_of_measure': fields.many2one('product.uom', 'Unit of Measure', required=True),
+		'uom_id': fields.many2one('product.uom', 'Unit of Measure', required=True),
 	}
 	
 	# ONCHANGE -----------------------------------------------------------------------------------------------------------------
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
-		# unit_of_measure hanya bisa uom_id product ybs
+		# uom_id hanya bisa uom_id product ybs
 		if not product_id: return {}
 		product_obj = self.pool.get('product.product')
 		res = {}
-		res['value'] = {'unit_of_measure': ''}
+		res['value'] = {'uom_id': ''}
 		for product_data in product_obj.browse(cr, uid, product_id):
-			res['domain'] = {'unit_of_measure': [('category_id','=', product_data.product_tmpl_id.uom_id.category_id.id)]}
+			res['domain'] = {'uom_id': [('category_id','=', product_data.product_tmpl_id.uom_id.category_id.id)]}
 		return res
 	
-	def onchange_unit_of_measure(self, cr, uid, ids, unit_of_measure, product_id, context=None):
-		# unit_of_measure hanya bisa uom_id product ybs
+	def onchange_uom_id(self, cr, uid, ids, uom_id, product_id, context=None):
+		# uom_id hanya bisa uom_id product ybs
 		if not product_id: return {}
 		product_obj = self.pool.get('product.product')
 		uom_obj = self.pool.get('product.uom')
 		res = {}
 		for product_data in product_obj.browse(cr, uid, product_id):
-			for uom_data in uom_obj.browse(cr, uid, unit_of_measure):
+			for uom_data in uom_obj.browse(cr, uid, uom_id):
 				if product_data.product_tmpl_id.uom_id.category_id.id != uom_data.category_id.id:
 					res = self.onchange_product_id(cr, uid, ids, product_id, context)
 					res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
