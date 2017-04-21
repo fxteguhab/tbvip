@@ -6,8 +6,8 @@
 			<field name="arch" type="xml">
 				<form string="Stock Bonus Usage" version="7.0">
 					<header>
-						<button name="action_approve" string="Approve" type="object" states="draft" confirm="Are you sure to approve this bonus usage?"/>
-						<button name="action_reject" class="oe_highlight" string="Reject" type="object" states="draft" confirm="Are you sure to reject this bonus usage?" />
+						<button name="action_approve" class="oe_highlight" string="Approve" type="object" states="draft" confirm="Are you sure to approve this bonus usage?"/>
+						<button name="action_reject" string="Reject" type="object" states="draft" confirm="Are you sure to reject this bonus usage?" />
 						<field name="state" widget="statusbar" readonly="1" />
 					</header>
 					<sheet>
@@ -23,9 +23,9 @@
 						</group>
 						<field name="bonus_usage_line">
 							<tree editable="bottom">
-								<field name="product_id" on_change="onchange_product_id(product_id)"/>
+								<field name="product_id" on_change="onchange_product_id(product_id)" domain="[('is_sup_bonus', '=', True)]"/>
 								<field name="qty"/>
-								<field name="unit_of_measure"/>
+								<field name="unit_of_measure" on_change="onchange_unit_of_measure(unit_of_measure, product_id)"/>
 							</tree>
 						</field>
 					</sheet>

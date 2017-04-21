@@ -71,7 +71,7 @@ class stock_bonus_usage(osv.osv):
 	
 	_constraints = [
 		(_usage_line_min, _('You must have at least one usage line.'), ['bonus_usage_line']),
-		(_move_from_min_qty, _('The location does not have that many product.'), ['move_from']),
+		(_move_from_min_qty, _('The location does not have that many product.'), ['move_from', 'bonus_usage_line']),
 	]
 	
 	# ACTION ----------------------------------------------------------------------------------------------------------------
@@ -111,6 +111,19 @@ class stock_bonus_usage_line(osv.osv):
 		res['value'] = {'unit_of_measure': ''}
 		for product_data in product_obj.browse(cr, uid, product_id):
 			res['domain'] = {'unit_of_measure': [('category_id','=', product_data.product_tmpl_id.uom_id.category_id.id)]}
+		return res
+	
+	def onchange_unit_of_measure(self, cr, uid, ids, unit_of_measure, product_id, context=None):
+		# unit_of_measure hanya bisa uom_id product ybs
+		if not product_id: return {}
+		product_obj = self.pool.get('product.product')
+		uom_obj = self.pool.get('product.uom')
+		res = {}
+		for product_data in product_obj.browse(cr, uid, product_id):
+			for uom_data in uom_obj.browse(cr, uid, unit_of_measure):
+				if product_data.product_tmpl_id.uom_id.category_id.id != uom_data.category_id.id:
+					res = self.onchange_product_id(cr, uid, ids, product_id, context)
+					res['warning'] = {'title': _('Warning!'), 'message': _('Selected Unit of Measure does not belong to the same category as the product Unit of Measure.')}
 		return res
 
 # ==========================================================================================================================
