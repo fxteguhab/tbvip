@@ -39,7 +39,7 @@ class stock_bonus_usage(osv.osv):
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
 	
 	_defaults = {
-		'request_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+		'usage_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'usage_by': lambda self, cr, uid, ctx: uid,
 		'state': 'draft',
 	}
@@ -48,13 +48,12 @@ class stock_bonus_usage(osv.osv):
 	
 	def _usage_line_min(self, cr, uid, ids, context=None):
 		# Cek bonus usage line harus ada minimal 1 baris
-		# for replace_vehicles in self.browse(cr, uid, ids, context):
-		# 	for replace_vehicle in replace_vehicles:
-		# 		if replace_vehicle.replaced_vehicle_id.model_id.id != replace_vehicle.replacement_vehicle_id.model_id.id:
-		# 			return False
+		for bonus_usages in self.browse(cr, uid, ids, context):
+			for bonus_usage in bonus_usages:
+				if len(bonus_usage.bonus_usage_line) == 0:
+					return False
 		return True
 	
-	# JUNED: tambahkan constraint di mana replacement vehicle tidak boleh sedang dipakai di kontrak aktif lainnya
 	_constraints = [
 		(_usage_line_min, _('You must have at least one usage line.'), ['bonus_usage_line']),
 	]
