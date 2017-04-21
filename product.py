@@ -46,6 +46,7 @@ class product_template(osv.osv):
 		'codex_id': fields.integer('MySQL Product ID'),
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
 			string="Last Purchase", relation="purchase.order.line"),
+		'type': fields.selection([('product', 'Stockable Product'), ('consu', 'Consumable'), ('service', 'Service'), ('sup_bonus', 'Supplier Bonus')], 'Product Type', required=True, help="Consumable: Will not imply stock management for this product. \nStockable product: Will imply stock management for this product."),
 	}
 	
 	def create(self, cr, uid, vals, context={}):
