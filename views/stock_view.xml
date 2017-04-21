@@ -23,9 +23,9 @@
 						</group>
 						<field name="bonus_usage_line">
 							<tree editable="bottom">
-								<field name="product_id" on_change="onchange_product_id(product_id)"/>
+								<field name="product_id" on_change="onchange_product_id(product_id)" domain="[('is_sup_bonus', '=', True)]"/>
 								<field name="qty"/>
-								<field name="unit_of_measure"/>
+								<field name="unit_of_measure" on_change="onchange_unit_of_measure(unit_of_measure, product_id)"/>
 							</tree>
 						</field>
 					</sheet>
