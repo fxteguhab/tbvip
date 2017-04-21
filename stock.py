@@ -64,6 +64,9 @@ class stock_bonus_usage(osv.osv):
 		return
 	
 	def action_reject (self, cr, uid, ids, context=None):
+		for bonus_usages in self.browse(cr, uid, ids, context):
+			for bonus_usage in bonus_usages:
+				bonus_usage.state = 'rejected'
 		return
 
 # ==========================================================================================================================
@@ -81,5 +84,17 @@ class stock_bonus_usage_line(osv.osv):
 		'qty': fields.float('Qty', required=True),
 		'unit_of_measure': fields.many2one('product.uom', 'Unit of Measure', required=True),
 	}
+	
+	# ONCHANGE -----------------------------------------------------------------------------------------------------------------
+	
+	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
+		# unit_of_measure hanya bisa uom_id product ybs
+		if not product_id: return {}
+		product_obj = self.pool.get('product.product')
+		res = {}
+		res['value'] = {'unit_of_measure': ''}
+		for product_data in product_obj.browse(cr, uid, product_id):
+			res['domain'] = {'unit_of_measure': [('category_id','=', product_data.product_tmpl_id.uom_id.category_id.id)]}
+		return res
 
 # ==========================================================================================================================

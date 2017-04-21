@@ -5,6 +5,11 @@
 			<field name="model">stock.bonus.usage</field>
 			<field name="arch" type="xml">
 				<form string="Stock Bonus Usage" version="7.0">
+					<header>
+						<button name="action_approve" string="Approve" type="object" states="draft" confirm="Are you sure to approve this bonus usage?"/>
+						<button name="action_reject" class="oe_highlight" string="Reject" type="object" states="draft" confirm="Are you sure to reject this bonus usage?" />
+						<field name="state" widget="statusbar" readonly="1" />
+					</header>
 					<sheet>
 						<group col="4">
 							<group>
@@ -18,7 +23,7 @@
 						</group>
 						<field name="bonus_usage_line">
 							<tree editable="bottom">
-								<field name="product_id"/>
+								<field name="product_id" on_change="onchange_product_id(product_id)"/>
 								<field name="qty"/>
 								<field name="unit_of_measure"/>
 							</tree>
