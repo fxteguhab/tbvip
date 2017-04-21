@@ -6,8 +6,8 @@
 			<field name="arch" type="xml">
 				<form string="Stock Bonus Usage" version="7.0">
 					<header>
-						<button name="action_approve" string="Approve" type="object" states="draft" confirm="Are you sure to approve this bonus usage?"/>
-						<button name="action_reject" class="oe_highlight" string="Reject" type="object" states="draft" confirm="Are you sure to reject this bonus usage?" />
+						<button name="action_approve" class="oe_highlight" string="Approve" type="object" states="draft" confirm="Are you sure to approve this bonus usage?"/>
+						<button name="action_reject" string="Reject" type="object" states="draft" confirm="Are you sure to reject this bonus usage?" />
 						<field name="state" widget="statusbar" readonly="1" />
 					</header>
 					<sheet>
