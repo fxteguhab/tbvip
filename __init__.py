@@ -1,5 +1,6 @@
 import product
 import res_partner
+import stock
 import hr
 import purchase
 import tbvip

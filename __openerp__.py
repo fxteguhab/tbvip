@@ -12,7 +12,7 @@
 		"base", "board", "web", "website",
 		"chjs_custom_view",
 		"account_accountant", "stock", "sale", "purchase", "fleet", "hr",
-		"purchase_needs", "purchase_sale_discount", "account_cancel",
+		"purchase_needs", "purchase_sale_discount", "account_cancel", "stock_opname"
 	],
 	'sequence': 150,
 	'data': [
@@ -33,6 +33,7 @@
 		'report/purchase_report.xml',
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
+		'menu/stock_menu.xml',
 		'workflows/purchase_workflow.xml',
 	],
 	'demo': [
