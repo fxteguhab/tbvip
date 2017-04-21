@@ -13,7 +13,7 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="domain">[('is_sup_bonus', '=', True)]</field>
-			<field name="context">{'default_is_sup_bonus': True}</field>
+			<field name="context">{'default_is_sup_bonus': True, 'default_type': 'product'}</field>
 		</record>
 
 		<menuitem sequence="2" id="menu_stock_bonus_usage" name="Stock Bonus Usage" parent="stock.menu_stock_root"/>

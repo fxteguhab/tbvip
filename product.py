@@ -22,7 +22,7 @@ class product_category(osv.osv):
 class product_template(osv.osv):
 	_inherit = 'product.template'
 	
-	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
+# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
 	
 	def _purchase_order_line_ids(self, cr, uid, ids, field_name, arg, context={}):
 		result = {}
@@ -40,7 +40,7 @@ class product_template(osv.osv):
 			result[data.id] = unique_supplier_order_line_ids
 		return result
 	
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'codex_id': fields.integer('MySQL Product ID'),
@@ -49,6 +49,12 @@ class product_template(osv.osv):
 		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
 	}
 	
+# DEFAULTS ----------------------------------------------------------------------------------------------------------------------
+	_defaults = {
+		'is_sup_bonus': False,
+	}
+	
+# OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(product_template, self).create(cr, uid, vals, context)
 		# waktu create product baru, samakan variant_codex_id anak-anaknya dengan codex_id parent
@@ -59,11 +65,8 @@ class product_template(osv.osv):
 				'variant_codex_id': new_data.codex_id,
 			})
 		return new_id
-		
-		
-	_defaults = {
-		'is_sup_bonus': False,
-	}
+	
+
 
 
 
