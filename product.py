@@ -59,6 +59,12 @@ class product_template(osv.osv):
 				'variant_codex_id': new_data.codex_id,
 			})
 		return new_id
+		
+		
+	_defaults = {
+		'is_sup_bonus': False,
+	}
+
 
 
 # ==========================================================================================================================

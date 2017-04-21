@@ -28,9 +28,8 @@
 			<field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
 			<field name="arch" type="xml">
 				<field name = "purchase_ok" position = "after">
-					<group>
-						<field name = "is_sup_bonus"/>
-					</group>
+					<label for="is_sup_bonus" string="Is Supplier Bonus"/> 
+					<field name= "is_sup_bonus" class="oe_inline"/> 
 				</field>
 			</field>
 		</record>
