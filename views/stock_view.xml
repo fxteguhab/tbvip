@@ -1,0 +1,44 @@
+<openerp>
+	<data>
+		<record id="stock_bonus_usage_form" model="ir.ui.view">
+			<field name="name">stock.bonus.usage.form</field>
+			<field name="model">stock.bonus.usage</field>
+			<field name="arch" type="xml">
+				<form string="Stock Bonus Usage" version="7.0">
+					<sheet>
+						<group col="4">
+							<group>
+								<field name="name"/>
+								<field name="move_from"/>
+							</group>
+							<group>
+								<field name="usage_date"/>
+								<field name="usage_by"/>
+							</group>
+						</group>
+						<field name="bonus_usage_line">
+							<tree editable="bottom">
+								<field name="product_id"/>
+								<field name="qty"/>
+								<field name="unit_of_measure"/>
+							</tree>
+						</field>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="stock_bonus_usage_tree" model="ir.ui.view">
+			<field name="name">stock.bonus.usage.tree</field>
+			<field name="model">stock.bonus.usage</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+					<field name="usage_date"/>
+					<field name="usage_by"/>
+					<field name="move_from"/>
+				</tree>
+			</field>
+		</record>
+	</data>
+</openerp>
