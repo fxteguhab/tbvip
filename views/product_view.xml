@@ -27,10 +27,10 @@
 			<field name="model">product.template</field>
 			<field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
 			<field name="arch" type="xml">
-				<field name = "purchase_ok" position = "after">
-					<label for="is_sup_bonus" string="Is Supplier Bonus"/> 
-					<field name= "is_sup_bonus" class="oe_inline"/> 
-				</field>
+				<label for = "purchase_ok" position = "after">
+					<field name= "is_sup_bonus" class="oe_inline"/>
+					<label for="is_sup_bonus" string="Is Supplier Bonus"/>
+				</label>
 			</field>
 		</record>
 		
