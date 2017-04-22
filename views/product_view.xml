@@ -22,15 +22,18 @@
 			</field>
 		</record>
 		
-		<record model="ir.ui.view" id="view_product_supplier_inherit_inherit">
-			<field name="name">purchase.product_supplier_inherit_inherit</field>
+		<record model="ir.ui.view" id="product_template_supplier_form_inherit">
+			<field name="name">product.template.supplier.form.inherit</field>
 			<field name="model">product.template</field>
-			<field name="inherit_id" ref="purchase.view_product_supplier_inherit"/>
+			<field name="priority">17</field>
+			<field name="inherit_id" ref="product.product_template_form_view"/>
 			<field name="arch" type="xml">
-				<label for = "purchase_ok" position = "after">
-					<field name= "is_sup_bonus" class="oe_inline"/>
-					<label for="is_sup_bonus" string="Is Supplier Bonus"/>
-				</label>
+				<div name="options" position="inside">
+					<div>
+						<field name="is_sup_bonus" class="oe_inline"/>
+						<label for="is_sup_bonus" string="Is Supplier Bonus"/>
+					</div>
+				</div>
 			</field>
 		</record>
 		
@@ -40,9 +43,9 @@
 			<field name="inherit_id" ref="product.product_template_search_view"/>
 			<field name="type">search</field>
 			<field name="arch" type="xml">
-				<search string="Product">
+				<filter name="consumable" position="after">
 					<filter string="Supplier Bonus" icon="terp-accessories-archiver" domain="[('is_sup_bonus','=',True)]"/>
-				</search>
+				</filter>
 			</field>
 		</record>
 	</data>
