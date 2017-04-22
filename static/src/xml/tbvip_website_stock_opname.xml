@@ -81,8 +81,13 @@
 										</tr>
 										<tr>
 											<td>Checked </td>
-											<td> : <t t-esc="stock_opname_line['product_qty']"/> </td>
-											<td> <t t-esc="stock_opname_line['product_uom_name']"/></td>
+											<t t-if="stock_opname['state'] == 'done'">
+												<td> : <t t-esc="stock_opname_line['product_qty']"/> </td>
+												<td> <t t-esc="stock_opname_line['product_uom_name']"/></td>
+											</t>
+											<t t-if="stock_opname['state'] != 'done'">
+												<td> : - </td>
+											</t>
 										</tr>
 									</table>
 								</div>
