@@ -12,8 +12,24 @@ class stock_location(osv.osv):
 	
 	_columns = {
 		'is_branch': fields.boolean('Is Branch?'),
-		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
+	
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		stock_location_id = super(stock_location, self).write(cr, uid, ids, vals, context)
+		stock_location_datas = self.browse(cr, uid, ids)
+		for stock_location_data in stock_location_datas:
+			if vals.has_key('is_branch'):
+				branch_obj = self.pool["tbvip.branch"]
+				if vals['is_branch']:
+					branch_id = branch_obj.create(cr, uid, {'name': stock_location_data.name}, context=context)
+					self.write(cr, uid, stock_location_data.id, {'branch_id': branch_id})
+				else:
+					branch_obj.unlink(cr, uid, stock_location_data.branch_id.id, context=context)
+				
+		return stock_location_id
 
 # ==========================================================================================================================
 

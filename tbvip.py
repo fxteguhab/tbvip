@@ -678,21 +678,32 @@ class tbvip_website_handler(osv.osv):
 		stock_inventory_datas = stock_inventory_obj.search(args)
 		result = []
 		for stock_inventory_data in stock_inventory_datas:
+			line_ids_data = [];
+			for line_data in stock_inventory_data.line_ids:
+				line_id_data = {}
+				line_id_data['product_name'] = line_data.product_id.name
+				line_id_data['location_name'] = line_data.location_id.name
+				line_id_data['product_qty'] = line_data.product_qty
+				line_id_data['theoretical_qty'] = line_data.theoretical_qty
+				line_id_data['product_uom_name'] = line_data.product_uom_id.name
+				line_ids_data.append(line_id_data);
 			record = {
 				'id': stock_inventory_data.id,
 				'state': stock_inventory_data.state,
 				'employee_name': stock_inventory_data.employee_id.name,
+				'location_name': stock_inventory_data.location_id.name,
 				'date': self._format_datetime(stock_inventory_data.date),
+				'line_ids': line_ids_data
 			}
 			result.append(record)
 		return result
 	
 	def _stock_opname_pool_branch(self, domain):
 		args = []
-		location_id = domain.get('branch', '').strip()
-		location_id = location_id.encode('ascii', 'ignore')
-		if location_id.isdigit():
-			args.append(['location_id.id', '=', location_id])
+		branch_id = domain.get('branch', '').strip()
+		branch_id = branch_id.encode('ascii', 'ignore')
+		if branch_id.isdigit():
+			args.append(['location_id.branch_id.id', '=', branch_id])
 		return args
 		
 	def _stock_opname_pool_state(self, domain):
@@ -705,13 +716,15 @@ class tbvip_website_handler(osv.osv):
 	def _stock_opname_pool_employee(self, domain):
 		args = []
 		employee_name = domain.get('employee', '').strip()
-		args.append(['employee_id.name', 'ilike', employee_name])
+		if employee_name:
+			args.append(['employee_id.name', 'ilike', employee_name])
 		return args
 	
 	def _stock_opname_pool_product(self, domain):
 		args = []
 		product_name = domain.get('product', '').strip()
-		args.append(['line_ids.product_id.name', 'ilike', product_name])
+		if product_name:
+			args.append(['line_ids.product_id.name', 'ilike', product_name])
 		return args
 		
 	# def load_kontra_bon(self, env, domain, context={}):
