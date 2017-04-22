@@ -1,7 +1,7 @@
 <openerp>
 	<data>
 		<record id="stock_action_stock_bonus_usage" model="ir.actions.act_window">
-			<field name="name">Stock Bonus Usage</field>
+			<field name="name">Bonus Product Usage</field>
 			<field name="res_model">stock.bonus.usage</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
@@ -16,10 +16,8 @@
 			<field name="context">{'default_is_sup_bonus': True, 'default_type': 'product'}</field>
 		</record>
 
-		<menuitem sequence="2" id="menu_stock_bonus_usage" name="Stock Bonus Usage" parent="stock.menu_stock_root"/>
-			<menuitem sequence="11" id="stock_menu_stock_bonus_usage" name="Stock Bonus Usage"
-					parent="menu_stock_bonus_usage" action="stock_action_stock_bonus_usage"/>
-		
+		<menuitem sequence="11" id="stock_menu_stock_bonus_usage" name="Bonus Product Usage"
+				parent="stock.menu_stock_inventory_control" action="stock_action_stock_bonus_usage"/>
 		<menuitem sequence="0" id="stock_opname_menu_product_supplier_bonus" name="Products Supplier Bonus" 
 				parent="stock.menu_stock_product" action="stock_action_product_supplier_bonus"/>
 		
