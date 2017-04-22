@@ -11,7 +11,7 @@
 			</xpath>
 		</template>
 
-		<template id="website_tbvip_list_with_filter" name="Kontra Bon">
+		<template id="website_tbvip_list_with_filter">
 			<t t-call="website.layout">
 				<div t-att-id="container_id">
 					<div class="container">

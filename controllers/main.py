@@ -5,6 +5,9 @@ from openerp.http import request
 from openerp.tools.translate import _
 
 class website_tbvip(http.Controller):
+	
+# KONTRA BON ----------------------------------------------------------------------------------------------------------------
+
 	@http.route('/tbvip/kontra_bon', type='http', auth="user", website=True)
 	def purchase_kontra_bon(self, **kwargs):
 		env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
@@ -94,3 +97,58 @@ class website_tbvip(http.Controller):
 				'success' : False,
 			}
 		return json.dumps(response)
+
+
+# STOCK OPNAME INJECT -------------------------------------------------------------------------------------------------------
+
+	@http.route('/tbvip/stock_opname', type='http', auth="user", website=True)
+	def stock_opname_inject(self, **kwargs):
+		env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
+		uid = env.uid
+		return request.render("tbvip.website_tbvip_list_with_filter", {
+			'page_title': 'Stock Opname',
+			'container_id': 'stock_opname_wrap',
+		})
+
+	@http.route('/tbvip/stock_opname/fetch_branches', type='http', auth="user", website=True)
+	def stock_opname_fetch_branches(self, **kwargs):
+		tbvip_branch = http.request.env['tbvip.branch']
+		result = [];
+		for record in tbvip_branch.search([]):
+			result.append({
+				'id': record.id,
+				'name': record.name,
+			});
+		result = sorted(result, key=lambda branch: branch['name'])
+		return json.dumps(result)
+
+	@http.route('/tbvip/stock_opname/fetch_data/<string:filters>', type='http',
+		auth="user", website=True)
+	def stock_opname_fetch_data(self, filters, **kwargs):
+		filters = json.loads(filters)
+		branch = filters.get('branch', None)
+		state = filters.get('state', None)
+		employee = filters.get('employee', None)
+		product = filters.get('product', None)
+	# set filter pencarian voucher
+		domain = {
+			'branch': branch,
+			'state': state,
+			'employee': employee,
+			'product': product,
+		}
+		handler_obj = http.request.env['tbvip.website.handler']
+		result = handler_obj.load_stock_opname(domain)
+	# return hasilnya
+		if len(result) == 0:
+			response = {
+				'status': 'ok',
+				'info': _('The search returns no result.')
+			}
+		else:
+			response = {
+				'status': 'ok',
+				'data': result,
+			}
+		res = json.dumps(response)
+		return res

@@ -558,6 +558,20 @@ class tbvip_website_handler(osv.osv):
 	_description = 'Model for handling website-based requests'
 	_auto = False
 	
+	def _format_date(self, date_string):
+		if date_string:
+			return datetime.strptime(date_string, '%Y-%m-%d').strftime('%d-%m-%Y')
+		else:
+			return '-'
+	
+	def _format_datetime(self, date_string):
+		if date_string:
+			return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').strftime('%d-%m-%Y %H:%M:%S')
+		else:
+			return '-'
+		
+	# KONTRA BON ------------------------------------------------------------------------------------------------------------
+	
 	def load_kontra_bon(self, domain, context={}):
 		args = []
 	# Pool domains
@@ -606,12 +620,6 @@ class tbvip_website_handler(osv.osv):
 			result.append(record)
 		return result
 	
-	def _format_date(self, date_string):
-		if date_string:
-			return datetime.strptime(date_string, '%Y-%m-%d').strftime('%d-%m-%Y')
-		else:
-			return '-'
-	
 	def _kontra_bon_pool_supplier(self, domain):
 		args = []
 		supplier = domain.get('supplier', '').strip()
@@ -655,6 +663,56 @@ class tbvip_website_handler(osv.osv):
 		account_voucher = self.env['account.voucher']
 		vouchers = account_voucher.search([('id', '=', domain.get('id', ''))])
 		return vouchers.write(domain)
+	
+# STOCK OPNAME --------------------------------------------------------------------------------------------------------------
+	
+	def load_stock_opname(self, domain, context={}):
+		args = []
+		# Pool domains
+		args.extend(self._stock_opname_pool_branch(domain))
+		args.extend(self._stock_opname_pool_state(domain))
+		args.extend(self._stock_opname_pool_employee(domain))
+		args.extend(self._stock_opname_pool_product(domain))
+		
+		stock_inventory_obj = self.env['stock.inventory']
+		stock_inventory_datas = stock_inventory_obj.search(args)
+		result = []
+		for stock_inventory_data in stock_inventory_datas:
+			record = {
+				'id': stock_inventory_data.id,
+				'state': stock_inventory_data.state,
+				'employee_name': stock_inventory_data.employee_id.name,
+				'date': self._format_datetime(stock_inventory_data.date),
+			}
+			result.append(record)
+		return result
+	
+	def _stock_opname_pool_branch(self, domain):
+		args = []
+		location_id = domain.get('branch', '').strip()
+		location_id = location_id.encode('ascii', 'ignore')
+		if location_id.isdigit():
+			args.append(['location_id.id', '=', location_id])
+		return args
+		
+	def _stock_opname_pool_state(self, domain):
+		args = []
+		state = domain.get('state', '').strip()
+		if state != 'all':
+			args.append(['state', '=', state])
+		return args
+	
+	def _stock_opname_pool_employee(self, domain):
+		args = []
+		employee_name = domain.get('employee', '').strip()
+		args.append(['employee_id.name', 'ilike', employee_name])
+		return args
+	
+	def _stock_opname_pool_product(self, domain):
+		args = []
+		product_name = domain.get('product', '').strip()
+		args.append(['line_ids.product_id.name', 'ilike', product_name])
+		return args
 		
 	# def load_kontra_bon(self, env, domain, context={}):
 	# 	uid = env.uid

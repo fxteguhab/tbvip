@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+	<t t-name="website_tbvip_stock_opname_filter">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="branch">Branch</label>
+					<select id="branch" class="form-control">
+						<option value="all">[All Branch]</option>
+						<t t-foreach="branches" t-as="branch">
+							<option t-attf-value="{{branch.id}}"><t t-esc="branch.name"/></option>
+						</t>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="state">State</label>
+					<select id="state" class="form-control">
+						<option value="all">[All status]</option>
+						<option value="draft">Draft</option>
+						<option value="cancel">Cancelled</option>
+						<option value="confirm">In Progress</option>
+						<option value="done">Validated</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="employee">Employee</label>
+					<input type="text" id="employee" class="form-control">
+					</input>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="product">Product</label>
+					<input type="text" id="product" class="form-control">
+					</input>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-1 form-group">
+				<button type="button" id="btn_filter" class="btn btn-primary">Filter</button>
+			</div>
+		</div>
+	</t>
+
+	<t t-name="website_tbvip_stock_opname_list">
+		<div class="website_list_container">
+			<t t-foreach="stock_opname_list" t-as="stock_opname">
+				<div class="row row_hoverable stock_opname accordion">
+					<div class="col-md-6">
+						<t t-esc="stock_opname['date']"/> - <b><t t-esc="stock_opname['employee_name']"/></b>
+						<t t-esc="stock_opname['state']"/>
+					</div>
+				</div>
+			</t>
+		</div>
+	</t>
+
+</templates>
