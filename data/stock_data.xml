@@ -1,0 +1,7 @@
+<openerp>
+	<data>
+		<record model="stock.location" id="stock_location_bonus_usage">
+			<field name="name">Bonus Usage</field>
+		</record>
+	</data>
+</openerp>
