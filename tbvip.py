@@ -726,7 +726,19 @@ class tbvip_website_handler(osv.osv):
 		if product_name:
 			args.append(['line_ids.product_id.name', 'ilike', product_name])
 		return args
-		
+	
+	def create_so_inject(self, domain, context={}):
+		stock_opname_inject = self.env['stock.opname.inject']
+		product_obj = self.env['product.product']
+		product_id = product_obj.search([('name', '=ilike', domain.get('product_name', ''))])
+		if len(product_id):
+			priority = domain.get('priority', '').strip()
+			priority = priority.encode('ascii', 'ignore')
+			return stock_opname_inject.create({
+				'product_id': product_id.id,
+				'priority': int(priority)
+			})
+		return
 	# def load_kontra_bon(self, env, domain, context={}):
 	# 	uid = env.uid
 	#
