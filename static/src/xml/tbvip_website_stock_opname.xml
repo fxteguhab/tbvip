@@ -123,17 +123,19 @@
 									<table>
 										<tr>
 											<td>Theoretical </td>
-											<td> : <t t-esc="stock_opname_line['theoretical_qty']"/> </td>
-											<td> <t t-esc="stock_opname_line['product_uom_name']"/></td>
+											<td>:</td>
+											<td style="padding-left:5px; text-align:right;"><t t-esc="stock_opname_line['theoretical_qty']"/> </td>
+											<td style="padding-left:3px;"><t t-esc="stock_opname_line['product_uom_name']"/></td>
 										</tr>
 										<tr>
 											<td>Checked </td>
+											<td>:</td>
 											<t t-if="stock_opname['state'] == 'done'">
-												<td> : <t t-esc="stock_opname_line['product_qty']"/> </td>
-												<td> <t t-esc="stock_opname_line['product_uom_name']"/></td>
+												<td style="padding-left:5px; text-align:right;"><t t-esc="stock_opname_line['product_qty']"/> </td>
+												<td style="padding-left:3px;"><t t-esc="stock_opname_line['product_uom_name']"/></td>
 											</t>
 											<t t-if="stock_opname['state'] != 'done'">
-												<td> : - </td>
+												<td style="padding-left:5px">-</td>
 											</t>
 										</tr>
 									</table>
