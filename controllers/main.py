@@ -179,7 +179,7 @@ class website_tbvip(http.Controller):
 		else:
 			response = {
 				'status': 'ok',
-				'info': _('Save Failed. No product with that name exist'),
+				'info': _('Save Failed. No stockable product with that name exist'),
 				'success' : False,
 			}
 		return json.dumps(response)

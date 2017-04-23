@@ -730,7 +730,10 @@ class tbvip_website_handler(osv.osv):
 	def create_so_inject(self, domain, context={}):
 		stock_opname_inject = self.env['stock.opname.inject']
 		product_obj = self.env['product.product']
-		product_id = product_obj.search([('name', '=ilike', domain.get('product_name', ''))])
+		product_id = product_obj.search([
+			('name', '=ilike', domain.get('product_name', '')),
+			('type', '=', 'product')
+		])
 		if len(product_id):
 			priority = domain.get('priority', '').strip()
 			priority = priority.encode('ascii', 'ignore')
