@@ -166,10 +166,13 @@ $(document).ready(function () {
 
 			function so_inject_get_data() {
 				$.get('/tbvip/stock_opname/fetch_so_inject', null, function(data){
+					var data_parsed = JSON.parse(data)
 					$("#so_inject_list_container", stock_opname).html(qweb.render('website_tbvip_so_inject_list',{
-						'so_inject_list': JSON.parse(data)
+						'so_inject_list': JSON.parse(data_parsed['so_inject_list'])
 					}));
-					$("#so_inject_input_container", stock_opname).html(qweb.render('website_tbvip_so_inject_input'));
+					$("#so_inject_input_container", stock_opname).html(qweb.render('website_tbvip_so_inject_input',{
+						'products': JSON.parse(data_parsed['products']),
+					}));
 				});
 			}
 
