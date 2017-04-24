@@ -205,12 +205,9 @@ $(document).ready(function () {
 				});
 			}
 
-			$.get('/tbvip/stock_opname/fetch_so_data', null, function(data){
-				var data_parsed = JSON.parse(data)
+			$.get('/tbvip/stock_opname/fetch_branches', null, function(data){
 				$("#so_filter_container", stock_opname).html(qweb.render('website_tbvip_stock_opname_filter',{
-					'branches': JSON.parse(data_parsed['branches']),
-					'employees': JSON.parse(data_parsed['employees']),
-					'products': JSON.parse(data_parsed['products']),
+					'branches': JSON.parse(data)
 				}));
 			});
 			so_inject_get_data()

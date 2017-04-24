@@ -111,41 +111,16 @@ class website_tbvip(http.Controller):
 			'container_id': 'stock_opname_wrap',
 		})
 
-	@http.route('/tbvip/stock_opname/fetch_so_data', type='http', auth="user", website=True)
-	def stock_opname_fetch_so_data(self, **kwargs):
+	@http.route('/tbvip/stock_opname/fetch_branches', type='http', auth="user", website=True)
+	def stock_opname_fetch_branches(self, **kwargs):
 		tbvip_branch = http.request.env['tbvip.branch']
-		employee = http.request.env['hr.employee']
-		product = http.request.env['product.product']
-		
-		branch_result = []
+		result = []
 		for record in tbvip_branch.search([]):
-			branch_result.append({
+			result.append({
 				'id': record.id,
 				'name': record.name,
 			})
-		branch_result = sorted(branch_result, key=lambda branch: branch['name'])
-		
-		employee_result = []
-		for record in employee.search([]):
-			employee_result.append({
-				'id': record.id,
-				'name': record.name,
-			})
-		employee_result = sorted(employee_result, key=lambda employee: employee['name'])
-		
-		product_result = []
-		for record in product.search([('type', '=', 'product')]):
-			product_result.append({
-				'id': record.id,
-				'name': record.name,
-			})
-		product_result = sorted(product_result, key=lambda product: product['name'])
-		
-		result = {
-			'branches': json.dumps(branch_result),
-			'employees': json.dumps(employee_result),
-			'products': json.dumps(product_result),
-		}
+		result = sorted(result, key=lambda branch: branch['name'])
 		return json.dumps(result)
 
 	@http.route('/tbvip/stock_opname/fetch_data/<string:filters>', type='http',

@@ -76,23 +76,15 @@
 			<div class="col-md-6">
 				<div class="form-group">
 					<label for="so_employee">Employee</label>
-					<select id="so_employee" class="form-control">
-						<option value="all">[All Employee]</option>
-						<t t-foreach="employees" t-as="employee">
-							<option t-attf-value="{{employee.id}}"><t t-esc="employee.name"/></option>
-						</t>
-					</select>
+					<input type="text" id="so_employee" class="form-control">
+					</input>
 				</div>
 			</div>
 			<div class="col-md-6">
 				<div class="form-group">
 					<label for="so_product">Product</label>
-					<select id="so_product" class="form-control">
-						<option value="all">[All Product]</option>
-						<t t-foreach="products" t-as="product">
-							<option t-attf-value="{{product.id}}"><t t-esc="product.name"/></option>
-						</t>
-					</select>
+					<input type="text" id="so_product" class="form-control">
+					</input>
 				</div>
 			</div>
 		</div>
