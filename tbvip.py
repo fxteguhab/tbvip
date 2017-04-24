@@ -715,16 +715,16 @@ class tbvip_website_handler(osv.osv):
 	
 	def _stock_opname_pool_employee(self, domain):
 		args = []
-		employee_id = domain.get('employee', '').strip()
-		if employee_id.isdigit():
-			args.append(['employee_id.id', '=', employee_id])
+		employee_name = domain.get('employee', '').strip()
+		if employee_name.isdigit():
+			args.append(['employee_id.name', 'ilike', employee_name])
 		return args
 	
 	def _stock_opname_pool_product(self, domain):
 		args = []
-		product_id = domain.get('product', '').strip()
-		if product_id.isdigit():
-			args.append(['line_ids.product_id.id', '=', product_id])
+		product_name = domain.get('product', '').strip()
+		if product_name.isdigit():
+			args.append(['line_ids.product_id.name', 'ilike', product_name])
 		return args
 	
 	def create_so_inject(self, domain, context={}):
