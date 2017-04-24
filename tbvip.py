@@ -716,14 +716,14 @@ class tbvip_website_handler(osv.osv):
 	def _stock_opname_pool_employee(self, domain):
 		args = []
 		employee_name = domain.get('employee', '').strip()
-		if employee_name.isdigit():
+		if employee_name:
 			args.append(['employee_id.name', 'ilike', employee_name])
 		return args
 	
 	def _stock_opname_pool_product(self, domain):
 		args = []
 		product_name = domain.get('product', '').strip()
-		if product_name.isdigit():
+		if product_name:
 			args.append(['line_ids.product_id.name', 'ilike', product_name])
 		return args
 	

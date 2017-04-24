@@ -6,12 +6,8 @@
 			<div class="col-md-6">
 				<div class="form-group">
 					<label for="product">Product</label>
-					<select id="product" class="form-control">
-						<option value="all">[All Product]</option>
-						<t t-foreach="products" t-as="product">
-							<option t-attf-value="{{product.id}}"><t t-esc="product.name"/></option>
-						</t>
-					</select>
+					<input type="text" id="product" class="form-control">
+					</input>
 				</div>
 			</div>
 			<div class="col-md-5">

@@ -182,27 +182,13 @@ class website_tbvip(http.Controller):
 	@http.route('/tbvip/stock_opname/fetch_so_inject', type='http', auth="user", website=True)
 	def stock_opname_fetch_so_inject(self, **kwargs):
 		stock_opname_inject = http.request.env['stock.opname.inject']
-		so_inject_result = []
+		result = []
 		for record in stock_opname_inject.search([]):
-			so_inject_result.append({
+			result.append({
 				'product_name': record.product_id.name,
 				'priority': record.priority,
 			})
-		so_inject_result = sorted(so_inject_result, key=lambda branch: branch['priority'])
-		
-		product = http.request.env['product.product']
-		product_result = []
-		for record in product.search([('type', '=', 'product')]):
-			product_result.append({
-				'id': record.id,
-				'name': record.name,
-			})
-		product_result = sorted(product_result, key=lambda employee: employee['name'])
-		
-		result = {
-			'so_inject_list': json.dumps(so_inject_result),
-			'products': json.dumps(product_result),
-		}
+		result = sorted(result, key=lambda branch: branch['priority'])
 		return json.dumps(result)
 
 	@http.route('/tbvip/stock_opname/create_so_inject/<string:data>', type='http', auth="user", website=True)
