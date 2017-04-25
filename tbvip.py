@@ -700,10 +700,10 @@ class tbvip_website_handler(osv.osv):
 	
 	def _stock_opname_pool_branch(self, domain):
 		args = []
-		branch_id = domain.get('branch', '').strip()
-		branch_id = branch_id.encode('ascii', 'ignore')
-		if branch_id.isdigit():
-			args.append(['location_id.branch_id.id', '=', branch_id])
+		location_id = domain.get('branch', '').strip()
+		location_id = location_id.encode('ascii', 'ignore')
+		if location_id.isdigit():
+			args.append(['location_id.id', '=', location_id])
 		return args
 		
 	def _stock_opname_pool_state(self, domain):

@@ -113,9 +113,9 @@ class website_tbvip(http.Controller):
 
 	@http.route('/tbvip/stock_opname/fetch_branches', type='http', auth="user", website=True)
 	def stock_opname_fetch_branches(self, **kwargs):
-		tbvip_branch = http.request.env['tbvip.branch']
+		stock_location = http.request.env['stock.location']
 		result = []
-		for record in tbvip_branch.search([]):
+		for record in stock_location.search([('is_branch', '=', True)]):
 			result.append({
 				'id': record.id,
 				'name': record.name,

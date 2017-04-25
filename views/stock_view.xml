@@ -54,7 +54,21 @@
 			<field name="arch" type="xml">
 				<field name="partner_id" position="before">
 					<field name="is_branch"/>
-					<field name="branch_id" attrs="{'invisible': [('is_branch', '=', True)], 'required': [('is_branch', '!=', True)]}"/>
+					<field name="branch_id"/>
+				</field>
+				<field name="location_id" position="replace">
+					<field name="location_id" domain="[('is_branch', '=', True)]"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="stock_opname_memory_form_inherit">
+			<field name="name">stock.opname.memory.form.inherit</field>
+			<field name="model">stock.opname.memory</field>
+			<field name="inherit_id" ref="stock_opname.stock_opname_memory_form"/>
+			<field name="arch" type="xml">
+				<field name="location_id" position="replace">
+					<field name="location_id" domain="[('is_branch', '=', True)]" on_change="onchange_location_id(location_id, rule_id)"/>
 				</field>
 			</field>
 		</record>

@@ -12,7 +12,7 @@ class stock_location(osv.osv):
 	
 	_columns = {
 		'is_branch': fields.boolean('Is Branch?'),
-		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
