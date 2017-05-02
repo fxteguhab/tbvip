@@ -2,9 +2,10 @@ $(document).ready(function () {
 	
 	var instance = openerp;
 	var qweb = openerp.qweb;
-	qweb.add_template('/tbvip/static/src/xml/tbvip_website.xml');
+	qweb.add_template('/tbvip/static/src/xml/tbvip_website_kontra_bon.xml');
+	qweb.add_template('/tbvip/static/src/xml/tbvip_website_stock_opname.xml');
 
-//PAGE: kontra bon
+//PAGE: KONTRA BON-----------------------------------------------------------------------------------------------------------
 
 	var kontra_bon_list = [];
 
@@ -123,5 +124,112 @@ $(document).ready(function () {
 			kontra_bon_cancel($(this));
 		});
 	});
+
+
+//PAGE: STOCK OPNAME---------------------------------------------------------------------------------------------------------
+
+		var stock_opname_list = [];
+
+		$('#stock_opname_wrap').each(function () {
+
+			var stock_opname = this;
+
+			function stock_opname_get_data() {
+				$("#so_message_container").empty();
+				var filters = JSON.stringify({
+					'branch': $("#so_branch").val(),
+					'state': $("#so_state").val(),
+					'employee': $("#so_employee").val(),
+					'product': $("#so_product").val(),
+				});
+				$.ajax({
+					dataType: "json",
+					url: '/tbvip/stock_opname/fetch_data/'+filters,
+					method: 'POST',
+					success: function(response) {
+						var container = $("#so_message_container");
+						if (response.error) {
+							MessageDialog.display(container, response.error, "error", 0);
+							return;
+						}
+						if (response.info) {
+							MessageDialog.display(container, response.info, "info");
+							return;
+						}
+						$.each(response.data, function(key, value) {
+							stock_opname_list[value.id] = value;
+						});
+						stock_opname_display_list(response.data);
+					},
+				});
+			}
+
+			function so_inject_get_data() {
+				$.get('/tbvip/stock_opname/fetch_so_inject', null, function(data){
+					$("#so_inject_list_container", stock_opname).html(qweb.render('website_tbvip_so_inject_list',{
+						'so_inject_list': JSON.parse(data)
+					}));
+					$("#so_inject_input_container", stock_opname).html(qweb.render('website_tbvip_so_inject_input'));
+				});
+			}
+
+			function stock_opname_display_list(data) {
+				$("#so_list_container", stock_opname).html(qweb.render('website_tbvip_stock_opname_list',{
+					'stock_opname_list': data,
+				}));
+			}
+
+			function so_inject_save(save_button) {
+				Loading.show($('body'));
+				var parent_div = save_button.parent().parent();
+				var product_name = parent_div.parent().find("#product").val();
+				var priority = parent_div.parent().find("#priority").val();
+				var json_string = JSON.stringify({
+					'product_name': product_name,
+					'priority': priority,
+				});
+				$.ajax({
+					dataType: "json",
+					url: '/tbvip/stock_opname/create_so_inject/'+json_string,
+					method: 'POST',
+					success: function(response) {
+						alert(response.info);
+						if(response.success){
+							so_inject_get_data();
+							if ($(".accordion_so_inject_list").hasClass("active")) {
+								$(".accordion_so_inject_list").click();
+							}
+						}
+						Loading.hide();
+					},
+				});
+			}
+
+			$.get('/tbvip/stock_opname/fetch_branches', null, function(data){
+				$("#so_filter_container", stock_opname).html(qweb.render('website_tbvip_stock_opname_filter',{
+					'branches': JSON.parse(data)
+				}));
+			});
+			so_inject_get_data()
+
+		//handle event di semua kemungkinan div yang muncul
+			$(stock_opname).on("click", "#so_btn_filter", function () {
+				stock_opname_get_data();
+			});
+
+			$(stock_opname).on("click", "#so_inject_btn_save", function () {
+				so_inject_save($(this));
+			});
+
+			$(stock_opname).on("click", ".accordion", function () {
+				$(this).toggleClass("active");
+				var detail = $(this).next();
+				if (detail.css("maxHeight") != "0px"){
+					detail.css("maxHeight", "0px");
+				} else {
+					detail.css("maxHeight", detail.prop("scrollHeight")+ "px");
+				}
+			});
+		});
 });
 

@@ -1,0 +1,73 @@
+<openerp>
+	<data>
+		<record id="stock_bonus_usage_form" model="ir.ui.view">
+			<field name="name">stock.bonus.usage.form</field>
+			<field name="model">stock.bonus.usage</field>
+			<field name="arch" type="xml">
+				<form string="Stock Bonus Usage" version="7.0">
+					<header>
+						<button name="action_approve" class="oe_highlight" string="Approve" type="object" states="draft" confirm="Are you sure to approve this bonus usage?"/>
+						<button name="action_reject" string="Reject" type="object" states="draft" confirm="Are you sure to reject this bonus usage?" />
+						<field name="state" widget="statusbar" readonly="1" />
+					</header>
+					<sheet>
+						<group col="4">
+							<group>
+								<field name="name"/>
+								<field name="move_from_id"/>
+							</group>
+							<group>
+								<field name="usage_date"/>
+								<field name="usage_by_id"/>
+							</group>
+						</group>
+						<field name="bonus_usage_line_ids">
+							<tree editable="bottom">
+								<field name="product_id" on_change="onchange_product_id(product_id)"
+										domain="[('is_sup_bonus', '=', True)]" options="{'no_create': 1}"/>
+								<field name="qty"/>
+								<field name="uom_id" on_change="onchange_uom_id(uom_id, product_id)"/>
+							</tree>
+						</field>
+					</sheet>
+				</form>
+			</field>
+		</record>
+
+		<record id="stock_bonus_usage_tree" model="ir.ui.view">
+			<field name="name">stock.bonus.usage.tree</field>
+			<field name="model">stock.bonus.usage</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+					<field name="usage_date"/>
+					<field name="usage_by_id"/>
+					<field name="move_from_id"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="stock_location_form_inherit">
+			<field name="name">stock.location.form.inherit</field>
+			<field name="model">stock.location</field>
+			<field name="inherit_id" ref="stock.view_location_form"/>
+			<field name="arch" type="xml">
+				<field name="partner_id" position="before">
+					<field name="is_branch"/>
+					<field name="branch_id" attrs="{'required': [('is_branch','=',True)], 'invisible': [('is_branch','!=',True)]}" />
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="stock_opname_memory_form_inherit">
+			<field name="name">stock.opname.memory.form.inherit</field>
+			<field name="model">stock.opname.memory</field>
+			<field name="inherit_id" ref="stock_opname.stock_opname_memory_form"/>
+			<field name="arch" type="xml">
+				<field name="location_id" position="replace">
+					<field name="location_id" domain="[('is_branch', '=', True)]" on_change="onchange_location_id(location_id, rule_id)"/>
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>
