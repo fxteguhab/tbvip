@@ -184,6 +184,7 @@ class website_tbvip(http.Controller):
 	@http.route('/tbvip/stock_opname/create_so_inject/<string:data>', type='http', auth="user", website=True)
 	def stock_opname_so_inject_create(self, data, **kwargs):
 		handler_obj = http.request.env['tbvip.website.handler']
+		print json.loads(data)
 		result = handler_obj.create_so_inject(json.loads(data))
 		if result == 'no_product':
 			response = {

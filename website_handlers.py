@@ -183,10 +183,11 @@ class tbvip_website_handler(osv.osv):
 		return args
 	
 	def create_so_inject(self, domain, context={}):
+		product_name = domain.get('product_name','').replace('|||','/')
 		stock_opname_inject = self.env['stock.opname.inject']
 		product_obj = self.env['product.product']
 		product_ids = product_obj.search([
-			('name', '=ilike', domain.get('product_name', '')),
+			('name', '=ilike', product_name),
 			('type', '=', 'product')
 		])
 		if len(product_ids) > 0:

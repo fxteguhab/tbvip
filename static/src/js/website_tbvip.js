@@ -187,7 +187,7 @@ $(document).ready(function () {
 				Loading.show($('body'));
 				var parent_div = save_button.parent().parent();
 				var location_id = parent_div.parent().find("#location_id").val();
-				var product_name = parent_div.parent().find("#product").val();
+				var product_name = encodeURIComponent(parent_div.parent().find("#product").val().replace('/','|||'));
 				var priority = parent_div.parent().find("#priority").val();
 				var json_string = JSON.stringify({
 					'location_id': location_id,
