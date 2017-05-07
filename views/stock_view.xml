@@ -58,5 +58,16 @@
 				</field>
 			</field>
 		</record>
+
+		<record id="stock_opname_inject_tree_inherit" model="ir.ui.view">
+			<field name="name">stock.opname.inject.tree.inherit</field>
+			<field name="model">stock.opname.inject</field>
+			<field name="inherit_id" ref="stock_opname.stock_opname_inject_tree"/>
+			<field name="arch" type="xml">
+				<field name="location_id" position="replace">
+					<field name="location_id" domain="[('is_branch', '=', True)]"/>
+				</field>
+			</field>
+		</record>
 	</data>
 </openerp>
