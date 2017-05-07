@@ -1,12 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
+	<t t-name="website_tbvip_so_inject_input">
+		<div class="row">
+			<div class="col-md-6">
+				<div class="form-group">
+					<label for="product">Product</label>
+					<input type="text" id="product" class="form-control">
+					</input>
+				</div>
+			</div>
+			<div class="col-md-5">
+				<div class="form-group">
+					<label for="priority">Priority</label>
+					<select id="priority" class="form-control">
+						<t t-foreach="[1,2,3,4,5,6]" t-as="index">
+							<option t-attf-value="{{index}}"><t t-esc="index"/></option>
+						</t>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-1 form-group">
+				<label for="btn_save" style="visibility:hidden">Save</label>
+				<button type="button" id="so_inject_btn_save" class="btn btn-success">Save</button>
+			</div>
+		</div>
+	</t>
+
+	<t t-name="website_tbvip_so_inject_list">
+		<div class="website_list_container">
+			<t t-if="so_inject_list.length == 0">
+				<div class="row">
+					<div class="col-xs-12" style="text-align: center; color: darkgray;">
+						<h4>Data Kosong</h4>
+					</div>
+				</div>
+			</t>
+			<t t-foreach="so_inject_list" t-as="so_inject">
+				<div class="row col-md-12">
+					<b><t t-esc="so_inject['product_name']"/></b>
+				</div>
+				<div class="row col-md-12">
+					Priority: <t t-esc="so_inject['priority']"/>
+					<hr style="margin-top: 5px; margin-bottom: 5px"/>
+				</div>
+			</t>
+		</div>
+	</t>
+
 	<t t-name="website_tbvip_stock_opname_filter">
 		<div class="row">
 			<div class="col-md-6">
 				<div class="form-group">
-					<label for="branch">Branch</label>
-					<select id="branch" class="form-control">
+					<label for="so_branch">Branch</label>
+					<select id="so_branch" class="form-control">
 						<option value="all">[All Branch]</option>
 						<t t-foreach="branches" t-as="branch">
 							<option t-attf-value="{{branch.id}}"><t t-esc="branch.name"/></option>
@@ -16,8 +63,8 @@
 			</div>
 			<div class="col-md-6">
 				<div class="form-group">
-					<label for="state">State</label>
-					<select id="state" class="form-control">
+					<label for="so_state">State</label>
+					<select id="so_state" class="form-control">
 						<option value="all">[All status]</option>
 						<option value="draft">Draft</option>
 						<option value="cancel">Cancelled</option>
@@ -28,22 +75,22 @@
 			</div>
 			<div class="col-md-6">
 				<div class="form-group">
-					<label for="employee">Employee</label>
-					<input type="text" id="employee" class="form-control">
+					<label for="so_employee">Employee</label>
+					<input type="text" id="so_employee" class="form-control">
 					</input>
 				</div>
 			</div>
 			<div class="col-md-6">
 				<div class="form-group">
-					<label for="product">Product</label>
-					<input type="text" id="product" class="form-control">
+					<label for="so_product">Product</label>
+					<input type="text" id="so_product" class="form-control">
 					</input>
 				</div>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-md-1 form-group">
-				<button type="button" id="btn_filter" class="btn btn-primary">Filter</button>
+				<button type="button" id="so_btn_filter" class="btn btn-primary">Filter</button>
 			</div>
 		</div>
 	</t>
@@ -66,34 +113,30 @@
 							</div>
 						</div>
 					</t>
-					<t t-foreach="stock_opname['line_ids']" t-as="stock_opname_line">
-						<div class="row">
-							<div class="col-xs-6">
-								<div style="height: 50%;">
-									<b><t t-esc="stock_opname_line['product_name']"/></b> - <t t-esc="stock_opname_line['location_name']"/>
-								</div>
-								<div style="height: 50%;">
-									<table>
-										<tr>
-											<td>Theoretical </td>
-											<td> : <t t-esc="stock_opname_line['theoretical_qty']"/> </td>
-											<td> <t t-esc="stock_opname_line['product_uom_name']"/></td>
-										</tr>
-										<tr>
-											<td>Checked </td>
-											<t t-if="stock_opname['state'] == 'done'">
-												<td> : <t t-esc="stock_opname_line['product_qty']"/> </td>
-												<td> <t t-esc="stock_opname_line['product_uom_name']"/></td>
-											</t>
-											<t t-if="stock_opname['state'] != 'done'">
-												<td> : - </td>
-											</t>
-										</tr>
-									</table>
-								</div>
-							</div>
-						</div>
-						<hr style="margin-top: 5px; margin-bottom: 0px"/>
+					<t t-if="stock_opname['line_ids'].length > 0">
+						<table class="table table-condensed table-striped">
+							<tr>
+								<th style="width: 35%">Product</th>
+								<th style="width: 35%">Location</th>
+								<th style="width: 15%">Theoretical</th>
+								<th style="width: 15%">Real</th>
+							</tr>
+							<t t-foreach="stock_opname['line_ids']" t-as="stock_opname_line">
+								<tr>
+									<td><t t-esc="stock_opname_line['product_name']"/></td>
+									<td><t t-esc="stock_opname_line['location_name']"/></td>
+									<td><t t-esc="stock_opname_line['theoretical_qty']"/> <t t-esc="stock_opname_line['product_uom_name']"/></td>
+									<td>
+										<t t-if="stock_opname['state'] == 'done'">
+											<t t-esc="stock_opname_line['product_qty']"/> <t t-esc="stock_opname_line['product_uom_name']"/>
+										</t>
+										<t t-if="stock_opname['state'] != 'done'">
+											-
+										</t>
+									</td>
+								</tr>
+							</t>	
+						</table>
 					</t>
 				</div>
 			</t>

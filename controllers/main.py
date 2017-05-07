@@ -105,20 +105,22 @@ class website_tbvip(http.Controller):
 	def stock_opname_inject(self, **kwargs):
 		env = request.env(context=dict(request.env.context, show_address=True, no_tag_br=True))
 		uid = env.uid
-		return request.render("tbvip.website_tbvip_list_with_filter", {
+		return request.render("tbvip.website_tbvip_stock_opname", {
 			'page_title': 'Stock Opname',
+			'so_inject_title': 'Stock Opname Inject',
+			'so_title': 'Stock Opname',
 			'container_id': 'stock_opname_wrap',
 		})
 
 	@http.route('/tbvip/stock_opname/fetch_branches', type='http', auth="user", website=True)
 	def stock_opname_fetch_branches(self, **kwargs):
-		tbvip_branch = http.request.env['tbvip.branch']
-		result = [];
-		for record in tbvip_branch.search([]):
+		stock_location = http.request.env['stock.location']
+		result = []
+		for record in stock_location.search([('is_branch', '=', True)]):
 			result.append({
 				'id': record.id,
 				'name': record.name,
-			});
+			})
 		result = sorted(result, key=lambda branch: branch['name'])
 		return json.dumps(result)
 
@@ -152,3 +154,33 @@ class website_tbvip(http.Controller):
 			}
 		res = json.dumps(response)
 		return res
+
+	@http.route('/tbvip/stock_opname/fetch_so_inject', type='http', auth="user", website=True)
+	def stock_opname_fetch_so_inject(self, **kwargs):
+		stock_opname_inject = http.request.env['stock.opname.inject']
+		result = []
+		for record in stock_opname_inject.search([]):
+			result.append({
+				'product_name': record.product_id.name,
+				'priority': record.priority,
+			})
+		result = sorted(result, key=lambda branch: branch['priority'])
+		return json.dumps(result)
+
+	@http.route('/tbvip/stock_opname/create_so_inject/<string:data>', type='http', auth="user", website=True)
+	def stock_opname_so_inject_create(self, data, **kwargs):
+		handler_obj = http.request.env['tbvip.website.handler']
+		result = handler_obj.create_so_inject(json.loads(data))
+		if result:
+			response = {
+				'status': 'ok',
+				'info': _('Save Success'),
+				'success' : True,
+			}
+		else:
+			response = {
+				'status': 'ok',
+				'info': _('Save Failed. No stockable product with that name exist'),
+				'success' : False,
+			}
+		return json.dumps(response)

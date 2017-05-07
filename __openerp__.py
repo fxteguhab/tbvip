@@ -11,8 +11,8 @@
 	'depends': [
 		"base", "board", "web", "website",
 		"chjs_custom_view",
-		"account_accountant", "stock", "sale", "purchase", "fleet", "hr",
-		"purchase_needs", "purchase_sale_discount", "account_cancel", "stock_opname"
+		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr",
+		"purchase_needs", "purchase_sale_discount", "stock_opname",
 	],
 	'sequence': 150,
 	'data': [
