@@ -3,14 +3,24 @@
 
 	<t t-name="website_tbvip_so_inject_input">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-4">
+				<div class="form-group">
+					<label for="location_id">Location</label>
+					<select id="location_id" class="form-control">
+						<t t-foreach="location_datas" t-as="location">
+							<option t-attf-value="{{location.id}}"><t t-esc="location.name"/></option>
+						</t>
+					</select>
+				</div>
+			</div>
+			<div class="col-md-4">
 				<div class="form-group">
 					<label for="product">Product</label>
 					<input type="text" id="product" class="form-control">
 					</input>
 				</div>
 			</div>
-			<div class="col-md-5">
+			<div class="col-md-3">
 				<div class="form-group">
 					<label for="priority">Priority</label>
 					<select id="priority" class="form-control">
@@ -38,7 +48,7 @@
 			</t>
 			<t t-foreach="so_inject_list" t-as="so_inject">
 				<div class="row col-md-12">
-					<b><t t-esc="so_inject['product_name']"/></b>
+					<b><t t-esc="so_inject['location_name']"/></b> - <t t-esc="so_inject['product_name']"/>
 				</div>
 				<div class="row col-md-12">
 					Priority: <t t-esc="so_inject['priority']"/>

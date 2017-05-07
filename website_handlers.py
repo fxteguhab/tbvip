@@ -191,10 +191,16 @@ class tbvip_website_handler(osv.osv):
 		])
 		if len(product_ids) > 0:
 			priority = domain.get('priority', '').strip()
-			priority = priority.encode('ascii', 'ignore')
-			return stock_opname_inject.create({
-				'product_id': product_ids[0],
-				'priority': int(priority),
-			})
+			priority = int(priority.encode('ascii', 'ignore'))
+			location_id = domain.get('location_id', '').strip()
+			location_id = int(location_id.encode('ascii', 'ignore'))
+			if location_id == 0:
+				return 'no_location'
+			else:
+				return stock_opname_inject.create({
+					'location_id': location_id,
+					'product_id': product_ids[0].id,
+					'priority': priority,
+				})
 		else:
-			return False
+			return 'no_product'

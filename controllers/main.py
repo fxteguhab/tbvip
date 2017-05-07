@@ -158,29 +158,49 @@ class website_tbvip(http.Controller):
 	@http.route('/tbvip/stock_opname/fetch_so_inject', type='http', auth="user", website=True)
 	def stock_opname_fetch_so_inject(self, **kwargs):
 		stock_opname_inject = http.request.env['stock.opname.inject']
+		stock_location = http.request.env['stock.location']
 		result = []
+	# INJECT LIST
+		inject_list = []
 		for record in stock_opname_inject.search([]):
-			result.append({
+			inject_list.append({
+				'location_name': record.location_id.name,
 				'product_name': record.product_id.name,
 				'priority': record.priority,
 			})
-		result = sorted(result, key=lambda branch: branch['priority'])
+		inject_list = sorted(inject_list, key=lambda a: a['priority'])
+		result.append(inject_list)
+	# LOCATION LIST
+		location_list = []
+		for location in stock_location.search([('is_branch', '=', True)]):
+			location_list.append({
+				'id': location.id,
+				'name': location.name,
+			})
+		location_list = sorted(location_list, key=lambda a: a['name'])
+		result.append(location_list)
 		return json.dumps(result)
 
 	@http.route('/tbvip/stock_opname/create_so_inject/<string:data>', type='http', auth="user", website=True)
 	def stock_opname_so_inject_create(self, data, **kwargs):
 		handler_obj = http.request.env['tbvip.website.handler']
 		result = handler_obj.create_so_inject(json.loads(data))
-		if result:
-			response = {
-				'status': 'ok',
-				'info': _('Save Success'),
-				'success' : True,
-			}
-		else:
+		if result == 'no_product':
 			response = {
 				'status': 'ok',
 				'info': _('Save Failed. No stockable product with that name exist'),
 				'success' : False,
+			}
+		elif result == 'no_location':
+			response = {
+				'status': 'ok',
+				'info': _('Save Failed. You must have at least one Branch Location.'),
+				'success' : False,
+			}
+		else:
+			response = {
+				'status': 'ok',
+				'info': _('Save Success'),
+				'success' : True,
 			}
 		return json.dumps(response)
