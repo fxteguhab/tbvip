@@ -175,4 +175,22 @@ class stock_check_memory_line(osv.osv_memory):
 		'stock_info': fields.text('Stock Info')
 	}
 
+	# ONCHANGE --------------------------------------------------------------------------------------------------------------
+	
+	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
+		result = {}
+		if not product_id: return result
+		product_obj = self.pool.get('product.product')
+		value = {}
+		value.update({'stock_info': self.get_stock_info(cr, uid, ids, product_id)})
+		result['value'] = value
+		return result
+	
+	def get_stock_info(self, cr, uid, ids, product_id):
+		result = ''
+		quant_obj = self.pool.get('stock.quant')
+		quant_ids = quant_obj.search(cr, uid, [('product_id', '=', product_id)])
+		for quant in quant_obj.browse(cr, uid, quant_ids):
+			result += str(quant.location_id.name) + ': ' + str(quant.qty) + '\r\n'
+		return result
 

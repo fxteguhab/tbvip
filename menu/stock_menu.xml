@@ -16,14 +16,14 @@
 			<field name="context">{'default_is_sup_bonus': True, 'default_type': 'product'}</field>
 		</record>
 
-
 		<record id="stock_action_check_stock" model="ir.actions.act_window">
 			<field name="name">Check Stock</field>
 			<field name="res_model">stock.check.memory</field>
 			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>
+			<field name="view_mode">form</field>
 		</record>
 
+		<menuitem sequence="5" id="stock_menu_check_stock" parent="stock.menu_stock_inventory_control" action="stock_action_check_stock"/>
 		<menuitem sequence="20" id="stock_menu_stock_bonus_usage" parent="stock.menu_stock_inventory_control" action="stock_action_stock_bonus_usage"/>
 		<menuitem sequence="5" id="stock_opname_menu_product_supplier_bonus" parent="stock.menu_stock_product" action="stock_action_product_supplier_bonus"/>
 		
