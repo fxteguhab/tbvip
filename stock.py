@@ -146,3 +146,33 @@ class stock_bonus_usage_line(osv.osv):
 		return res
 
 # ==========================================================================================================================
+
+
+class stock_check_memory(osv.osv_memory):
+	
+	_name = 'stock.check.memory'
+	_description = 'Stock Bonus Usage Line'
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'check_line': fields.one2many('stock.check.memory.line', 'header_id', 'Check Lines')
+	}
+
+# ==========================================================================================================================
+
+
+class stock_check_memory_line(osv.osv_memory):
+	
+	_name = 'stock.check.memory.line'
+	_description = 'Stock Bonus Usage Line'
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'header_id': fields.many2one('stock.check.memory', 'Stock Check'),
+		'product_id': fields.many2one('product.product', 'Product', domain="[('sale_ok', '=', True)]"),
+		'stock_info': fields.text('Stock Info')
+	}
+
+
