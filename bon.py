@@ -10,7 +10,10 @@ class tbvip_bon_book(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	def _total_sheets(self, cr, uid, ids, field_name, arg, context=None):
-		pass
+		result = dict.fromkeys(ids, 0)
+		for bon in self.browse(cr, uid, ids):
+			result[bon.id] = bon.end_at - bon.start_from + 1
+		return result
 	
 	_columns = {
 		'issue_date': fields.date('Issue Date', required=True, _help='Book released date.'),
