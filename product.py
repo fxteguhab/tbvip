@@ -79,4 +79,5 @@ class product_product(osv.osv):
 	
 	_columns = {
 		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
+		'commission': fields.char('Commission', help="Discount string."),
 	}
