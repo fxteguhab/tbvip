@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="tbvip_action_tbvip_bon_book" model="ir.actions.act_window">
+			<field name="name">Bon Book</field>
+			<field name="res_model">tbvip.bon.book</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="1" id="tbvip_menu_tbvip_bon_book" parent="base.menu_sales" action="tbvip_action_tbvip_bon_book"/>
+	</data>
+</openerp>

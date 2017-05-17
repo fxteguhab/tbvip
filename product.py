@@ -47,6 +47,7 @@ class product_template(osv.osv):
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
 			string="Last Purchase", relation="purchase.order.line"),
 		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
+		'commission': fields.char('Commission', help="Discount string."),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------

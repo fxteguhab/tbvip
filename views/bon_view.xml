@@ -1,0 +1,41 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="bon_book_form">
+			<field name="name">tbvip.bon.book.form</field>
+			<field name="model">tbvip.bon.book</field>
+			<field name="arch" type="xml">
+				<form string="Bon" version="7.0">
+					<group col="4">
+						<group>
+							<field name="issue_date"/>
+							<field name="user_id"/>
+							<field name="start_from"/>
+							<field name="end_at"/>
+						</group>
+						<group>
+							<field name="total_sheets"/>
+							<field name="total_used" readonly="1"/>
+							<field name="used_numbers" readonly="1"/>
+						</group>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="bon_book_tree">
+			<field name="name">tbvip.bon.book.tree</field>
+			<field name="model">tbvip.bon.book</field>
+			<field name="arch" type="xml">
+				<tree string="Bon" version="7.0">
+					<field name="issue_date"/>
+					<field name="user_id"/>
+					<field name="start_from"/>
+					<field name="end_at"/>
+					<field name="total_sheets"/>
+					<field name="total_used" readonly="1"/>
+					<field name="used_numbers" readonly="1"/>
+				</tree>
+			</field>
+		</record>
+	</data>
+</openerp>

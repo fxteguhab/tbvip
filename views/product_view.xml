@@ -34,6 +34,12 @@
 						<label for="is_sup_bonus" string="Is Supplier Bonus"/>
 					</div>
 				</div>
+				<group name="sale_condition" position="inside">
+					<label for="commission"/>
+					<div>
+						<field name="commission"/>
+					</div>
+				</group>
 			</field>
 		</record>
 		
