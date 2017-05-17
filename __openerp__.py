@@ -12,7 +12,7 @@
 		"base", "board", "web", "website",
 		"chjs_custom_view",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr",
-		"purchase_needs", "purchase_sale_discount", "stock_opname",
+		"purchase_needs", "purchase_sale_discount", "stock_opname",  "account_receivable_limit",
 	],
 	'sequence': 150,
 	'data': [

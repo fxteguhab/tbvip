@@ -163,7 +163,6 @@ class stock_check_memory(osv.osv_memory):
 
 
 class stock_check_memory_line(osv.osv_memory):
-	
 	_name = 'stock.check.memory.line'
 	_description = 'Stock Bonus Usage Line'
 	
@@ -189,8 +188,13 @@ class stock_check_memory_line(osv.osv_memory):
 	def get_stock_info(self, cr, uid, ids, product_id):
 		result = ''
 		quant_obj = self.pool.get('stock.quant')
-		quant_ids = quant_obj.search(cr, uid, [('product_id', '=', product_id)])
+		quant_ids = quant_obj.search(cr, uid, [('product_id', '=', product_id), ('location_id.usage','=', 'internal')])
+		map = {}
+		default_uom = ''
 		for quant in quant_obj.browse(cr, uid, quant_ids):
-			result += str(quant.location_id.name) + ': ' + str(quant.qty) + '\r\n'
+			default_uom = quant.product_id.uom_id.name
+			map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
+		for key in sorted(map.iterkeys()):
+			result += key + ': ' + str(map[key]) + ' ' + default_uom + '\r\n'
 		return result
 

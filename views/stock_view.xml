@@ -89,7 +89,7 @@
 					<field name="check_line">
 						<tree editable="bottom">
 							<field name="product_id" on_change="onchange_product_id(product_id)"/>
-							<field name="stock_info"/>
+							<field name="stock_info" readonly="True"/>
 						</tree>
 					</field>
 				</form>
