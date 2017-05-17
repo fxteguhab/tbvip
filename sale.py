@@ -1,5 +1,7 @@
 from openerp.osv import osv, fields
 import commission_utility
+from openerp.tools.translate import _
+from datetime import datetime, date, timedelta
 
 # ==========================================================================================================================
 
@@ -10,6 +12,7 @@ class sale_order(osv.osv):
 	
 	_columns = {
 		'commission_total': fields.float('Commission Total'),
+		'bon_number': fields.char('Bon Number'),
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
@@ -17,6 +20,42 @@ class sale_order(osv.osv):
 	def create(self, cr, uid, vals, context={}):
 		if vals.get('order_line', False):
 			vals['commission_total'] = self._calculate_commission_total(cr, uid, vals['order_line'])
+		
+		if vals.get('bon_number', False):
+			bon_book_same_number_ids = self.search(cr, uid, [
+				('user_id', '=', uid),
+				('bon_number', '=', vals['bon_number']),
+				('date_order', '>=', date.today().strftime('%Y-%m-%d 00:00:00')),
+				('date_order', '<=', date.today().strftime('%Y-%m-%d 23:59:59')),
+			])
+			if len(bon_book_same_number_ids) > 0:
+				raise osv.except_orm(_('Bon book number error'),
+					_('There is sale order with the same bon book number for this user.'))
+			bon_book_obj = self.pool.get('tbvip.bon.book')
+			bon_book_id = bon_book_obj.search(cr, uid, [
+				('user_id', '=', uid),
+				('start_from', '<=', int(vals['bon_number'])),
+				('end_at', '>=', int(vals['bon_number'])),
+			], limit=1, order='issue_date DESC')
+			bon_book = bon_book_obj.browse(cr, uid, bon_book_id)
+			if bon_book:
+				if bon_book.total_used >= bon_book.total_sheets:
+					raise osv.except_orm(_('Bon book is full'), _('All sheets in bon book have already been used.'))
+				else:
+					used_numbers = []
+					if bon_book.used_numbers:
+						used_numbers = bon_book.used_numbers.split(',')
+						for used_number in used_numbers:
+							if used_number == vals['bon_number']:
+								raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
+					bon_book_obj.write(cr, uid, bon_book.id, {
+						'total_used': bon_book.total_used + 1,
+						'used_numbers': (bon_book.used_numbers + ',' + vals['bon_number'])
+											if (len(used_numbers)>1) else vals['bon_number']
+					})
+			else:
+				raise osv.except_orm(_('Creating sale order error'),
+					_('There is no bon book with the given number for this user.'))
 		return super(sale_order, self).create(cr, uid, vals, context)
 	
 	def write(self, cr, uid, ids, vals, context=None):
