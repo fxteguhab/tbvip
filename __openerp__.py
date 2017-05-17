@@ -28,6 +28,7 @@
 		'views/product_view.xml',
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
+		'views/sale_view.xml',
 		'views/stock_view.xml',
 		'views/tbvip.xml',
 		'report/account_report.xml',
