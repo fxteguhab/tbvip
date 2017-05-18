@@ -198,3 +198,15 @@ class stock_check_memory_line(osv.osv_memory):
 			result += key + ': ' + str(map[key]) + ' ' + default_uom + '\r\n'
 		return result
 
+
+# ==========================================================================================================================
+
+class stock_check_memory(osv.osv):
+	
+	_inherit = 'stock.move'
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'demand_id': fields.many2one('tbvip.demand', 'Demand')
+	}
