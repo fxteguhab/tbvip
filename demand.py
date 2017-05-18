@@ -98,15 +98,6 @@ class tbvip_demand(osv.osv):
 					'sale_order_id': sale_order_id,
 				})
 		return True
-	
-	def action_cancel(self, cr, uid, ids, context=None):
-		self.write(cr, uid, ids, {
-			'state': 'canceled',
-			'cancel_reason': 1,
-			'cancel_by': uid,
-			'cancel_time': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
-		})
-		return True
 
 
 # ==========================================================================================================================
@@ -131,3 +122,24 @@ class tbvip_demand_line(osv.osv):
 		product = product_obj.browse(cr, uid, product_id)
 		return {'value': {'uom_id': product.product_tmpl_id.uom_id.id},
 				'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}}
+
+# ---------------------------------------------------------------------------------------------------------------------------
+
+class stock_opname_memory(osv.osv_memory):
+	_name = "tbvip.demand.memory"
+	_description = "Demand Memory"
+	
+	_columns = {
+		'cancel_reason': fields.text('Cancel Reason'),
+	}
+	
+	def action_cancel(self, cr, uid, ids, context=None):
+		demand_obj = self.pool.get('tbvip.demand')
+		for demand_memory in self.browse(cr, uid, ids):
+			demand_obj.write(cr, uid, context['active_id'], {
+				'state': 'canceled',
+				'cancel_reason': demand_memory.cancel_reason,
+				'cancel_by': uid,
+				'cancel_time': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+			})
+		return True
