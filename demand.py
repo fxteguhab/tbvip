@@ -61,14 +61,22 @@ class tbvip_demand(osv.osv):
 			demand = self.browse(cr, uid, id)
 			if demand.demand_type == 'interbranch':
 			# create stock move, set to available
-			# 	stock_move_obj = self.pool.get('stock.move')
-			# 	stock_move_id = stock_move_obj.create(cr, uid, {
-			#
-			# 	})
-			# 	self.write(cr, uid, id, {
-			# 		'state': 'ready_for_transfer',
-			# 	})
-			# 	stock_move_obj.action_assign(cr, uid, [stock_move_id])
+				stock_move_obj = self.pool.get('stock.move')
+				stock_move_ids = []
+				for demand_line in demand.demand_line_ids:
+					stock_move_ids.append(stock_move_obj.create(cr, uid, {
+						'demand_id': id,
+						'product_id': demand_line.product_id.id,
+						'product_uom': demand_line.uom_id.id,
+						'product_uom_qty': demand_line.qty,
+						'name': 'From demand',
+						'location_id': 1,
+						'location_dest_id': 1,
+					}))
+				stock_move_obj.force_assign(cr, uid, stock_move_ids)
+				self.write(cr, uid, id, {
+					'state': 'ready_for_transfer',
+				})
 			elif demand.demand_type == 'different_management':
 			# create sales order, set to confirm
 				sale_order_obj = self.pool.get('sale.order')
