@@ -39,7 +39,7 @@ class sale_order(osv.osv):
 			if order_line[2].get('product_uom_qty', False) and order_line[2].get('commission_amount', False):
 				product = product_obj.browse(cr, uid, order_line[2]['product_id'])
 				qty = product_uom_obj._compute_qty(cr, uid,
-					order_line[2]['product_uom'], order_line[2]['product_uom_qty'], product.product_tmpl_id.uom_po_id.id)
+					order_line[2]['product_uom'], order_line[2]['product_uom_qty'], product.product_tmpl_id.uom_id.id)
 				commission_total += (qty * order_line[2]['commission_amount'])
 		return commission_total
 		
