@@ -8,8 +8,18 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
+		<record id="tbvip_action_tbvip_demanded_products" model="ir.actions.act_window">
+			<field name="name">Demanded Products</field>
+			<field name="res_model">tbvip.demand.line</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="domain">[('demand_id.state', '=', 'ready_for_transfer')]</field>
+		</record>
+
 		<menuitem sequence="1" id="tbvip_menu_tbvip" name="Demand" parent="stock.menu_stock_root"/>
 			<menuitem sequence="11" id="tbvip_menu_tbvip_demand"
 					parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demand"/>
+			<menuitem sequence="12" id="tbvip_menu_tbvip_demanded_products"
+				parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demanded_products"/>
 	</data>
 </openerp>

@@ -6,7 +6,7 @@
 			<field name="name">tbvip.demand.form</field>
 			<field name="model">tbvip.demand</field>
 			<field name="arch" type="xml">
-				<form string="Rule" version="7.0">
+				<form string="Demand" version="7.0">
 					<header>
 						<button name="action_set_wait" string="Set to Wait" type="object" states="requested"
 								class="oe_highlight" confirm="Are you sure to set this demand to Waiting for Supplier?"/>
@@ -46,7 +46,7 @@
 			<field name="name">tbvip.demand.tree</field>
 			<field name="model">tbvip.demand</field>
 			<field name="arch" type="xml">
-				<tree string="Rule" version="7.0">
+				<tree string="Demand" version="7.0">
 					<field name="request_date"/>
 					<field name="branch_id"/>
 					<field name="demand_type" readonly="1"/>
@@ -74,6 +74,34 @@
 						<filter string="Canceled" name="filter_canceled" domain="[('state','=','canceled')]"/>
 					</group>
 				</search>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_demand_line_form">
+			<field name="name">tbvip.demand.line.form</field>
+			<field name="model">tbvip.demand.line</field>
+			<field name="arch" type="xml">
+				<tree string="Demand Line" version="7.0">
+					<field name="demand_id"/>
+					<field name="product_id"/>
+					<field name="qty"/>
+					<field name="uom_id"/>
+					<field name="create_uid"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_demand_line_tree">
+			<field name="name">tbvip.demand.line.tree</field>
+			<field name="model">tbvip.demand.line</field>
+			<field name="arch" type="xml">
+				<tree string="Demand Line" version="7.0">
+					<field name="demand_id"/>
+					<field name="product_id"/>
+					<field name="qty"/>
+					<field name="uom_id"/>
+					<field name="create_uid"/>
+				</tree>
 			</field>
 		</record>
 
