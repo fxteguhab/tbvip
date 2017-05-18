@@ -56,5 +56,26 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="tbvip_demand_search">
+			<field name="name">tbvip.demand.search</field>
+			<field name="model">tbvip.demand</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Demand Search">
+					<field name="create_uid" string="Request User"/>
+					<group string="Demand Type">
+						<filter string="Interbranch" name="filter_interbranch" domain="[('demand_type','=','interbranch')]"/>
+						<filter string="Different Management" name="filter_different_management" domain="[('demand_type','=','different_management')]"/>
+					</group>
+					<group string="State">
+						<filter string="Requested" name="filter_requested" domain="[('state','=','requested')]"/>
+						<filter string="Waiting for Supplier" name="filter_waiting_for_supplier" domain="[('state','=','waiting_for_supplier')]"/>
+						<filter string="Ready for Transfer" name="filter_ready_for_transfer" domain="[('state','=','ready_for_transfer')]"/>
+						<filter string="Canceled" name="filter_canceled" domain="[('state','=','canceled')]"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
 	</data>
 </openerp>
