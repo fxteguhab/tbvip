@@ -68,7 +68,7 @@ class sale_order(osv.osv):
 				if bon_book.used_numbers:
 					used_numbers = bon_book.used_numbers.split(',')
 					for used_number in used_numbers:
-						if used_number == vals['bon_number']:
+						if used_number == bon_number:
 							raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
 				bon_book_obj.write(cr, uid, bon_book.id, {
 					'total_used': bon_book.total_used + 1,

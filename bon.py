@@ -16,14 +16,14 @@ class tbvip_bon_book(osv.osv):
 		return result
 	
 	_columns = {
-		'issue_date': fields.date('Issue Date', required=True, _help='Book released date.'),
-		'user_id': fields.many2one('res.users', 'User', required=True, ondelete='restrict', _help='Whom the book is given to.'),
-		'start_from': fields.integer('Start From', required=True, _help='Bon starting number.'),
-		'end_at': fields.integer('End At', required=True, _help='Bon ending number.'),
+		'issue_date': fields.date('Issue Date', required=True, help='Book released date.'),
+		'user_id': fields.many2one('res.users', 'User', required=True, ondelete='restrict', help='Whom the book is given to.'),
+		'start_from': fields.integer('Start From', required=True, help='Bon starting number.'),
+		'end_at': fields.integer('End At', required=True, help='Bon ending number.'),
 		'total_sheets': fields.function(_total_sheets, string='Total Sheets', type='float', store={},
-			_help='Total sheets, calculated as End At - Start From + 1.'),
-		'total_used': fields.integer('Total Used', _help='Total sheets that have been used.'),
-		'used_numbers': fields.text('Used Numbers', _help='All bon numbers that have been used.'),
+			help='Total sheets, calculated as End At - Start From + 1.'),
+		'total_used': fields.integer('Total Used', help='Total sheets that have been used.'),
+		'used_numbers': fields.text('Used Numbers', help='All bon numbers that have been used.'),
 	}
 	
 	_sql_constraints = [
