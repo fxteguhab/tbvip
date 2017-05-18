@@ -22,8 +22,6 @@
 							<field name="branch_id"/>
 							<field name="demand_type" readonly="1"/>
 							<field name="state" readonly="1"/>
-							<field name="stock_move_id" readonly="1"
-									attrs="{'invisible': [('demand_type','!=','interbranch')]}"/>
 							<field name="sale_order_id" readonly="1"
 									attrs="{'invisible': [('demand_type','!=','different_management')]}"/>
 						</group>
@@ -53,7 +51,6 @@
 					<field name="branch_id"/>
 					<field name="demand_type" readonly="1"/>
 					<field name="state" readonly="1"/>
-					<field name="stock_move_id"/>
 					<field name="sale_order_id"/>
 				</tree>
 			</field>
