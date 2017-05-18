@@ -60,7 +60,7 @@
 			<field name="model">tbvip.demand</field>
 			<field name="type">search</field>
 			<field name="arch" type="xml">
-				<search string="Demand Search">
+				<search string="Demand">
 					<field name="create_uid" string="Request User"/>
 					<group string="Demand Type">
 						<filter string="Interbranch" name="filter_interbranch" domain="[('demand_type','=','interbranch')]"/>
