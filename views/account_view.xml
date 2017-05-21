@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="account_account_journal_edc_tree_inherit" model="ir.ui.view">
+			<field name="name">account.account.journal.edc.tree.inherit</field>
+			<field name="model">account.journal.edc</field>
+			<field name="inherit_id" ref="sale_direct_cash.account_account_journal_edc_tree"/>
+			<field name="arch" type="xml">
+				<field name="credit_fee" position="after">
+					<field name="current_branch_id"/>
+				</field>
+			</field>
+		</record>
+
+		<record id="account_account_journal_edc_form_inherit" model="ir.ui.view">
+			<field name="name">account.account.journal.edc.form.inherit</field>
+			<field name="model">account.journal.edc</field>
+			<field name="inherit_id" ref="sale_direct_cash.account_account_journal_edc_form"/>
+			<field name="arch" type="xml">
+				<field name="credit_fee" position="after">
+					<field name="current_branch_id"/>
+				</field>
+			</field>
+		</record>
+
+	</data>
+</openerp>

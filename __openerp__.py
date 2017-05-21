@@ -13,6 +13,7 @@
 		"chjs_custom_view",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr",
 		"purchase_needs", "purchase_sale_discount", "stock_opname",  "account_receivable_limit",
+		"sale_direct_cash"
 	],
 	'sequence': 150,
 	'data': [
@@ -28,6 +29,7 @@
 		'menu/purchase_menu.xml',
 		'menu/stock_menu.xml',
 		'views/account_invoice_view.xml',
+		'views/account_view.xml',
 		'views/account_voucher_view.xml',
 		'views/bon_view.xml',
 		'views/demand_view.xml',
