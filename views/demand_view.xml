@@ -7,28 +7,12 @@
 			<field name="model">tbvip.demand</field>
 			<field name="arch" type="xml">
 				<form string="Demand" version="7.0">
-					<header>
-						<button name="action_set_wait" string="Set to Wait" type="object" states="requested"
-								class="oe_highlight" confirm="Are you sure to set this demand to Waiting for Supplier?"/>
-						<button name="action_set_ready" string="Set to Ready" type="object" states="requested,waiting_for_supplier"
-								class="oe_highlight" confirm="Are you sure to set this demand to Ready for Transfer?"/>
-						<button name="%(tbvip_action_tbvip_demand_cancel)d" string="Cancel" type="action"
-								states="requested,waiting_for_supplier,ready_for_transfer"/>
-					</header>
-					<group col="4">
-						<group>
-							<field name="request_date"/>
-							<field name="branch_id"/>
-							<field name="demand_type" readonly="1"/>
-							<field name="state" readonly="1"/>
-							<field name="sale_order_id" readonly="1"
-									attrs="{'invisible': [('demand_type','!=','different_management')]}"/>
-						</group>
-						<group>
-							<field name="cancel_by" readonly="1"/>
-							<field name="cancel_time" readonly="1"/>
-							<field name="cancel_reason" readonly="1"/>
-						</group>
+					<group>
+						<field name="request_date"/>
+						<field name="demand_type" readonly="1"/>
+						<field name="state" readonly="1"/>
+						<field name="target_branch_id"/>
+						<field name="requestor_branch_id" readonly="1"/>
 					</group>
 					<field name="demand_line_ids">
 						<tree editable="bottom">
@@ -47,10 +31,10 @@
 			<field name="arch" type="xml">
 				<tree string="Demand" version="7.0">
 					<field name="request_date"/>
-					<field name="branch_id"/>
 					<field name="demand_type" readonly="1"/>
 					<field name="state" readonly="1"/>
-					<field name="sale_order_id"/>
+					<field name="target_branch_id"/>
+					<field name="requestor_branch_id"/>
 				</tree>
 			</field>
 		</record>
@@ -58,6 +42,78 @@
 		<record model="ir.ui.view" id="tbvip_demand_search">
 			<field name="name">tbvip.demand.search</field>
 			<field name="model">tbvip.demand</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Demand">
+					<field name="create_uid" string="Request User"/>
+					<group string="Demand Type">
+						<filter string="Interbranch" name="filter_interbranch" domain="[('demand_type','=','interbranch')]"/>
+						<filter string="Different Management" name="filter_different_management" domain="[('demand_type','=','different_management')]"/>
+					</group>
+					<group string="State">
+						<filter string="Requested" name="filter_requested" domain="[('state','=','requested')]"/>
+						<filter string="Partially Fulfilled" name="filter_waiting_for_supplier" domain="[('state','=','partially_fulfilled')]"/>
+						<filter string="Fulfilled" name="filter_ready_for_transfer" domain="[('state','=','fulfilled')]"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+
+		<!-- DEMAND LINE -->
+		<record model="ir.ui.view" id="tbvip_demand_line_form">
+			<field name="name">tbvip.demand.line.form</field>
+			<field name="model">tbvip.demand.line</field>
+			<field name="arch" type="xml">
+				<form string="Demand Line" version="7.0">
+					<group col="4">
+						<group>
+							<field name="demand_id"/>
+							<field name="request_date"/>
+							<field name="response_date" readonly="1"/>
+							<field name="create_uid"/>
+							<field name="demand_type"/>
+							<field name="state" readonly="1"/>
+						</group>
+						<group>
+							<field name="product_id"/>
+							<field name="qty"/>
+							<field name="uom_id"/>
+							<field name="cancel_by" readonly="1"/>
+							<field name="cancel_time" readonly="1"/>
+							<field name="cancel_reason" readonly="1"/>
+						</group>
+					</group>
+					<group>
+						<field name="purchase_order_line_id" readonly="1"/>
+						<field name="sale_order_line_id" readonly="1"
+								attrs="{'invisible': [('demand_type','!=','different_management')]}"/>
+						<field name="stock_move_id" readonly="1"
+								attrs="{'invisible': [('demand_type','!=','interbranch')]}"/>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_demand_line_tree">
+			<field name="name">tbvip.demand.line.tree</field>
+			<field name="model">tbvip.demand.line</field>
+			<field name="arch" type="xml">
+				<tree string="Demand Line" version="7.0">
+					<field name="demand_id"/>
+					<field name="demand_type"/>
+					<field name="state" readonly="1"/>
+					<field name="product_id"/>
+					<field name="qty"/>
+					<field name="uom_id"/>
+					<field name="create_uid"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_demand_line_search">
+			<field name="name">tbvip.demand.line.search</field>
+			<field name="model">tbvip.demand.line</field>
 			<field name="type">search</field>
 			<field name="arch" type="xml">
 				<search string="Demand">
@@ -76,34 +132,8 @@
 			</field>
 		</record>
 
-		<record model="ir.ui.view" id="tbvip_demand_line_form">
-			<field name="name">tbvip.demand.line.form</field>
-			<field name="model">tbvip.demand.line</field>
-			<field name="arch" type="xml">
-				<tree string="Demand Line" version="7.0">
-					<field name="demand_id"/>
-					<field name="product_id"/>
-					<field name="qty"/>
-					<field name="uom_id"/>
-					<field name="create_uid"/>
-				</tree>
-			</field>
-		</record>
 
-		<record model="ir.ui.view" id="tbvip_demand_line_tree">
-			<field name="name">tbvip.demand.line.tree</field>
-			<field name="model">tbvip.demand.line</field>
-			<field name="arch" type="xml">
-				<tree string="Demand Line" version="7.0">
-					<field name="demand_id"/>
-					<field name="product_id"/>
-					<field name="qty"/>
-					<field name="uom_id"/>
-					<field name="create_uid"/>
-				</tree>
-			</field>
-		</record>
-
+		<!-- DEMAND MEMORY -->
 		<record model="ir.ui.view" id="tbvip_demand_memory">
 			<field name="name">tbvip.demand.memory.form</field>
 			<field name="model">tbvip.demand.memory</field>

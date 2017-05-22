@@ -12,8 +12,8 @@
 			<field name="name">Demanded Products</field>
 			<field name="res_model">tbvip.demand.line</field>
 			<field name="view_type">form</field>
-			<field name="view_mode">tree</field>
-			<field name="domain">[('demand_id.state', '=', 'ready_for_transfer')]</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('demand_id.state', '!=', 'ready_for_transfer')]</field>
 		</record>
 
 		<record id="tbvip_action_tbvip_demand_cancel" model="ir.actions.act_window">
