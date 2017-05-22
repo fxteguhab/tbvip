@@ -81,8 +81,8 @@
 					</group>
 					<group string="State">
 						<filter string="Requested" name="filter_requested" domain="[('state','=','requested')]"/>
-						<filter string="Partially Fulfilled" name="filter_waiting_for_supplier" domain="[('state','=','partially_fulfilled')]"/>
-						<filter string="Fulfilled" name="filter_ready_for_transfer" domain="[('state','=','fulfilled')]"/>
+						<filter string="Partially Fulfilled" name="filter_partially_fulfilled" domain="[('state','=','partially_fulfilled')]"/>
+						<filter string="Fulfilled" name="filter_fulfilled" domain="[('state','=','fulfilled')]"/>
 					</group>
 				</search>
 			</field>
@@ -95,6 +95,9 @@
 			<field name="model">tbvip.demand.line</field>
 			<field name="arch" type="xml">
 				<form string="Demand Line" version="7.0">
+					<group>
+						<field name="demand_id"/>
+					</group>
 					<group col="4">
 						<group>
 							<field name="demand_id"/>
@@ -131,7 +134,7 @@
 				<tree string="Demand Line" version="7.0">
 					<field name="demand_id"/>
 					<field name="demand_type"/>
-					<field name="state" readonly="1"/>
+					<field name="state"/>
 					<field name="product_id"/>
 					<field name="qty"/>
 					<field name="uom_id"/>
@@ -158,25 +161,6 @@
 						<filter string="Canceled" name="filter_canceled" domain="[('state','=','canceled')]"/>
 					</group>
 				</search>
-			</field>
-		</record>
-
-
-		<!-- DEMAND MEMORY -->
-		<record model="ir.ui.view" id="tbvip_demand_memory">
-			<field name="name">tbvip.demand.memory.form</field>
-			<field name="model">tbvip.demand.memory</field>
-			<field name="arch" type="xml">
-				<form>
-					<group>
-						<field name="cancel_reason"/>
-					</group>
-					<footer>
-						<button name="action_cancel" type="object" string="Cancel Demand" class="oe_highlight"/>
-						or
-						<button string="Cancel" class="oe_link" special="cancel"/>
-					</footer>
-				</form>
 			</field>
 		</record>
 	</data>

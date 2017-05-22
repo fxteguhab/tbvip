@@ -104,6 +104,15 @@ class sale_order_line(osv.osv):
 				vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
 		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
+	def unlink(self, cr, uid, ids, context=None):
+		result = super(sale_order_line, self).write(cr, uid, ids, context)
+		demand_line_obj = self.pool.get('tbvip.demand.line')
+		demand_line_ids = demand_line_obj.search(cr, uid, [('sale_order_line_id','in',ids)])
+		demand_line_obj.write(cr, uid, demand_line_ids, {
+			'state': 'requested'
+		})
+		return result
+	
 	def _calculate_commission_amount(self, cr, uid, order_line, sale_order_line_id):
 		product_uom_obj = self.pool.get('product.uom')
 		product_obj = self.pool.get('product.product')

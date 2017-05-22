@@ -210,3 +210,17 @@ class stock_check_memory(osv.osv):
 	_columns = {
 		'demand_id': fields.many2one('tbvip.demand', 'Demand')
 	}
+	
+class stock_move(osv.osv):
+	_inherit = 'stock.move'
+	
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
+	def unlink(self, cr, uid, ids, context=None):
+		result = super(stock_move, self).write(cr, uid, ids, context)
+		demand_line_obj = self.pool.get('tbvip.demand.line')
+		demand_line_ids = demand_line_obj.search(cr, uid, [('sale_order_line_id','in',ids)])
+		demand_line_obj.write(cr, uid, demand_line_ids, {
+			'state': 'requested'
+		})
+		return result

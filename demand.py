@@ -94,6 +94,25 @@ class tbvip_demand_line(osv.osv):
 		'state': 'requested',
 	}
 	
+# OVERRIDES ----------------------------------------------------------------------------------------------------------------
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		result = super(tbvip_demand_line, self).write(cr, uid, ids, vals, context)
+		if vals.get('state', False):
+			demand_obj = self.pool.get('tbvip.demand')
+			for demand_line in self.browse(cr, uid, ids):
+				counter = 0
+				for line in demand_line.demand_id.demand_line_ids:
+					if line.state == 'ready_for_transfer' or line.state == 'canceled':
+						counter += 1
+				if counter == len(demand_line.demand_id.demand_line_ids):
+					demand_obj.write(cr, uid, demand_line.demand_id.id, { 'state': 'fulfilled' })
+				elif counter == 0:
+					demand_obj.write(cr, uid, demand_line.demand_id.id, { 'state': 'requested' })
+				else:
+					demand_obj.write(cr, uid, demand_line.demand_id.id, { 'state': 'partially_fulfilled' })
+		return result
+	
 # METHODS ------------------------------------------------------------------------------------------------------------------
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
@@ -102,57 +121,56 @@ class tbvip_demand_line(osv.osv):
 		return {'value': {'uom_id': product.product_tmpl_id.uom_id.id},
 				'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}}
 	
+# ACTIONS ------------------------------------------------------------------------------------------------------------------
 	
-	# ACTIONS ------------------------------------------------------------------------------------------------------------------
-	
-	def action_set_wait(self, cr, uid, ids, context=None):
-		self.write(cr, uid, ids, {
-			'state': 'waiting_for_supplier',
-		})
-		return True
-	
-	def action_set_ready(self, cr, uid, ids, context=None):
-		for id in ids:
-			demand = self.browse(cr, uid, id)
-			if demand.demand_type == 'interbranch':
-				# create stock move, set to available
-				stock_move_obj = self.pool.get('stock.move')
-				stock_move_ids = []
-				for demand_line in demand.demand_line_ids:
-					stock_move_ids.append(stock_move_obj.create(cr, uid, {
-						'demand_id': id,
-						'product_id': demand_line.product_id.id,
-						'product_uom': demand_line.uom_id.id,
-						'product_uom_qty': demand_line.qty,
-						'name': 'From demand',
-						'location_id': 1,
-						'location_dest_id': 1,
-					}))
-				stock_move_obj.force_assign(cr, uid, stock_move_ids)
-				self.write(cr, uid, id, {
-					'state': 'ready_for_transfer',
-				})
-			elif demand.demand_type == 'different_management':
-				# create sales order, set to confirm
-				sale_order_obj = self.pool.get('sale.order')
-				order_lines = []
-				for demand_line in demand.demand_line_ids:
-					order_lines.append((0, False, {
-						'product_id': demand_line.product_id.id,
-						'product_uom': demand_line.uom_id.id,
-						'product_uom_qty': demand_line.qty,
-					}))
-				sale_order_line_id = sale_order_obj.create(cr, uid, {
-					'partner_id': uid,
-					'date_order': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
-					'order_line': order_lines,
-				})
-				sale_order_obj.action_button_confirm(cr, uid, [sale_order_line_id])
-				self.write(cr, uid, id, {
-					'state': 'ready_for_transfer',
-					'sale_order_line_id': sale_order_line_id,
-				})
-		return True
+	# def action_set_wait(self, cr, uid, ids, context=None):
+	# 	self.write(cr, uid, ids, {
+	# 		'state': 'waiting_for_supplier',
+	# 	})
+	# 	return True
+	#
+	# def action_set_ready(self, cr, uid, ids, context=None):
+	# 	for id in ids:
+	# 		demand = self.browse(cr, uid, id)
+	# 		if demand.demand_type == 'interbranch':
+	# 			# create stock move, set to available
+	# 			stock_move_obj = self.pool.get('stock.move')
+	# 			stock_move_ids = []
+	# 			for demand_line in demand.demand_line_ids:
+	# 				stock_move_ids.append(stock_move_obj.create(cr, uid, {
+	# 					'demand_id': id,
+	# 					'product_id': demand_line.product_id.id,
+	# 					'product_uom': demand_line.uom_id.id,
+	# 					'product_uom_qty': demand_line.qty,
+	# 					'name': 'From demand',
+	# 					'location_id': 1,
+	# 					'location_dest_id': 1,
+	# 				}))
+	# 			stock_move_obj.force_assign(cr, uid, stock_move_ids)
+	# 			self.write(cr, uid, id, {
+	# 				'state': 'ready_for_transfer',
+	# 			})
+	# 		elif demand.demand_type == 'different_management':
+	# 			# create sales order, set to confirm
+	# 			sale_order_obj = self.pool.get('sale.order')
+	# 			order_lines = []
+	# 			for demand_line in demand.demand_line_ids:
+	# 				order_lines.append((0, False, {
+	# 					'product_id': demand_line.product_id.id,
+	# 					'product_uom': demand_line.uom_id.id,
+	# 					'product_uom_qty': demand_line.qty,
+	# 				}))
+	# 			sale_order_line_id = sale_order_obj.create(cr, uid, {
+	# 				'partner_id': uid,
+	# 				'date_order': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+	# 				'order_line': order_lines,
+	# 			})
+	# 			sale_order_obj.action_button_confirm(cr, uid, [sale_order_line_id])
+	# 			self.write(cr, uid, id, {
+	# 				'state': 'ready_for_transfer',
+	# 				'sale_order_line_id': sale_order_line_id,
+	# 			})
+	# 	return True
 
 # ---------------------------------------------------------------------------------------------------------------------------
 
