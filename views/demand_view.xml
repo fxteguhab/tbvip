@@ -41,7 +41,7 @@
 						<field name="demand_type" readonly="1"/>
 						<field name="state" readonly="1"/>
 						<field name="target_branch_id"/>
-						<field name="requestor_branch_id" readonly="1"/>
+						<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
 					</group>
 					<field name="demand_line_ids">
 						<tree editable="bottom">
@@ -63,7 +63,7 @@
 					<field name="demand_type" readonly="1"/>
 					<field name="state" readonly="1"/>
 					<field name="target_branch_id"/>
-					<field name="requestor_branch_id"/>
+					<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
 				</tree>
 			</field>
 		</record>

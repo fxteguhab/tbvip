@@ -35,7 +35,7 @@ class tbvip_demand(osv.osv):
 		'state': fields.selection(_DEMAND_FULFILLMENT, 'Demand State', required=True),
 		'target_branch_id': fields.many2one('tbvip.branch', 'Targeted Branch', required=True,
 			help='Which branch this demand is requested to.'),
-		'requestor_branch_id': fields.many2one('tbvip.branch', 'Requestor Branch', required=[('demand_type','=','interbranch')],
+		'requester_branch_id': fields.many2one('tbvip.branch', 'Requester Branch',
 			help='Which branch requested this demand.'),
 		'demand_line_ids': fields.one2many('tbvip.demand.line', 'demand_id', 'Demand Lines'),
 	}
@@ -44,7 +44,7 @@ class tbvip_demand(osv.osv):
 		'request_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'demand_type': 'interbranch',
 		'state': 'requested',
-		'requestor_branch_id': lambda self, cr, uid, ctx: 1,
+		'requester_branch_id': lambda self, cr, uid, ctx: 1,
 	}
 
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------

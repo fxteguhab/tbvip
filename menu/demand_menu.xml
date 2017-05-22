@@ -13,7 +13,7 @@
 			<field name="res_model">tbvip.demand.line</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
-			<field name="domain">[('demand_id.state', '!=', 'ready_for_transfer')]</field>
+			<field name="domain">[('state', '!=', 'ready_for_transfer')]</field>
 		</record>
 
 		<menuitem sequence="1" id="tbvip_menu_tbvip" name="Demand" parent="stock.menu_stock_root"/>
