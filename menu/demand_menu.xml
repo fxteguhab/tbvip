@@ -16,15 +16,6 @@
 			<field name="domain">[('demand_id.state', '!=', 'ready_for_transfer')]</field>
 		</record>
 
-		<record id="tbvip_action_tbvip_demand_cancel" model="ir.actions.act_window">
-			<field name="name">Cancel Demand</field>
-			<field name="res_model">tbvip.demand.memory</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">form</field>
-			<field name="view_id" ref="tbvip_demand_memory"/>
-			<field name="target">new</field>
-		</record>
-
 		<menuitem sequence="1" id="tbvip_menu_tbvip" name="Demand" parent="stock.menu_stock_root"/>
 			<menuitem sequence="11" id="tbvip_menu_tbvip_demand"
 					parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demand"/>
