@@ -1,5 +1,34 @@
 <openerp>
 	<data>
+		<!-- Because tbvip_demand_memory is referenced by tbvip_action_tbvip_demand_cancel and
+		tbvip_action_tbvip_demand_cancel is referenced by tbvip_demand_form; tbvip_action_tbvip_demand_cancel is placed
+		here between tbvip_demand_memory and tbvip_demand_form (instead on menu)-->
+
+		<record model="ir.ui.view" id="tbvip_demand_memory">
+			<field name="name">tbvip.demand.memory.form</field>
+			<field name="model">tbvip.demand.memory</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="cancel_reason"/>
+					</group>
+					<footer>
+						<button name="action_cancel" type="object" string="Cancel Demand" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+
+		<record id="tbvip_action_tbvip_demand_cancel" model="ir.actions.act_window">
+			<field name="name">Cancel Demand</field>
+			<field name="res_model">tbvip.demand.memory</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="view_id" ref="tbvip_demand_memory"/>
+			<field name="target">new</field>
+		</record>
 
 		<!-- RULE -->
 		<record model="ir.ui.view" id="tbvip_demand_form">
@@ -101,23 +130,6 @@
 					<field name="uom_id"/>
 					<field name="create_uid"/>
 				</tree>
-			</field>
-		</record>
-
-		<record model="ir.ui.view" id="tbvip_demand_memory">
-			<field name="name">tbvip.demand.memory.form</field>
-			<field name="model">tbvip.demand.memory</field>
-			<field name="arch" type="xml">
-				<form>
-					<group>
-						<field name="cancel_reason"/>
-					</group>
-					<footer>
-						<button name="action_cancel" type="object" string="Cancel Demand" class="oe_highlight"/>
-						or
-						<button string="Cancel" class="oe_link" special="cancel"/>
-					</footer>
-				</form>
 			</field>
 		</record>
 
