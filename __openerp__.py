@@ -40,6 +40,7 @@
 		'views/sale_view.xml',
 		'views/stock_view.xml',
 		'views/tbvip.xml',
+		'views/res_users_view.xml',
 		'report/account_report.xml',
 		'report/documents/account_voucher.xml',
 		'report/purchase_report.xml',

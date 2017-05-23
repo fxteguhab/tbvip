@@ -14,3 +14,4 @@ import commission_utility
 import bon
 import demand
 import account
+import res_users

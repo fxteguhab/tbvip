@@ -44,14 +44,19 @@ class tbvip_demand(osv.osv):
 		'request_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'demand_type': 'interbranch',
 		'state': 'requested',
-		'requester_branch_id': lambda self, cr, uid, ctx: 1,
+		'requester_branch_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
 	}
 
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 
-
-
-
+	def name_get(self, cr, uid, ids, context=None):
+		result = []
+		for demand in self.browse(cr, uid, ids, context):
+			result.append((
+				demand.id,
+				demand.request_date + ' | ' + demand.target_branch_id.name + ' - ' + demand.requester_branch_id.name
+			))
+		return result
 
 # ==========================================================================================================================
 
@@ -74,7 +79,7 @@ class tbvip_demand_line(osv.osv):
 		return result
 	
 	_columns = {
-		'demand_id': fields.many2one('tbvip.demand', 'Demand'),
+		'demand_id': fields.many2one('tbvip.demand', 'Demand', required=True),
 		'request_date': fields.function(_request_date, string="Total Amount Reconciled", type='datetime', store=True),
 		'response_date': fields.datetime('User Respond Time'),
 		'demand_type': fields.function(_demand_type, string="Demand Type", type='selection', selection=_DEMAND_TYPE, store=True),
@@ -120,6 +125,15 @@ class tbvip_demand_line(osv.osv):
 					demand_obj.write(cr, uid, demand_line.demand_id.id, { 'state': 'requested' })
 				else:
 					demand_obj.write(cr, uid, demand_line.demand_id.id, { 'state': 'partially_fulfilled' })
+		return result
+	
+	def name_get(self, cr, uid, ids, context=None):
+		result = []
+		for demand in self.browse(cr, uid, ids, context):
+			result.append((
+				demand.id,
+				demand.product_id.name
+			))
 		return result
 	
 # METHODS ------------------------------------------------------------------------------------------------------------------
