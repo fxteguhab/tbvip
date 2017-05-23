@@ -20,6 +20,12 @@ _DEMAND_FULFILLMENT = [
 	('fulfilled', 'Fulfilled'),
 ]
 
+_RESPONSE_TYPE = [
+	('buy_from_supplier', 'Buy from Supplier'),
+	('fulfill', 'Fulfill'),
+	('cannot_provide', 'Cannot Provide'),
+]
+
 # ==========================================================================================================================
 
 class tbvip_demand(osv.osv):
@@ -198,7 +204,7 @@ class tbvip_demand_line(osv.osv):
 				})
 		return True
 
-# ---------------------------------------------------------------------------------------------------------------------------
+# ===========================================================================================================================
 
 class stock_opname_memory(osv.osv_memory):
 	_name = "tbvip.demand.memory"
@@ -218,3 +224,45 @@ class stock_opname_memory(osv.osv_memory):
 				'cancel_time': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 			})
 		return True
+	
+# ===========================================================================================================================
+
+
+class tbvip_demand_respond_memory(osv.osv_memory):
+	_name = "tbvip.demand.respond.memory"
+	_description = "Demand Respond"
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'response_date': fields.datetime('Response Date', required=True),
+		'response_type': fields.selection(_RESPONSE_TYPE, 'Response Type', required=True),
+		'cancel_reason': fields.text('Cancel Reason'),
+		'respond_line': fields.one2many('tbvip.demand.respond.line.memory', 'header_id', 'Respond Line'),
+	}
+	
+	_defaults = {
+		'response_date': lambda: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+		# 'respond_line': 'interbranch',
+	}
+	
+	def action_execute_response(self, cr, uid, ids, context=None):
+		
+		return True
+	
+# ===========================================================================================================================
+
+
+class tbvip_demand_respond_line_memory(osv.osv_memory):
+	_name = "tbvip.demand.respond.line.memory"
+	_description = "Demand Respond Line"
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'header_id': fields.many2one('tbvip.demand.respond.memory', 'Demand Respond'),
+		'demand_line_id': fields.many2one('tbvip.demand.line', 'Demand Line'),
+		'product_id': fields.many2one('product.product', 'Product'),
+		'qty': fields.float('Quantity'),
+		'uom_id': fields.many2one('product.uom', 'header_id', 'Respond Line'),
+	}

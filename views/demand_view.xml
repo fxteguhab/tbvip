@@ -171,5 +171,34 @@
 				</search>
 			</field>
 		</record>
+
+		<!-- DEMAND RESPOND MEMORY -->
+		<record model="ir.ui.view" id="tbvip_demand_respond_memory_form">
+			<field name="name">tbvip.demand.respond.memory.form</field>
+			<field name="model">tbvip.demand.respond.memory</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="response_date"/>
+						<field name="response_type"/>
+						<field name="cancel_reason" attrs="{'required': [('response_type','=','cannot_provide')], 'invisible': [('response_type','!=','cannot_provide')]}"/>
+						<field name="respond_line" readonly="1">
+							<tree>
+								<field name="header_id"/>
+								<field name="demand_line_id" invisible="1"/>
+								<field name="product_id" readonly="1"/>
+								<field name="qty" readonly="1"/>
+								<field name="uom_id" readonly="1"/>
+							</tree>
+						</field>
+					</group>
+					<footer>
+						<button name="action_execute_response" type="object" string="Execute Response" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
 	</data>
 </openerp>
