@@ -29,8 +29,8 @@ class tbvip_demand(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'request_date': fields.date('Request Date', required=True, help='Request date.'),
-		'demand_type': fields.selection(_DEMAND_TYPE, 'Demand Type',
+		'request_date': fields.datetime('Request Date', required=True, help='Request date.'),
+		'demand_type': fields.selection(_DEMAND_TYPE, 'Demand Type', required=True,
 			help='Whether this demand is inter branches in the same management or in different managements.'),
 		'state': fields.selection(_DEMAND_FULFILLMENT, 'Demand State', required=True),
 		'target_branch_id': fields.many2one('tbvip.branch', 'Targeted Branch', required=True,
@@ -67,12 +67,17 @@ class tbvip_demand_line(osv.osv):
 			result[line.id] = line.demand_id.request_date
 		return result
 	
+	def _demand_type(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			result[line.id] = line.demand_id.demand_type
+		return result
+	
 	_columns = {
 		'demand_id': fields.many2one('tbvip.demand', 'Demand'),
-		'request_date': fields.function(_request_date, string="Total Amount Reconciled", type='date', store=True),
+		'request_date': fields.function(_request_date, string="Total Amount Reconciled", type='datetime', store=True),
 		'response_date': fields.datetime('User Respond Time'),
-		'demand_type': fields.selection(_DEMAND_TYPE, 'Demand Type',
-			help='Whether this demand is inter branches in the same management or in different managements.'),
+		'demand_type': fields.function(_demand_type, string="Demand Type", type='selection', selection=_DEMAND_TYPE, store=True),
 		'state': fields.selection(_DEMAND_STATE, 'Demand Line State', required=True),
 		'stock_move_id': fields.many2one('stock.move', 'Stock Move', ondelete="set null",
 			help='Is set if demand type is interbranch and state is Ready for Transfer.'),
@@ -90,13 +95,17 @@ class tbvip_demand_line(osv.osv):
 	}
 	
 	_defaults = {
-		'demand_type': 'interbranch',
 		'state': 'requested',
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def write(self, cr, uid, ids, vals, context=None):
+		if vals.get('state', False):
+			if vals['state'] == 'requested':
+				vals['stock_move_id'] = None
+				vals['sale_order_line_id'] = None
+				vals['purchase_order_line_id'] = None
 		result = super(tbvip_demand_line, self).write(cr, uid, ids, vals, context)
 		if vals.get('state', False):
 			demand_obj = self.pool.get('tbvip.demand')
@@ -124,51 +133,54 @@ class tbvip_demand_line(osv.osv):
 # ACTIONS ------------------------------------------------------------------------------------------------------------------
 	
 	def action_set_wait(self, cr, uid, ids, context=None):
-		self.write(cr, uid, ids, {
-			'state': 'waiting_for_supplier',
-		})
+		for id in ids:
+			self.write(cr, uid, id, {
+				'state': 'waiting_for_supplier',
+			})
 		return True
 
 	def action_set_ready(self, cr, uid, ids, context=None):
 		for id in ids:
-			demand = self.browse(cr, uid, id)
+			demand_line = self.browse(cr, uid, id)
+			demand = demand_line.demand_id
 			if demand.demand_type == 'interbranch':
 				# create stock move, set to available
 				stock_move_obj = self.pool.get('stock.move')
-				stock_move_ids = []
-				for demand_line in demand.demand_line_ids:
-					stock_move_ids.append(stock_move_obj.create(cr, uid, {
-						'demand_id': id,
-						'product_id': demand_line.product_id.id,
-						'product_uom': demand_line.uom_id.id,
-						'product_uom_qty': demand_line.qty,
-						'name': 'From demand',
-						'location_id': 1,
-						'location_dest_id': 1,
-					}))
-				stock_move_obj.force_assign(cr, uid, stock_move_ids)
+				stock_location_obj = self.pool.get('stock.location')
+				requester_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.requester_branch_id.id)])
+				target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.target_branch_id.id)])
+				stock_move_id = stock_move_obj.create(cr, uid, {
+					'product_id': demand_line.product_id.id,
+					'product_uom': demand_line.uom_id.id,
+					'product_uom_qty': demand_line.qty,
+					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
+					'location_id': requester_location_ids[0],
+					'location_dest_id': target_location_ids[0],
+				})
+				stock_move_obj.force_assign(cr, uid, stock_move_id)
 				self.write(cr, uid, id, {
 					'state': 'ready_for_transfer',
+					'stock_move_id': stock_move_id,
 				})
 			elif demand.demand_type == 'different_management':
 				# create sales order, set to confirm
 				sale_order_obj = self.pool.get('sale.order')
-				order_lines = []
-				for demand_line in demand.demand_line_ids:
-					order_lines.append((0, False, {
-						'product_id': demand_line.product_id.id,
-						'product_uom': demand_line.uom_id.id,
-						'product_uom_qty': demand_line.qty,
-					}))
-				sale_order_line_id = sale_order_obj.create(cr, uid, {
+				order_lines = [(0, False, {
+					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
+					'product_id': demand_line.product_id.id,
+					'product_uom': demand_line.uom_id.id,
+					'product_uom_qty': demand_line.qty,
+				})]
+				sale_order_id = sale_order_obj.create(cr, uid, {
 					'partner_id': uid,
 					'date_order': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 					'order_line': order_lines,
 				})
-				sale_order_obj.action_button_confirm(cr, uid, [sale_order_line_id])
+				sale_order_obj.action_button_confirm(cr, uid, [sale_order_id])
+				sale_order = sale_order_obj.browse(cr, uid, sale_order_id)
 				self.write(cr, uid, id, {
 					'state': 'ready_for_transfer',
-					'sale_order_line_id': sale_order_line_id,
+					'sale_order_line_id': sale_order.order_line[0].id,
 				})
 		return True
 

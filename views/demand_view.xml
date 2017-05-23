@@ -38,7 +38,8 @@
 				<form string="Demand" version="7.0">
 					<group>
 						<field name="request_date"/>
-						<field name="demand_type" readonly="1"/>
+						<field name="demand_type"/>
+						<!--<field name="demand_type" readonly="1"/>-->
 						<field name="state" readonly="1"/>
 						<field name="target_branch_id"/>
 						<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
@@ -60,7 +61,8 @@
 			<field name="arch" type="xml">
 				<tree string="Demand" version="7.0">
 					<field name="request_date"/>
-					<field name="demand_type" readonly="1"/>
+					<field name="demand_type"/>
+					<!--<field name="demand_type" readonly="1"/>-->
 					<field name="state" readonly="1"/>
 					<field name="target_branch_id"/>
 					<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
@@ -100,12 +102,9 @@
 								class="oe_highlight" confirm="Are you sure to set this demand to Waiting for Supplier?"/>
 						<button name="action_set_ready" string="Set to Ready" type="object" states="requested,waiting_for_supplier"
 								class="oe_highlight" confirm="Are you sure to set this demand to Ready for Transfer?"/>
-						<button name="%(tbvip_action_tbvip_demand_cancel)d" string="Cancel" type="action"
+						<button name="%(tbvip_action_tbvip_demand_cancel)d" string="Cannot Provide" type="action"
 								states="requested,waiting_for_supplier,ready_for_transfer"/>
 					</header>
-					<group>
-						<field name="demand_id"/>
-					</group>
 					<group col="4">
 						<group>
 							<field name="demand_id"/>
@@ -113,6 +112,7 @@
 							<field name="response_date" readonly="1"/>
 							<field name="create_uid"/>
 							<field name="demand_type"/>
+							<!--<field name="demand_type" readonly="1"/>-->
 							<field name="state" readonly="1"/>
 						</group>
 						<group>
