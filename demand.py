@@ -152,13 +152,15 @@ class tbvip_demand_line(osv.osv):
 	
 # ACTIONS ------------------------------------------------------------------------------------------------------------------
 	
+	# bikin po belom, tambahin juga di linenya tanda kalo ini dari demand atau bukan
 	def action_set_wait(self, cr, uid, ids, context=None):
 		for id in ids:
 			self.write(cr, uid, id, {
 				'state': 'waiting_for_supplier',
 			})
 		return True
-
+	
+	# bikin so ato stock move udah
 	def action_set_ready(self, cr, uid, ids, context=None):
 		for id in ids:
 			demand_line = self.browse(cr, uid, id)
@@ -214,6 +216,7 @@ class stock_opname_memory(osv.osv_memory):
 		'cancel_reason': fields.text('Cancel Reason'),
 	}
 	
+	# harusnya udah
 	def action_cancel(self, cr, uid, ids, context=None):
 		demand_obj = self.pool.get('tbvip.demand')
 		for demand_memory in self.browse(cr, uid, ids):
@@ -241,13 +244,34 @@ class tbvip_demand_respond_memory(osv.osv_memory):
 		'respond_line': fields.one2many('tbvip.demand.respond.line.memory', 'header_id', 'Respond Line'),
 	}
 	
+	# DEFAULTS --------------------------------------------------------------------------------------------------------------
+	
+	def _respond_line(self, cr, uid, context=None):
+		result = []
+		active_model = context.get('active_model')
+		if active_model == 'tbvip.demand.line':
+			demand_line_obj = self.pool.get('tbvip.demand.line')
+			for line in demand_line_obj.browse(cr, uid, context.get('active_ids')):
+				result.append((0, False, {
+					'demand_line_id': line.id,
+					'product_id': line.product_id,
+					'qty': line.qty,
+					'uom_id': line.uom_id,
+				}))
+		return result
+	
 	_defaults = {
-		'response_date': lambda: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
-		# 'respond_line': 'interbranch',
+		'response_date': lambda cr, uid, ids, context=None: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+		'respond_line': _respond_line,
 	}
 	
 	def action_execute_response(self, cr, uid, ids, context=None):
-		
+		# demand_obj.write(cr, uid, context['active_id'], {
+		# 	'state': 'canceled',
+		# 	'cancel_reason': demand_memory.cancel_reason,
+		# 	'cancel_by': uid,
+		# 	'cancel_time': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+		# })
 		return True
 	
 # ===========================================================================================================================
@@ -264,5 +288,5 @@ class tbvip_demand_respond_line_memory(osv.osv_memory):
 		'demand_line_id': fields.many2one('tbvip.demand.line', 'Demand Line'),
 		'product_id': fields.many2one('product.product', 'Product'),
 		'qty': fields.float('Quantity'),
-		'uom_id': fields.many2one('product.uom', 'header_id', 'Respond Line'),
+		'uom_id': fields.many2one('product.uom', 'UoM ID'),
 	}

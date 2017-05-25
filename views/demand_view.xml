@@ -36,11 +36,15 @@
 			<field name="model">tbvip.demand</field>
 			<field name="arch" type="xml">
 				<form string="Demand" version="7.0">
+					<header>
+						<button name="%(tbvip_action_tbvip_respond_demands)d" string="Respond" type="action"
+								class="oe_highlight"/>
+						<field name="state" widget="statusbar"/>
+					</header>
 					<group>
 						<field name="request_date"/>
 						<field name="demand_type"/>
 						<!--<field name="demand_type" readonly="1"/>-->
-						<field name="state" readonly="1"/>
 						<field name="target_branch_id"/>
 						<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
 					</group>
@@ -95,6 +99,7 @@
 		<record model="ir.ui.view" id="tbvip_demand_line_form">
 			<field name="name">tbvip.demand.line.form</field>
 			<field name="model">tbvip.demand.line</field>
+			<field name="type">form</field>
 			<field name="arch" type="xml">
 				<form string="Demand Line" version="7.0">
 					<header>
@@ -138,6 +143,7 @@
 		<record model="ir.ui.view" id="tbvip_demand_line_tree">
 			<field name="name">tbvip.demand.line.tree</field>
 			<field name="model">tbvip.demand.line</field>
+			<field name="type">tree</field>
 			<field name="arch" type="xml">
 				<tree string="Demand Line" version="7.0">
 					<field name="demand_id"/>
@@ -184,7 +190,6 @@
 						<field name="cancel_reason" attrs="{'required': [('response_type','=','cannot_provide')], 'invisible': [('response_type','!=','cannot_provide')]}"/>
 						<field name="respond_line" readonly="1">
 							<tree>
-								<field name="header_id"/>
 								<field name="demand_line_id" invisible="1"/>
 								<field name="product_id" readonly="1"/>
 								<field name="qty" readonly="1"/>

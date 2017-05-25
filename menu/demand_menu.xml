@@ -16,10 +16,31 @@
 			<field name="domain">[('state', '!=', 'ready_for_transfer')]</field>
 		</record>
 
+		<record id="tbvip_action_tbvip_respond_demands" model="ir.actions.act_window">
+			<field name="name">Respond Demands</field>
+			<field name="res_model">tbvip.demand.respond.memory</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+		</record>
+
+		<record id="tbvip_action_demand_product_respond" model="ir.actions.act_window">
+			<field name="name">Respond Demands</field>
+			<field name="res_model">tbvip.demand.respond.memory</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">form</field>
+			<field name="target">new</field>
+			<field name="src_model">tbvip.demand.line</field>
+			<field name="multi">True</field>
+			<field name="key2">client_action_multi</field>
+		</record>
+
 		<menuitem sequence="1" id="tbvip_menu_tbvip" name="Demand" parent="stock.menu_stock_root"/>
 			<menuitem sequence="11" id="tbvip_menu_tbvip_demand"
 					parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demand"/>
 			<menuitem sequence="12" id="tbvip_menu_tbvip_demanded_products"
 				parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demanded_products"/>
+			<menuitem sequence="13" id="tbvip_menu_tbvip_respond_demands"
+					parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_respond_demands"/>
 	</data>
 </openerp>
