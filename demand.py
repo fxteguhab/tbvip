@@ -46,14 +46,30 @@ class tbvip_demand(osv.osv):
 		'demand_line_ids': fields.one2many('tbvip.demand.line', 'demand_id', 'Demand Lines'),
 	}
 	
+# DEFAULTS ------------------------------------------------------------------------------------------------------------------
+	
 	_defaults = {
 		'request_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'demand_type': 'interbranch',
 		'state': 'requested',
 		'requester_branch_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
 	}
+	
+# CONSTRAINTS ---------------------------------------------------------------------------------------------------------------
+	
+	def _check_user_assigned_to_branch(self, cr, uid, ids, context=None):
+		users_obj = self.pool.get('res.users')
+		user_branch_id = users_obj.browse(cr, uid, [uid], context).branch_id
+		for demand in self.browse(cr, uid, ids, context):
+			if demand.demand_type == 'interbranch' and not user_branch_id:
+				return False
+		return True
+	
+	_constraints = [
+		(_check_user_assigned_to_branch, _('You must be assigned to a branch.'), ['demand_type']),
+	]
 
-# OVERRIDES ----------------------------------------------------------------------------------------------------------------
+# OVERRIDES -----------------------------------------------------------------------------------------------------------------
 
 	def name_get(self, cr, uid, ids, context=None):
 		result = []
@@ -142,7 +158,7 @@ class tbvip_demand_line(osv.osv):
 			))
 		return result
 	
-# METHODS ------------------------------------------------------------------------------------------------------------------
+# ONCHANGE ------------------------------------------------------------------------------------------------------------------
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
 		product_obj = self.pool.get('product.product')
@@ -150,21 +166,19 @@ class tbvip_demand_line(osv.osv):
 		return {'value': {'uom_id': product.product_tmpl_id.uom_id.id},
 				'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}}
 	
-# ACTIONS ------------------------------------------------------------------------------------------------------------------
+# METHODS -------------------------------------------------------------------------------------------------------------------
 	
-	# bikin po belom, tambahin juga di linenya tanda kalo ini dari demand atau bukan
-	def action_set_wait(self, cr, uid, ids, context=None):
-		for id in ids:
-			self.write(cr, uid, id, {
-				'state': 'waiting_for_supplier',
-			})
-		return True
+	def cancel_demand_lines(self, cr, uid, line_ids, cancel_reason, context=None):
+		self.write(cr, uid, line_ids, {
+			'state': 'canceled',
+			'cancel_reason': cancel_reason,
+			'cancel_by': uid,
+			'cancel_time': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+		})
 	
-	# bikin so ato stock move udah
-	def action_set_ready(self, cr, uid, ids, context=None):
-		for id in ids:
-			demand_line = self.browse(cr, uid, id)
-			demand = demand_line.demand_id
+	def ready_demand_lines(self, cr, uid, line_ids, context=None):
+		for line in self.browse(cr, uid, line_ids):
+			demand = line.demand_id
 			if demand.demand_type == 'interbranch':
 				# create stock move, set to available
 				stock_move_obj = self.pool.get('stock.move')
@@ -172,15 +186,15 @@ class tbvip_demand_line(osv.osv):
 				requester_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.requester_branch_id.id)])
 				target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.target_branch_id.id)])
 				stock_move_id = stock_move_obj.create(cr, uid, {
-					'product_id': demand_line.product_id.id,
-					'product_uom': demand_line.uom_id.id,
-					'product_uom_qty': demand_line.qty,
+					'product_id': line.product_id.id,
+					'product_uom': line.uom_id.id,
+					'product_uom_qty': line.qty,
 					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
 					'location_id': requester_location_ids[0],
 					'location_dest_id': target_location_ids[0],
 				})
 				stock_move_obj.force_assign(cr, uid, stock_move_id)
-				self.write(cr, uid, id, {
+				self.write(cr, uid, line.id, {
 					'state': 'ready_for_transfer',
 					'stock_move_id': stock_move_id,
 				})
@@ -189,9 +203,9 @@ class tbvip_demand_line(osv.osv):
 				sale_order_obj = self.pool.get('sale.order')
 				order_lines = [(0, False, {
 					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
-					'product_id': demand_line.product_id.id,
-					'product_uom': demand_line.uom_id.id,
-					'product_uom_qty': demand_line.qty,
+					'product_id': line.product_id.id,
+					'product_uom': line.uom_id.id,
+					'product_uom_qty': line.qty,
 				})]
 				sale_order_id = sale_order_obj.create(cr, uid, {
 					'partner_id': uid,
@@ -200,12 +214,59 @@ class tbvip_demand_line(osv.osv):
 				})
 				sale_order_obj.action_button_confirm(cr, uid, [sale_order_id])
 				sale_order = sale_order_obj.browse(cr, uid, sale_order_id)
-				self.write(cr, uid, id, {
+				self.write(cr, uid, line.id, {
 					'state': 'ready_for_transfer',
 					'sale_order_line_id': sale_order.order_line[0].id,
 				})
-		return True
-
+	
+	def wait_demand_lines(self, cr, uid, line_ids, context=None):
+		# bikin po belom, tambahin juga di linenya tanda kalo ini dari demand atau bukan
+		po_obj = self.pool.get('purchase.order')
+		stock_location_obj = self.pool.get('stock.location')
+		suppliers_products = {}	# dictionary of partner_id: order_lines
+		branch_id = 0
+		for line in self.browse(cr, uid, line_ids):
+			branch_id = line.demand_id.target_branch_id.id
+			if len(line.product_id.seller_ids) == 0:
+				raise osv.except_osv(_('Error!'), _("Make sure every product have at least one supplier"))
+			else:
+				partner_id = line.product_id.seller_ids[0]
+				products = suppliers_products[partner_id] if suppliers_products.get(partner_id, False) else []
+				products.append((0, False, {
+					'product_id': line.product_id.id,
+					'name': line.product_id.name,
+					'product_qty': line.qty,
+					'product_uom': line.uom_id.id,
+					'price_unit': line.product_id.standard_price,
+					'is_from_demand': True,
+				}))
+				suppliers_products[partner_id] = products
+		for supplier, products in suppliers_products.iteritems():
+			target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',line.demand_id.target_branch_id.id)])
+			po_obj.create(cr, uid, {
+				'branch_id': branch_id,
+				'partner_id': supplier,
+				'date_order': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+				'picking_type_id': self._get_picking_in(cr, uid, context),
+				'location_id': target_location_ids[0],
+				'invoice_method': 'order',
+				'order_line': products,
+			}, context)
+			self.write(cr, uid, line.id, {
+				'state': 'waiting_for_supplier',
+			})
+	
+	def _get_picking_in(self, cr, uid, context=None):
+		obj_data = self.pool.get('ir.model.data')
+		type_obj = self.pool.get('stock.picking.type')
+		user_obj = self.pool.get('res.users')
+		company_id = user_obj.browse(cr, uid, uid, context=context).company_id.id
+		types = type_obj.search(cr, uid, [('code', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)], context=context)
+		if not types:
+			types = type_obj.search(cr, uid, [('code', '=', 'incoming'), ('warehouse_id', '=', False)], context=context)
+			if not types:
+				raise osv.except_osv(_('Error!'), _("Make sure you have at least an incoming picking type defined"))
+		return types[0]
 # ===========================================================================================================================
 
 class stock_opname_memory(osv.osv_memory):
@@ -216,7 +277,6 @@ class stock_opname_memory(osv.osv_memory):
 		'cancel_reason': fields.text('Cancel Reason'),
 	}
 	
-	# harusnya udah
 	def action_cancel(self, cr, uid, ids, context=None):
 		demand_obj = self.pool.get('tbvip.demand')
 		for demand_memory in self.browse(cr, uid, ids):
@@ -252,12 +312,24 @@ class tbvip_demand_respond_memory(osv.osv_memory):
 		if active_model == 'tbvip.demand.line':
 			demand_line_obj = self.pool.get('tbvip.demand.line')
 			for line in demand_line_obj.browse(cr, uid, context.get('active_ids')):
-				result.append((0, False, {
-					'demand_line_id': line.id,
-					'product_id': line.product_id,
-					'qty': line.qty,
-					'uom_id': line.uom_id,
-				}))
+				if line.state == 'requested':
+					result.append((0, False, {
+						'demand_line_id': line.id,
+						'product_id': line.product_id,
+						'qty': line.qty,
+						'uom_id': line.uom_id,
+					}))
+		elif active_model == 'tbvip.demand':
+			demand_line_obj = self.pool.get('tbvip.demand')
+			for demand in demand_line_obj.browse(cr, uid, context.get('active_ids')):
+				for line in demand.demand_line_ids:
+					if line.state == 'requested':
+						result.append((0, False, {
+							'demand_line_id': line.id,
+							'product_id': line.product_id,
+							'qty': line.qty,
+							'uom_id': line.uom_id,
+						}))
 		return result
 	
 	_defaults = {
@@ -266,12 +338,20 @@ class tbvip_demand_respond_memory(osv.osv_memory):
 	}
 	
 	def action_execute_response(self, cr, uid, ids, context=None):
-		# demand_obj.write(cr, uid, context['active_id'], {
-		# 	'state': 'canceled',
-		# 	'cancel_reason': demand_memory.cancel_reason,
-		# 	'cancel_by': uid,
-		# 	'cancel_time': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
-		# })
+		demand_line_obj = self.pool.get('tbvip.demand.line')
+		for memory in self.browse(cr, uid, ids, context):
+			line_ids = []
+			for line in memory.respond_line:
+				if line.demand_line_id.state == 'requested':
+					line_ids.append(line.demand_line_id.id)
+			if memory.response_type == 'buy_from_supplier':
+				demand_line_obj.wait_demand_lines(cr, uid, line_ids, context=None)
+			elif memory.response_type == 'fulfill':
+				demand_line_obj.ready_demand_lines(cr, uid, line_ids, context=None)
+			elif memory.response_type == 'cannot_provide':
+				demand_line_obj.cancel_demand_lines(cr, uid, line_ids, memory.cancel_reason, context=None)
+			else:
+				pass
 		return True
 	
 # ===========================================================================================================================
