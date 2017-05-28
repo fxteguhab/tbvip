@@ -1,4 +1,5 @@
 from openerp.osv import osv, fields
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 
@@ -221,6 +222,8 @@ class tbvip_demand_line(osv.osv):
 	
 	def wait_demand_lines(self, cr, uid, line_ids, context=None):
 		# bikin po belom, tambahin juga di linenya tanda kalo ini dari demand atau bukan
+		if context is None:
+			context = {}
 		po_obj = self.pool.get('purchase.order')
 		stock_location_obj = self.pool.get('stock.location')
 		suppliers_products = {}	# dictionary of partner_id: order_lines
@@ -230,7 +233,7 @@ class tbvip_demand_line(osv.osv):
 			if len(line.product_id.seller_ids) == 0:
 				raise osv.except_osv(_('Error!'), _("Make sure every product have at least one supplier"))
 			else:
-				partner_id = line.product_id.seller_ids[0]
+				partner_id = line.product_id.seller_ids[0].name.id
 				products = suppliers_products[partner_id] if suppliers_products.get(partner_id, False) else []
 				products.append((0, False, {
 					'product_id': line.product_id.id,
@@ -239,6 +242,7 @@ class tbvip_demand_line(osv.osv):
 					'product_uom': line.uom_id.id,
 					'price_unit': line.product_id.standard_price,
 					'is_from_demand': True,
+					'date_planned': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
 				}))
 				suppliers_products[partner_id] = products
 		for supplier, products in suppliers_products.iteritems():
@@ -246,11 +250,12 @@ class tbvip_demand_line(osv.osv):
 			po_obj.create(cr, uid, {
 				'branch_id': branch_id,
 				'partner_id': supplier,
-				'date_order': datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+				'date_order': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
 				'picking_type_id': self._get_picking_in(cr, uid, context),
 				'location_id': target_location_ids[0],
 				'invoice_method': 'order',
 				'order_line': products,
+				'pricelist_id': self.pool.get('res.partner').browse(cr, uid, supplier).property_product_pricelist_purchase.id,
 			}, context)
 			self.write(cr, uid, line.id, {
 				'state': 'waiting_for_supplier',
