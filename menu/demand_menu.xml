@@ -22,6 +22,7 @@
 			<field name="res_model">tbvip.demand</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
+			<field name="view_mode">tree,form</field>
 			<field name="domain">[('demand_type', '=', 'different_management')]</field>
 			<field name="context">{'default_demand_type': 'different_management'}</field>
 		</record>
@@ -49,6 +50,6 @@
 			<menuitem sequence="12" id="tbvip_menu_tbvip_demanded_products"
 				parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demanded_products"/>
 			<menuitem sequence="13" id="tbvip_menu_tbvip_demand_management_guest"
-				parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demand_management_guest"/>
+				parent="tbvip_menu_tbvip" action="tbvip_action_tbvip_demand_management_guest" groups="tbvip.group_management_guest"/>
 	</data>
 </openerp>
