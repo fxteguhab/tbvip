@@ -38,7 +38,7 @@
 				<form string="Demand" version="7.0">
 					<header>
 						<button name="%(tbvip_action_tbvip_respond_demands)d" string="Respond" type="action"
-								class="oe_highlight"/>
+								class="oe_highlight" attrs="{'invisible': [('state','in',['fulfilled'])]}"/>
 						<field name="state" widget="statusbar"/>
 					</header>
 					<group>
