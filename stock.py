@@ -204,6 +204,19 @@ class stock_check_memory_line(osv.osv_memory):
 class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	
+	def _default_location_source(self, cr, uid, context=None):
+		result = super(stock_move, self)._default_location_source(cr, uid, context)
+		if not result:
+			users_obj = self.pool.get('res.users')
+			outgoing_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_outgoing_location
+			if outgoing_location:
+				result = outgoing_location
+		return result
+	
+	_defaults = {
+		'location_id': _default_location_source,
+	}
+	
 	# OVERRIDES ------------------------------------------------------------------------------------------------------------
 	
 	def unlink(self, cr, uid, ids, context=None):
