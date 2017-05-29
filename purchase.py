@@ -63,6 +63,16 @@ class purchase_order(osv.osv):
 				})
 		return new_id
 	
+	def write(self, cr, uid, ids, vals, context=None):
+		result = super(purchase_order, self).write(cr, uid, ids, vals, context)
+		if vals.get('state', False) and vals['state'] == 'confirmed':
+			demand_line_obj = self.pool.get('tbvip.demand.line')
+			for po in self.browse(cr, uid, ids):
+				demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
+				demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
+		return result
+				
+	
 	def picking_done(self, cr, uid, ids, context=None):
 		"""
 		Overrides picking_done to also mark the picking as transfered
@@ -127,7 +137,6 @@ class purchase_order_line(osv.osv):
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
-		'is_from_demand': fields.boolean('Is From Demand'),
 		# 'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
 		'mysql_purchase_det_id': fields.integer('MySQL Purchase Detail ID'),
 		'purchase_hour': fields.function(_purchase_hour, method=True, string='Purchase Hour', type='float'),
