@@ -17,6 +17,7 @@
 	],
 	'sequence': 150,
 	'data': [
+		'security/tbvip_security.xml',
 		'cron/tbvip_cron.xml',
 		'data/product_data.xml',
 		'data/account_data.xml',
@@ -45,6 +46,7 @@
 		'report/documents/account_voucher.xml',
 		'report/purchase_report.xml',
 		'workflows/purchase_workflow.xml',
+		'security/ir_rule.xml',
 	],
 	'demo': [
 	],

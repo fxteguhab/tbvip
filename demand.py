@@ -77,7 +77,7 @@ class tbvip_demand(osv.osv):
 		for demand in self.browse(cr, uid, ids, context):
 			result.append((
 				demand.id,
-				demand.request_date + ' | ' + demand.target_branch_id.name + ' - ' + demand.requester_branch_id.name
+				demand.request_date + ' | ' + demand.requester_branch_id.name + ' -> ' + demand.target_branch_id.name
 			))
 		return result
 
