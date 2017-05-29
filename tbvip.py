@@ -18,6 +18,8 @@ class tbvip_branch(osv.osv):
 	
 	_columns = {
 		'name': fields.char('Branch Name', required=True),
+		'default_incoming_location': fields.many2one('stock.location', 'Default Incoming Location'),
+		'default_outgoing_location': fields.many2one('stock.location', 'Default Outgoing Location'),
 	}
 
 

@@ -69,6 +69,8 @@
 				<form>
 					<group>
 						<field name="name"/>
+						<field name="default_incoming_location"/>
+						<field name="default_outgoing_location"/>
 					</group>
 				</form>
 			</field>
@@ -79,6 +81,8 @@
 			<field name="arch" type="xml">
 				<tree>
 					<field name="name"/>
+					<field name="default_incoming_location"/>
+					<field name="default_outgoing_location"/>
 				</tree>
 			</field>
 		</record>
