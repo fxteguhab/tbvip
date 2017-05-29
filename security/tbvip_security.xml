@@ -7,7 +7,7 @@
 		</record>
 
 		<record id="tbvip.group_management_guest" model="res.groups">
-			<field name="name">Management Quest</field>
+			<field name="name">Management Guest</field>
 			<field name="category_id" ref="tbvip.module_category_tbvip"/>
 		</record>
 	</data>
