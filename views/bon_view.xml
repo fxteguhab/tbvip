@@ -37,5 +37,16 @@
 				</tree>
 			</field>
 		</record>
+
+		<record model="ir.ui.view" id="bon_book_search">
+			<field name="name">tbvip.bon.book.search</field>
+			<field name="model">tbvip.bon.book</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Bon">
+					<field string = "Nomor Bon" name="start_from" filter_domain="['&amp;',('start_from','&lt;=',self),('end_at','&gt;=',self)]"/>
+				</search>
+			</field>
+		</record>
 	</data>
 </openerp>
