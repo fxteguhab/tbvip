@@ -45,6 +45,7 @@
 		'report/documents/account_voucher.xml',
 		'report/purchase_report.xml',
 		'workflows/purchase_workflow.xml',
+		'security/ir_rule.xml',
 	],
 	'demo': [
 	],
