@@ -17,6 +17,7 @@
 	],
 	'sequence': 150,
 	'data': [
+		'security/tbvip_security.xml',
 		'cron/tbvip_cron.xml',
 		'data/product_data.xml',
 		'data/account_data.xml',
