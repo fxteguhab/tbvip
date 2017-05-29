@@ -158,6 +158,11 @@ class purchase_order_line(osv.osv):
 			product = product_obj.browse(cr, uid, vals['product_id'])
 			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
 			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
+		if not vals.get('location_id', False):
+			users_obj = self.pool.get('res.users')
+			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location
+			if incoming_location != False:
+				vals['location_id'] = incoming_location
 		return new_order_line
 	
 	def _message_line_changes(self, cr, uid, vals, line_id, create=False, context=None):
