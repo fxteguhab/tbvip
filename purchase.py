@@ -2,6 +2,7 @@
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+from datetime import datetime
 
 # ==========================================================================================================================
 
@@ -114,12 +115,23 @@ class purchase_order_line(osv.osv):
 					 % (product.name, purchase_order.name, product.standard_price,
 				data['price_unit']))
 	
+	def _purchase_hour(self, cr, uid, ids, field_name, arg, context={}):
+		result = {}
+		lines = self.browse(cr, uid, ids)
+		for line in lines:
+			purchase_date = datetime.strptime(line.date_order, '%Y-%m-%d %H:%M:%S')
+			result[line.id] = purchase_date.hour * 3600 + purchase_date.minute * 60
+		return result
+	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
 		'is_from_demand': fields.boolean('Is From Demand'),
 		# 'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
+		'mysql_purchase_det_id': fields.integer('MySQL Purchase Detail ID'),
+		'purchase_hour': fields.function(_purchase_hour, method=True, string='Purchase Hour', type='float'),
+		'alert': fields.integer('Alert'),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -174,3 +186,12 @@ class purchase_order_line(osv.osv):
 			for purchase_line in self.browse(cr, uid, ids):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		return edited_order_line
+	
+	def unlink(self, cr, uid, ids, context=None):
+		result = super(purchase_order_line, self).write(cr, uid, ids, context)
+		demand_line_obj = self.pool.get('tbvip.demand.line')
+		demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',ids)])
+		demand_line_obj.write(cr, uid, demand_line_ids, {
+			'state': 'requested'
+		})
+		return result
