@@ -43,8 +43,8 @@
 					</header>
 					<group>
 						<field name="request_date"/>
-						<field name="demand_type"/>
-						<!--<field name="demand_type" readonly="1"/>-->
+						<!--<field name="demand_type"/>-->
+						<field name="demand_type" readonly="1"/>
 						<field name="target_branch_id"/>
 						<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
 					</group>
@@ -65,8 +65,8 @@
 			<field name="arch" type="xml">
 				<tree string="Demand" version="7.0">
 					<field name="request_date"/>
-					<field name="demand_type"/>
-					<!--<field name="demand_type" readonly="1"/>-->
+					<!--<field name="demand_type"/>-->
+					<field name="demand_type" readonly="1"/>
 					<field name="state" readonly="1"/>
 					<field name="target_branch_id"/>
 					<field name="requester_branch_id" attrs="{'required': [('demand_type','=','interbranch')]}"/>
@@ -117,8 +117,8 @@
 							<field name="request_date"/>
 							<field name="response_date" readonly="1"/>
 							<field name="create_uid"/>
-							<field name="demand_type"/>
-							<!--<field name="demand_type" readonly="1"/>-->
+							<!--<field name="demand_type"/>-->
+							<field name="demand_type" readonly="1"/>
 						</group>
 						<group>
 							<field name="product_id"/>

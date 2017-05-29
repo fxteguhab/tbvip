@@ -77,7 +77,7 @@ class tbvip_demand(osv.osv):
 		for demand in self.browse(cr, uid, ids, context):
 			result.append((
 				demand.id,
-				demand.request_date + ' | ' + demand.target_branch_id.name + ' - ' + demand.requester_branch_id.name
+				demand.request_date + ' | ' + demand.requester_branch_id.name + ' -> ' + demand.target_branch_id.name
 			))
 		return result
 
@@ -225,6 +225,7 @@ class tbvip_demand_line(osv.osv):
 		if context is None:
 			context = {}
 		po_obj = self.pool.get('purchase.order')
+		po_line_obj = self.pool.get('purchase.order.line')
 		stock_location_obj = self.pool.get('stock.location')
 		suppliers_products = {}	# dictionary of partner_id: order_lines
 		branch_id = 0
@@ -235,31 +236,35 @@ class tbvip_demand_line(osv.osv):
 			else:
 				partner_id = line.product_id.seller_ids[0].name.id
 				products = suppliers_products[partner_id] if suppliers_products.get(partner_id, False) else []
-				products.append((0, False, {
+				products.append({
 					'product_id': line.product_id.id,
 					'name': line.product_id.name,
 					'product_qty': line.qty,
 					'product_uom': line.uom_id.id,
 					'price_unit': line.product_id.standard_price,
-					'is_from_demand': True,
 					'date_planned': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-				}))
+					'demand_line_id': line.id,
+				})
 				suppliers_products[partner_id] = products
 		for supplier, products in suppliers_products.iteritems():
 			target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',line.demand_id.target_branch_id.id)])
-			po_obj.create(cr, uid, {
+			po_id = po_obj.create(cr, uid, {
 				'branch_id': branch_id,
 				'partner_id': supplier,
 				'date_order': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
 				'picking_type_id': self._get_picking_in(cr, uid, context),
 				'location_id': target_location_ids[0],
 				'invoice_method': 'order',
-				'order_line': products,
+				# 'order_line': products,
 				'pricelist_id': self.pool.get('res.partner').browse(cr, uid, supplier).property_product_pricelist_purchase.id,
 			}, context)
-			self.write(cr, uid, line.id, {
-				'state': 'waiting_for_supplier',
-			})
+			for product in products:
+				product['order_id'] = po_id
+				po_line_id = po_line_obj.create(cr, uid, product)
+				self.write(cr, uid, product['demand_line_id'], {
+					'state': 'waiting_for_supplier',
+					'purchase_order_line_id': po_line_id
+				})
 	
 	def _get_picking_in(self, cr, uid, context=None):
 		obj_data = self.pool.get('ir.model.data')
