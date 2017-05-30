@@ -247,13 +247,12 @@ class tbvip_demand_line(osv.osv):
 				})
 				suppliers_products[partner_id] = products
 		for supplier, products in suppliers_products.iteritems():
-			target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',line.demand_id.target_branch_id.id)])
 			po_id = po_obj.create(cr, uid, {
 				'branch_id': branch_id,
 				'partner_id': supplier,
 				'date_order': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
 				'picking_type_id': self._get_picking_in(cr, uid, context),
-				'location_id': target_location_ids[0],
+				'location_id': branch_id.default_incoming_location,
 				'invoice_method': 'order',
 				# 'order_line': products,
 				'pricelist_id': self.pool.get('res.partner').browse(cr, uid, supplier).property_product_pricelist_purchase.id,
