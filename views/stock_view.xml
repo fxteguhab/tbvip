@@ -54,7 +54,7 @@
 			<field name="arch" type="xml">
 				<field name="partner_id" position="before">
 					<field name="is_branch"/>
-					<field name="branch_id" attrs="{'required': [('is_branch','=',True)], 'invisible': [('is_branch','!=',True)]}" />
+					<!--<field name="branch_id" attrs="{'required': [('is_branch','=',True)], 'invisible': [('is_branch','!=',True)]}" />-->
 				</field>
 			</field>
 		</record>
