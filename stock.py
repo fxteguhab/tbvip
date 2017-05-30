@@ -208,7 +208,7 @@ class stock_move(osv.osv):
 		result = super(stock_move, self)._default_location_source(cr, uid, context)
 		if not result:
 			users_obj = self.pool.get('res.users')
-			outgoing_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_outgoing_location
+			outgoing_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_outgoing_location_id
 			if outgoing_location:
 				result = outgoing_location
 		return result

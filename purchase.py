@@ -160,7 +160,7 @@ class purchase_order_line(osv.osv):
 			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
 		if not vals.get('location_id', False):
 			users_obj = self.pool.get('res.users')
-			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location
+			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location_id
 			if incoming_location != False:
 				vals['location_id'] = incoming_location
 		return new_order_line
