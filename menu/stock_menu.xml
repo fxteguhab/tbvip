@@ -23,9 +23,17 @@
 			<field name="view_mode">form</field>
 		</record>
 
+		<record id="stock_action_stock_sublocation" model="ir.actions.act_window">
+			<field name="name">Stock Sublocations</field>
+			<field name="res_model">stock.sublocation</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
 		<menuitem sequence="5" id="stock_menu_check_stock" parent="stock.menu_stock_inventory_control" action="stock_action_check_stock"/>
 		<menuitem sequence="20" id="stock_menu_stock_bonus_usage" parent="stock.menu_stock_inventory_control" action="stock_action_stock_bonus_usage"/>
 		<menuitem sequence="5" id="stock_opname_menu_product_supplier_bonus" parent="stock.menu_stock_product" action="stock_action_product_supplier_bonus"/>
+		<menuitem sequence="5" id="stock_menu_stock_sublocation" parent="stock.menu_stock_configuration" action="stock_action_stock_sublocation"/>
 		
 	</data>
 </openerp>

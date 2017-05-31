@@ -227,3 +227,43 @@ class stock_move(osv.osv):
 			'state': 'requested'
 		})
 		return result
+
+# ==========================================================================================================================
+
+class stock_sublocation(osv.osv):
+	_name = 'stock.sublocation'
+	
+	_MAX_GET_NAME_COUNT = 10
+	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+
+	def _full_name(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for sublocation in self.browse(cr, uid, ids, context):
+			name_count = 0
+			iter_location = sublocation
+			full_name = iter_location.name
+			while iter_location.parent_id.id is not False and name_count < self._MAX_GET_NAME_COUNT:
+				iter_location = iter_location.parent_id
+				full_name = iter_location.name + ' / ' + full_name
+				name_count += 1
+			result[sublocation.id] = full_name
+		return result
+	
+	_columns = {
+		'name': fields.char('Name'),
+		'full_name': fields.function(_full_name, type='char', string='Full Name'),
+		'parent_id': fields.many2one('stock.sublocation', 'Parent Sublocation'),
+		'child_ids': fields.one2many('stock.sublocation', 'parent_id', 'Child Sublocations'),
+		'type': fields.selection([('view', 'View'), ('physical', 'Physical')], 'Type')
+	}
+	
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
+	def name_get(self, cr, uid, ids, context=None):
+		result = []
+		for sublocation in self.browse(cr, uid, ids, context):
+			result.append((sublocation.id, sublocation.full_name))
+		return result
+		
+	# METHODS ---------------------------------------------------------------------------------------------------------------

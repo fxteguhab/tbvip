@@ -96,5 +96,38 @@
 			</field>
 		</record>
 
+		<record id="stock_sublocation_form" model="ir.ui.view">
+			<field name="name">stock.sublocation.form</field>
+			<field name="model">stock.sublocation</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="name"/>
+						<field name="full_name" readonly="True"/>
+						<field name="type"/>
+						<field name="parent_id"/>
+						<field name="child_ids">
+							<tree editable="bottom">
+								<field name="name"/>
+								<field name="type"/>
+							</tree>
+						</field>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record id="stock_sublocation_tree" model="ir.ui.view">
+			<field name="name">stock.sublocation.tree</field>
+			<field name="model">stock.sublocation</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+					<field name="type"/>
+					<field name="parent_id"/>
+				</tree>
+			</field>
+		</record>
+
 	</data>
 </openerp>
