@@ -183,16 +183,16 @@ class tbvip_demand_line(osv.osv):
 			if demand.demand_type == 'interbranch':
 				# create stock move, set to available
 				stock_move_obj = self.pool.get('stock.move')
-				stock_location_obj = self.pool.get('stock.location')
-				requester_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.requester_branch_id.id)])
-				target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.target_branch_id.id)])
+				#stock_location_obj = self.pool.get('stock.location')
+				#requester_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.requester_branch_id.id)])
+				#target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.target_branch_id.id)])
 				stock_move_id = stock_move_obj.create(cr, uid, {
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'product_uom_qty': line.qty,
 					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
-					'location_id': requester_location_ids[0],
-					'location_dest_id': target_location_ids[0],
+					'location_id': line.demand_id.target_branch_id.default_incoming_location_id.id,
+					'location_dest_id': line.demand_id.target_branch_id.default_outgoing_location_id.id,
 				})
 				stock_move_obj.force_assign(cr, uid, stock_move_id)
 				self.write(cr, uid, line.id, {
@@ -252,9 +252,9 @@ class tbvip_demand_line(osv.osv):
 				'partner_id': supplier,
 				'date_order': datetime.today().strftime(DEFAULT_SERVER_DATETIME_FORMAT),
 				'picking_type_id': self._get_picking_in(cr, uid, context),
-				'location_id': branch_id.default_incoming_location,
+				'location_id': line.demand_id.target_branch_id.default_incoming_location_id.id,
 				'invoice_method': 'order',
-				# 'order_line': products,
+				 #'order_line': products,
 				'pricelist_id': self.pool.get('res.partner').browse(cr, uid, supplier).property_product_pricelist_purchase.id,
 			}, context)
 			for product in products:
