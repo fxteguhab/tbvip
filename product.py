@@ -48,6 +48,7 @@ class product_template(osv.osv):
 			string="Last Purchase", relation="purchase.order.line"),
 		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
 		'commission': fields.char('Commission', help="Discount string."),
+		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------
@@ -80,5 +81,18 @@ class product_product(osv.osv):
 	
 	_columns = {
 		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
-		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
 	}
+
+# ==========================================================================================================================
+
+class product_product_branch_sublocation(osv.osv):
+	_name = 'product.product.branch.sublocation'
+	
+	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'product_id': fields.many2one('product.product', 'Product'),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+		'sublocation_id': fields.many2one('stock.sublocation', 'Sublocation'),
+	}
+
