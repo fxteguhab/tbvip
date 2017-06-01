@@ -13,13 +13,10 @@ class stock_opname_memory_line(osv.osv_memory):
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
 		context = {} if context is None else None
+		product_obj = self.pool.get('product.product')
 		result = ''
-		for line in self.browse(cr, uid, ids. context):
-			product_sublocation = ''
-			for product_sublocation_id in line.product_id.product_sublocation_ids:
+		for product in product_obj.browse(cr, uid, [product_id], context):
+			for product_sublocation_id in product.product_sublocation_ids:
 				sublocation = product_sublocation_id.sublocation_id
-				product_sublocation += '\r\n' + sublocation.branch_id + ' / ' + sublocation.full_name
-			result += '\r\n' + product_sublocation
+				result += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
 		return {'value': {'sublocation': result}}
-		
-	

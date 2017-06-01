@@ -88,7 +88,7 @@ class product_product(osv.osv):
 class product_product_branch_sublocation(osv.osv):
 	_name = 'product.product.branch.sublocation'
 	
-	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'product_id': fields.many2one('product.product', 'Product'),

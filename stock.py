@@ -265,5 +265,23 @@ class stock_sublocation(osv.osv):
 		for sublocation in self.browse(cr, uid, ids, context):
 			result.append((sublocation.id, sublocation.full_name))
 		return result
-		
-	# METHODS ---------------------------------------------------------------------------------------------------------------
+
+# ==========================================================================================================================
+
+class stock_inventory_line(osv.osv):
+	_inherit = 'stock.inventory.line'
+	
+	_columns = {
+		'sublocation': fields.text('Sublocations'),
+	}
+	
+	def onchange_createline(self, cr, uid, ids, location_id=False, product_id=False, uom_id=False, package_id=False, prod_lot_id=False, partner_id=False, company_id=False, context=None):
+		result = super(stock_inventory_line, self).onchange_createline(cr, uid, ids, location_id, product_id, uom_id, package_id, prod_lot_id, partner_id, company_id, context)
+		product_obj = self.pool.get('product.product')
+		sublocation_name = ''
+		for product in product_obj.browse(cr, uid, [product_id], context):
+			for product_sublocation_id in product.product_sublocation_ids:
+				sublocation = product_sublocation_id.sublocation_id
+				sublocation_name += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
+		result['value'].update({'sublocation': sublocation_name})
+		return result
