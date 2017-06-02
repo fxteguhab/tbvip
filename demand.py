@@ -207,6 +207,7 @@ class tbvip_demand_line(osv.osv):
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'product_uom_qty': line.qty,
+					'discount_string': 'cost',
 				})]
 				sale_order_id = sale_order_obj.create(cr, uid, {
 					'partner_id': uid,
