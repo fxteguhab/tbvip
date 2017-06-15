@@ -8,6 +8,7 @@
 				<field name="partner_id" position="after">
 					<field name="commission_total" readonly="1"/>
 					<field name="bon_number"/>
+					<field name="branch_id" readonly="False"/>
 				</field>
 				<field name="price_subtotal" position="before">
 					<field name="commission"/>

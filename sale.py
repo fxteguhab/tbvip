@@ -13,6 +13,7 @@ class sale_order(osv.osv):
 	_columns = {
 		'commission_total': fields.float('Commission Total'),
 		'bon_number': fields.char('Bon Number'),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
