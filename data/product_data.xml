@@ -127,5 +127,13 @@
 			<field name="parent_id" ref="product.product_category_1"/>
 		</record>
 
+		<record model="product.product" id="product_product_ongkir">
+			<field name="name">Ongkir</field>
+			<field name="sale_ok" eval="False"/>
+			<field name="hr_expense_ok" eval="False"/>
+			<field name="purchase_ok" eval="False"/>
+			<field name="type">service</field>
+		</record>
+
 	</data>
 </openerp>
