@@ -12,8 +12,8 @@
 		"base", "board", "web", "website",
 		"chjs_custom_view",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr",
-		"purchase_needs", "purchase_sale_discount", "stock_opname",  "account_receivable_limit",
-		"sale_direct_cash"
+		"purchase_needs", "purchase_sale_discount", "stock_opname", "account_receivable_limit",
+		"sale_direct_cash", "canvassing",
 	],
 	'sequence': 150,
 	'data': [
@@ -43,6 +43,7 @@
 		'views/tbvip.xml',
 		'views/res_users_view.xml',
 		'views/stock_opname_view.xml',
+		'views/fleet_view.xml',
 		'report/account_report.xml',
 		'report/documents/stock_inventory.xml',
 		'report/documents/account_voucher.xml',
