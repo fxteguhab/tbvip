@@ -1,5 +1,6 @@
 from openerp.osv import osv, fields
 
+
 # ==========================================================================================================================
 
 class fleet_vehicle(osv.osv):
@@ -11,5 +12,5 @@ class fleet_vehicle(osv.osv):
 		'next_service_date': fields.date('Next Service Date'),
 		'next_pkb_date': fields.date('Next PKB Date'),
 	}
-	
+
 # ==========================================================================================================================
