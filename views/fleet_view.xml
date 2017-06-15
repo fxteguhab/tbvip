@@ -1,0 +1,28 @@
+<openerp>
+	<data>
+
+		<record model="ir.ui.view" id="fleet_vehicle_form_inherit">
+			<field name="name">tbvip.fleet.vehicle.form.inherit</field>
+			<field name="model">fleet.vehicle</field>
+			<field name="inherit_id" ref="fleet.fleet_vehicle_form"/>
+			<field name="arch" type="xml">
+				<field name="color" position="after">
+					<field name="next_service_date"/>
+					<field name="next_pkb_date"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="fleet_vehicle_tree_inherit">
+			<field name="name">tbvip.fleet.vehicle.tree.inherit</field>
+			<field name="model">fleet.vehicle</field>
+			<field name="inherit_id" ref="fleet.fleet_vehicle_tree"/>
+			<field name="arch" type="xml">
+				<field name="odometer_unit" position="after">
+					<field name="next_service_date"/>
+					<field name="next_pkb_date"/>
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>
