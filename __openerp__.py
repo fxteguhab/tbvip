@@ -44,6 +44,7 @@
 		'views/res_users_view.xml',
 		'views/stock_opname_view.xml',
 		'views/fleet_view.xml',
+		'views/canvassing_view.xml',
 		'report/account_report.xml',
 		'report/documents/stock_inventory.xml',
 		'report/documents/account_voucher.xml',
