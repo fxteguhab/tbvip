@@ -17,6 +17,9 @@
 				<xpath expr="//field[@name='price_subtotal']" position="after">
 					<field name="source" readonly="1" />
 				</xpath>
+				<field name="picking_type_id" position="before">
+					<field name="shipped_or_taken"/>
+				</field>
 			</field>
 		</record>
 

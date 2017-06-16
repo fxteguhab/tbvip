@@ -45,6 +45,10 @@ class purchase_order(osv.osv):
 			select=True, copy=False, track_visibility='always',
 			help="Depicts the date where the Quotation should be validated and "
 				 "converted into a Purchase Order, by default it's the creation date.", ),
+		'shipped_or_taken': fields.selection([
+			('shipped', 'Shipped'),
+			('taken', 'Taken')
+		], 'Shipped or Taken'),
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
