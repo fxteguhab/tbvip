@@ -19,16 +19,20 @@ class canvassing_canvas(osv.osv):
 		po_obj = self.pool.get('purchase.order')
 		so_obj = self.pool.get('sale.order')
 		
-		# Get picking ids from Purchase Orders
-		po_ids = po_obj.search(cr, uid, [('branch_id', '=', branch_id), ('state', '=', 'approved')], context)
+		# Get pickings from Purchase Orders
+		po_ids = po_obj.search(cr, uid, [
+			('branch_id', '=', branch_id), ('state', '=', 'approved'), ('shipped_or_taken', '=', 'shipped')
+		], context)
 		picking_ids = []
 		for po in po_obj.browse(cr, uid, po_ids, context):
 			for picking in po.picking_ids:
 				if picking.state == 'assigned':
 					picking_ids.append(picking)
 		
-		# Get picking ids from Sales Orders
-		so_ids = so_obj.search(cr, uid, [('branch_id', '=', branch_id), ('state', 'in', ['approved', 'progress'])], context)
+		# Get pickings from Sales Orders
+		so_ids = so_obj.search(cr, uid, [
+			('branch_id', '=', branch_id), ('state', 'in', ['approved', 'progress']), ('shipped_or_taken', '=', 'shipped')
+		], context)
 		for so in so_obj.browse(cr, uid, so_ids, context):
 			for picking in so.picking_ids:
 				if picking.state == 'assigned':
