@@ -71,15 +71,7 @@ class canvasssing_canvas_stock_line(osv.Model):
 	_columns = {
 		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
 	}
-
-	# OVERRIDES -------------------------------------------------------------------------------------------------------------
-
-	def onchange_address(self, cr, uid, ids, address, branch_id, context=None):
-		branch_obj = self.pool.get('tbvip.branch')
-		branch = branch_obj.browse(cr, uid, branch_id)
-		distance = google_maps.GoogleMaps.distance(address,branch.address,'driving')
-		return {'value': {'distance': distance}}
-
+	
 # ===========================================================================================================================
 
 class canvasssing_canvas_invoice_line(osv.Model):

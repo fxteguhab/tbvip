@@ -8,7 +8,7 @@
 			<field name="inherit_id" ref="canvassing.canvassing_canvas_form"/>
 			<field name="arch" type="xml">
 				<field name="name" position="after">
-					<field name="branch_id" on_change="onchange_branch_id(branch_id)"/>
+					<field name="branch_id"/>
 				</field>
 			</field>
 		</record>
@@ -19,7 +19,7 @@
 			<field name="inherit_id" ref="canvassing.canvassing_canvas_stock_line_tree"/>
 			<field name="arch" type="xml">
 				<field name="canvas_state" position="after">
-					<field name="canvas_branch_id" on_change="onchange_address(address,canvas_branch_id)"/>
+					<field name="canvas_branch_id"/>
 				</field>
 			</field>
 		</record>
@@ -30,7 +30,7 @@
 			<field name="inherit_id" ref="canvassing.canvassing_canvas_invoice_line_tree"/>
 			<field name="arch" type="xml">
 				<field name="canvas_state" position="after">
-					<field name="canvas_branch_id" on_change="onchange_address(address,canvas_branch_id)"/>
+					<field name="canvas_branch_id"/>
 				</field>
 			</field>
 		</record>
