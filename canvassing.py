@@ -62,31 +62,34 @@ class canvassing_canvas(osv.osv):
 		return picking_ids
 
 # ==========================================================================================================================
-
-class canvasssing_canvas_stock_line(osv.Model):
-	_inherit = 'canvassing.canvas.stock.line'
-	
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
-	}
-
-	# OVERRIDES -------------------------------------------------------------------------------------------------------------
-
-	def onchange_address(self, cr, uid, ids, address, branch_id, context=None):
-		branch_obj = self.pool.get('tbvip.branch')
-		branch = branch_obj.browse(cr, uid, branch_id)
-		distance = google_maps.GoogleMaps.distance(address,branch.address,'driving')
-		return {'value': {'distance': distance}}
-
-# ===========================================================================================================================
-
-class canvasssing_canvas_invoice_line(osv.Model):
-	_inherit = 'canvassing.canvas.invoice.line'
-	
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
-	}
+#
+# class canvasssing_canvas_stock_line(osv.Model):
+# 	_inherit = 'canvassing.canvas.stock.line'
+#
+# 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+#
+# 	_columns = {
+# 		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
+# 	}
+#
+# 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+#
+# 	def create(self, cr, uid, vals, context={}):
+# 		new_id = super(canvasssing_canvas_stock_line, self).create(cr, uid, vals, context)
+# 		# new = self.browse(cr, uid, new_id)
+# 		# if new.address and new.canvas_branch_id:
+# 		# 	self.write(cr, uid, [new_id], {
+# 		# 		'distance': 5, #google_maps.GoogleMaps.distance(new.address,new.canvas_branch_id,'driving')
+# 		# 	})
+# 		return new_id
+#
+# # ===========================================================================================================================
+#
+# class canvasssing_canvas_invoice_line(osv.Model):
+# 	_inherit = 'canvassing.canvas.invoice.line'
+#
+# 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+#
+# 	_columns = {
+# 		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
+# 	}
