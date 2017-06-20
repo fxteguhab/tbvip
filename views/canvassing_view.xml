@@ -8,7 +8,7 @@
 			<field name="inherit_id" ref="canvassing.canvassing_canvas_form"/>
 			<field name="arch" type="xml">
 				<field name="name" position="after">
-					<field name="branch_id"/>
+					<field name="branch_id" attrs="{'readonly': [('state', '=', 'finished')]}"/>
 				</field>
 			</field>
 		</record>
