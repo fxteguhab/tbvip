@@ -70,19 +70,19 @@ class canvasssing_canvas_stock_line(osv.Model):
 
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(canvasssing_canvas_stock_line, self).create(cr, uid, vals, context)
-		self._update_distance(cr, uid, new_id)
+		self._update_distance(cr, uid, [new_id])
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		result = super(canvasssing_canvas_stock_line, self).write(cr, uid, ids, vals, context)
 		if vals.get('address',False):
-			for id in ids:
-				self._update_distance(cr, uid, id)
+			self._update_distance(cr, uid, ids)
 		return result
 	
-	def _update_distance(self, cr, uid, stock_line_id, context=None):
-		obj = self.browse(cr, uid, stock_line_id)
-		if obj.address and obj.canvas_id.branch_id:
-			self.write(cr, uid, [stock_line_id], {
-				'distance': 5, #google_maps.GoogleMaps.distance(obj.address,obj.canvas_id.branch_id,'driving')
-			})
+	def _update_distance(self, cr, uid, stock_line_ids, context=None):
+		google_map = google_maps.GoogleMaps()
+		for obj in self.browse(cr, uid, stock_line_ids):
+			if obj.address and obj.canvas_id.branch_id:
+				self.write(cr, uid, [obj.id], {
+					'distance': google_map.distance(obj.address,obj.canvas_id.branch_id.address,'driving',api='masukkan_google_api_key_yang_benar'),
+				})
