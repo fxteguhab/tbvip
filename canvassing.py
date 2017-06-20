@@ -86,10 +86,3 @@ class canvasssing_canvas_stock_line(osv.Model):
 			self.write(cr, uid, [stock_line_id], {
 				'distance': 5, #google_maps.GoogleMaps.distance(obj.address,obj.canvas_id.branch_id,'driving')
 			})
-
-# ===========================================================================================================================
-#
-# class canvasssing_canvas_invoice_line(osv.Model):
-# 	_inherit = 'canvassing.canvas.invoice.line'
-#
-#
