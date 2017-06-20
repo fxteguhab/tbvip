@@ -65,43 +65,24 @@ class canvassing_canvas(osv.osv):
 
 class canvasssing_canvas_stock_line(osv.Model):
 	_inherit = 'canvassing.canvas.stock.line'
-	
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
-	}
-	
-# ===========================================================================================================================
 
-#
-# class canvasssing_canvas_stock_line(osv.Model):
-# 	_inherit = 'canvassing.canvas.stock.line'
-#
-# 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-#
-# 	_columns = {
-# 		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
-# 	}
-#
-# 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
-#
-# 	def create(self, cr, uid, vals, context={}):
-# 		new_id = super(canvasssing_canvas_stock_line, self).create(cr, uid, vals, context)
-# 		# new = self.browse(cr, uid, new_id)
-# 		# if new.address and new.canvas_branch_id:
-# 		# 	self.write(cr, uid, [new_id], {
-# 		# 		'distance': 5, #google_maps.GoogleMaps.distance(new.address,new.canvas_branch_id,'driving')
-# 		# 	})
-# 		return new_id
-#
-# # ===========================================================================================================================
-#
-# class canvasssing_canvas_invoice_line(osv.Model):
-# 	_inherit = 'canvassing.canvas.invoice.line'
-#
-# 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-#
-# 	_columns = {
-# 		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
-# 	}
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(canvasssing_canvas_stock_line, self).create(cr, uid, vals, context)
+		self._update_distance(cr, uid, new_id)
+		return new_id
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		result = super(canvasssing_canvas_stock_line, self).write(cr, uid, ids, vals, context)
+		if vals.get('address',False):
+			for id in ids:
+				self._update_distance(cr, uid, id)
+		return result
+	
+	def _update_distance(self, cr, uid, stock_line_id, context=None):
+		obj = self.browse(cr, uid, stock_line_id)
+		if obj.address and obj.canvas_id.branch_id:
+			self.write(cr, uid, [stock_line_id], {
+				'distance': 5, #google_maps.GoogleMaps.distance(obj.address,obj.canvas_id.branch_id,'driving')
+			})
