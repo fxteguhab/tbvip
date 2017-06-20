@@ -13,29 +13,6 @@
 			</field>
 		</record>
 
-<<<<<<< HEAD
-		<record id="canvassing_canvas_stock_line_tree_inherit" model="ir.ui.view">
-			<field name="name">canvassing.canvas.stock.line.tree.inherit</field>
-			<field name="model">canvassing.canvas.stock.line</field>
-			<field name="inherit_id" ref="canvassing.canvassing_canvas_stock_line_tree"/>
-			<field name="arch" type="xml">
-				<field name="canvas_state" position="after">
-					<field name="canvas_branch_id"/>
-				</field>
-			</field>
-		</record>
-
-		<record id="canvassing_canvas_invoice_line_tree_inherit" model="ir.ui.view">
-			<field name="name">canvassing.canvas.invoice.line.tree.inherit</field>
-			<field name="model">canvassing.canvas.invoice.line</field>
-			<field name="inherit_id" ref="canvassing.canvassing_canvas_invoice_line_tree"/>
-			<field name="arch" type="xml">
-				<field name="canvas_state" position="after">
-					<field name="canvas_branch_id"/>
-				</field>
-			</field>
-		</record>
-=======
 		<!--<record id="canvassing_canvas_stock_line_tree_inherit" model="ir.ui.view">-->
 			<!--<field name="name">canvassing.canvas.stock.line.tree.inherit</field>-->
 			<!--<field name="model">canvassing.canvas.stock.line</field>-->
@@ -57,7 +34,5 @@
 				<!--</field>-->
 			<!--</field>-->
 		<!--</record>-->
->>>>>>> 2d665d2824c1e1231803b05b75248e76d2e5384e
-
 	</data>
 </openerp>
