@@ -71,6 +71,7 @@
 						<field name="name"/>
 						<field name="default_incoming_location_id"/>
 						<field name="default_outgoing_location_id"/>
+						<field name="address"/>
 					</group>
 				</form>
 			</field>
@@ -83,6 +84,7 @@
 					<field name="name"/>
 					<field name="default_incoming_location_id"/>
 					<field name="default_outgoing_location_id"/>
+					<field name="address"/>
 				</tree>
 			</field>
 		</record>
