@@ -9,7 +9,7 @@ class canvassing_canvas(osv.osv):
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 	}
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
