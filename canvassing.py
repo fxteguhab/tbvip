@@ -62,7 +62,6 @@ class canvassing_canvas(osv.osv):
 		return picking_ids
 
 # ==========================================================================================================================
-<<<<<<< HEAD
 
 class canvasssing_canvas_stock_line(osv.Model):
 	_inherit = 'canvassing.canvas.stock.line'
@@ -75,15 +74,6 @@ class canvasssing_canvas_stock_line(osv.Model):
 	
 # ===========================================================================================================================
 
-class canvasssing_canvas_invoice_line(osv.Model):
-	_inherit = 'canvassing.canvas.invoice.line'
-	
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
-	}
-=======
 #
 # class canvasssing_canvas_stock_line(osv.Model):
 # 	_inherit = 'canvassing.canvas.stock.line'
@@ -115,4 +105,3 @@ class canvasssing_canvas_invoice_line(osv.Model):
 # 	_columns = {
 # 		'canvas_branch_id': fields.related('canvas_id', 'branch_id', type='many2one', string='Canvas Branch ID'),
 # 	}
->>>>>>> 2d665d2824c1e1231803b05b75248e76d2e5384e
