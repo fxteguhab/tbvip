@@ -220,7 +220,7 @@ class stock_move(osv.osv):
 	# OVERRIDES ------------------------------------------------------------------------------------------------------------
 	
 	def unlink(self, cr, uid, ids, context=None):
-		result = super(stock_move, self).write(cr, uid, ids, context)
+		result = super(stock_move, self).unlink(cr, uid, ids, context)
 		demand_line_obj = self.pool.get('tbvip.demand.line')
 		demand_line_ids = demand_line_obj.search(cr, uid, [('stock_move_id','in',ids)])
 		demand_line_obj.write(cr, uid, demand_line_ids, {

@@ -106,7 +106,7 @@ class sale_order_line(osv.osv):
 		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
-		result = super(sale_order_line, self).write(cr, uid, ids, context)
+		result = super(sale_order_line, self).unlink(cr, uid, ids, context)
 		demand_line_obj = self.pool.get('tbvip.demand.line')
 		demand_line_ids = demand_line_obj.search(cr, uid, [('sale_order_line_id','in',ids)])
 		demand_line_obj.write(cr, uid, demand_line_ids, {
