@@ -22,7 +22,38 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<menuitem id="menu_tbvip_branch" name="Branches" parent="base.menu_config"
+		<record id="action_tbvip_branch_working_hour" model="ir.actions.act_window">
+			<field name="name">Branch Working Hours</field>
+			<field name="res_model">tbvip.branch.working.hour</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="action_tbvip_additional_activity" model="ir.actions.act_window">
+			<field name="name">Additional Activities</field>
+			<field name="res_model">tbvip.additional.activity</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="action_tbvip_additional_activity_log" model="ir.actions.act_window">
+			<field name="name">Additional Activity Logs</field>
+			<field name="res_model">tbvip.additional.activity.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem id="menu_tbvip_branch" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch"/>
+
+		<menuitem id="menu_tbvip_branch_working_hour" parent="base.menu_config"
+				sequence="1" action="action_tbvip_branch_working_hour"/>
+
+		<menuitem id="menu_tbvip_hr_activity" parent="hr.menu_hr_root" name="Employee Activities"
+				sequence="20"/>
+			<menuitem id="menu_tbvip_additional_activity" parent="menu_tbvip_hr_activity"
+					sequence="1" action="action_tbvip_additional_activity"/>
+			<menuitem id="menu_tbvip_additional_activity_log" parent="menu_tbvip_hr_activity"
+				sequence="2" action="action_tbvip_additional_activity_log"/>
 	</data>
 </openerp>

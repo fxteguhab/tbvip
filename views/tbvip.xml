@@ -72,6 +72,8 @@
 						<field name="default_incoming_location_id"/>
 						<field name="default_outgoing_location_id"/>
 						<field name="address"/>
+						<field name="default_open_hour" widget="float_time"/>
+						<field name="default_closed_hour" widget="float_time"/>
 					</group>
 				</form>
 			</field>
@@ -82,9 +84,87 @@
 			<field name="arch" type="xml">
 				<tree>
 					<field name="name"/>
-					<field name="default_incoming_location_id"/>
-					<field name="default_outgoing_location_id"/>
-					<field name="address"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="tbvip_branch_working_hour_form" model="ir.ui.view">
+			<field name="name">tbvip.branch.working.hour.form</field>
+			<field name="model">tbvip.branch.working.hour</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="branch_id" on_change="onchange_branch_id(branch_id)"/>
+						<field name="start_date"/>
+						<field name="open_hour" widget="float_time"/>
+						<field name="closed_hour" widget="float_time"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="tbvip_branch_working_hour_tree" model="ir.ui.view">
+			<field name="name">tbvip.branch.working.hour.tree</field>
+			<field name="model">tbvip.branch.working.hour</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="branch_id"/>
+					<field name="start_date"/>
+					<field name="open_hour" widget="float_time"/>
+					<field name="closed_hour" widget="float_time"/>
+				</tree>
+			</field>
+		</record>
+
+
+		<record id="tbvip_additional_activity_form" model="ir.ui.view">
+			<field name="name">tbvip.additional.activity.form</field>
+			<field name="model">tbvip.additional.activity</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="name"/>
+						<field name="desc"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="tbvip_additional_activity_tree" model="ir.ui.view">
+			<field name="name">tbvip.additional.activity.tree</field>
+			<field name="model">tbvip.additional.activity</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+					<field name="desc"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="tbvip_additional_activity_log_form" model="ir.ui.view">
+			<field name="name">tbvip.additional.activity.log.form</field>
+			<field name="model">tbvip.additional.activity.log</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="branch_id"/>
+						<field name="activity_time"/>
+						<field name="employee_id"/>
+						<field name="additional_activity_id"/>
+						<field name="point"/>
+						<field name="employee_point_id" invisible="True"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="tbvip_additional_activity_log_tree" model="ir.ui.view">
+			<field name="name">tbvip.additional.activity.log.tree</field>
+			<field name="model">tbvip.additional.activity.log</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="branch_id"/>
+					<field name="activity_time"/>
+					<field name="employee_id"/>
+					<field name="additional_activity_id"/>
+					<field name="point"/>
 				</tree>
 			</field>
 		</record>

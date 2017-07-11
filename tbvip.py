@@ -1,10 +1,7 @@
-import calendar
 import csv
-import os
-from datetime import datetime, date, timedelta
+from datetime import datetime
 
-from dateutil.relativedelta import relativedelta
-from openerp.models import BaseModel
+import os
 from openerp.osv import osv, fields
 
 
@@ -21,6 +18,8 @@ class tbvip_branch(osv.osv):
 		'default_incoming_location_id': fields.many2one('stock.location', 'Default Incoming Location', required=True),
 		'default_outgoing_location_id': fields.many2one('stock.location', 'Default Outgoing Location', required=True),
 		'address': fields.text('Address', required=True),
+		'default_open_hour': fields.float('Default Open Hour'),
+		'default_closed_hour': fields.float('Default Closed Hour'),
 	}
 
 
@@ -711,3 +710,103 @@ class tbvip_data_synchronizer(osv.osv):
 		for row in posted: voucher_list.append(row)
 		for row in canceled: voucher_list.append(row)
 		"""
+		
+# ==========================================================================================================================
+
+class tbvip_branch_working_hour(osv.osv):
+	_name = 'tbvip.branch.working.hour'
+	_description = 'Working Hour'
+	
+	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
+		'start_date': fields.date('Start Date'),
+		'open_hour': fields.float('Open Hour'),
+		'closed_hour': fields.float('Closed Hour'),
+	}
+	
+	# DEFAULTS --------------------------------------------------------------------------------------------------------------
+	
+	_defaults = {
+		'start_date': datetime.now(),
+		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
+	}
+	
+	# ONCHANGES --------------------------------------------------------------------------------------------------------------
+	
+	def onchange_branch_id(self, cr, uid, ids, branch_id, context=None):
+		context = {} if context is None else context
+		result_value = {}
+		branch_obj = self.pool.get('tbvip.branch')
+		
+		branch = branch_obj.browse(cr, uid, [branch_id], context)
+		result_value['open_hour'] = branch.default_open_hour
+		result_value['closed_hour'] = branch.default_closed_hour
+		
+		return {'value': result_value}
+	
+	# OVERRIDES ------------------------------------------------------------------------------------------------------------------
+	
+	def name_get(self, cr, uid, ids, context=None):
+		result = []
+		for working_hour in self.browse(cr, uid, ids, context):
+			open_hour, open_minute = divmod(working_hour.open_hour * 60, 60)
+			closed_hour, closed_minute = divmod(working_hour.closed_hour * 60, 60)
+			name = "{wh.branch_id.name} | {wh.start_date} -> {0:02.0f}:{1:02.0f}-{2:02.0f}:{3:02.0f}".format(
+				open_hour, open_minute, closed_hour, closed_minute, wh=working_hour,
+			)
+			result.append((working_hour.id, name))
+		return result
+
+# ==========================================================================================================================
+
+
+class tbvip_additional_activity(osv.osv):
+	_name = 'tbvip.additional.activity'
+	_description = 'Additional Activity'
+	
+	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'name': fields.char('Name'),
+		'desc': fields.text('Description'),
+	}
+
+# ==========================================================================================================================
+
+
+class tbvip_additional_activity_log(osv.osv):
+	_name = 'tbvip.additional.activity.log'
+	_description = 'Additional Activity Log'
+	
+	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'employee_id': fields.many2one('hr.employee', 'Employee'),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+		'activity_time': fields.datetime('Time'),
+		'additional_activity_id': fields.many2one('tbvip.additional.activity', 'Activity'),
+		'point': fields.float('Point'),
+		'employee_point_id': fields.many2one('hr.point.employee.point', 'Employee Point', ondelete='set null'),
+	}
+	
+	# DEFAULTS --------------------------------------------------------------------------------------------------------------
+	
+	_defaults = {
+		'activity_time': datetime.now(),
+		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
+	}
+	
+	# OVERRIDES ------------------------------------------------------------------------------------------------------------------
+	
+	def name_get(self, cr, uid, ids, context=None):
+		result = []
+		for activity_log in self.browse(cr, uid, ids, context):
+			name = "{log.activity_time} | {log.employee_id.name} -> {log.additional_activity_id.name}".format(
+				log=activity_log
+			)
+			result.append((activity_log.id, name))
+		return result
+
+# ==========================================================================================================================
