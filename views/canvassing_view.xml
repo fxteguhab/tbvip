@@ -10,6 +10,9 @@
 				<field name="name" position="after">
 					<field name="branch_id" attrs="{'readonly': [('state', '=', 'finished')]}"/>
 				</field>
+				<field name="date_delivered" position="after">
+					<field name="total_distance" attrs="{'readonly': True, 'invisible': [('state', '!=', 'finished')]}"/>
+				</field>
 			</field>
 		</record>
 
