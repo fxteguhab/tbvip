@@ -1,0 +1,25 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="hr_employee_form_inherit">
+			<field name="name">hr.employee.form.inherit</field>
+			<field name="model">hr.employee</field>
+			<field name="inherit_id" ref="hr.view_employee_form"/>
+			<field name="arch" type="xml">
+				<field name="department_id" position="before">
+					<field name="employee_no"/>
+					<field name="type"/>
+				</field>
+			</field>
+		</record>
+		<record model="ir.ui.view" id="hr_attendance_form_inherit">
+			<field name="name">hr.attendance.form.inherit</field>
+			<field name="model">hr.attendance</field>
+			<field name="inherit_id" ref="hr_attendance.view_attendance_form"/>
+			<field name="arch" type="xml">
+				<field name="employee_id" position="after">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>

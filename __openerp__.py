@@ -35,6 +35,7 @@
 		'views/bon_view.xml',
 		'views/demand_view.xml',
 		'views/employee_view.xml',
+		'views/hr_view.xml',
 		'views/product_view.xml',
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
