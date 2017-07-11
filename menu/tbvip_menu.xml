@@ -49,11 +49,10 @@
 		<menuitem id="menu_tbvip_branch_working_hour" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch_working_hour"/>
 
-		<menuitem id="menu_tbvip_hr_activity" parent="hr.menu_hr_root" name="Employee Activities"
-				sequence="20"/>
-			<menuitem id="menu_tbvip_additional_activity" parent="menu_tbvip_hr_activity"
-					sequence="1" action="action_tbvip_additional_activity"/>
-			<menuitem id="menu_tbvip_additional_activity_log" parent="menu_tbvip_hr_activity"
-				sequence="2" action="action_tbvip_additional_activity_log"/>
+		<menuitem name="Employee Activities" sequence="20" parent="hr.menu_hr_root" id="menu_hr_activity"/>
+			<menuitem id="menu_tbvip_additional_activity" parent="menu_hr_activity"
+					sequence="5" action="action_tbvip_additional_activity"/>
+			<menuitem id="menu_tbvip_additional_activity_log" parent="menu_hr_activity"
+				sequence="6" action="action_tbvip_additional_activity_log"/>
 	</data>
 </openerp>
