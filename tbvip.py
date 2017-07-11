@@ -15,8 +15,8 @@ class tbvip_branch(osv.osv):
 	
 	_columns = {
 		'name': fields.char('Branch Name', required=True),
-		'default_incoming_location_id': fields.many2one('stock.location', 'Default Incoming Location', required=True),
-		'default_outgoing_location_id': fields.many2one('stock.location', 'Default Outgoing Location', required=True),
+		'default_incoming_location_id': fields.many2one('stock.location', 'Default Incoming Location'),
+		'default_outgoing_location_id': fields.many2one('stock.location', 'Default Outgoing Location'),
 		'address': fields.text('Address', required=True),
 		'default_open_hour': fields.float('Default Open Hour'),
 		'default_closed_hour': fields.float('Default Closed Hour'),

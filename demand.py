@@ -186,6 +186,10 @@ class tbvip_demand_line(osv.osv):
 				#stock_location_obj = self.pool.get('stock.location')
 				#requester_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.requester_branch_id.id)])
 				#target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.target_branch_id.id)])
+				if line.demand_id.target_branch_id.default_incoming_location_id:
+					raise osv.except_osv(_('Error!'), _("Please set default branch incoming location"))
+				if line.demand_id.target_branch_id.default_outgoing_location_id:
+					raise osv.except_osv(_('Error!'), _("Please set default branch outgoing location"))
 				stock_move_id = stock_move_obj.create(cr, uid, {
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,

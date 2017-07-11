@@ -3,10 +3,12 @@
 
 		<record id="tbvip_branch_22" model="tbvip.branch">
 			<field name="name">Pahlawan 22</field>
+			<field name="address">Jalan Pahlawan 22</field>
 		</record>
 
 		<record id="tbvip_branch_49" model="tbvip.branch">
 			<field name="name">Pahlawan 49</field>
+			<field name="address">Jalan Pahlawan 49</field>
 		</record>
 
 	</data>
