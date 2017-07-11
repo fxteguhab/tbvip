@@ -15,8 +15,8 @@ class tbvip_branch(osv.osv):
 	
 	_columns = {
 		'name': fields.char('Branch Name', required=True),
-		'default_incoming_location_id': fields.many2one('stock.location', 'Default Incoming Location', required=True),
-		'default_outgoing_location_id': fields.many2one('stock.location', 'Default Outgoing Location', required=True),
+		'default_incoming_location_id': fields.many2one('stock.location', 'Default Incoming Location'),
+		'default_outgoing_location_id': fields.many2one('stock.location', 'Default Outgoing Location'),
 		'address': fields.text('Address', required=True),
 		'default_open_hour': fields.float('Default Open Hour'),
 		'default_closed_hour': fields.float('Default Closed Hour'),
@@ -808,5 +808,30 @@ class tbvip_additional_activity_log(osv.osv):
 			)
 			result.append((activity_log.id, name))
 		return result
-
+	
+	def create(self, cr, uid, vals, context=None):
+		result = super(tbvip_additional_activity_log, self).create(cr, uid, vals, context)
+		self._create_employee_point(cr, uid, result, context)
+		return result
+	
+	def _create_employee_point(self, cr, uid, additional_activity_log_id, context=None):
+		"""
+		Create new hr.point.employee.point based on newly created tbvip.additional.activity.log and update its
+		employee_point_id
+		:param additional_activity_log_id:
+		"""
+		employee_point_obj = self.pool.get('hr.point.employee.point')
+		additional_activity_log = self.browse(cr, uid, [additional_activity_log_id], context)
+		employee_point_vals = {
+			'event_date': additional_activity_log.activity_time,
+			'employee_id': additional_activity_log.employee_id.id,
+			# 'point_type_id': additional_activity_log_vals.get('event_date'), TODO Get point type for additional activity from external ID?
+			'point': additional_activity_log.point,
+			'reference_model': self._name,
+			'reference_id': additional_activity_log_id,
+		}
+		new_employee_point_id = employee_point_obj.create(cr, uid, employee_point_vals, context)
+		# Update employee_point_id
+		self.write(cr, uid, [additional_activity_log_id], {'employee_point_id': new_employee_point_id})
+		
 # ==========================================================================================================================
