@@ -13,7 +13,7 @@
 		"chjs_custom_view",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr",
 		"purchase_needs", "purchase_sale_discount", "stock_opname", "account_receivable_limit",
-		"sale_direct_cash", "canvassing",
+		"hr_employee_point", "sale_direct_cash", "canvassing", "hr_attendance",
 	],
 	'sequence': 150,
 	'data': [
