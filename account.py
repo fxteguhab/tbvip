@@ -36,5 +36,5 @@ class account_journal_edc(osv.osv):
 	
 	_columns = {
 		'qty_sum': fields.function(_qty_sum, type="integer", string="Qty Sum"),
-		'row_count': fields.function(_row_count, type="integer", string="Qty Sum"),
+		'row_count': fields.function(_row_count, type="integer", string="Row Count"),
 	}
