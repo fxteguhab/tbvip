@@ -10,6 +10,10 @@
 						account.group_account_manager
 					</attribute>
 				</button>
+				<field name="account_id" position="after">
+					<field name="qty_sum"/>
+					<field name="row_count"/>
+				</field>
 			</field>
 		</record>
 	</data>
