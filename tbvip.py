@@ -821,11 +821,13 @@ class tbvip_additional_activity_log(osv.osv):
 		:param additional_activity_log_id:
 		"""
 		employee_point_obj = self.pool.get('hr.point.employee.point')
+		model_obj = self.pool.get('ir.model.data')
+		model, point_type_id = model_obj.get_object_reference(cr, uid, 'hr_employee_point', 'hr_point_type_xtra')
 		additional_activity_log = self.browse(cr, uid, [additional_activity_log_id], context)
 		employee_point_vals = {
 			'event_date': additional_activity_log.activity_time,
 			'employee_id': additional_activity_log.employee_id.id,
-			# 'point_type_id': additional_activity_log_vals.get('event_date'), TODO Get point type for additional activity from external ID?
+			'point_type_id': point_type_id,
 			'point': additional_activity_log.point,
 			'reference_model': self._name,
 			'reference_id': additional_activity_log_id,
