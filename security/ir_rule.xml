@@ -5,10 +5,10 @@
 			<field name="name">TBVIP: Branch only demands</field>
 			<field name="model_id" ref="tbvip.model_tbvip_demand"/>
 			<field name="domain_force">[('requester_branch_id', '=', user.branch_id)]</field>
-			<field name="perm_read" eval="False"/>
-			<field name="perm_write" eval="False"/>
+			<field name="perm_read" eval="True"/>
+			<field name="perm_write" eval="True"/>
 			<field name="perm_create" eval="True"/>
-			<field name="perm_unlink" eval="False"/>
+			<field name="perm_unlink" eval="True"/>
 		</record>
 
 		<record id="tbvip_rule_demand_admin" model="ir.rule">

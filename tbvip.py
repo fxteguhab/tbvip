@@ -368,7 +368,121 @@ class tbvip_data_synchronizer(osv.osv):
 			data = perform_supplier_data_conversion(supplier)
 			mysql_bridge_obj.update_insert(cr, uid, 'res.partner', data['mysql_partner_id'], partner_map_codex_ids,
 				partner_map_ids, data)
-		
+
+# versi 20170720
+	
+	def util_import_category_csv(self, cr, uid, context={}):
+	# mengimport list kategori dari file csv
+	# buka dan baca filenya dulu
+		try:
+			sep = os.sep
+			temp = os.path.abspath(os.path.dirname(__file__)).split(sep)
+			basepath = ''
+			for slicer in temp[:-1]:
+				basepath = basepath + slicer + sep
+			fullpath = basepath + '/tbvip/static/import/category-ready.csv'
+			fullpath = fullpath.replace('/', sep)
+			f = open(fullpath, 'rb')
+		except:
+			raise osv.except_osv("Sync Error", "Category file not found.")
+		try:
+			category_lines = []
+			reader = csv.reader(f)
+			for row in reader:
+				if row[0] == 'codex_id': continue
+				category_lines.append(row)
+		except:
+			f.close()
+			raise osv.except_osv("Sync Error", "Unable to open source category.")
+		finally:
+			f.close()
+	# untuk setiap baris, cari parent category berdasarkan namanya
+	# supaya rada cepet, kita pake "cache"
+		parent_cache = {}
+		category_obj = self.pool.get('product.category')
+		for line in category_lines:
+			mysql_id = line[0]
+			categ_name = line[2]
+			parent_name = line[3]
+			if not parent_cache.get(parent_name):
+				parent_ids = category_obj.search(cr, uid, [('name','=',parent_name)])
+				if len(parent_ids) > 0:
+					parent_data = category_obj.browse(cr, uid, parent_ids[0])
+					parent_cache.update({parent_data.name: parent_data.id})
+			parent_id = parent_cache.get(parent_name, False)
+			if not parent_id: continue
+			if categ_name.endswith('VARIANT'): categ_name = categ_name.replace(' VARIANT','')
+			category_obj.create(cr, uid, {
+				'name': categ_name,
+				'parent_id': parent_id,
+				'codex_id': int(mysql_id),
+				})
+
+	def util_import_product_basic_csv(self, cr, uid, context={}):
+	# mengimport list product basic dari file csv
+		category_obj = self.pool.get('product.category')
+		product_obj = self.pool.get('product.template')
+	# buka dan baca filenya dulu
+		try:
+			sep = os.sep
+			temp = os.path.abspath(os.path.dirname(__file__)).split(sep)
+			basepath = ''
+			for slicer in temp[:-1]:
+				basepath = basepath + slicer + sep
+			fullpath = basepath + '/tbvip/static/import/product-ready-basic.csv'
+			fullpath = fullpath.replace('/', sep)
+			f = open(fullpath, 'rb')
+		except:
+			raise osv.except_osv("Sync Error", "Product file not found.")
+		try:
+			product_lines = []
+			reader = csv.reader(f)
+			for row in reader:
+				if row[0] == 'codex_id': continue
+				product_lines.append(row)
+		except:
+			f.close()
+			raise osv.except_osv("Sync Error", "Unable to open source product.")
+		finally:
+			f.close()
+	# supaya ngga ngambil2 terus ke category, kita kasih cache. ini pasangan codex_id dan odoo id dari category ybs
+		category_cache = {}
+	# khusus uncategories, tambahin dulu ke cache
+		category_ids = category_obj.search(cr, uid, [('name','=','UNCATEGORIES')])
+		category_cache.update({'0': category_ids[0]})
+		category_ids = category_obj.search(cr, uid, [('name','=','INVALID IMPORT CATEGORY')])
+		category_cache.update({'999999': category_ids[0]})
+		invalid_categories = [
+			'164','212','264','282','542','869','871','956','1011','1048','1136','1205','1220','1532','2095','2096','2171','2172','3393','3403','3566','3568','4123','4168',
+			'9009' # id ini tidak terdaftar di item_codex
+		]
+	# mulai jalanin sebaris2
+		for line in product_lines:
+			mysql_id = int(line[0])
+			categ_id = line[1]
+			if categ_id not in category_cache:
+				category_ids = category_obj.search(cr, uid, [('codex_id','=',categ_id)])
+				if len(category_ids) == 0:
+					if categ_id not in invalid_categories:
+						raise osv.except_osv('Product Import Error','Cannot find old category id: %s' % categ_id)
+					else:
+						categ_id = '999999'
+				else:
+					category_data = category_obj.browse(cr, uid, category_ids[0])
+					category_cache.update({categ_id: category_data.id})
+			data = {
+				'name': line[4],
+				'type': 'product',
+				'state': 'sellable',
+				'codex_id': int(line[0]),
+				'categ_id': category_cache.get(categ_id, None)
+			}
+			product_obj.create(cr, uid, data)
+			print data
+
+		#raise osv.except_osv('test','sudah sampai')
+
+
 # EMPLOYEE -----------------------------------------------------------------------------------------------------------------
 	
 	def cron_sync_employee(self, cr, uid, context={}):

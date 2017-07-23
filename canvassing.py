@@ -38,7 +38,7 @@ class canvassing_canvas(osv.osv):
 		
 		# Get pickings from Purchase Orders
 		po_ids = po_obj.search(cr, uid, [
-			('branch_id', '=', branch_id), ('state', '=', 'approved'), ('shipped_or_taken', '=', 'shipped')
+			('branch_id', '=', branch_id), ('state', '=', 'approved'), ('shipped_or_taken', '=', 'taken')
 		], context)
 		picking_ids = []
 		for po in po_obj.browse(cr, uid, po_ids, context):

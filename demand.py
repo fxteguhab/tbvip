@@ -60,7 +60,7 @@ class tbvip_demand(osv.osv):
 	
 	def _check_user_assigned_to_branch(self, cr, uid, ids, context=None):
 		users_obj = self.pool.get('res.users')
-		user_branch_id = users_obj.browse(cr, uid, [uid], context).branch_id
+		user_branch_id = users_obj.browse(cr, uid, [uid], context).branch_id.id
 		for demand in self.browse(cr, uid, ids, context):
 			if demand.demand_type == 'interbranch' and not user_branch_id:
 				return False
@@ -102,7 +102,7 @@ class tbvip_demand_line(osv.osv):
 		return result
 	
 	_columns = {
-		'demand_id': fields.many2one('tbvip.demand', 'Demand', required=True),
+		'demand_id': fields.many2one('tbvip.demand', 'Demand', required=True, ondelete="cascade"),
 		'request_date': fields.function(_request_date, string="Total Amount Reconciled", type='datetime', store=True),
 		'response_date': fields.datetime('User Respond Time'),
 		'demand_type': fields.function(_demand_type, string="Demand Type", type='selection', selection=_DEMAND_TYPE, store=True),
@@ -186,17 +186,17 @@ class tbvip_demand_line(osv.osv):
 				#stock_location_obj = self.pool.get('stock.location')
 				#requester_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.requester_branch_id.id)])
 				#target_location_ids = stock_location_obj.search(cr, uid, [('branch_id','=',demand.target_branch_id.id)])
-				if line.demand_id.target_branch_id.default_incoming_location_id:
+				if not line.demand_id.requester_branch_id.default_incoming_location_id.id:
 					raise osv.except_osv(_('Error!'), _("Please set default branch incoming location"))
-				if line.demand_id.target_branch_id.default_outgoing_location_id:
+				if not line.demand_id.target_branch_id.default_outgoing_location_id.id:
 					raise osv.except_osv(_('Error!'), _("Please set default branch outgoing location"))
 				stock_move_id = stock_move_obj.create(cr, uid, {
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'product_uom_qty': line.qty,
-					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
-					'location_id': line.demand_id.target_branch_id.default_incoming_location_id.id,
-					'location_dest_id': line.demand_id.target_branch_id.default_outgoing_location_id.id,
+					'name': _("Demand from %s to %s at %s") % (demand.requester_branch_id.name,demand.target_branch_id.name,demand.request_date),
+					'location_id': line.demand_id.target_branch_id.default_outgoing_location_id.id,
+					'location_dest_id': line.demand_id.requester_branch_id.default_incoming_location_id.id,
 				})
 				stock_move_obj.force_assign(cr, uid, stock_move_id)
 				self.write(cr, uid, line.id, {
@@ -207,7 +207,7 @@ class tbvip_demand_line(osv.osv):
 				# create sales order, set to confirm
 				sale_order_obj = self.pool.get('sale.order')
 				order_lines = [(0, False, {
-					'name': 'Demand from ' + demand.requester_branch_id.name + ' at ' + demand.request_date,
+					'name': _("Demand from %s to %s at %s") % (demand.requester_branch_id.name,demand.target_branch_id.name,demand.request_date),
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'product_uom_qty': line.qty,

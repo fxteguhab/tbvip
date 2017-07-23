@@ -285,3 +285,11 @@ class stock_inventory_line(osv.osv):
 				sublocation_name += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
 		result['value'].update({'sublocation': sublocation_name})
 		return result
+
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(stock_inventory_line, self).create(cr, uid, vals, context=context)
+		onchange_result = self.onchange_createline(cr, uid, [new_id], vals['location_id'], vals['product_id'])
+		self.write(cr, uid, [new_id], {
+			'sublocation': onchange_result['value']['sublocation']
+			})
+		return new_id

@@ -11,38 +11,67 @@ class sale_order(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'commission_total': fields.float('Commission Total'),
+		'commission_total': fields.float('Commission Total', readonly=True),
 		'bon_number': fields.char('Bon Number'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
+	}
+
+	def _default_partner_id(self, cr, uid, context={}):
+	# kalau penjualan cash, default customer adalah general customer
+		partner_id = None
+		if context.get('default_cash_or_receivable') == 'cash':
+			model, general_customer_id = self.pool['ir.model.data'].get_object_reference(
+				cr, uid, 'tbvip', 'tbvip_customer_general')
+			partner_id = general_customer_id or None
+		return partner_id
+
+	def _default_branch_id(self, cr, uid, context={}):
+	# default branch adalah tempat user sekarang ditugaskan
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		return user_data.branch_id.id or None
+
+	_defaults = {
+		'partner_id': _default_partner_id,
+		'branch_id': _default_branch_id,
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
-		if vals.get('order_line', False):
-			vals['commission_total'] = self._calculate_commission_total(cr, uid, vals['order_line'])
 		if vals.get('bon_number', False):
 			self._update_bon_book(cr, uid, vals['bon_number'])
-		return super(sale_order, self).create(cr, uid, vals, context)
+		new_id = super(sale_order, self).create(cr, uid, vals, context)
+		self._calculate_commission_total(cr, uid, new_id)
+		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
-		if vals.get('order_line', False):
-			vals['commission_total'] = self._calculate_commission_total(cr, uid, vals['order_line'])
 		if vals.get('bon_number', False):
 			self._update_bon_book(cr, uid, vals['bon_number'])
-		return super(sale_order, self).write(cr, uid, ids, vals, context)
+		result = super(sale_order, self).write(cr, uid, ids, vals, context)
+		if vals.get('order_line', False):
+			for sale_id in ids:
+				self._calculate_commission_total(cr, uid, sale_id)
+		return result
 	
-	def _calculate_commission_total(self, cr, uid, order_lines):
-		commission_total = 0
+	def _calculate_commission_total(self, cr, uid, sale_order_id):
 		product_uom_obj = self.pool.get('product.uom')
 		product_obj = self.pool.get('product.product')
-		for order_line in order_lines:
-			if order_line[2].get('product_uom_qty', False) and order_line[2].get('commission_amount', False):
+		order_data = self.browse(cr, uid, sale_order_id)
+		commission_total = 0
+		for order_line in order_data.order_line:
+			qty = product_uom_obj._compute_qty(cr, uid,
+				order_line.product_uom.id, order_line.product_uom_qty, order_line.product_id.product_tmpl_id.uom_id.id)
+			commission_total += order_line.commission_amount * qty
+			"""
+			if order_line[2].get('product_uom_qty', False) or order_line[2].get('commission_amount', False):
 				product = product_obj.browse(cr, uid, order_line[2]['product_id'])
 				qty = product_uom_obj._compute_qty(cr, uid,
 					order_line[2]['product_uom'], order_line[2]['product_uom_qty'], product.product_tmpl_id.uom_id.id)
 				commission_total += (qty * order_line[2]['commission_amount'])
-		return commission_total
+			"""
+		self.write(cr, uid, [sale_order_id], {
+			'commission_total': commission_total
+			})
 		
 	def _update_bon_book(self, cr, uid, bon_number):
 		bon_book_same_number_ids = self.search(cr, uid, [
@@ -67,14 +96,13 @@ class sale_order(osv.osv):
 			else:
 				used_numbers = []
 				if bon_book.used_numbers:
-					used_numbers = bon_book.used_numbers.split(',')
+					used_numbers = bon_book.used_numbers.split(', ')
 					for used_number in used_numbers:
 						if used_number == bon_number:
 							raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
 				bon_book_obj.write(cr, uid, bon_book.id, {
 					'total_used': bon_book.total_used + 1,
-					'used_numbers': (bon_book.used_numbers + ',' + bon_number)
-					if (len(used_numbers)>1) else bon_number
+					'used_numbers': (bon_book.used_numbers + ', ' + bon_number) if (len(used_numbers)>=1) else bon_number,
 				})
 		else:
 			raise osv.except_orm(_('Creating sale order error'),
@@ -121,10 +149,10 @@ class sale_order_line(osv.osv):
 		commission = order_line['commission']
 		if sale_order_line_id:
 			sale_order_line = self.browse(cr, uid, sale_order_line_id)
-			product_id = sale_order_line['product_id'].id
-			product_uom = sale_order_line['product_uom'].id
-			product_uom_qty = sale_order_line['product_uom_qty']
-			price_unit = sale_order_line['price_unit']
+			product_id = sale_order_line.product_id.id
+			product_uom = sale_order_line.product_uom.id
+			product_uom_qty = sale_order_line.product_uom_qty
+			price_unit = sale_order_line.price_unit
 		else:
 			product_id = order_line['product_id']
 			product_uom = order_line['product_uom']
@@ -134,7 +162,8 @@ class sale_order_line(osv.osv):
 		product = product_obj.browse(cr, uid, product_id)
 		qty = product_uom_obj._compute_qty(cr, uid,
 			product_uom, product_uom_qty, product.product_tmpl_id.uom_po_id.id)
-		price_unit_one_qty = price_unit * 1.0 / qty
+		#price_unit_one_qty = price_unit * 1.0 / qty
+		price_unit_one_qty = price_unit * 1.0
 		try:
 			valid_commission_string = \
 				commission_utility.validate_commission_string(commission, price_unit_one_qty)
