@@ -20,6 +20,7 @@ class tbvip_branch(osv.osv):
 		'address': fields.text('Address', required=True),
 		'default_open_hour': fields.float('Default Open Hour'),
 		'default_closed_hour': fields.float('Default Closed Hour'),
+		'fingerprint_id': fields.char('Fingerprint ID'),
 	}
 
 

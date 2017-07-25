@@ -74,6 +74,7 @@
 						<field name="address"/>
 						<field name="default_open_hour" widget="float_time"/>
 						<field name="default_closed_hour" widget="float_time"/>
+						<field name="fingerprint_id" />
 					</group>
 				</form>
 			</field>
