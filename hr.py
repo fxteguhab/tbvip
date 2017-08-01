@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
+from openerp.tools.translate import _
 
 # ==========================================================================================================================
 
