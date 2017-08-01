@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
+from openerp.tools.translate import _
 
 # ==========================================================================================================================
 
@@ -25,6 +26,18 @@ class hr_attendance(osv.osv):
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
+
+	def create(self, cr, uid, vals, context={}):
+	# kalau ada absen maka otomatis pindahkan user ke cabang tempat di absen
+	# assuming ada data cabangnya ya
+		if vals.get('branch_id', False):
+			user_obj = self.pool.get('res.users')
+			employee_obj = self.pool.get('hr.employee')
+			employee_data = employee_obj.browse(cr, uid, vals.get('employee_id'))
+			user_obj.write(cr, uid, [employee_data.user_id.id], {
+				'branch_id': vals['branch_id']
+				})
+		return super(hr_attendance, self).create(cr, uid, vals, context=context)
 
 	def save_fingerprint_data(self, cr, uid, branch_id, employee_id, attendance_time, context={}):
 	# asumsi: branch id dan employee id dalam fingerprint ID, jadi harus dicari dulu 
