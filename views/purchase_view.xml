@@ -3,6 +3,7 @@
 		<record model="ir.ui.view" id="purchase_order_form_inherit">
 			<field name="name">purchase.order.form.inherit</field>
 			<field name="model">purchase.order</field>
+			<field name="priority">17</field>
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
 				<field name="partner_id" position="before">
@@ -20,6 +21,11 @@
 				<field name="picking_type_id" position="before">
 					<field name="shipped_or_taken"/>
 				</field>
+				<!--<field name="product_id" position="attributes">-->
+					<!--<attribute name="on_change">onchange_product_id(parent.pricelist_id, product_id, 0, False,-->
+						<!--parent.partner_id, parent.date_order, parent.fiscal_position, date_planned, False, False,-->
+						<!--parent.state, discount_from_subtotal, parent.price_type_id, context)</attribute>-->
+				<!--</field>-->
 			</field>
 		</record>
 
