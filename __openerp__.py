@@ -37,6 +37,7 @@
 		'views/employee_view.xml',
 		'views/hr_view.xml',
 		'views/product_view.xml',
+		'views/product_production_view.xml',
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
 		'views/sale_view.xml',
