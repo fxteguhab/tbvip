@@ -10,3 +10,10 @@ class product_production(osv.osv):
 		employee_obj = self.pool.get('hr.employee')
 		employee = employee_obj.browse(cr, uid, employee_id)
 		return { 'value': { 'location_id': employee.user_id.branch_id.default_incoming_location_id.id }}
+		
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(product_production, self).create(cr, uid, vals, context)
+		confirm = self.action_confirm(cr, uid, new_id, context)
+		return new_id
