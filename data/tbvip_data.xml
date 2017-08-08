@@ -27,6 +27,12 @@
 			<field name="sell_price_type_id" ref="tbvip_normal_price_sell"></field>
 		</record>
 
+		<record id="tbvip_supplier_general" model="res.partner">
+			<field name="name">GENERAL SUPPLIER</field>
+			<field name="customer" eval="True" />
+			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"></field>
+		</record>
+
 		<!-- EMPLOYEE POINT ROLE -->
 
 		<record id="tbvip_employee_point_role_admin" model="hr.point.employee.role">

@@ -26,6 +26,17 @@
 						parent.partner_id, parent.date_order, parent.fiscal_position, date_planned, False, False,
 						parent.state, discount_from_subtotal, parent.price_type_id, context)</attribute>
 				</field>
+				<field name="product_qty" position="attributes">
+					<attribute name="on_change">onchange_product_id(parent.pricelist_id, product_id, 0, False,
+						parent.partner_id, parent.date_order, parent.fiscal_position, date_planned, False, False,
+						parent.state, discount_from_subtotal, parent.price_type_id, context)</attribute>
+				</field>
+				<field name="name" position="replace">
+					<field name="name" invisible="1"/>
+				</field>
+				<field name="source" position="replace">
+					<field name="source" invisible="1"/>
+				</field>
 			</field>
 		</record>
 

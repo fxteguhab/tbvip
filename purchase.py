@@ -24,6 +24,16 @@ class purchase_order(osv.osv):
 			result[data.id] = max_alert
 		return result
 	
+	def _default_partner_id(self, cr, uid, context={}):
+		model, general_supplier_id = self.pool['ir.model.data'].get_object_reference(
+			cr, uid, 'tbvip', 'tbvip_supplier_general')
+		return general_supplier_id
+	
+	def _default_branch_id(self, cr, uid, context={}):
+		# default branch adalah tempat user sekarang ditugaskan
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		return user_data.branch_id.id or None
+	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -53,6 +63,12 @@ class purchase_order(osv.osv):
 			('shipped', 'Shipped'),
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
+	}
+	
+	_defaults = {
+		'partner_id': _default_partner_id,
+		'branch_id': _default_branch_id,
+		'shipped_or_taken': 'taken',
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -227,7 +243,6 @@ class purchase_order_line(osv.osv):
 
 		result_discount = psd.purchase_discount.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order, fiscal_position_id, date_planned, name, price_unit, state, discount_from_subtotal=discount_from_subtotal, context=context)
-
 
 		result = result_discount
 		if result_price_type:
