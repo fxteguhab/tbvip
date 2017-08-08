@@ -11,9 +11,20 @@
 			<field name="address">Jalan Pahlawan 49</field>
 		</record>
 
+		<record id="tbvip_normal_price_sell" model="price.type">
+			<field name="name">NORMAL PRICE SELL</field>
+			<field name="type">sell</field>
+		</record>
+
+		<record id="tbvip_normal_price_buy" model="price.type">
+			<field name="name">NORMAL PRICE BUY</field>
+			<field name="type">buy</field>
+		</record>
+
 		<record id="tbvip_customer_general" model="res.partner">
 			<field name="name">GENERAL CUSTOMER</field>
 			<field name="customer" eval="True" />
+			<field name="sell_price_type_id" ref="tbvip_normal_price_sell"></field>
 		</record>
 
 		<!-- EMPLOYEE POINT ROLE -->

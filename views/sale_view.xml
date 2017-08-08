@@ -3,17 +3,23 @@
 		<record model="ir.ui.view" id="view_order_form_inherit">
 			<field name="name">sale.order.form.inherit</field>
 			<field name="model">sale.order</field>
-			<field name="inherit_id" ref="sale.view_order_form"/>
+			<field name="inherit_id" ref="purchase_sale_discount.view_order_form_inherit"/>
 			<field name="arch" type="xml">
 				<field name="partner_id" position="after">
 					<field name="commission_total" readonly="1"/>
 					<field name="bon_number"/>
 					<field name="branch_id" readonly="False"/>
 				</field>
-				<field name="price_subtotal" position="before">
+				<xpath expr="//field[@name='order_line']/tree//field[@name='discount_string']" position="after">
 					<field name="commission"/>
 					<field name="commission_amount" readonly="1"/>
-				</field>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="replace">
+					<field name="name" invisible="1"/>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='tax_id']" position="replace">
+					<field name="tax_id" invisible="1"/>
+				</xpath>
 			</field>
 		</record>
 
