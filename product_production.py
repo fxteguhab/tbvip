@@ -16,4 +16,5 @@ class product_production(osv.osv):
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(product_production, self).create(cr, uid, vals, context)
 		confirm = self.action_confirm(cr, uid, new_id, context)
+		finish = self.action_finish(cr, uid, new_id, context)
 		return new_id
