@@ -218,21 +218,22 @@ class purchase_order_line(osv.osv):
 		})
 		return result
 	
-	# def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-	# 		partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
-	# 		name=False, price_unit=False, state='draft', discount_from_subtotal=False, parent_price_type_id=False, context=None):
-	#
-	# 	result_price_type = cpl.purchase.onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-	# 		partner_id, date_order, fiscal_position_id, date_planned, name, price_unit, state, parent_price_type_id=parent_price_type_id, context=context)
-	#
-	# 	result_discount = psd.onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-	# 		partner_id, date_order, fiscal_position_id, date_planned, name, price_unit, state, discount_from_subtotal=discount_from_subtotal, context=context)
-	#
-	#
-	# 	result = result_discount
-	# 	if result_price_type:
-	# 		if result:
-	# 			result['value']['price_type_id'] = result_price_type['value']['price_type_id']
-	# 		else:
-	# 			result = { 'value': { 'price_type_id': result_price_type['value']['price_type_id'] } }
-	# 	return result
+	def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+			name=False, price_unit=False, state='draft', discount_from_subtotal=False, parent_price_type_id=False, context=None):
+
+		result_price_type = cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order, fiscal_position_id, date_planned, name, price_unit, state, parent_price_type_id=parent_price_type_id, context=context)
+
+		result_discount = psd.purchase_discount.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order, fiscal_position_id, date_planned, name, price_unit, state, discount_from_subtotal=discount_from_subtotal, context=context)
+
+
+		result = result_discount
+		if result_price_type:
+			if result_price_type['value'].get('price_type_id', False):
+				if result:
+					result['value']['price_type_id'] = result_price_type['value']['price_type_id']
+				else:
+					result = { 'value': { 'price_type_id': result_price_type['value']['price_type_id'] } }
+		return result
