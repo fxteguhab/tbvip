@@ -96,3 +96,12 @@ class product_product_branch_sublocation(osv.osv):
 		'sublocation_id': fields.many2one('stock.sublocation', 'Sublocation'),
 	}
 
+# ==========================================================================================================================
+
+class product_uom(osv.osv):
+	_inherit = 'product.uom'
+	
+	_defaults = {
+		'category_id': lambda self, cr, uid, ctx:
+			self.pool.get('ir.model.data').get_object_reference(cr, uid, 'product', 'product_uom_categ_unit')[1],
+	}
