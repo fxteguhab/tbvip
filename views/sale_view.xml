@@ -10,6 +10,9 @@
 					<field name="bon_number"/>
 					<field name="branch_id" readonly="False"/>
 				</field>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='discount']" position="replace">
+					<field name="discount" invisible="1"/>
+				</xpath>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='discount_string']" position="after">
 					<field name="commission"/>
 					<field name="commission_amount" readonly="1"/>
