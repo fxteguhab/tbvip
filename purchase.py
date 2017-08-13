@@ -237,6 +237,17 @@ class purchase_order_line(osv.osv):
 	def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
 			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False, context=None):
-		return cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+		product_conversion_obj = self.pool.get('product.conversion')
+		uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
+		result = cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order, fiscal_position_id, date_planned,
 			name, price_unit, state, parent_price_type_id, price_type_id, context)
+		temp = super(purchase_order_line, self).onchange_product_uom(
+			cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
+			date_planned, name, price_unit, state, context={})
+		if result.get('domain', False) and temp.get('domain', False):
+			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		result['value'].update({
+			'product_uom' : temp['value']['product_uom']
+		})
+		return result
