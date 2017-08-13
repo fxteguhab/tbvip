@@ -19,3 +19,4 @@ import stock_opname
 import fleet
 import canvassing
 import product_production
+import price_list
