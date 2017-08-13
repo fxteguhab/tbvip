@@ -199,14 +199,16 @@ class sale_order_line(osv.osv):
 			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
 			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+		product_conversion_obj = self.pool.get('product.conversion')
+		uom = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom, context).id
 		result = super(sale_order_line, self).onchange_product_id_price_list(cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)
-		
 		temp = super(sale_order_line, self).onchange_product_uom(
 			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
 			lang, update_tax, date_order, fiscal_position, context=None)
-		
+		if result.get('domain', False) and temp.get('domain', False):
+			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
 		result['value'].update({
 			'product_uom' : temp['value']['product_uom']
 		})
