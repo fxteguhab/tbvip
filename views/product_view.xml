@@ -80,12 +80,6 @@
 			<field name="model">product.uom</field>
 			<field name="inherit_id" ref="product.product_uom_form_view"/>
 			<field name="arch" type="xml">
-				<field name="category_id" position="attributes">
-					<attribute name="attrs">{'readonly': True}</attribute>
-				</field>
-				<field name="uom_type" position="attributes">
-					<attribute name="attrs">{'readonly': True}</attribute>
-				</field>
 				<field name="active" position="attributes">
 					<attribute name="attrs">{'invisible': True}</attribute>
 				</field>
