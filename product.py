@@ -40,6 +40,24 @@ class product_template(osv.osv):
 			result[data.id] = unique_supplier_order_line_ids
 		return result
 	
+	def _product_current_stock(self, cr, uid, ids, field_name, arg, context={}):
+		result = {}
+		quant_obj = self.pool.get('stock.quant')
+		for product in self.browse(cr, uid, ids, context=context):
+			stocks = ''
+			for variant in product.product_variant_ids:
+				map = {}
+				quant_ids = quant_obj.search(cr, uid, [('product_id', '=', variant.id), ('location_id.usage', '=', 'internal')])
+				for quant in quant_obj.browse(cr, uid, quant_ids):
+					default_uom = quant.product_id.uom_id.name
+					map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
+				stocks += variant.name + '\n'
+				for key in sorted(map.iterkeys()):
+					stocks += key + ': ' + str(map[key]) + ' ' + default_uom + '\n'
+				stocks += '\n'
+			result[product.id] = stocks
+		return result
+	
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -47,8 +65,9 @@ class product_template(osv.osv):
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
 			string="Last Purchase", relation="purchase.order.line"),
 		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
-		'commission': fields.char('Commission', help="Discount string."),
+		'commission': fields.char('Commission'),
 		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
+		'product_current_stock': fields.function(_product_current_stock, string="Current Stock", type='text', store=False),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------
@@ -67,9 +86,6 @@ class product_template(osv.osv):
 				'variant_codex_id': new_data.codex_id,
 			})
 		return new_id
-	
-
-
 
 
 # ==========================================================================================================================

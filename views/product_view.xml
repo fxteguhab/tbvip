@@ -19,6 +19,11 @@
 						</field>
 					</page>
 				</notebook>
+				<field name="description" position="after">
+					<group>
+						<field name="product_current_stock"/>
+					</group>
+				</field>
 			</field>
 		</record>
 
