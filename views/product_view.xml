@@ -19,9 +19,9 @@
 						</field>
 					</page>
 				</notebook>
-				<field name="description" position="after">
+				<field name="description" position="before">
 					<group>
-						<field name="product_current_stock"/>
+						<field name="product_current_stock" readonly="1"/>
 					</group>
 				</field>
 			</field>
