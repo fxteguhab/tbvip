@@ -45,7 +45,7 @@
 
 		<record id="tbvip_supplier_general" model="res.partner">
 			<field name="name">GENERAL SUPPLIER</field>
-			<field name="customer" eval="True" />
+			<field name="supplier" eval="True" />
 			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"></field>
 		</record>
 
