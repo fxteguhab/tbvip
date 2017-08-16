@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="action_commission" model="ir.actions.act_window">
+			<field name="name">Commission</field>
+			<field name="res_model">tbvip.commission</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="action_product_current_commission" model="ir.actions.act_window">
+			<field name="name">Product Current Commission</field>
+			<field name="res_model">product.current.commission</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem id="menu_commission" parent="base.menu_product"
+				sequence="11" action="action_commission"/>
+		<menuitem id="menu_product_current_commission" parent="base.menu_product"
+				sequence="12" action="action_product_current_commission"/>
+
+	</data>
+</openerp>

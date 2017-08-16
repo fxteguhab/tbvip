@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record model="ir.ui.view" id="commission_form">
+			<field name="name">tbvip.commission.form</field>
+			<field name="model">tbvip.commission</field>
+			<field name="arch" type="xml">
+				<form string="Commission" version="7.0">
+					<header>
+						<button name="test_cron_commission" type="object" string="Cron" class="oe_highlight"/>
+						<button name="activate_commission" type="object" string="Activate Commission" class="oe_highlight"
+								confirm="Are you sure to activate this commission?" states="draft"/>
+						<field name="state" widget="statusbar"/>
+					</header>
+					<group>
+						<field name="name" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
+						<field name="start_date" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
+						<field name="type" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
+						<field name="line_product_ids"
+								attrs="{'readonly': [('state', 'in', ['running','expired'])],
+										'invisible': [('type', 'in', ['category'])]}"/>
+						<field name="line_category_ids"
+								attrs="{'readonly': [('state', 'in', ['running','expired'])],
+										'invisible': [('type', 'in', ['product'])]}"/>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="commission_tree">
+			<field name="name">tbvip.commission.tree</field>
+			<field name="model">tbvip.commission</field>
+			<field name="arch" type="xml">
+				<tree string="Commission" version="7.0">
+					<field name="name"/>
+					<field name="type"/>
+					<field name="start_date"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="commission_line_product_tree">
+			<field name="name">tbvip.commission.line.product.tree</field>
+			<field name="model">tbvip.commission.line.product</field>
+			<field name="arch" type="xml">
+				<tree string="Commission Product Line" version="7.0" editable="bottom">
+					<field name="product_template_id"/>
+					<field name="commission"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="commission_line_category_tree">
+			<field name="name">tbvip.commission.line.category.tree</field>
+			<field name="model">tbvip.commission.line.category</field>
+			<field name="arch" type="xml">
+				<tree string="Commission Product Category Line" version="7.0" editable="bottom">
+					<field name="product_category_id"/>
+					<field name="commission"/>
+				</tree>
+			</field>
+		</record>
+
+
+		<!-- PRODUCT CURRENT COMMISSION  -->
+
+		<record model="ir.ui.view" id="product_current_commission_form">
+			<field name="name">product.current.commission.form</field>
+			<field name="model">product.current.commission</field>
+			<field name="arch" type="xml">
+				<form string="Product Current Price" version="7.0">
+					<group>
+						<field name="product_id"/>
+						<field name="commission"/>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="product_current_commission_tree">
+			<field name="name">product.current.commission.tree</field>
+			<field name="model">product.current.commission</field>
+			<field name="arch" type="xml">
+				<tree string="Product Current Price" version="7.0">
+					<field name="product_id"/>
+					<field name="commission"/>
+				</tree>
+			</field>
+		</record>
+
+	</data>
+</openerp>
