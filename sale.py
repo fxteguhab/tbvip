@@ -14,7 +14,26 @@ class sale_order(osv.osv):
 		'commission_total': fields.float('Commission Total', readonly=True),
 		'bon_number': fields.char('Bon Number'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
+		'is_cash': fields.boolean('Is Cash'),
+		'cash_amount': fields.float('Cash Amount'),
+		# 'is_edc': fields.boolean('Is EDC'),
+		'is_transfer': fields.boolean('Is Transfer'),
+		'transfer_amount': fields.float('Transfer Amount'),
+		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
+		'stock_location_id': fields.many2one('stock.location', 'Location'),
 	}
+	
+	def name_get(self, cr, uid, ids, context={}):
+		if isinstance(ids, (list, tuple)) and not len(ids): return []
+		if isinstance(ids, (long, int)): ids = [ids]
+		res = []
+		for record in self.browse(cr, uid, ids):
+			name = record.name
+			if record.date_order:
+				bon_name = ' ' + record.bon_number if record.bon_number else ''
+				name = '%s%s' % (datetime.strptime(record.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
+			res.append((record.id, name))
+		return res
 
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
@@ -34,6 +53,7 @@ class sale_order(osv.osv):
 		'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'taken',
+		'stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
