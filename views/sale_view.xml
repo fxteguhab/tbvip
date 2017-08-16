@@ -35,7 +35,7 @@
 					<attribute name="invisible">1</attribute>
 				</xpath>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='discount_string']" position="after">
-					<field name="commission"/>
+					<field name="commission" readonly="1"/>
 					<field name="commission_amount" readonly="1"/>
 				</xpath>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="attributes">
@@ -44,6 +44,17 @@
 				<xpath expr="//field[@name='order_line']/tree//field[@name='tax_id']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>
+			</field>
+		</record>
+
+		<record id="view_order_tree_inherit" model="ir.ui.view">
+			<field name="name">sale.order.tree.inherit</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_order_tree"/>
+			<field name="arch" type="xml">
+				<field name="amount_total" position="before">
+					<field name="commission_total"/>
+				</field>
 			</field>
 		</record>
 

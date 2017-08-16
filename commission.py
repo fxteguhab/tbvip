@@ -174,8 +174,8 @@ class product_current_commission(osv.osv):
 		('unique_product','UNIQUE(product_id)',_('Same product has existed')),
 	]
 	
-	def get_current_commission(self, cr, uid, product_id=False, uom_id=False, context=None):
-		if product_id and uom_id:
+	def get_current_commission(self, cr, uid, product_id=False, context=None):
+		if product_id:
 			product_current_commission_ids = self.search(cr, uid, [
 				('product_id', '=', product_id),
 			], context=context)

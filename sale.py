@@ -137,7 +137,7 @@ class sale_order_line(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'commission': fields.char('Commission', help="Discount string."),
+		'commission': fields.char('Commission', help="Commission String"),
 		'commission_amount': fields.float('Commission Amount'),
 	}
 	
@@ -146,12 +146,22 @@ class sale_order_line(osv.osv):
 	def create(self, cr, uid, vals, context={}):
 		if vals.get('commission', False):
 			vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
+		else:
+			product_obj = self.pool.get('product.current.commission')
+			current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
+			vals['commission'] = current_commission
+			vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
 		return super(sale_order_line, self).create(cr, uid, vals, context)
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for id in ids:
 			if vals.get('commission', False):
 				vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
+			else:
+				product_obj = self.pool.get('product.current.commission')
+				current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
+				vals['commission'] = current_commission
+				vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
 		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -167,18 +177,19 @@ class sale_order_line(osv.osv):
 		product_uom_obj = self.pool.get('product.uom')
 		product_obj = self.pool.get('product.product')
 		
-		commission = order_line['commission']
 		if sale_order_line_id:
 			sale_order_line = self.browse(cr, uid, sale_order_line_id)
 			product_id = sale_order_line.product_id.id
 			product_uom = sale_order_line.product_uom.id
 			product_uom_qty = sale_order_line.product_uom_qty
 			price_unit = sale_order_line.price_unit
+			commission = sale_order_line.commission
 		else:
 			product_id = order_line['product_id']
 			product_uom = order_line['product_uom']
 			product_uom_qty = order_line['product_uom_qty']
 			price_unit = order_line['price_unit']
+			commission = order_line['commission']
 		
 		product = product_obj.browse(cr, uid, product_id)
 		qty = product_uom_obj._compute_qty(cr, uid,
@@ -198,9 +209,9 @@ class sale_order_line(osv.osv):
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
 		result = super(sale_order_line, self).product_id_change(cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name,
 			partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag, context)
-		product_obj = self.pool.get('product.product')
-		product = product_obj.browse(cr, uid, product)
-		result['value']['commission'] = product.commission
+		product_obj = self.pool.get('product.current.commission')
+		current_commission = product_obj.get_current_commission(cr, uid, product)
+		result['value']['commission'] = current_commission
 		return result
 	
 	def onchange_product_uom_qty(self, cr, uid, ids, pricelist, product, qty=0,
