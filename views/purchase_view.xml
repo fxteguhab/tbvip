@@ -7,7 +7,11 @@
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
 				<field name="partner_id" position="before">
+					<field name="employee_id"/>
 					<field name="branch_id"/>
+				</field>
+				<field name="date_order" position="before">
+					<field name="create_uid" readonly="1"/>
 				</field>
 				<xpath expr="//label[@string='Request for Quotation ']" position="attributes">
 					<attribute name="string">Draft Purchase Order</attribute>

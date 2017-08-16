@@ -63,12 +63,14 @@ class purchase_order(osv.osv):
 			('shipped', 'Shipped'),
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
+		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
 	}
 	
 	_defaults = {
 		'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'taken',
+		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_incoming_location_id.id,
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
