@@ -2,6 +2,7 @@ from openerp import api
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 
+import utility
 
 class product_production(osv.osv):
 	_inherit = "product.production"
@@ -33,6 +34,11 @@ class product_production_finished(osv.osv):
 			'uom_id': uom_record.id,
 		}}
 		return result
+	
+	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
+		res = super(product_production_finished, self).onchange_product_id(cr, uid, ids, product_id, context)
+		res = utility.update_uom_domain_direct_production(res)
+		return res;
 		
 # ===========================================================================================================================
 
@@ -48,5 +54,10 @@ class product_production_raw(osv.osv):
 			'uom_id': uom_record.id,
 		}}
 		return result
+	
+	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
+		res = super(product_production_raw, self).onchange_product_id(cr, uid, ids, product_id, context)
+		res = utility.update_uom_domain_direct_production(res)
+		return res;
 		
 # ===========================================================================================================================
