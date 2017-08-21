@@ -9,6 +9,12 @@
 				<field name="employee_id" position="attributes">
 					<attribute name="on_change">onchange_employee_id(employee_id)</attribute>
 				</field>
+				<button name="action_confirm" position="attributes">
+				<attribute name="invisible">True</attribute>
+			</button>
+				<button name="action_finish" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</button>
 			</field>
 		</record>
 
