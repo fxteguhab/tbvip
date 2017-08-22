@@ -228,9 +228,16 @@ class purchase_order_line(osv.osv):
 		if vals.get('price_unit', False):
 			for purchase_line in self.browse(cr, uid, ids):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
-			if vals.get('product_id', False) and vals.get('price_type', False) and vals.get('product_uom', False):
-				self._create_product_current_price_if_none(cr, uid,
-					vals['price_type'], vals['product_id'], vals['product_uom'], vals['price_unit'])
+		for po_line in self.browse(cr, uid, ids):
+			product_id = po_line.product_id.id
+			price_type_id = po_line.price_type_id.id
+			product_uom = po_line.product_uom.id
+			price_unit = po_line.price_unit
+			if vals.get('product_id', False): product_id = vals['product_id']
+			if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
+			if vals.get('product_uom', False): product_uom = vals['product_uom']
+			if vals.get('price_unit', False): price_unit = vals['price_unit']
+			self._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit)
 		return edited_order_line
 	
 	def unlink(self, cr, uid, ids, context=None):
