@@ -15,6 +15,7 @@
 					</header>
 					<group>
 						<field name="name" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
+						<field name="create_date" attrs="{'readonly': True}"/>
 						<field name="start_date" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
 						<field name="end_date" attrs="{'invisible': [('state', 'in', ['running','draft'])]}"/>
 						<field name="type" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
