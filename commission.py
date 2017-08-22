@@ -22,6 +22,7 @@ class commission(osv.osv):
 	_columns = {
 		'name': fields.char('Name', required=True),
 		'start_date': fields.date('Start Date', required=True),
+		'end_date': fields.date('End Date', readonly=True),
 		'type': fields.selection(_COMMISSION_TYPE, 'Type', required=True),
 		'line_product_ids': fields.one2many('tbvip.commission.line.product', 'commission_id', 'Commission Product Line'),
 		'line_category_ids': fields.one2many('tbvip.commission.line.category', 'commission_id', 'Commission Product Category Line'),
@@ -76,7 +77,8 @@ class commission(osv.osv):
 	
 	def set_to_expired(self, cr, uid, ids, context=None):
 		return self.write(cr, uid, ids, {
-			'state': 'expired'
+			'state': 'expired',
+			'end_date': datetime.today(),
 		}, context=context)
 
 	def activate_commission(self, cr, uid, commission_ids, context=None):
