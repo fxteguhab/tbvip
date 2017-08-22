@@ -36,18 +36,15 @@ def calculate_commission(commission_string, price):
 	commissions = commission_string.split("+")
 	commission_result = 0
 	for commission in commissions:
-		value = 0
 		if "%" in commission:
 			try:
-				value = (price * (float(commission[:-1]))) / 100.00
+				commission_result += (price * (float(commission[:-1]))) / 100.00
 			except:
 				raise InvalidCommissionException(_("Commission format mismatch: %s") % commission_string)
 		else:
 			if len(commission) > 0:
 				try:
-					value = float(commission)
+					commission_result += float(commission)
 				except:
 					raise InvalidCommissionException(_("Commission format mismatch: %s") % commission_string)
-		price += value
-		commission_result += value
 	return commission_result

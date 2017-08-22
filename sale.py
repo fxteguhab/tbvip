@@ -190,9 +190,6 @@ class sale_order_line(osv.osv):
 		if not commission:
 			commission = commission_obj.get_current_commission(cr, uid, product_id)
 	
-		product = product_obj.browse(cr, uid, product_id)
-		qty = product_uom_obj._compute_qty(cr, uid,
-			product_uom, product_uom_qty, product.product_tmpl_id.uom_po_id.id)
 		price_subtotal = price_unit * product_uom_qty
 		try:
 			valid_commission_string = commission_utility.validate_commission_string(commission)
