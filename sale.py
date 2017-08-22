@@ -75,14 +75,10 @@ class sale_order(osv.osv):
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
-		product_uom_obj = self.pool.get('product.uom')
-		product_obj = self.pool.get('product.product')
 		order_data = self.browse(cr, uid, sale_order_id)
 		commission_total = 0
 		for order_line in order_data.order_line:
-			qty = product_uom_obj._compute_qty(cr, uid,
-				order_line.product_uom.id, order_line.product_uom_qty, order_line.product_id.product_tmpl_id.uom_id.id)
-			commission_total += order_line.commission_amount * qty
+			commission_total += order_line.commission_amount
 			"""
 			if order_line[2].get('product_uom_qty', False) or order_line[2].get('commission_amount', False):
 				product = product_obj.browse(cr, uid, order_line[2]['product_id'])
@@ -197,7 +193,7 @@ class sale_order_line(osv.osv):
 		product = product_obj.browse(cr, uid, product_id)
 		qty = product_uom_obj._compute_qty(cr, uid,
 			product_uom, product_uom_qty, product.product_tmpl_id.uom_po_id.id)
-		price_subtotal = price_unit * qty
+		price_subtotal = price_unit * product_uom_qty
 		try:
 			valid_commission_string = commission_utility.validate_commission_string(commission)
 			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_subtotal)
