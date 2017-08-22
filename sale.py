@@ -155,13 +155,7 @@ class sale_order_line(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for id in ids:
-			if vals.get('commission', False):
-				vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
-			else:
-				product_obj = self.pool.get('product.current.commission')
-				current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
-				vals['commission'] = current_commission
-				vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
+			vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
 		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -176,7 +170,8 @@ class sale_order_line(osv.osv):
 	def _calculate_commission_amount(self, cr, uid, order_line, sale_order_line_id):
 		product_uom_obj = self.pool.get('product.uom')
 		product_obj = self.pool.get('product.product')
-		
+		commission_obj = self.pool.get('product.current.commission')
+	
 		if sale_order_line_id:
 			sale_order_line = self.browse(cr, uid, sale_order_line_id)
 			product_id = sale_order_line.product_id.id
@@ -184,22 +179,28 @@ class sale_order_line(osv.osv):
 			product_uom_qty = sale_order_line.product_uom_qty
 			price_unit = sale_order_line.price_unit
 			commission = sale_order_line.commission
-		else:
-			product_id = order_line['product_id']
-			product_uom = order_line['product_uom']
-			product_uom_qty = order_line['product_uom_qty']
-			price_unit = order_line['price_unit']
-			commission = order_line['commission']
 		
+		if order_line.get('product_id', False):
+			product_id = order_line['product_id']
+		if order_line.get('product_uom', False):
+			product_uom = order_line['product_uom']
+		if order_line.get('product_uom_qty', False):
+			product_uom_qty = order_line['product_uom_qty']
+		if order_line.get('price_unit', False):
+			price_unit = order_line['price_unit']
+		if order_line.get('commission', False):
+			commission = order_line['commission']
+			
+		if not commission:
+			commission = commission_obj.get_current_commission(cr, uid, product_id)
+	
 		product = product_obj.browse(cr, uid, product_id)
 		qty = product_uom_obj._compute_qty(cr, uid,
 			product_uom, product_uom_qty, product.product_tmpl_id.uom_po_id.id)
-		#price_unit_one_qty = price_unit * 1.0 / qty
-		price_unit_one_qty = price_unit * 1.0
+		price_subtotal = price_unit * qty
 		try:
-			valid_commission_string = \
-				commission_utility.validate_commission_string(commission, price_unit_one_qty)
-			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit_one_qty)
+			valid_commission_string = commission_utility.validate_commission_string(commission)
+			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_subtotal)
 		except commission_utility.InvalidCommissionException:
 			return False
 		return commission_amount
