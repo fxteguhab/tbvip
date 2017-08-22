@@ -67,9 +67,9 @@ class purchase_order(osv.osv):
 	}
 	
 	_defaults = {
-		'partner_id': _default_partner_id,
+		# 'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
-		'shipped_or_taken': 'taken',
+		'shipped_or_taken': 'shipped',
 		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_incoming_location_id.id,
 	}
 	
