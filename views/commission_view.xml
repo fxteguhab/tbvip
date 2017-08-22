@@ -14,7 +14,7 @@
 						<field name="state" widget="statusbar"/>
 					</header>
 					<group>
-						<field name="name" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
+						<field name="name"/>
 						<field name="create_date" attrs="{'readonly': True}"/>
 						<field name="start_date" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
 						<field name="end_date" attrs="{'invisible': [('state', 'in', ['running','draft'])]}"/>
@@ -29,6 +29,16 @@
 				</form>
 			</field>
 		</record>
+		
+		<record model="ir.ui.view" id="tbvip_commission_search">
+			<field name="name">tbvip.commission.search</field>
+			<field name="model">tbvip.commission</field>
+			<field name="arch" type="xml">
+				<search string="TBVIP Commission Search">
+					<field name="state" string="State" />
+				</search>
+			</field>
+		</record>
 
 		<record model="ir.ui.view" id="commission_tree">
 			<field name="name">tbvip.commission.tree</field>
@@ -38,6 +48,7 @@
 					<field name="name"/>
 					<field name="type"/>
 					<field name="start_date"/>
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>

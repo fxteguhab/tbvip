@@ -57,6 +57,17 @@ class product_template(osv.osv):
 				stocks += '\n'
 			result[product.id] = stocks
 		return result
+		
+	def _current_price_ids(self, cr, uid, ids, field_name, arg, context={}):
+		current_pricelist_obj = self.pool.get('product.current.price')
+		result = {}
+		for product in self.browse(cr, uid, ids):
+			price = 0
+			variants = product.product_variant_ids
+			if len(variants) > 0:
+				variant = variants[0]
+				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id)], limit=1)
+		return result
 	
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
@@ -68,6 +79,7 @@ class product_template(osv.osv):
 		'commission': fields.char('Commission'),
 		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
 		'product_current_stock': fields.function(_product_current_stock, string="Current Stock", type='text', store=False),
+		'current_price_ids': fields.function(_current_price_ids, string="Current Prices", type='one2many', relation='product.current.price'),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------

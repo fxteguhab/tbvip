@@ -67,9 +67,9 @@ class purchase_order(osv.osv):
 	}
 	
 	_defaults = {
-		'partner_id': _default_partner_id,
+		# 'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
-		'shipped_or_taken': 'taken',
+		'shipped_or_taken': 'shipped',
 		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_incoming_location_id.id,
 	}
 	
@@ -184,6 +184,9 @@ class purchase_order_line(osv.osv):
 			product = product_obj.browse(cr, uid, vals['product_id'])
 			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
 			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
+			if vals.get('price_type_id', False) and vals.get('product_uom', False):
+				self._create_product_current_price_if_none(cr, uid,
+					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
 		if not vals.get('location_id', False):
 			users_obj = self.pool.get('res.users')
 			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location_id
@@ -225,6 +228,16 @@ class purchase_order_line(osv.osv):
 		if vals.get('price_unit', False):
 			for purchase_line in self.browse(cr, uid, ids):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
+		for po_line in self.browse(cr, uid, ids):
+			product_id = po_line.product_id.id
+			price_type_id = po_line.price_type_id.id
+			product_uom = po_line.product_uom.id
+			price_unit = po_line.price_unit
+			if vals.get('product_id', False): product_id = vals['product_id']
+			if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
+			if vals.get('product_uom', False): product_uom = vals['product_uom']
+			if vals.get('price_unit', False): price_unit = vals['price_unit']
+			self._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit)
 		return edited_order_line
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -253,3 +266,51 @@ class purchase_order_line(osv.osv):
 			'product_uom' : temp['value']['product_uom']
 		})
 		return result
+	
+	def _create_product_current_price_if_none(self, cr, uid, price_type_id, product_id, uom_id, price):
+		product_current_price_obj = self.pool.get('product.current.price')
+		product_current_price_ids = product_current_price_obj.search(cr, uid, [
+			('price_type_id', '=', price_type_id),
+			('product_id', '=', product_id)
+		])
+		if len(product_current_price_ids) == 0:
+			product_current_price_obj.create(cr, uid, {
+				'price_type_id': price_type_id,
+				'product_id': product_id,
+				'uom_id_1': uom_id,
+				'price_1': price,
+			})
+		else:
+			add = True
+			field_uom = False
+			field_price = False
+			product_current_price = product_current_price_obj.browse(cr, uid, product_current_price_ids)[0]
+			if product_current_price['uom_id_1'].id == uom_id or product_current_price['uom_id_2'].id == uom_id or \
+				product_current_price['uom_id_3'].id == uom_id or product_current_price['uom_id_4'].id == uom_id or \
+				product_current_price['uom_id_5'].id == uom_id:
+				add = False
+			if add:
+				if not product_current_price['uom_id_1']:
+					field_uom = 'uom_id_1'
+					field_price = 'price_1'
+				elif not product_current_price['uom_id_2']:
+					field_uom = 'uom_id_2'
+					field_price = 'price_2'
+				elif not product_current_price['uom_id_3']:
+					field_uom = 'uom_id_3'
+					field_price = 'price_3'
+				elif not product_current_price['uom_id_4']:
+					field_uom = 'uom_id_4'
+					field_price = 'price_4'
+				elif not product_current_price['uom_id_5']:
+					field_uom = 'uom_id_5'
+					field_price = 'price_5'
+				if field_uom and field_price:
+					product_current_price_obj.write(cr, uid, [product_current_price.id], {
+						'price_type_id': price_type_id,
+						'product_id': product_id,
+						field_uom: uom_id,
+						field_price: price,
+					})
+				else:
+					pass  # penuh field uomnya
