@@ -36,6 +36,8 @@
 			<field name="arch" type="xml">
 				<search string="TBVIP Commission Search">
 					<field name="state" string="State" />
+					<filter string="State Draft" name="filter_state_draft" domain="[('state','=','draft')]" />
+					<filter string="State Running" name="filter_state_running" domain="[('state','=','running')]" />
 				</search>
 			</field>
 		</record>
