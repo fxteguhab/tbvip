@@ -8,7 +8,7 @@
 			<field name="arch" type="xml">
 				<form string="Commission" version="7.0">
 					<header>
-						<button name="test_cron_commission" type="object" string="Cron" class="oe_highlight"/>
+						<!-- <button name="test_cron_commission" type="object" string="Cron" class="oe_highlight"/> -->
 						<button name="activate_commission" type="object" string="Activate Commission" class="oe_highlight"
 								confirm="Are you sure to activate this commission?" states="draft"/>
 						<field name="state" widget="statusbar"/>
@@ -16,6 +16,7 @@
 					<group>
 						<field name="name" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
 						<field name="start_date" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
+						<field name="end_date" attrs="{'invisible': [('state', 'in', ['running','draft'])]}"/>
 						<field name="type" attrs="{'readonly': [('state', 'in', ['running','expired'])]}"/>
 						<field name="line_product_ids"
 								attrs="{'readonly': [('state', 'in', ['running','expired'])],
