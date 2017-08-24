@@ -19,7 +19,6 @@
 	'data': [
 		'security/ir_rule.xml',
 		'security/tbvip_security.xml',
-		'security/ir.model.access.csv',
 		'cron/tbvip_cron.xml',
 		'data/product_data.xml',
 		'data/account_data.xml',
@@ -58,7 +57,7 @@
 		'report/documents/stock_inventory.xml',
 		'report/purchase_report.xml',
 		'workflows/purchase_workflow.xml',
-		'security/ir_rule.xml',
+		# 'security/ir.model.access.csv',
 	],
 	'demo': [
 	],
