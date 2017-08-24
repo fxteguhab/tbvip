@@ -7,6 +7,9 @@
 			<field name="model">price.list.line.product</field>
 			<field name="inherit_id" ref="chjs_price_list.price_list_line_product_tree"/>
 			<field name="arch" type="xml">
+				<field name="product_template_id" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 				</field>
@@ -30,6 +33,9 @@
 			<field name="model">price.list.line.category</field>
 			<field name="inherit_id" ref="chjs_price_list.price_list_line_category_tree"/>
 			<field name="arch" type="xml">
+				<field name="product_category_id" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 				</field>
