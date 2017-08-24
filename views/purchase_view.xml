@@ -36,6 +36,7 @@
 				</field>
 				<field name="product_id" position="replace">
 					<field name="product_id"
+							options="{'no_create': 1}"
 							on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
 							parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
 							parent.price_type_id, price_type_id, context)"/>
