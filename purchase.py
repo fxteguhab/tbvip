@@ -263,7 +263,7 @@ class purchase_order_line(osv.osv):
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
 		result['value'].update({
-			'product_uom' : temp['value']['product_uom']
+			'product_uom': self.pool.get('product.product').browse(cr, uid, product_id).uom_id.id
 		})
 		return result
 	

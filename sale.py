@@ -67,6 +67,12 @@ class sale_order(osv.osv):
 				self._calculate_commission_total(cr, uid, sale_id)
 		return result
 	
+	# def action_button_confirm(self, cr, uid, ids, context=None):
+	# 	result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
+	# 	if result:
+	# 		cash_sales_obj = self.pool.get('')
+	# 	return result
+	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
 		order_data = self.browse(cr, uid, sale_order_id)
 		commission_total = 0
@@ -271,7 +277,7 @@ class sale_order_line(osv.osv):
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
 		result['value'].update({
-			'product_uom' : temp['value']['product_uom']
+			'product_uom': self.pool.get('product.product').browse(cr, uid, product).uom_id.id
 		})
 		
 		return result
