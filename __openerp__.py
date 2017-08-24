@@ -49,6 +49,7 @@
 		'views/stock_opname_view.xml',
 		'views/fleet_view.xml',
 		'views/canvassing_view.xml',
+		'views/chjs_price_list_view.xml',
 		'report/account_report.xml',
 		'report/documents/stock_inventory.xml',
 		'report/documents/account_voucher.xml',
