@@ -52,15 +52,11 @@ class sale_order(osv.osv):
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
-		if vals.get('bon_number', False):
-			self._update_bon_book(cr, uid, vals['bon_number'])
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
-		if vals.get('bon_number', False):
-			self._update_bon_book(cr, uid, vals['bon_number'])
 		for sale_order_data in self.browse(cr, uid, ids):
 			bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
 			bon_name = ' / ' + bon_number if bon_number else ''
@@ -70,6 +66,13 @@ class sale_order(osv.osv):
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
+		return result
+	
+	def action_button_confirm(self, cr, uid, ids, context=None):
+		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
+		for sale in self.browse(cr, uid, ids):
+			if sale.bon_number and sale.date_order:
+				self._update_bon_book(cr, uid, sale.bon_number, sale.date_order)
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
@@ -88,14 +91,14 @@ class sale_order(osv.osv):
 			'commission_total': commission_total
 			})
 	
-	def onchange_bon_number(self, cr, uid, ids, bon_number, context=None):
+	def onchange_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
 		if not bon_number:
 			return
 		result = {}
 		bon_book_same_number_ids = self.search(cr, uid, [
 			('bon_number', '=', bon_number),
-			('date_order', '>=', date.today().strftime('%Y-%m-%d 00:00:00')),
-			('date_order', '<=', date.today().strftime('%Y-%m-%d 23:59:59')),
+			('date_order', '>=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 00:00:00")),
+			('date_order', '<=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 23:59:59")),
 		])
 		if len(bon_book_same_number_ids) > 0:
 			raise osv.except_orm(_('Bon book number error'),
@@ -133,11 +136,11 @@ class sale_order(osv.osv):
 				_('There is no bon book with the given number.'))
 		return result
 	
-	def _update_bon_book(self, cr, uid, bon_number):
+	def _update_bon_book(self, cr, uid, bon_number, date_order):
 		bon_book_same_number_ids = self.search(cr, uid, [
 			('bon_number', '=', bon_number),
-			('date_order', '>=', date.today().strftime('%Y-%m-%d 00:00:00')),
-			('date_order', '<=', date.today().strftime('%Y-%m-%d 23:59:59')),
+			('date_order', '>=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 00:00:00")),
+			('date_order', '<=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 23:59:59")),
 		])
 		if len(bon_book_same_number_ids) > 0:
 			raise osv.except_orm(_('Bon book number error'),
