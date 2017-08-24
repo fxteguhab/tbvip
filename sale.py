@@ -22,18 +22,6 @@ class sale_order(osv.osv):
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 	}
-	
-	def name_get(self, cr, uid, ids, context={}):
-		if isinstance(ids, (list, tuple)) and not len(ids): return []
-		if isinstance(ids, (long, int)): ids = [ids]
-		res = []
-		for record in self.browse(cr, uid, ids):
-			name = record.name
-			if record.date_order:
-				bon_name = ' ' + record.bon_number if record.bon_number else ''
-				name = '%s%s' % (datetime.strptime(record.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
-			res.append((record.id, name))
-		return res
 
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
@@ -68,6 +56,11 @@ class sale_order(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		if vals.get('bon_number', False):
 			self._update_bon_book(cr, uid, vals['bon_number'])
+		for sale_order_data in self.browse(cr, uid, ids):
+			bon_number = vals['bon_number'] if vals['bon_number'] else sale_order_data.bon_number
+			bon_name = ' / ' + bon_number if bon_number else ''
+			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
+			vals['name'] = name
 		result = super(sale_order, self).write(cr, uid, ids, vals, context)
 		if vals.get('order_line', False):
 			for sale_id in ids:
