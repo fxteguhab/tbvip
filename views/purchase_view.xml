@@ -10,6 +10,9 @@
 					<field name="employee_id"/>
 					<field name="branch_id"/>
 				</field>
+				<field name="picking_type_id" position="replace">
+					<field name="picking_type_id" invisible="1" on_change="onchange_picking_type_id(picking_type_id, context)" domain="[('code','=','incoming')]" options="{'no_create': True}" groups="stock.group_locations"/>
+				</field>
 				<field name="date_order" position="before">
 					<field name="create_uid" readonly="1"/>
 				</field>
