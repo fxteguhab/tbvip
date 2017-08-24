@@ -2,6 +2,7 @@ from openerp.osv import osv, fields
 import commission_utility
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
+import openerp.addons.decimal_precision as dp
 
 # ==========================================================================================================================
 
@@ -174,6 +175,7 @@ class sale_order_line(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
+		'product_uom_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'commission': fields.char('Commission', help="Commission String"),
 		'commission_amount': fields.float('Commission Amount'),
 	}
