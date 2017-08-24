@@ -176,6 +176,8 @@ class purchase_order_line(osv.osv):
 		'purchase_hour': fields.function(_purchase_hour, method=True, string='Purchase Hour', type='float'),
 		'alert': fields.integer('Alert'),
 		'product_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True),
+		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
+			string='UoM Category', readonly=True)
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -271,8 +273,11 @@ class purchase_order_line(osv.osv):
 			date_planned, name, price_unit, state, context={})
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
-			'product_uom': self.pool.get('product.product').browse(cr, uid, product_id).uom_id.id
+			'product_uom': product.uom_id.id,
+			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
 		})
 		return result
 	

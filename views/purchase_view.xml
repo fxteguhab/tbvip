@@ -42,7 +42,9 @@
 							parent.price_type_id, price_type_id, context)"/>
 				</field>
 				<field name="product_uom" position="replace">
+					<field name="uom_category_filter_id" invisible="True"/>
 					<field name="product_uom"
+							domain="[('category_id','=', uom_category_filter_id)]"
 							on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
 							parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
 							parent.price_type_id, price_type_id, context)"/>
