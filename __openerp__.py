@@ -17,7 +17,9 @@
 	],
 	'sequence': 150,
 	'data': [
+		'security/ir_rule.xml',
 		'security/tbvip_security.xml',
+		'security/ir.model.access.csv',
 		'cron/tbvip_cron.xml',
 		'data/product_data.xml',
 		'data/account_data.xml',
