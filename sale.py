@@ -140,13 +140,10 @@ class sale_order_line(osv.osv):
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
-		if vals.get('commission', False):
-			vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
-		else:
-			product_obj = self.pool.get('product.current.commission')
-			current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
-			vals['commission'] = current_commission
-			vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
+		product_obj = self.pool.get('product.current.commission')
+		current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
+		vals['commission'] = current_commission
+		vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
 		return super(sale_order_line, self).create(cr, uid, vals, context)
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -174,8 +171,7 @@ class sale_order_line(osv.osv):
 			product_uom = sale_order_line.product_uom.id
 			product_uom_qty = sale_order_line.product_uom_qty
 			price_unit = sale_order_line.price_unit
-			commission = sale_order_line.commission
-		
+			
 		if order_line.get('product_id', False):
 			product_id = order_line['product_id']
 		if order_line.get('product_uom', False):
@@ -184,16 +180,17 @@ class sale_order_line(osv.osv):
 			product_uom_qty = order_line['product_uom_qty']
 		if order_line.get('price_unit', False):
 			price_unit = order_line['price_unit']
-		if order_line.get('commission', False):
-			commission = order_line['commission']
+		
+		commission = commission_obj.get_current_commission(cr, uid, product_id)
 			
-		if not commission:
-			commission = commission_obj.get_current_commission(cr, uid, product_id)
+		product = product_obj.browse(cr, uid, product_id)
+		qty = product_uom_obj._compute_qty(cr, uid,
+			product_uom, product_uom_qty, product.product_tmpl_id.uom_po_id.id)
 	
-		price_subtotal = price_unit * product_uom_qty
+		price_unit = price_unit / qty * product_uom_qty
 		try:
 			valid_commission_string = commission_utility.validate_commission_string(commission)
-			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_subtotal)
+			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit, qty)
 		except commission_utility.InvalidCommissionException:
 			return False
 		return commission_amount

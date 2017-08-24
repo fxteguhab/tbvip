@@ -30,7 +30,7 @@ def validate_commission_string(commission_string):
 	return commission_string_nospace  # valid
 
 
-def calculate_commission(commission_string, price):
+def calculate_commission(commission_string, price, total_qty):
 	if not commission_string:
 		return 0
 	commissions = commission_string.split("+")
@@ -38,13 +38,13 @@ def calculate_commission(commission_string, price):
 	for commission in commissions:
 		if "%" in commission:
 			try:
-				commission_result += (price * (float(commission[:-1]))) / 100.00
+				commission_result += (price * (float(commission[:-1]))) / 100.00 * total_qty
 			except:
 				raise InvalidCommissionException(_("Commission format mismatch: %s") % commission_string)
 		else:
 			if len(commission) > 0:
 				try:
-					commission_result += float(commission)
+					commission_result += float(commission) * total_qty
 				except:
 					raise InvalidCommissionException(_("Commission format mismatch: %s") % commission_string)
 	return commission_result
