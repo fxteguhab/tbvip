@@ -111,10 +111,11 @@ class purchase_order(osv.osv):
 		Overrides picking_done to also mark the picking as transfered
 		"""
 		picking_ids = []
-		# for po in self.browse(cr, uid, ids, context=context):
-		# 	picking_ids += [picking.id for picking in po.picking_ids]
-		# picking_obj = self.pool.get('stock.picking')
-		# picking_obj.do_transfer(cr, uid, picking_ids)
+		for po in self.browse(cr, uid, ids, context=context):
+			if po.shipped_or_taken == 'shipped':
+				picking_ids += [picking.id for picking in po.picking_ids]
+		picking_obj = self.pool.get('stock.picking')
+		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
 	
 	def action_invoice_create(self, cr, uid, ids, context=None):
