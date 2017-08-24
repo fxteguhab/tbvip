@@ -292,7 +292,7 @@ class sale_order_line(osv.osv):
 		product_obj = self.pool.get('product.product')
 		product_browsed = product_obj.browse(cr, uid, product)
 		result['value'].update({
-			'product_uom': product_browsed.uom_id.id,
+			'product_uom': uom if uom else product_browsed.uom_id.id,
 			'uom_category_filter_id': product_browsed.product_tmpl_id.uom_id.category_id.id
 		})
 		
