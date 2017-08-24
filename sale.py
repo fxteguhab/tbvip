@@ -74,11 +74,13 @@ class sale_order(osv.osv):
 				self._calculate_commission_total(cr, uid, sale_id)
 		return result
 	
-	# def action_button_confirm(self, cr, uid, ids, context=None):
-	# 	result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
-	# 	if result:
-	# 		cash_sales_obj = self.pool.get('')
-	# 	return result
+	def action_button_confirm(self, cr, uid, ids, context=None):
+		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
+		if result:
+			self.write(cr, uid, ids, {
+				'cash_or_receivable': 'cash'
+			}, context=context)
+		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
 		order_data = self.browse(cr, uid, sale_order_id)
