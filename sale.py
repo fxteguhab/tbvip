@@ -143,7 +143,7 @@ class sale_order(osv.osv):
 			('date_order', '>=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 00:00:00")),
 			('date_order', '<=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 23:59:59")),
 		])
-		if len(bon_book_same_number_ids) > 0:
+		if len(bon_book_same_number_ids) > 1:
 			raise osv.except_orm(_('Bon book number error'),
 				_('There is sale order with the same bon book number.'))
 		bon_book_obj = self.pool.get('tbvip.bon.book')
