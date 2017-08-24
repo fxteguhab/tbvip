@@ -57,7 +57,7 @@ class sale_order(osv.osv):
 		if vals.get('bon_number', False):
 			self._update_bon_book(cr, uid, vals['bon_number'])
 		for sale_order_data in self.browse(cr, uid, ids):
-			bon_number = vals['bon_number'] if vals['bon_number'] else sale_order_data.bon_number
+			bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
 			bon_name = ' / ' + bon_number if bon_number else ''
 			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
 			vals['name'] = name
