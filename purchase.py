@@ -70,7 +70,6 @@ class purchase_order(osv.osv):
 		# 'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'shipped',
-		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_incoming_location_id.id,
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -97,7 +96,15 @@ class purchase_order(osv.osv):
 				demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
 				demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
 		return result
-				
+
+	def onchange_picking_type_id(self, cr, uid, ids, picking_type_id, context=None):
+		result = super(purchase_order, self).onchange_picking_type_id(cr, uid, ids, picking_type_id, context)
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		location_id =  user_data.branch_id.default_incoming_location_id.id or None
+		result.update({
+			'location_id': location_id,
+		})
+		return {'value': result}
 	
 	def picking_done(self, cr, uid, ids, context=None):
 		"""
