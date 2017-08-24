@@ -22,18 +22,6 @@ class sale_order(osv.osv):
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 	}
-	
-	def name_get(self, cr, uid, ids, context={}):
-		if isinstance(ids, (list, tuple)) and not len(ids): return []
-		if isinstance(ids, (long, int)): ids = [ids]
-		res = []
-		for record in self.browse(cr, uid, ids):
-			name = record.name
-			if record.date_order:
-				bon_name = ' ' + record.bon_number if record.bon_number else ''
-				name = '%s%s' % (datetime.strptime(record.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
-			res.append((record.id, name))
-		return res
 
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
@@ -68,6 +56,11 @@ class sale_order(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		if vals.get('bon_number', False):
 			self._update_bon_book(cr, uid, vals['bon_number'])
+		for sale_order_data in self.browse(cr, uid, ids):
+			bon_number = vals['bon_number'] if vals['bon_number'] else sale_order_data.bon_number
+			bon_name = ' / ' + bon_number if bon_number else ''
+			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
+			vals['name'] = name
 		result = super(sale_order, self).write(cr, uid, ids, vals, context)
 		if vals.get('order_line', False):
 			for sale_id in ids:
@@ -89,20 +82,63 @@ class sale_order(osv.osv):
 		self.write(cr, uid, [sale_order_id], {
 			'commission_total': commission_total
 			})
-		
-	def _update_bon_book(self, cr, uid, bon_number):
+	
+	def onchange_bon_number(self, cr, uid, ids, bon_number, context=None):
+		if not bon_number:
+			return
+		result = {}
 		bon_book_same_number_ids = self.search(cr, uid, [
-			('user_id', '=', uid),
 			('bon_number', '=', bon_number),
 			('date_order', '>=', date.today().strftime('%Y-%m-%d 00:00:00')),
 			('date_order', '<=', date.today().strftime('%Y-%m-%d 23:59:59')),
 		])
 		if len(bon_book_same_number_ids) > 0:
 			raise osv.except_orm(_('Bon book number error'),
-				_('There is sale order with the same bon book number for this user.'))
+				_('There is sale order with the same bon book number.'))
 		bon_book_obj = self.pool.get('tbvip.bon.book')
 		bon_book_id = bon_book_obj.search(cr, uid, [
-			('user_id', '=', uid),
+			('start_from', '<=', int(bon_number)),
+			('end_at', '>=', int(bon_number)),
+		], limit=1, order='issue_date DESC')
+		bon_book = bon_book_obj.browse(cr, uid, bon_book_id)
+		if bon_book:
+			if bon_book.total_used >= bon_book.total_sheets:
+				raise osv.except_orm(_('Bon book is full'), _('All sheets in bon book have already been used.'))
+			else:
+				if bon_book.used_numbers:
+					used_numbers = bon_book.used_numbers.split(', ')
+					for used_number in used_numbers:
+						if used_number == bon_number:
+							raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
+		
+				employee_obj = self.pool.get('hr.employee')
+				user_id = bon_book.user_id.id
+				employee_id = employee_obj.search(cr, uid, [
+					('user_id', '=', user_id),
+				], limit=1)
+				if employee_id:
+					result['value'] = {}
+					result['value'].update({
+						'employee_id': employee_id[0]	,
+					})
+				else:
+					raise osv.except_orm(_('Bon number error'), bon_book.user_id.name + ' ' + _('is not an employee.'))
+		else:
+			raise osv.except_orm(_('Creating sale order error'),
+				_('There is no bon book with the given number.'))
+		return result
+	
+	def _update_bon_book(self, cr, uid, bon_number):
+		bon_book_same_number_ids = self.search(cr, uid, [
+			('bon_number', '=', bon_number),
+			('date_order', '>=', date.today().strftime('%Y-%m-%d 00:00:00')),
+			('date_order', '<=', date.today().strftime('%Y-%m-%d 23:59:59')),
+		])
+		if len(bon_book_same_number_ids) > 0:
+			raise osv.except_orm(_('Bon book number error'),
+				_('There is sale order with the same bon book number.'))
+		bon_book_obj = self.pool.get('tbvip.bon.book')
+		bon_book_id = bon_book_obj.search(cr, uid, [
 			('start_from', '<=', int(bon_number)),
 			('end_at', '>=', int(bon_number)),
 		], limit=1, order='issue_date DESC')
@@ -123,7 +159,7 @@ class sale_order(osv.osv):
 				})
 		else:
 			raise osv.except_orm(_('Creating sale order error'),
-				_('There is no bon book with the given number for this user.'))
+				_('There is no bon book with the given number.'))
 
 # ==========================================================================================================================
 
@@ -232,7 +268,7 @@ class sale_order_line(osv.osv):
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
 		result['value'].update({
-			'product_uom' : temp['value']['product_uom']
+			'product_uom': self.pool.get('product.product').browse(cr, uid, product).uom_id.id
 		})
 		
 		return result

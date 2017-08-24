@@ -28,6 +28,9 @@
 						</group>
 					</page>
 				</xpath>
+				<field name="bon_number" position="replace">
+					<field name="bon_number" on_change="onchange_bon_number(bon_number, context)"/>
+				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</field>
