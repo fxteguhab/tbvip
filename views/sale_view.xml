@@ -55,6 +55,10 @@
 				<xpath expr="//field[@name='order_line']/tree//field[@name='discount_string']" position="after">
 					<field name="commission" invisible="1"/>
 					<field name="commission_amount" invisible="1"/>
+					<field name="uom_category_filter_id" invisible="1"/>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='product_uom']" position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
 				</xpath>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="attributes">
 					<attribute name="invisible">1</attribute>

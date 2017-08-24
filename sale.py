@@ -191,6 +191,8 @@ class sale_order_line(osv.osv):
 		'product_uom_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'commission': fields.char('Commission', help="Commission String"),
 		'commission_amount': fields.float('Commission Amount'),
+		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
+			string='UoM Category', readonly=True)
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
@@ -287,8 +289,11 @@ class sale_order_line(osv.osv):
 			lang, update_tax, date_order, fiscal_position, context=None)
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		product_obj = self.pool.get('product.product')
+		product_browsed = product_obj.browse(cr, uid, product)
 		result['value'].update({
-			'product_uom': self.pool.get('product.product').browse(cr, uid, product).uom_id.id
+			'product_uom': product_browsed.uom_id.id,
+			'uom_category_filter_id': product_browsed.product_tmpl_id.uom_id.category_id.id
 		})
 		
 		return result
