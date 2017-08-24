@@ -2,6 +2,7 @@ from openerp.osv import osv, fields
 import commission_utility
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
+import openerp.addons.decimal_precision as dp
 
 # ==========================================================================================================================
 
@@ -15,10 +16,15 @@ class sale_order(osv.osv):
 		'bon_number': fields.char('Bon Number'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'is_cash': fields.boolean('Is Cash'),
-		'cash_amount': fields.float('Cash Amount'),
-		# 'is_edc': fields.boolean('Is EDC'),
 		'is_transfer': fields.boolean('Is Transfer'),
+		'is_edc': fields.boolean('Is EDC'),
+		'cash_amount': fields.float('Cash Amount'),
 		'transfer_amount': fields.float('Transfer Amount'),
+		'edc_amount': fields.float('EDC Amount'),
+		'edc_id': fields.many2one('account.journal.edc', 'EDC'),
+		'approval_code': fields.char('Approval Code'),
+		'card_fee': fields.float('Card Fee (%)'),
+		'card_fee_amount': fields.float(type='float', string='Card Fee Amount', store=True, multi='sums'),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 	}
@@ -57,7 +63,7 @@ class sale_order(osv.osv):
 		if vals.get('bon_number', False):
 			self._update_bon_book(cr, uid, vals['bon_number'])
 		for sale_order_data in self.browse(cr, uid, ids):
-			bon_number = vals['bon_number'] if vals['bon_number'] else sale_order_data.bon_number
+			bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
 			bon_name = ' / ' + bon_number if bon_number else ''
 			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
 			vals['name'] = name
@@ -169,6 +175,7 @@ class sale_order_line(osv.osv):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
+		'product_uom_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'commission': fields.char('Commission', help="Commission String"),
 		'commission_amount': fields.float('Commission Amount'),
 	}

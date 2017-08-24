@@ -168,6 +168,7 @@ class purchase_order_line(osv.osv):
 		'mysql_purchase_det_id': fields.integer('MySQL Purchase Detail ID'),
 		'purchase_hour': fields.function(_purchase_hour, method=True, string='Purchase Hour', type='float'),
 		'alert': fields.integer('Alert'),
+		'product_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------

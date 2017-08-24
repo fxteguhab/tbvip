@@ -1,6 +1,11 @@
 <openerp>
 	<data>
 
+		<record forcecreate="True" id="decimal_custom_order_line" model="decimal.precision">
+			<field name="name">Decimal Custom Order Line</field>
+			<field name="digits">2</field>
+		</record>
+
 		<template id="assets_frontend" inherit_id="website.assets_frontend" name="tbvip">
 			<xpath expr="." position="inside">
 				<link rel='stylesheet' href='/tbvip/static/src/css/tbvip.css'/>
