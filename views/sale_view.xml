@@ -9,6 +9,21 @@
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_id']"
 						position="attributes">
 					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+						product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+						parent.price_type_id, price_type_id, context)
+					</attribute>
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
+						position="attributes">
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+						product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+						parent.price_type_id, price_type_id, context)
+					</attribute>
 				</xpath>
 			</field>
 		</record>

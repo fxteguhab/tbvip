@@ -4,6 +4,14 @@ from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 import openerp.addons.decimal_precision as dp
 
+import openerp.addons.sale as imported_sale
+import openerp.addons.portal_sale as imported_portal_sale
+import openerp.addons.sale_stock as imported_sale_stock
+import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
+import openerp.addons.sale_direct_cash as imported_sale_direct_cash
+import openerp.addons.product_custom_conversion as imported_product_custom_conversion
+import openerp.addons.chjs_price_list as imported_price_list
+
 # ==========================================================================================================================
 
 class sale_order(osv.osv):
@@ -253,47 +261,80 @@ class sale_order_line(osv.osv):
 			return False
 		return commission_amount
 	
-	def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
-			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
-			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
-		result = super(sale_order_line, self).product_id_change(cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name,
-			partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag, context)
-		product_obj = self.pool.get('product.current.commission')
-		current_commission = product_obj.get_current_commission(cr, uid, product)
-		result['value']['commission'] = current_commission
-		return result
+	# def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
+	# 		uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+	# 		lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
+	# 	result = super(sale_order_line, self).product_id_change(cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name,
+	# 		partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag, context)
+	# 	product_obj = self.pool.get('product.current.commission')
+	# 	current_commission = product_obj.get_current_commission(cr, uid, product)
+	# 	result['value']['commission'] = current_commission
+	# 	return result
 	
-	def onchange_product_uom_qty(self, cr, uid, ids, pricelist, product, qty=0,
-			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
-			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, warehouse_id=False, price_unit = False,context=None):
-		result = super(sale_order_line, self).product_id_change_with_wh(
-			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
-			lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, context=None)
-		result['value'].update({
-			'price_unit': price_unit,
-			'product_uom': uom,
-		})
-		return result
+	# def onchange_product_uom_qty(self, cr, uid, ids, pricelist, product, qty=0,
+	# 		uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+	# 		lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, warehouse_id=False, price_unit = False,context=None):
+	# 	result = super(sale_order_line, self).product_id_change_with_wh(
+	# 		cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
+	# 		lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, context=None)
+	# 	result['value'].update({
+	# 		'price_unit': price_unit,
+	# 		'product_uom': uom,
+	# 	})
+	# 	return result
 	
-	def onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty=0,
+	# def onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty=0,
+	# 		uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+	# 		lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
+	# 		warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+	# 	product_conversion_obj = self.pool.get('product.conversion')
+	# 	uom = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom, context).id
+	# 	result = super(sale_order_line, self).onchange_product_id_price_list(cr, uid, ids, pricelist, product, qty,
+	# 		uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
+	# 		warehouse_id, parent_price_type_id, price_type_id, context)
+	# 	temp = super(sale_order_line, self).onchange_product_uom(
+	# 		cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
+	# 		lang, update_tax, date_order, fiscal_position, context=None)
+	# 	if result.get('domain', False) and temp.get('domain', False):
+	# 		result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+	# 	product_obj = self.pool.get('product.product')
+	# 	product_browsed = product_obj.browse(cr, uid, product)
+	# 	result['value'].update({
+	# 		'product_uom': uom if uom else product_browsed.uom_id.id,
+	# 		'uom_category_filter_id': product_browsed.product_tmpl_id.uom_id.category_id.id
+	# 	})
+	#
+	# 	return result
+	
+	
+	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist, product, qty=0,
 			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
 			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom, context).id
-		result = super(sale_order_line, self).onchange_product_id_price_list(cr, uid, ids, pricelist, product, qty,
+		
+		# dari sale tidak perlu karena di tempat lain di panggil menggunakan super
+		# dari modul portal_sale dan sale_stock dan sale_direct_cash tidak ada override onchange product id
+		result_price_list = imported_price_list.sale.sale_order_line.onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)
-		temp = super(sale_order_line, self).onchange_product_uom(
+		result = result_price_list
+		temp = imported_product_custom_conversion.sale.sale_order_line.onchange_product_uom(self,
 			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
 			lang, update_tax, date_order, fiscal_position, context=None)
+		
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
 		product_obj = self.pool.get('product.product')
 		product_browsed = product_obj.browse(cr, uid, product)
 		result['value'].update({
-			'product_uom': uom if uom else product_browsed.uom_id.id,
+			'product_uom': temp['value']['product_uom'] if temp['value'].get('product_uom', False) else uom if uom else product_browsed.uom_id.id,
 			'uom_category_filter_id': product_browsed.product_tmpl_id.uom_id.category_id.id
 		})
+		
+		product_obj = self.pool.get('product.current.commission')
+		current_commission = product_obj.get_current_commission(cr, uid, product)
+		result['value']['commission'] = current_commission
 		
 		return result
