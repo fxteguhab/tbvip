@@ -14,6 +14,10 @@
 		<record id="group_management_cashier" model="res.groups">
 			<field name="name">Cashier</field>
 			<field name="category_id" ref="tbvip.module_category_tbvip"/>
+			<field name="implied_ids" eval="[
+			(4, ref('base.group_sale_salesman')),
+			(4, ref('stock.group_stock_user')),
+			]"/>
 		</record>
 		<record id="group_management_administrator" model="res.groups">
 			<field name="name">Admin</field>
