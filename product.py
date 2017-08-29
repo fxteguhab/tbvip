@@ -52,9 +52,12 @@ class product_template(osv.osv):
 					default_uom = quant.product_id.uom_id.name
 					map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
 				stocks += variant.name + '\n'
+				stock = ''
 				for key in sorted(map.iterkeys()):
-					stocks += key + ': ' + str(map[key]) + ' ' + default_uom + '\n'
-				stocks += '\n'
+					stock += key + ': ' + str(map[key]) + ' ' + default_uom + '\n'
+				if len(stock) == 0:
+					stock = 'None'
+				stocks += stock + '\n'
 			result[product.id] = stocks
 		return result
 		

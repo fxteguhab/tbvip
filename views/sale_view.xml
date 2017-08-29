@@ -6,30 +6,51 @@
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale.view_order_form"/>
 			<field name="arch" type="xml">
+				<xpath expr="/form/sheet/group" position="replace">
+					<group>
+						<group>
+							<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
+							<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
+									attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
+							<field name="partner_id" on_change="onchange_partner_id(partner_id, context)"
+									domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1}"
+									options='{"always_reload": True}'/>
+							<field name="price_type_id"/>
+							<field name="shipped_or_taken"/>
+						</group>
+						<group>
+							<field name="create_uid" readonly="1"/>
+							<field name="employee_id"/>
+							<field name="stock_location_id" readonly="1"/>
+							<field name="commission_total" readonly="1"/>
+							<field name="client_order_ref"/>
+							<field name="pricelist_id" invisible="1"/>
+							<field name="currency_id" invisible="1"/>
+						</group>
+					</group>
+				</xpath>
+
+				<!--<xpath expr="/form/sheet/notebook/page[2]" position="replace"></xpath>-->
+
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_id']"
 						position="attributes">
 					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+						product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+						parent.price_type_id, price_type_id, context)
+					</attribute>
 				</xpath>
-			</field>
-		</record>
-
-		<record model="ir.ui.view" id="view_order_form_inherit">
-			<field name="name">sale.order.form.inherit</field>
-			<field name="model">sale.order</field>
-			<field name="inherit_id" ref="purchase_sale_discount.view_order_form_inherit"/>
-			<field name="arch" type="xml">
-				<field name="partner_id" position="before">
-					<field name="employee_id"/>
-				</field>
-				<field name="partner_id" position="after">
-					<field name="commission_total" readonly="1"/>
-					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
-							attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
-				</field>
-				<field name="date_order" position="before">
-					<field name="create_uid" readonly="1"/>
-					<field name="stock_location_id" readonly="1"/>
-				</field>
+				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
+						position="attributes">
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+						product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+						parent.price_type_id, price_type_id, context)
+					</attribute>
+				</xpath>
 				<xpath expr="//page[@string='Order Lines']" position="after">
 					<page string="Payment Method">
 						<group name="method_cash" col="4">
@@ -39,13 +60,23 @@
 							<field name="transfer_amount" attrs="{'invisible': [('is_transfer','=',False)],'required': [('is_transfer','=',False)]}"/>
 							<field name="is_edc"/>
 							<field name="edc_amount" attrs="{'invisible': [('is_edc','=',False)],'required': [('is_edc','=',False)]}"/>
-							<field name="edc_id" attrs="{'invisible': [('is_edc','=',False)]}"/>
 							<field name="approval_code" attrs="{'invisible': [('is_edc','=',False)]}"/>
 							<field name="card_fee" attrs="{'invisible': [('is_edc','=',False)]}"/>
 							<field name="card_fee_amount" readonly="1" attrs="{'invisible': [('is_edc','=',False)]}"/>
 						</group>
 					</page>
 				</xpath>
+				<xpath expr="//page[@string='Other Information']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_order_form_inherit">
+			<field name="name">sale.order.form.inherit</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="purchase_sale_discount.view_order_form_inherit"/>
+			<field name="arch" type="xml">
 				<field name="user_id" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</field>

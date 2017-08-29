@@ -10,8 +10,12 @@
 					<field name="employee_id"/>
 					<field name="branch_id"/>
 				</field>
-				<field name="picking_type_id" position="replace">
-					<field name="picking_type_id" invisible="1" on_change="onchange_picking_type_id(picking_type_id, context)" domain="[('code','=','incoming')]" options="{'no_create': True}" groups="stock.group_locations"/>
+				<field name="picking_type_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+					<attribute name="domain">[('code','=','incoming')]</attribute>
+					<attribute name="groups">stock.group_locations</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="on_change">onchange_picking_type_id(picking_type_id, context)</attribute>
 				</field>
 				<field name="price_unit" position="attributes">
 					<attribute name="on_change">onchange_order_line(product_qty, price_unit, discount_string, product_uom, product_id, discount_from_subtotal)</attribute>
@@ -31,30 +35,31 @@
 				<field name="picking_type_id" position="before">
 					<field name="shipped_or_taken"/>
 				</field>
-				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="replace">
-					<field name="name" invisible="1"/>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="attributes">
+					<attribute name="invisible">True</attribute>
 				</xpath>
-				<field name="source" position="replace">
-					<field name="source" invisible="1"/>
+				<field name="source" position="attributes">
+					<attribute name="invisible">True</attribute>
 				</field>
-				<field name="product_id" position="replace">
-					<field name="product_id"
-							options="{'no_create': 1}"
-							on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
-							parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
-							parent.price_type_id, price_type_id, context)"/>
+				<field name="product_id" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
+						parent.price_type_id,price_type_id,discount_from_subtotal,context)
+					</attribute>
 				</field>
-				<field name="product_uom" position="replace">
+				<field name="product_uom" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
+						parent.price_type_id,price_type_id,discount_from_subtotal,context)
+					</attribute>
+				</field>
+				<field name="product_qty" position="after">
 					<field name="uom_category_filter_id" invisible="True"/>
-					<field name="product_uom"
-							domain="[('category_id','=', uom_category_filter_id)]"
-							on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
-							parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
-							parent.price_type_id, price_type_id, context)"/>
-				</field>
-				<field name="product_qty" position="replace">
-					<field name="product_qty"
-							on_change=""/>
 				</field>
 			</field>
 		</record>

@@ -12,18 +12,23 @@
 				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_2" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_3" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_4" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_5" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 			</field>
 		</record>
@@ -38,18 +43,23 @@
 				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_2" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_3" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_4" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_5" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 			</field>
 		</record>
