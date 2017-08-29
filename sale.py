@@ -313,6 +313,8 @@ class sale_order_line(osv.osv):
 		result_price_list = imported_price_list.sale.sale_order_line.onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)
+		# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
+		result_price_list['warning'] = {}
 		result = result_price_list
 		temp = imported_product_custom_conversion.sale.sale_order_line.onchange_product_uom(self,
 			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
