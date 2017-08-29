@@ -45,7 +45,7 @@
 				</xpath>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='price_type_id']" position="attributes">
 					<attribute name="on_change">
-						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						onchange_product_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
 						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
 						parent.price_type_id,price_type_id,discount_from_subtotal,context)
 					</attribute>
@@ -62,7 +62,7 @@
 					<attribute name="options">{'no_create': 1}</attribute>
 					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
 					<attribute name="on_change">
-						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						onchange_product_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
 						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
 						parent.price_type_id,price_type_id,discount_from_subtotal,context)
 					</attribute>

@@ -338,6 +338,19 @@ class purchase_order_line(osv.osv):
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
 			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
 			discount_from_subtotal=False, context=None):
+		result = self.onchange_product_tbvip(cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order,
+			fiscal_position_id, date_planned, name, price_unit, state, parent_price_type_id, price_type_id,
+			discount_from_subtotal, context)
+		if product_id:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, product_id)
+			result['value']['product_uom'] = product.uom_id.id
+		return result
+	
+	def onchange_product_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
+			discount_from_subtotal=False, context=None):
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
 		
