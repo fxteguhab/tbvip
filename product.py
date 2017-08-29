@@ -51,7 +51,7 @@ class product_template(osv.osv):
 				for quant in quant_obj.browse(cr, uid, quant_ids):
 					default_uom = quant.product_id.uom_id.name
 					map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
-				stocks += variant.name + '\n'
+				# stocks += variant.name + '\n'
 				stock = ''
 				for key in sorted(map.iterkeys()):
 					stock += key + ': ' + str(map[key]) + ' ' + default_uom + '\n'
