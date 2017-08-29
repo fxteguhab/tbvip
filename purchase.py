@@ -312,6 +312,10 @@ class purchase_order_line(osv.osv):
 			date_planned, name, price_unit, state, parent_price_type_id, price_type_id, context)
 		price_unit_current = result_price_list['value']['price_unit'] \
 			if result_price_list['value'].get('price_unit', False) else price_unit
+			
+		# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
+		result_price_list['warning'] = {}
+		
 		result = result_price_list
 		
 		result_purchase_sale_discount = \
