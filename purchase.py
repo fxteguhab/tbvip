@@ -69,7 +69,6 @@ class purchase_order(osv.osv):
 			('shipped', 'Shipped'),
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
-		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
 	}
 	
 	_defaults = {
