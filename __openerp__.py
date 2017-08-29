@@ -31,6 +31,7 @@
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
 		'menu/stock_menu.xml',
+		'menu/sale_menu.xml',
 		'views/account_invoice_view.xml',
 		'views/account_view.xml',
 		'views/account_voucher_view.xml',

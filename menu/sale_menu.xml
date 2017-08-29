@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record model="ir.actions.act_window" id="sale.action_orders">
+			<field name="context" eval="{
+				'search_default_my_sale_orders_filter': 1,
+				'default_cash_or_receivable': 'receivable',
+				'default_is_payment_cash': True
+			}"/>
+		</record>
+	</data>
+</openerp>
