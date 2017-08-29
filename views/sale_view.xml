@@ -53,6 +53,7 @@
 				</xpath>
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
 						position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
 					<attribute name="on_change">
 						onchange_product_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
 						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
@@ -96,9 +97,6 @@
 					<field name="commission" invisible="1"/>
 					<field name="commission_amount" invisible="1"/>
 					<field name="uom_category_filter_id" invisible="1"/>
-				</xpath>
-				<xpath expr="//field[@name='order_line']/tree//field[@name='product_uom']" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
 				</xpath>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="attributes">
 					<attribute name="invisible">1</attribute>
