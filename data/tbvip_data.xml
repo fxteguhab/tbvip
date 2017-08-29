@@ -35,6 +35,7 @@
 			<field name="name">GENERAL SUPPLIER</field>
 			<field name="supplier" eval="True" />
 			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"/>
+			<field name="active" eval="False" />
 		</record>
 
 		<!-- EMPLOYEE POINT ROLE -->
