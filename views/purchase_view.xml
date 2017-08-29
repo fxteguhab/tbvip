@@ -40,6 +40,16 @@
 				<field name="source" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='product_qty']" position="attributes">
+					<attribute name="on_change">onchange_order_line(product_qty, price_unit, discount_string, product_uom, product_id, discount_from_subtotal)</attribute>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='price_type_id']" position="attributes">
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
+						parent.price_type_id,price_type_id,discount_from_subtotal,context)
+					</attribute>
+				</xpath>
 				<field name="product_id" position="attributes">
 					<attribute name="options">{'no_create': 1}</attribute>
 					<attribute name="on_change">
