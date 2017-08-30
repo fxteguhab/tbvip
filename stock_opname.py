@@ -6,7 +6,11 @@ from datetime import datetime, timedelta
 
 class stock_opname_memory(osv.osv_memory):
 	_inherit = 'stock.opname.memory'
-
+	
+	_defaults = {
+		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_stock_location_id.id,
+	}
+	
 	def action_generate_stock_opname(self, cr, uid, ids, context=None):
 	# karena di tbvip location stock opname per barang pasti idem Inventoried Location,
 	# maka di form field/kolom location di Inventories (stock_opname_memory_line.location_id) dihide
@@ -37,3 +41,10 @@ class stock_opname_memory_line(osv.osv_memory):
 				sublocation = product_sublocation_id.sublocation_id
 				result += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
 		return {'value': {'sublocation': result}}
+
+class stock_opname_inject(osv.osv_memory):
+	_inherit = 'stock.opname.inject'
+	
+	_defaults = {
+		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_stock_location_id.id,
+	}
