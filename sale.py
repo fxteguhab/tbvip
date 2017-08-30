@@ -235,7 +235,8 @@ class sale_order_line(osv.osv):
 			product_uom = sale_order_line.product_uom.id
 			product_uom_qty = sale_order_line.product_uom_qty
 			price_unit = sale_order_line.price_unit
-			
+			price_type_id = sale_order_line.price_type_id.id
+	
 		if order_line.get('product_id', False):
 			product_id = order_line['product_id']
 		if order_line.get('product_uom', False):
@@ -244,17 +245,26 @@ class sale_order_line(osv.osv):
 			product_uom_qty = order_line['product_uom_qty']
 		if order_line.get('price_unit', False):
 			price_unit = order_line['price_unit']
-		
+		if order_line.get('price_type_id', False):
+			price_type_id = order_line['price_type_id']
+	
 		commission = commission_obj.get_current_commission(cr, uid, product_id)
 			
 		product = product_obj.browse(cr, uid, product_id)
 		qty = product_uom_obj._compute_qty(cr, uid,
 			product_uom, product_uom_qty, product.product_tmpl_id.uom_po_id.id)
-	
-		price_unit = price_unit / qty * product_uom_qty
+		
+		# ambil harga uom unit untuk perhitungan commission
+		ir_model_data = self.pool.get('ir.model.data')
+		uom_unit_id = ir_model_data.get_object(cr, uid, 'product', 'product_uom_unit').id
+		product_current_price_obj = self.pool.get('product.current.price')
+		price_unit_commission = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, uom_unit_id)
+		
+		if not price_unit_commission:
+			price_unit_commission = price_unit / qty * product_uom_qty
 		try:
 			valid_commission_string = commission_utility.validate_commission_string(commission)
-			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit, qty)
+			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit_commission, qty)
 		except commission_utility.InvalidCommissionException:
 			return False
 		return commission_amount
