@@ -10,12 +10,43 @@ class product_category(osv.osv):
 	
 	_columns = {
 		'codex_id': fields.integer('MySQL Product ID'),
+		'brand_id': fields.many2one('product.brand', 'Brand'),
+		'tonnage': fields.float('Tonnage/Weight (kg)'),
+		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
 	}
+	
+	def write(self, cr, uid, ids, data, context=None):
+		result = super(product_category, self).write(cr, uid, ids, data, context)
+		for category_id in ids:
+			product_obj = self.pool.get('product.template')
+			product_ids = product_obj.search(cr, uid, [
+				('categ_id', '=', category_id),
+			])
+			if data.get('brand_id', False):
+				product_obj.write(cr, uid, product_ids, {
+					'brand_id': data['brand_id'],
+				})
+			if data.get('tonnage', False):
+				product_obj.write(cr, uid, product_ids, {
+					'tonnage': data['tonnage'],
+				})
+			if data.get('stock_unit_id', False):
+				product_obj.write(cr, uid, product_ids, {
+					'stock_unit_id': data['stock_unit_id'],
+				})
+		return result
 
+# ==========================================================================================================================
 
-# ORDER --------------------------------------------------------------------------------------------------------------------
-
-# _order = 'parent_id, codex_id'
+class product_brand(osv.osv):
+	
+	_name = "product.brand"
+	
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'name': fields.char('Name'),
+	}
 
 # ==========================================================================================================================
 
@@ -83,6 +114,9 @@ class product_template(osv.osv):
 		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
 		'product_current_stock': fields.function(_product_current_stock, string="Current Stock", type='text', store=False),
 		'current_price_ids': fields.function(_current_price_ids, string="Current Prices", type='one2many', relation='product.current.price'),
+		'brand_id': fields.many2one('product.brand', 'Brand'),
+		'tonnage': fields.float('Tonnage/Weight (kg)'),
+		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------

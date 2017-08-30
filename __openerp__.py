@@ -28,6 +28,7 @@
 		'menu/bon_menu.xml',
 		'menu/commission_menu.xml',
 		'menu/demand_menu.xml',
+		'menu/product_menu.xml',
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
 		'menu/stock_menu.xml',
