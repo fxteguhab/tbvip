@@ -188,9 +188,12 @@ class sale_order(osv.osv):
 		if bon_number and date_order:
 			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
 			if bon_book:
+				temp_book_number = bon_book.used_numbers
+				if not temp_book_number:
+					temp_book_number = ""
 				bon_book_obj.write(cr, uid, bon_book.id, {
 					'total_used': bon_book.total_used + 1,
-					'used_numbers': (bon_book.used_numbers + ', ' + bon_number) if (len(bon_book.used_numbers)>=1) else bon_number,
+					'used_numbers': (temp_book_number + ', ' + bon_number) if (len(temp_book_number)>=1) else bon_number,
 				})
 		return
 
