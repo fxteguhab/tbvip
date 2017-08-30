@@ -74,6 +74,7 @@
 				<form>
 					<group>
 						<field name="name"/>
+						<field name="default_stock_location_id"/>
 						<field name="default_incoming_location_id"/>
 						<field name="default_outgoing_location_id"/>
 						<field name="address"/>
