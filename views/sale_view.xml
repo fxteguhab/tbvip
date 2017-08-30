@@ -56,7 +56,10 @@
 				</xpath>
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
 						position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="domain">
+						[('category_id','=', uom_category_filter_id),('is_auto_create','=',False)]
+					</attribute>
 					<attribute name="on_change">
 						onchange_product_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
 						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
