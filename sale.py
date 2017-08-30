@@ -60,6 +60,14 @@ class sale_order(osv.osv):
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
+		if vals.get('bon_number', False) and vals.get('date_order', False):
+			bon_number = vals['bon_number']
+			date_order = vals['date_order']
+			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
+			if bon_book:
+				vals.update({
+					'employee_id': bon_book.employee_id.id
+				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
 		return new_id
@@ -70,10 +78,25 @@ class sale_order(osv.osv):
 			bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
 			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
 			vals['name'] = name
-		result = super(sale_order, self).write(cr, uid, ids, vals, context)
+			
+			if vals.get('bon_number', False) or vals.get('date_order', False):
+				bon_number = sale_order_data.bon_number
+				date_order = sale_order_data.date_order
+				if vals.get('bon_number', False):
+					bon_number = vals['bon_number']
+				if vals.get('date_order', False):
+					date_order = vals['date_order']
+				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
+				if bon_book:
+					vals.update({
+						'employee_id': bon_book.employee_id.id
+					})
+			result = super(sale_order, self).write(cr, uid, sale_order_data.id, vals, context)
+			
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
+		
 		return result
 	
 	def action_button_confirm(self, cr, uid, ids, context=None):
