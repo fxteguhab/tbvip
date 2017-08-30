@@ -54,7 +54,7 @@ def generate_stock_opname_products(self, cr, uid):
 		<!--</record>-->
 
 	</data>
-	<data noupdate="1">
+	<data>
 		<function model="stock.location" name="_initialize_default_stock_location_data"/>
 	</data>
 </openerp>
