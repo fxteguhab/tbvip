@@ -34,7 +34,7 @@
 				<field name="warehouse_id" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
-				
+
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='price_type_id']"
 						position="attributes">
 					<attribute name="on_change">

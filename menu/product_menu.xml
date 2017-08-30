@@ -1,0 +1,17 @@
+<openerp>
+	<data>
+
+		<record id="product_brand_action" model="ir.actions.act_window">
+			<field name="name">Brands</field>
+			<field name="type">ir.actions.act_window</field>
+			<field name="res_model">product.brand</field>
+			<field name="view_type">tree</field>
+		</record>
+
+		<menuitem
+				action="product_brand_action"
+				id="product.menu_products_brand"
+				parent="product.prod_config_main"
+				sequence="10" groups="base.group_no_one"/>
+	</data>
+</openerp>
