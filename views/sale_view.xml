@@ -12,16 +12,15 @@
 							<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
 							<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
 									attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
+							<field name="employee_id"/>
 							<field name="partner_id" on_change="onchange_partner_id(partner_id, context)"
 									domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1}"
 									options='{"always_reload": True}'/>
 							<field name="price_type_id"/>
-							<field name="shipped_or_taken"/>
 						</group>
 						<group>
-							<field name="create_uid" readonly="1"/>
-							<field name="employee_id"/>
 							<field name="stock_location_id" readonly="1"/>
+							<field name="shipped_or_taken"/>
 							<field name="commission_total" readonly="1"/>
 							<field name="client_order_ref"/>
 							<field name="pricelist_id" invisible="1"/>
