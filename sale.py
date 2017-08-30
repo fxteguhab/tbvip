@@ -8,7 +8,7 @@ import openerp.addons.sale as imported_sale
 import openerp.addons.portal_sale as imported_portal_sale
 import openerp.addons.sale_stock as imported_sale_stock
 import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
-import openerp.addons.sale_direct_cash as imported_sale_direct_cash
+import openerp.addons.sale_mutiple_payment as imported_sale_mutiple_payment
 import openerp.addons.product_custom_conversion as imported_product_custom_conversion
 import openerp.addons.chjs_price_list as imported_price_list
 
@@ -23,15 +23,6 @@ class sale_order(osv.osv):
 		'commission_total': fields.float('Commission Total', readonly=True),
 		'bon_number': fields.char('Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'is_payment_cash': fields.boolean('Cash'),
-		'is_payment_transfer': fields.boolean('Transfer'),
-		'is_payment_edc': fields.boolean('EDC'),
-		'cash_amount': fields.float('Cash Amount'),
-		'transfer_amount': fields.float('Transfer Amount'),
-		'edc_amount': fields.float('EDC Amount'),
-		'approval_code': fields.char('Approval Code'),
-		'card_fee': fields.float('Card Fee (%)'),
-		'card_fee_amount': fields.float(type='float', string='Card Fee Amount', store=True, multi='sums'),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 	}
