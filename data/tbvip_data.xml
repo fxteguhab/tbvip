@@ -8,9 +8,9 @@
 			<!--<field name="default_outgoing_location_id" ref="stock_location_branch_22"></field>-->
 		</record>
 
-		<record id="tbvip_branch_49" model="tbvip.branch">
-			<field name="name">Pahlawan 49</field>
-			<field name="address">Jalan Pahlawan 49</field>
+		<record id="tbvip_branch_85" model="tbvip.branch">
+			<field name="name">Pahlawan 85</field>
+			<field name="address">Jalan Pahlawan 85</field>
 			<!--<field name="default_incoming_location_id" ref="stock_location_branch_49"></field>-->
 			<!--<field name="default_outgoing_location_id" ref="stock_location_branch_49"></field>-->
 		</record>

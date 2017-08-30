@@ -41,17 +41,20 @@ def generate_stock_opname_products(self, cr, uid):
 			</field>
 		</record>
 
-		<record model="stock.warehouse" id="stock_warehouse_22">
-			<field name="name">Gudang Pahlawan 22</field>
-			<field name="code">W22</field>
-			<field name="partner_id" ref="base.main_partner"/>
-		</record>
+		<!--<record model="stock.warehouse" id="stock_warehouse_22">-->
+			<!--<field name="name">Gudang Pahlawan 22</field>-->
+			<!--<field name="code">W22</field>-->
+			<!--<field name="partner_id" ref="base.main_partner"/>-->
+		<!--</record>-->
 
-		<record model="stock.warehouse" id="stock_warehouse_49">
-			<field name="name">Gudang Pahlawan 49</field>
-			<field name="code">W49</field>
-			<field name="partner_id" ref="base.main_partner"/>
-		</record>
+		<!--<record model="stock.warehouse" id="stock_warehouse_49">-->
+			<!--<field name="name">Gudang Pahlawan 49</field>-->
+			<!--<field name="code">W49</field>-->
+			<!--<field name="partner_id" ref="base.main_partner"/>-->
+		<!--</record>-->
 
+	</data>
+	<data noupdate="1">
+		<function model="stock.location" name="_initialize_default_stock_location_data"/>
 	</data>
 </openerp>
