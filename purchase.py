@@ -334,11 +334,25 @@ class purchase_order_line(osv.osv):
 			date_planned, name, price_unit_current, state, context={})
 		if result.get('domain', False) and result_custom_conversion.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + result_custom_conversion['domain']['product_uom']
+		
+		custom_product_uom = False
+		if result_custom_conversion['value'].get('product_uom', False):
+			custom_product_uom = result_custom_conversion['value']['product_uom']
+			# cari current price untuk product uom ini
+			product_conversion_obj = self.pool.get('product.conversion')
+			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, custom_product_uom)
+			if uom_record:
+				product_current_price_obj = self.pool.get('product.current.price')
+				current_price = product_current_price_obj.get_current_price(cr, uid, product_id, price_type_id, uom_record.id)
+				if current_price:
+					result['value'].update({
+						'price_unit': current_price
+					})
+		
 		product_obj = self.pool.get('product.product')
 		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
-			'product_uom': result_custom_conversion['value']['product_uom']
-				if result_custom_conversion['value'].get('product_uom', False) else uom_id if uom_id else product.uom_id.id,
+			'product_uom': custom_product_uom if custom_product_uom else uom_id if uom_id else product.uom_id.id,
 			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
 		})
 		
