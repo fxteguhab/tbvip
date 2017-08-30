@@ -14,6 +14,25 @@ class stock_location(osv.osv):
 		'is_branch': fields.boolean('Is Branch?'),
 		# 'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
+
+	def _initialize_default_stock_location_data(self, cr, uid, ids=None, context=None):
+		stock_warehouse_obj = self.pool.get('stock.warehouse')
+		stock_warehouse_id = stock_warehouse_obj.search(cr, uid, [('code', '=', 'WH')], limit=1, context=context)
+		stock_warehouse = stock_warehouse_obj.browse(cr, uid, stock_warehouse_id)
+		if stock_warehouse:
+			stock_location_id = stock_warehouse.view_location_id
+			stock_location_22 = self.create(cr, uid, {
+				'name': 'Gudang 22',
+				'location_id': stock_location_id.id,
+				'usage': 'internal',
+			})
+			stock_location_85 = self.create(cr, uid, {
+				'name': 'Gudang 85',
+				'location_id': stock_location_id.id,
+				'usage': 'internal',
+			})
+		return True
+			
 	
 # ==========================================================================================================================
 
