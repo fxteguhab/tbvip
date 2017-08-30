@@ -37,6 +37,7 @@
 		'views/account_voucher_view.xml',
 		'views/bon_view.xml',
 		'views/commission_view.xml',
+		'views/conversion_view.xml',
 		'views/demand_view.xml',
 		'views/employee_view.xml',
 		'views/hr_view.xml',
