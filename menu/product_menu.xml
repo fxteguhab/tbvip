@@ -3,15 +3,12 @@
 
 		<record id="product_brand_action" model="ir.actions.act_window">
 			<field name="name">Brands</field>
-			<field name="type">ir.actions.act_window</field>
 			<field name="res_model">product.brand</field>
-			<field name="view_type">tree</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
 		</record>
 
-		<menuitem
-				action="product_brand_action"
-				id="product.menu_products_brand"
-				parent="product.prod_config_main"
-				sequence="10" groups="base.group_no_one"/>
+		<menuitem sequence="6" id="product_menu_product_brand" parent="stock.menu_stock_product" action="product_brand_action"/>
+
 	</data>
 </openerp>
