@@ -36,12 +36,50 @@ class tbvip_bon_book(osv.osv):
 		('start_less_than_end', 'CHECK(end_at >= start_from)', 'Start number should be less than end number.'),
 		('number_less_than_zero', 'CHECK(end_at >= 1)', 'Start and end number should be more than 0.'),
 	]
-	
+
 	_defaults = {
 		'branch_id': _default_branch_id,
 	}
 	
+# METHOD -------------------------------------------------------------------------------------------------------------------
+	
+	def _cek_crossing_bon_number(self, cr, uid, cek_bon_id, issue_date, start_from, end_at):
+		bon_book_ids = self.search(cr, uid,
+			['&',('id','!=',cek_bon_id),'&',('issue_date','=',issue_date),'|','&',('end_at', '>=', start_from),('end_at', '<=', end_at),
+				'|','&',('start_from', '>=', start_from),('start_from', '<=', end_at),
+				'&', ('start_from', '<=', start_from),('end_at', '>=', end_at)
+			])
+		
+		if len(bon_book_ids) > 0:
+			bon = self.browse(cr, uid, bon_book_ids[0])
+			raise osv.except_orm(_('Bon book number error'),
+				_('Bon book with number %s - %s at issue date %s has been used' % (bon.start_from, bon.end_at, issue_date)))
+
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
+	
+	def create(self, cr, uid, vals, context={}):
+		id = super(tbvip_bon_book, self).create(cr, uid, vals, context)
+		# Cek apakah ada bon yang saling bersilangan untuk issue date yang sama
+		self._cek_crossing_bon_number(cr, uid, id, vals.get('issue_date', False), vals.get('start_from', False), vals.get('end_at', False))
+		return id
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		# Cek apakah ada bon yang saling bersilangan untuk issue date yang sama
+		for bon in self.browse(cr, uid, ids):
+			start_from = bon.start_from
+			end_at = bon.end_at
+			issue_date = bon.issue_date
+			
+			if vals.get('start_from', False):
+				start_from = vals.get('start_from', False)
+			if vals.get('end_at', False):
+				end_at = vals.get('end_at', False)
+			if vals.get('issue_date', False):
+				issue_date = vals.get('issue_date', False)
+				
+			self._cek_crossing_bon_number(cr, uid, bon.id, issue_date, start_from, end_at)
+		
+		return super(tbvip_bon_book, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
 		bon_books = self.browse(cr, uid, ids)
