@@ -31,6 +31,9 @@
 				<xpath expr="//field[@name='price_subtotal']" position="after">
 					<field name="source" readonly="1" />
 				</xpath>
+				<field name="pricelist_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 				<field name="picking_type_id" position="before">
 					<field name="shipped_or_taken"/>
 				</field>
