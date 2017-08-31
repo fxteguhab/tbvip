@@ -194,6 +194,12 @@ class purchase_order_line(osv.osv):
 			string='UoM Category', readonly=True)
 	}
 	
+	_sql_constraints = [
+		('po_quantity_less_than_zero', 'CHECK(product_qty <= 0)', 'Quantity should be more than zero.'),
+		('po_price_unit_less_than_zero', 'CHECK(price_unit <= 0)', 'Price should be more than zero.'),
+		('po_price_subtotal_less_than_zero', 'CHECK(price_subtotal <= 0)', 'Price subtotal should be more than zero.'),
+	]
+	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
 	
 	_defaults = {

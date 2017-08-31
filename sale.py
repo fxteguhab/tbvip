@@ -203,6 +203,12 @@ class sale_order_line(osv.osv):
 			string='UoM Category', readonly=True)
 	}
 	
+	_sql_constraints = [
+		('so_quantity_less_than_zero', 'CHECK(product_uom_qty <= 0)', 'Quantity should be more than zero.'),
+		('so_price_unit_less_than_zero', 'CHECK(price_unit <= 0)', 'Price should be more than zero.'),
+		('so_price_subtotal_less_than_zero', 'CHECK(price_subtotal <= 0)', 'Price subtotal should be more than zero.'),
+	]
+	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
