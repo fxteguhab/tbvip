@@ -260,8 +260,12 @@ class sale_order_line(osv.osv):
 			product_uom = order_line['product_uom']
 		if order_line.get('product_uom_qty', False):
 			product_uom_qty = order_line['product_uom_qty']
+		elif not sale_order_line_id:
+			product_uom_qty = 0
 		if order_line.get('price_unit', False):
 			price_unit = order_line['price_unit']
+		elif not sale_order_line_id:
+			price_unit = 0
 		if order_line.get('price_type_id', False):
 			price_type_id = order_line['price_type_id']
 	
