@@ -9,6 +9,9 @@
 				<field name="color" position="after">
 					<field name="next_service_date"/>
 					<field name="next_pkb_date"/>
+					<field name="gps_id"/>
+					<field name="gps_sim"/>
+					<field name="gps_renew"/>
 				</field>
 			</field>
 		</record>
