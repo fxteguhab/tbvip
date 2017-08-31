@@ -399,3 +399,21 @@ class sale_order_line(osv.osv):
 		result['value']['commission'] = current_commission
 		
 		return result
+	
+	def onchange_product_uom_qty_tbvip(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False,
+			name='', partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False,
+			flag=False, warehouse_id=False, price_unit=False, discount_string=False, context=None):
+		result = super(sale_order_line, self).onchange_product_uom_qty(
+			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
+			lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, price_unit, context=None)
+		result['value'].pop('price_unit', None)
+		result['value'].pop('product_uom', None)
+		
+		result_purchase_sale_discount = imported_purchase_sale_discount.sale_discount.sale_order_line.onchange_order_line(
+			self, cr, uid, ids, qty, price_unit, uom, product, discount_string, context=None)
+		if result_purchase_sale_discount and result_purchase_sale_discount['value'].get('price_subtotal', False):
+			result['value'].update({
+				'price_subtotal': result_purchase_sale_discount['value']['price_subtotal']
+			})
+		
+		return result
