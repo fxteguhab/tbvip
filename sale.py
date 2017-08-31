@@ -8,7 +8,7 @@ import openerp.addons.sale as imported_sale
 import openerp.addons.portal_sale as imported_portal_sale
 import openerp.addons.sale_stock as imported_sale_stock
 import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
-import openerp.addons.sale_direct_cash as imported_sale_direct_cash
+import openerp.addons.sale_multiple_payment as imported_sale_multiple_payment
 import openerp.addons.product_custom_conversion as imported_product_custom_conversion
 import openerp.addons.chjs_price_list as imported_price_list
 
@@ -23,15 +23,6 @@ class sale_order(osv.osv):
 		'commission_total': fields.float('Commission Total', readonly=True),
 		'bon_number': fields.char('Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'is_payment_cash': fields.boolean('Cash'),
-		'is_payment_transfer': fields.boolean('Transfer'),
-		'is_payment_edc': fields.boolean('EDC'),
-		'cash_amount': fields.float('Cash Amount'),
-		'transfer_amount': fields.float('Transfer Amount'),
-		'edc_amount': fields.float('EDC Amount'),
-		'approval_code': fields.char('Approval Code'),
-		'card_fee': fields.float('Card Fee (%)'),
-		'card_fee_amount': fields.float(type='float', string='Card Fee Amount', store=True, multi='sums'),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 	}
@@ -39,7 +30,7 @@ class sale_order(osv.osv):
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
 		partner_id = None
-		if context.get('default_cash_or_receivable') == 'cash':
+		if context.get('default_is_payment_cash', False):
 			model, general_customer_id = self.pool['ir.model.data'].get_object_reference(
 				cr, uid, 'tbvip', 'tbvip_customer_general')
 			partner_id = general_customer_id or None
@@ -334,7 +325,7 @@ class sale_order_line(osv.osv):
 		uom = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom, context).id
 		
 		# dari sale tidak perlu karena di tempat lain di panggil menggunakan super
-		# dari modul portal_sale dan sale_stock dan sale_direct_cash tidak ada override onchange product id
+		# dari modul portal_sale dan sale_stock dan sale_multiple_payment tidak ada override onchange product id
 		result_price_list = imported_price_list.sale.sale_order_line.onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)

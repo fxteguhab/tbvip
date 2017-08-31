@@ -67,21 +67,6 @@
 						parent.price_type_id, price_type_id, context)
 					</attribute>
 				</xpath>
-				<xpath expr="//page[@string='Order Lines']" position="after">
-					<page string="Payment Method">
-						<group name="method_cash" col="4">
-							<field name="is_payment_cash"/>
-							<field name="cash_amount" attrs="{'invisible': [('is_payment_cash','=',False)],'required': [('is_payment_cash','=',False)]}"/>
-							<field name="is_payment_transfer"/>
-							<field name="transfer_amount" attrs="{'invisible': [('is_payment_transfer','=',False)],'required': [('is_payment_transfer','=',False)]}"/>
-							<field name="is_payment_edc"/>
-							<field name="edc_amount" attrs="{'invisible': [('is_payment_edc','=',False)],'required': [('is_payment_edc','=',False)]}"/>
-							<field name="approval_code" attrs="{'invisible': [('is_payment_edc','=',False)]}"/>
-							<field name="card_fee" attrs="{'invisible': [('is_payment_edc','=',False)]}"/>
-							<field name="card_fee_amount" readonly="1" attrs="{'invisible': [('is_payment_edc','=',False)]}"/>
-						</group>
-					</page>
-				</xpath>
 				<xpath expr="//page[@string='Other Information']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>
