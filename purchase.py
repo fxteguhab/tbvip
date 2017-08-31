@@ -111,6 +111,15 @@ class purchase_order(osv.osv):
 		})
 		return {'value': result}
 	
+	def onchange_branch_id(self, cr, uid, ids, branch_id, context=None):
+		result = {}
+		branch_obj = self.pool.get('tbvip.branch')
+		location_id =  branch_obj.browse(cr, uid, branch_id)[0].default_incoming_location_id.id or None
+		result.update({
+			'location_id': location_id,
+		})
+		return {'value': result}
+	
 	def picking_done(self, cr, uid, ids, context=None):
 		"""
 		Overrides picking_done to also mark the picking as transfered

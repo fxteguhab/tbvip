@@ -9,13 +9,15 @@
 			<field name="arch" type="xml">
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">
-					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
 					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
 							attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
-					<field name="employee_id" readonly="True"/>
 				</field>
 
 				<field name="client_order_ref" position="replace"/>
+				<field name="shipped_or_taken" position="before">
+					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
+					<field name="employee_id" readonly="True"/>
+				</field>
 				<field name="shipped_or_taken" position="after">
 					<field name="client_order_ref"/>
 				</field>
