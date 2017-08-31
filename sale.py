@@ -51,6 +51,14 @@ class sale_order(osv.osv):
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
+		if vals.get('bon_number', False) and vals.get('date_order', False):
+			bon_number = vals['bon_number']
+			date_order = vals['date_order']
+			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
+			if bon_book:
+				vals.update({
+					'employee_id': bon_book.employee_id.id
+				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
 		return new_id
@@ -61,10 +69,25 @@ class sale_order(osv.osv):
 			bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
 			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
 			vals['name'] = name
-		result = super(sale_order, self).write(cr, uid, ids, vals, context)
+			
+			if vals.get('bon_number', False) or vals.get('date_order', False):
+				bon_number = sale_order_data.bon_number
+				date_order = sale_order_data.date_order
+				if vals.get('bon_number', False):
+					bon_number = vals['bon_number']
+				if vals.get('date_order', False):
+					date_order = vals['date_order']
+				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
+				if bon_book:
+					vals.update({
+						'employee_id': bon_book.employee_id.id
+					})
+			result = super(sale_order, self).write(cr, uid, sale_order_data.id, vals, context)
+			
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
+		
 		return result
 	
 	def action_button_confirm(self, cr, uid, ids, context=None):
@@ -156,9 +179,12 @@ class sale_order(osv.osv):
 		if bon_number and date_order:
 			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
 			if bon_book:
+				temp_book_number = bon_book.used_numbers
+				if not temp_book_number:
+					temp_book_number = ""
 				bon_book_obj.write(cr, uid, bon_book.id, {
 					'total_used': bon_book.total_used + 1,
-					'used_numbers': (bon_book.used_numbers + ', ' + bon_number) if (len(bon_book.used_numbers)>=1) else bon_number,
+					'used_numbers': (temp_book_number + ', ' + bon_number) if (len(temp_book_number)>=1) else bon_number,
 				})
 		return
 
@@ -335,18 +361,50 @@ class sale_order_line(osv.osv):
 		temp = imported_product_custom_conversion.sale.sale_order_line.onchange_product_uom(self,
 			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
 			lang, update_tax, date_order, fiscal_position, context=None)
-		
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		
+		custom_product_uom = False
+		if temp['value'].get('product_uom', False):
+			custom_product_uom = temp['value']['product_uom']
+			# cari current price untuk product uom ini
+			product_conversion_obj = self.pool.get('product.conversion')
+			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product, custom_product_uom)
+			if uom_record:
+				product_current_price_obj = self.pool.get('product.current.price')
+				current_price = product_current_price_obj.get_current_price(cr, uid, product, price_type_id, uom_record.id)
+				if current_price:
+					result['value'].update({
+						'price_unit': current_price
+					})
+			
 		product_obj = self.pool.get('product.product')
 		product_browsed = product_obj.browse(cr, uid, product)
 		result['value'].update({
-			'product_uom': temp['value']['product_uom'] if temp['value'].get('product_uom', False) else uom if uom else product_browsed.uom_id.id,
+			'product_uom': custom_product_uom if custom_product_uom else uom if uom else product_browsed.uom_id.id,
 			'uom_category_filter_id': product_browsed.product_tmpl_id.uom_id.category_id.id
 		})
 		
 		product_obj = self.pool.get('product.current.commission')
 		current_commission = product_obj.get_current_commission(cr, uid, product)
 		result['value']['commission'] = current_commission
+		
+		return result
+	
+	def onchange_product_uom_qty_tbvip(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False,
+			name='', partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False,
+			flag=False, warehouse_id=False, price_unit=False, discount_string=False, context=None):
+		result = super(sale_order_line, self).onchange_product_uom_qty(
+			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
+			lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, price_unit, context=None)
+		result['value'].pop('price_unit', None)
+		result['value'].pop('product_uom', None)
+		
+		result_purchase_sale_discount = imported_purchase_sale_discount.sale_discount.sale_order_line.onchange_order_line(
+			self, cr, uid, ids, qty, price_unit, uom, product, discount_string, context=None)
+		if result_purchase_sale_discount and result_purchase_sale_discount['value'].get('price_subtotal', False):
+			result['value'].update({
+				'price_subtotal': result_purchase_sale_discount['value']['price_subtotal']
+			})
 		
 		return result

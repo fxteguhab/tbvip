@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="conversion_product_conversion_tree_inherit" model="ir.ui.view">
+			<field name="name">conversion.product.conversion.tree.inherit</field>
+			<field name="model">product.conversion</field>
+			<field name="inherit_id" ref="product_custom_conversion.conversion_product_conversion_tree"/>
+			<field name="arch" type="xml">
+				<field name="uom_id" position="attributes">
+					<attribute name="domain">
+						[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]
+					</attribute>
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>
