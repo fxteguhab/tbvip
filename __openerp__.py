@@ -10,10 +10,10 @@
 	'website': 'http://www.chjs.biz',
 	'depends': [
 		"base", "board", "web", "website",
-		"chjs_custom_view",
-		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr", "hr_attendance","hr_expense",
-		"purchase_needs", "purchase_sale_discount", "stock_opname", "account_receivable_limit", 
-		"sale_direct_cash", "canvassing", "hr_employee_point", 
+		"chjs_custom_view", "chjs_price_list",
+		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr", "hr_attendance", "hr_expense",
+		"purchase_needs", "purchase_sale_discount", "stock_opname", "account_receivable_limit",
+		"sale_direct_cash", "canvassing", "hr_employee_point", "product_custom_conversion", "product_production",
 	],
 	'sequence': 150,
 	'data': [
@@ -37,6 +37,7 @@
 		'views/employee_view.xml',
 		'views/hr_view.xml',
 		'views/product_view.xml',
+		'views/product_production_view.xml',
 		'views/purchase_view.xml',
 		'views/purchase_needs_view.xml',
 		'views/sale_view.xml',

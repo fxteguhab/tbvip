@@ -33,6 +33,7 @@ class sale_order(osv.osv):
 	_defaults = {
 		'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
+		'shipped_or_taken': 'taken',
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
@@ -180,4 +181,36 @@ class sale_order_line(osv.osv):
 		product_obj = self.pool.get('product.product')
 		product = product_obj.browse(cr, uid, product)
 		result['value']['commission'] = product.commission
+		return result
+	
+	def onchange_product_uom_qty(self, cr, uid, ids, pricelist, product, qty=0,
+			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, warehouse_id=False, price_unit = False,context=None):
+		result = super(sale_order_line, self).product_id_change_with_wh(
+			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
+			lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, context=None)
+		result['value'].update({
+			'price_unit': price_unit,
+			'product_uom': uom,
+		})
+		return result
+	
+	def onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty=0,
+			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
+			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+		product_conversion_obj = self.pool.get('product.conversion')
+		uom = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom, context).id
+		result = super(sale_order_line, self).onchange_product_id_price_list(cr, uid, ids, pricelist, product, qty,
+			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
+			warehouse_id, parent_price_type_id, price_type_id, context)
+		temp = super(sale_order_line, self).onchange_product_uom(
+			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
+			lang, update_tax, date_order, fiscal_position, context=None)
+		if result.get('domain', False) and temp.get('domain', False):
+			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		result['value'].update({
+			'product_uom' : temp['value']['product_uom']
+		})
+		
 		return result

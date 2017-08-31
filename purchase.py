@@ -4,6 +4,10 @@ from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime
 
+import openerp.addons.purchase_sale_discount as psd
+import openerp.addons.chjs_price_list as cpl
+import openerp.addons.decimal_precision as dp
+
 # ==========================================================================================================================
 
 class purchase_order(osv.osv):
@@ -19,6 +23,16 @@ class purchase_order(osv.osv):
 				max_alert = max(max_alert, line.alert)
 			result[data.id] = max_alert
 		return result
+	
+	def _default_partner_id(self, cr, uid, context={}):
+		model, general_supplier_id = self.pool['ir.model.data'].get_object_reference(
+			cr, uid, 'tbvip', 'tbvip_supplier_general')
+		return general_supplier_id
+	
+	def _default_branch_id(self, cr, uid, context={}):
+		# default branch adalah tempat user sekarang ditugaskan
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		return user_data.branch_id.id or None
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
@@ -49,6 +63,12 @@ class purchase_order(osv.osv):
 			('shipped', 'Shipped'),
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
+	}
+	
+	_defaults = {
+		'partner_id': _default_partner_id,
+		'branch_id': _default_branch_id,
+		'shipped_or_taken': 'taken',
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -211,5 +231,23 @@ class purchase_order_line(osv.osv):
 		demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',ids)])
 		demand_line_obj.write(cr, uid, demand_line_ids, {
 			'state': 'requested'
+		})
+		return result
+	
+	def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False, context=None):
+		product_conversion_obj = self.pool.get('product.conversion')
+		uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
+		result = cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order, fiscal_position_id, date_planned,
+			name, price_unit, state, parent_price_type_id, price_type_id, context)
+		temp = super(purchase_order_line, self).onchange_product_uom(
+			cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
+			date_planned, name, price_unit, state, context={})
+		if result.get('domain', False) and temp.get('domain', False):
+			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		result['value'].update({
+			'product_uom' : temp['value']['product_uom']
 		})
 		return result
