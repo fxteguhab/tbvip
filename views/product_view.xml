@@ -20,7 +20,7 @@
 					</page>
 				</notebook>
 				<field name="type" position="before">
-					<field name="brand_id"/>
+					<field name="brand_id" />
 					<field name="tonnage"/>
 					<field name="stock_unit_id"/>
 				</field>
