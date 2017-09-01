@@ -4,33 +4,38 @@
 		<record model="ir.ui.view" id="sale_view_order_form_inherit">
 			<field name="name">sale.view.order.form.inherit</field>
 			<field name="model">sale.order</field>
+			<field name="priority">17</field>
 			<field name="inherit_id" ref="sale.view_order_form"/>
 			<field name="arch" type="xml">
-				<xpath expr="/form/sheet/group" position="replace">
-					<group>
-						<group>
-							<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
-							<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
-									attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
-							<field name="partner_id" on_change="onchange_partner_id(partner_id, context)"
-									domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1}"
-									options='{"always_reload": True}'/>
-							<field name="price_type_id"/>
-							<field name="shipped_or_taken"/>
-						</group>
-						<group>
-							<field name="create_uid" readonly="1"/>
-							<field name="employee_id"/>
-							<field name="stock_location_id" readonly="1"/>
-							<field name="commission_total" readonly="1"/>
-							<field name="client_order_ref"/>
-							<field name="pricelist_id" invisible="1"/>
-							<field name="currency_id" invisible="1"/>
-						</group>
-					</group>
-				</xpath>
+				<field name="date_order" position="replace"/>
+				<field name="partner_id" position="before">
+					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
+							attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
+				</field>
 
-				<!--<xpath expr="/form/sheet/notebook/page[2]" position="replace"></xpath>-->
+				<field name="client_order_ref" position="replace"/>
+				<field name="shipped_or_taken" position="before">
+					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
+					<field name="employee_id" readonly="True"/>
+				</field>
+				<field name="shipped_or_taken" position="after">
+					<field name="client_order_ref"/>
+				</field>
+				<field name="pricelist_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="currency_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="sale_discount" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="line_discounts" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="warehouse_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='price_type_id']"
 						position="attributes">
@@ -53,12 +58,23 @@
 				</xpath>
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
 						position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="domain">
+						[('category_id','=', uom_category_filter_id),('is_auto_create','=',False)]
+					</attribute>
 					<attribute name="on_change">
 						onchange_product_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
 						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
 						product_packaging, parent.fiscal_position, False, parent.warehouse_id,
 						parent.price_type_id, price_type_id, context)
+					</attribute>
+				</xpath>
+				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom_qty']"
+						position="attributes">
+					<attribute name="on_change">
+						onchange_product_uom_qty_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+						product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order, product_packaging,
+						parent.fiscal_position, False, parent.warehouse_id, price_unit, discount_string, context)
 					</attribute>
 				</xpath>
 				<xpath expr="//page[@string='Other Information']" position="attributes">

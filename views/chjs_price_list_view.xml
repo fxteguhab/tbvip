@@ -64,5 +64,39 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="product_current_price_form_inherit">
+			<field name="name">price.list.product.current.price.form</field>
+			<field name="model">product.current.price</field>
+			<field name="inherit_id" ref="chjs_price_list.product_current_price_form"/>
+			<field name="arch" type="xml">
+				<field name="price_type_id" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+				<field name="product_id" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+				<field name="uom_id_1" position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+				<field name="uom_id_2" position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+				<field name="uom_id_3" position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+				<field name="uom_id_4" position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+				<field name="uom_id_5" position="attributes">
+					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+				</field>
+			</field>
+		</record>
+
 	</data>
 </openerp>

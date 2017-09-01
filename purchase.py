@@ -9,7 +9,7 @@ import openerp.addons.sale as imported_sale
 import openerp.addons.portal_sale as imported_portal_sale
 import openerp.addons.sale_stock as imported_sale_stock
 import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
-import openerp.addons.sale_mutiple_payment as imported_sale_mutiple_payment
+import openerp.addons.sale_multiple_payment as imported_sale_multiple_payment
 import openerp.addons.product_custom_conversion as imported_product_custom_conversion
 import openerp.addons.chjs_price_list as imported_price_list
 import openerp.addons.decimal_precision as dp
@@ -111,6 +111,15 @@ class purchase_order(osv.osv):
 		})
 		return {'value': result}
 	
+	def onchange_branch_id(self, cr, uid, ids, branch_id, context=None):
+		result = {}
+		branch_obj = self.pool.get('tbvip.branch')
+		location_id =  branch_obj.browse(cr, uid, branch_id)[0].default_incoming_location_id.id or None
+		result.update({
+			'location_id': location_id,
+		})
+		return {'value': result}
+	
 	def picking_done(self, cr, uid, ids, context=None):
 		"""
 		Overrides picking_done to also mark the picking as transfered
@@ -184,6 +193,12 @@ class purchase_order_line(osv.osv):
 		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
 			string='UoM Category', readonly=True)
 	}
+	
+	_sql_constraints = [
+		('po_quantity_less_than_zero', 'CHECK(product_qty > 0)', 'Quantity should be more than zero.'),
+		('po_price_unit_less_than_zero', 'CHECK(price_unit >= 0)', 'Price should be more than zero.'),
+		('po_price_subtotal_less_than_zero', 'CHECK(price_subtotal >= 0)', 'Price subtotal should be more than zero.'),
+	]
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
 	
@@ -334,11 +349,25 @@ class purchase_order_line(osv.osv):
 			date_planned, name, price_unit_current, state, context={})
 		if result.get('domain', False) and result_custom_conversion.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + result_custom_conversion['domain']['product_uom']
+		
+		custom_product_uom = False
+		if result_custom_conversion['value'].get('product_uom', False):
+			custom_product_uom = result_custom_conversion['value']['product_uom']
+			# cari current price untuk product uom ini
+			product_conversion_obj = self.pool.get('product.conversion')
+			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, custom_product_uom)
+			if uom_record:
+				product_current_price_obj = self.pool.get('product.current.price')
+				current_price = product_current_price_obj.get_current_price(cr, uid, product_id, price_type_id, uom_record.id)
+				if current_price:
+					result['value'].update({
+						'price_unit': current_price
+					})
+		
 		product_obj = self.pool.get('product.product')
 		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
-			'product_uom': result_custom_conversion['value']['product_uom']
-				if result_custom_conversion['value'].get('product_uom', False) else uom_id if uom_id else product.uom_id.id,
+			'product_uom': custom_product_uom if custom_product_uom else uom_id if uom_id else product.uom_id.id,
 			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
 		})
 		

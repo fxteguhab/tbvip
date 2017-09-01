@@ -4,6 +4,19 @@ from datetime import datetime
 
 # ==========================================================================================================================
 
+class stock_unit(osv.osv):
+	
+	_name = 'stock.unit'
+	
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'name': fields.char('Name'),
+		'unit': fields.float('Unit'),
+	}
+
+# ==========================================================================================================================
+
 class stock_location(osv.osv):
 	
 	_inherit = 'stock.location'
@@ -17,20 +30,72 @@ class stock_location(osv.osv):
 
 	def _initialize_default_stock_location_data(self, cr, uid, ids=None, context=None):
 		stock_warehouse_obj = self.pool.get('stock.warehouse')
-		stock_warehouse_id = stock_warehouse_obj.search(cr, uid, [('code', '=', 'WH')], limit=1, context=context)
+		branch_obj = self.pool.get('tbvip.branch')
+		data_obj = self.pool.get('ir.model.data')
+		stock_warehouse_id = data_obj.get_object(cr, uid, 'stock', 'warehouse0').id
 		stock_warehouse = stock_warehouse_obj.browse(cr, uid, stock_warehouse_id)
 		if stock_warehouse:
 			stock_location_id = stock_warehouse.view_location_id
-			stock_location_22 = self.create(cr, uid, {
-				'name': 'Gudang 22',
-				'location_id': stock_location_id.id,
-				'usage': 'internal',
+			name_gudang_22 = "Gudang 22"
+			name_gudang_85 = "Gudang 85"
+			name_gudang_cikutra = "Gudang Cikutra"
+			
+		# cari dahulu apakah sudah pernah dibikin, jika iya gunakan location yang lama
+			stock_location_22 = self.search(cr, uid, [
+				('name', '=', name_gudang_22),
+			], limit=1)
+			stock_location_85 = self.search(cr, uid, [
+				('name', '=', name_gudang_85),
+			], limit=1)
+			stock_location_cikutra = self.search(cr, uid, [
+				('name', '=', name_gudang_cikutra),
+			], limit=1)
+			
+			if len(stock_location_22)==0:
+				stock_location_22 = self.create(cr, uid, {
+					'name': name_gudang_22,
+					'location_id': stock_location_id.id,
+					'usage': 'internal',
+					'is_branch': True,
+				})
+			else :
+				stock_location_22 = stock_location_22[0]
+			if len(stock_location_85)==0:
+				stock_location_85 = self.create(cr, uid, {
+					'name': name_gudang_85,
+					'location_id': stock_location_id.id,
+					'usage': 'internal',
+					'is_branch': True,
+				})
+			else :
+				stock_location_85 = stock_location_85[0]
+			if len(stock_location_cikutra)==0:
+				stock_location_cikutra = self.create(cr, uid, {
+					'name': name_gudang_cikutra,
+					'location_id': stock_location_id.id,
+					'usage': 'internal',
+					'is_branch': True,
+				})
+			else :
+				stock_location_cikutra = stock_location_cikutra[0]
+			
+			branch_id_22 = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_branch_22').id
+			branch_id_85 = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_branch_85').id
+			
+			branch_obj.write(cr, uid, branch_id_22, {
+				'default_incoming_location_id' : stock_location_22,
+				'default_outgoing_location_id' : stock_location_22,
+				#'default_stock_location_id' : stock_location_22,
 			})
-			stock_location_85 = self.create(cr, uid, {
-				'name': 'Gudang 85',
-				'location_id': stock_location_id.id,
-				'usage': 'internal',
+			
+			branch_obj.write(cr, uid, branch_id_85, {
+				'default_incoming_location_id' : stock_location_85,
+				'default_outgoing_location_id' : stock_location_85,
+				#'default_stock_location_id' : stock_location_85,
 			})
+			
+				
+			#TODO location cikutra belum di set kemana2, karena belum ada branch
 		return True
 			
 	
@@ -223,20 +288,18 @@ class stock_check_memory_line(osv.osv_memory):
 class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	
-	def _default_location_source(self, cr, uid, context=None):
-		result = super(stock_move, self)._default_location_source(cr, uid, context)
-		if not result:
-			users_obj = self.pool.get('res.users')
-			outgoing_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_outgoing_location_id
-			if outgoing_location:
-				result = outgoing_location
-		return result
-	
-	_defaults = {
-		'location_id': _default_location_source,
-	}
-	
-	# OVERRIDES ------------------------------------------------------------------------------------------------------------
+	def create(self, cr, uid, vals, context={}):
+		user_obj = self.pool.get('res.users')
+		stock_location_obj = self.pool.get('stock.location')
+		new_id = super(stock_move, self).create(cr, uid, vals, context=context)
+		if vals.get('location_dest_id', False):
+			stock_location_data = stock_location_obj.browse(cr, uid, vals['location_dest_id']);
+			if stock_location_data.usage == 'customer':
+				location_id = user_obj.browse(cr, uid, uid, context).branch_id.default_outgoing_location_id.id
+				self.write(cr, uid, [new_id], {
+					'location_id': location_id,
+				})
+		return new_id
 	
 	def unlink(self, cr, uid, ids, context=None):
 		result = super(stock_move, self).unlink(cr, uid, ids, context)

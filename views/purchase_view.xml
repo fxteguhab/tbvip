@@ -7,7 +7,7 @@
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
 				<field name="partner_id" position="before">
-					<field name="branch_id"/>
+					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
 				</field>
 				<field name="picking_type_id" position="attributes">
 					<attribute name="invisible">True</attribute>
@@ -31,6 +31,9 @@
 				<xpath expr="//field[@name='price_subtotal']" position="after">
 					<field name="source" readonly="1" />
 				</xpath>
+				<field name="pricelist_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 				<field name="picking_type_id" position="before">
 					<field name="shipped_or_taken"/>
 				</field>
@@ -60,7 +63,9 @@
 				</field>
 				<field name="product_uom" position="attributes">
 					<attribute name="options">{'no_create': 1}</attribute>
-					<attribute name="domain">[('category_id','=', uom_category_filter_id)]</attribute>
+					<attribute name="domain">
+						[('category_id','=', uom_category_filter_id),('is_auto_create','=',False)]
+					</attribute>
 					<attribute name="on_change">
 						onchange_product_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
 						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
@@ -68,8 +73,14 @@
 					</attribute>
 				</field>
 				<field name="product_qty" position="after">
-					<field name="uom_category_filter_id" invisible="True"/>
+					<field name="uom_category_filter_id" invisible="1"/>
 				</field>
+				<xpath expr="//page[@string='RFQ &amp; Bid']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				<xpath expr="//page[@string='Deliveries &amp; Invoices']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
 			</field>
 		</record>
 
