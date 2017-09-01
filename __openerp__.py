@@ -50,6 +50,7 @@
 		'views/stock_view.xml',
 		'views/tbvip.xml',
 		'views/res_users_view.xml',
+		'views/res_partner_view.xml',
 		'views/stock_opname_view.xml',
 		'views/fleet_view.xml',
 		'views/canvassing_view.xml',
