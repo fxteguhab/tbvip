@@ -85,13 +85,13 @@ class stock_location(osv.osv):
 			branch_obj.write(cr, uid, branch_id_22, {
 				'default_incoming_location_id' : stock_location_22,
 				'default_outgoing_location_id' : stock_location_22,
-				#'default_stock_location_id' : stock_location_22,
+				'default_stock_location_id' : stock_location_22,
 			})
 			
 			branch_obj.write(cr, uid, branch_id_85, {
 				'default_incoming_location_id' : stock_location_85,
 				'default_outgoing_location_id' : stock_location_85,
-				#'default_stock_location_id' : stock_location_85,
+				'default_stock_location_id' : stock_location_85,
 			})
 			
 				
