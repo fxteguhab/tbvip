@@ -15,11 +15,11 @@ class account_voucher(osv.osv):
 		
 		partner_obj = self.pool.get('res.partner')
 		partner = partner_obj.browse(cr, uid, [partner_id])
-		if not result.get('domain', False):
-			result['domain'] = {}
-		result['domain'].update({
-			'bank_id': [('id', 'in', partner.bank_ids.ids)],
-		})
+		# if not result.get('domain', False):
+		# 	result['domain'] = {}
+		# result['domain'].update({
+		# 	'bank_id': [('id', 'in', partner.bank_ids.ids)],
+		# })
 		
 		return result
 	
