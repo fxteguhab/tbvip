@@ -42,5 +42,3 @@ class account_journal_edc(osv.osv):
 	def invoice_auto_done(self, cr, uid, ids, context=None):
 		for invoice in self.browse(cr, uid, ids):
 			invoice.signal_workflow('invoice_open')
-			invoice.confirm_paid()
-		# pass

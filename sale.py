@@ -95,6 +95,9 @@ class sale_order(osv.osv):
 		for sale in self.browse(cr, uid, ids):
 			if sale.bon_number and sale.date_order:
 				self._update_bon_book(cr, uid, sale.bon_number, sale.date_order)
+	# make invoice and make it state become open
+		invoice_ids =  super(sale_order, self).action_invoice_create(cr, uid, ids, context=context)
+		self.pool.get('account.invoice').invoice_auto_done(cr, uid, invoice_ids,context)
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
