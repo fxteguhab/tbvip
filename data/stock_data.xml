@@ -18,22 +18,29 @@ def generate_stock_opname_products(self, cr, uid):
 	today = datetime.now()
 	last_week = today - timedelta(days=7)
 	last_month = today - timedelta(days=30)
-	
+
 	product_ids = product_obj.search(cr, uid, [
 		'&amp;', ('type', '=', 'product'),
 		'|', ('latest_inventory_adjustment_date', '=', None),
 		('latest_inventory_adjustment_date', '&lt;', last_week.strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
 	])
-	
+
+	product_template_obj = self.pool.get('product.template')
 	filtered_products = []
-	products = product_obj.browse(cr, uid, product_ids)
-	products = products.sorted(key=lambda p: p.last_sale)
+	products_browsed = product_obj.browse(cr, uid, product_ids)
+	products = []
+	for product in products_browsed:
+		result_last_sale = product_template_obj._get_last_sale(cr, uid, [product.id], False, False, None)
+		if result_last_sale:
+			product['last_sale'] = result_last_sale[product.id]
+			products.append(product)
+	products.sort(key=lambda p: p.last_sale)
 	for product in products:
 		if product.last_sale:
 			last_sale = datetime.strptime(product.last_sale, DEFAULT_SERVER_DATETIME_FORMAT)
 			if last_month &lt; last_sale and last_sale &lt; today:
 				filtered_products.append(product)
-	
+
 	stock_opname_products = []
 	for filtered_product in filtered_products:
 		stock_opname_products.append({'product_id': filtered_product.id})
