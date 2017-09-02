@@ -28,6 +28,7 @@ class stock_location(osv.osv):
 		# 'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
 
+	"""
 	def _initialize_default_stock_location_data(self, cr, uid, ids=None, context=None):
 		stock_warehouse_obj = self.pool.get('stock.warehouse')
 		branch_obj = self.pool.get('tbvip.branch')
@@ -97,7 +98,7 @@ class stock_location(osv.osv):
 				
 			#TODO location cikutra belum di set kemana2, karena belum ada branch
 		return True
-			
+	"""		
 	
 # ==========================================================================================================================
 
