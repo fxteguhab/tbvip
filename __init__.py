@@ -1,4 +1,4 @@
-# -u tbvip,sale_direct_cash,account_receivable_limit,stock_opname,purchase_needs,purchase_sale_discount,canvassing,hr_employee_point,product_custom_conversion,product_production,chjs_price_list -d tbvip
+# -u tbvip,sale_multiple_payment,account_receivable_limit,stock_opname,purchase_needs,purchase_sale_discount,canvassing,hr_employee_point,product_custom_conversion,product_production,chjs_price_list -d tbvip
 import product
 import res_partner
 import stock
@@ -20,3 +20,4 @@ import fleet
 import canvassing
 import product_production
 import price_list
+import commission

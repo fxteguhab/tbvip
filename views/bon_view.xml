@@ -8,12 +8,14 @@
 					<group col="4">
 						<group>
 							<field name="issue_date"/>
-							<field name="user_id"/>
+							<field name="employee_id"/>
 							<field name="start_from"/>
 							<field name="end_at"/>
 						</group>
 						<group>
-							<field name="total_sheets"/>
+							<field name="branch_id" readonly="1"/>
+							<field name="create_uid" readonly="1"/>
+							<field name="total_sheets" readonly="1"/>
 							<field name="total_used" readonly="1"/>
 							<field name="used_numbers" readonly="1"/>
 						</group>
@@ -27,8 +29,10 @@
 			<field name="model">tbvip.bon.book</field>
 			<field name="arch" type="xml">
 				<tree string="Bon" version="7.0">
+					<field name="branch_id"/>
+					<field name="create_uid"/>
 					<field name="issue_date"/>
-					<field name="user_id"/>
+					<field name="employee_id"/>
 					<field name="start_from"/>
 					<field name="end_at"/>
 					<field name="total_sheets"/>

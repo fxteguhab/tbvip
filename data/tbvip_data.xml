@@ -1,16 +1,6 @@
 <openerp>
 	<data>
 
-		<record id="tbvip_branch_22" model="tbvip.branch">
-			<field name="name">Pahlawan 22</field>
-			<field name="address">Jalan Pahlawan 22</field>
-		</record>
-
-		<record id="tbvip_branch_49" model="tbvip.branch">
-			<field name="name">Pahlawan 49</field>
-			<field name="address">Jalan Pahlawan 49</field>
-		</record>
-
 		<record id="tbvip_normal_price_sell" model="price.type">
 			<field name="name">NORMAL PRICE SELL</field>
 			<field name="type">sell</field>
@@ -24,13 +14,14 @@
 		<record id="tbvip_customer_general" model="res.partner">
 			<field name="name">GENERAL CUSTOMER</field>
 			<field name="customer" eval="True" />
-			<field name="sell_price_type_id" ref="tbvip_normal_price_sell"></field>
+			<field name="sell_price_type_id" ref="tbvip_normal_price_sell"/>
 		</record>
 
 		<record id="tbvip_supplier_general" model="res.partner">
 			<field name="name">GENERAL SUPPLIER</field>
-			<field name="customer" eval="True" />
-			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"></field>
+			<field name="supplier" eval="True" />
+			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"/>
+			<field name="active" eval="False" />
 		</record>
 
 		<!-- EMPLOYEE POINT ROLE -->

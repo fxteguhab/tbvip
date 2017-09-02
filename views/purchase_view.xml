@@ -7,7 +7,20 @@
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
 				<field name="partner_id" position="before">
-					<field name="branch_id"/>
+					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
+				</field>
+				<field name="picking_type_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+					<attribute name="domain">[('code','=','incoming')]</attribute>
+					<attribute name="groups">stock.group_locations</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="on_change">onchange_picking_type_id(picking_type_id, context)</attribute>
+				</field>
+				<field name="price_unit" position="attributes">
+					<attribute name="on_change">onchange_order_line(product_qty, price_unit, discount_string, product_uom, product_id, discount_from_subtotal)</attribute>
+				</field>
+				<field name="date_order" position="before">
+					<field name="create_uid" readonly="1"/>
 				</field>
 				<xpath expr="//label[@string='Request for Quotation ']" position="attributes">
 					<attribute name="string">Draft Purchase Order</attribute>
@@ -18,31 +31,56 @@
 				<xpath expr="//field[@name='price_subtotal']" position="after">
 					<field name="source" readonly="1" />
 				</xpath>
+				<field name="pricelist_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 				<field name="picking_type_id" position="before">
 					<field name="shipped_or_taken"/>
 				</field>
-				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="replace">
-					<field name="name" invisible="1"/>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="attributes">
+					<attribute name="invisible">True</attribute>
 				</xpath>
-				<field name="source" position="replace">
-					<field name="source" invisible="1"/>
+				<field name="source" position="attributes">
+					<attribute name="invisible">True</attribute>
 				</field>
-				<field name="product_id" position="replace">
-					<field name="product_id"
-							on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
-							parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
-							parent.price_type_id, price_type_id, context)"/>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='product_qty']" position="attributes">
+					<attribute name="on_change">onchange_order_line(product_qty, price_unit, discount_string, product_uom, product_id, discount_from_subtotal)</attribute>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/tree//field[@name='price_type_id']" position="attributes">
+					<attribute name="on_change">
+						onchange_product_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
+						parent.price_type_id,price_type_id,discount_from_subtotal,context)
+					</attribute>
+				</xpath>
+				<field name="product_id" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="on_change">
+						onchange_product_id_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
+						parent.price_type_id,price_type_id,discount_from_subtotal,context)
+					</attribute>
 				</field>
-				<field name="product_uom" position="replace">
-					<field name="product_uom"
-							on_change="onchange_product_id(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
-							parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
-							parent.price_type_id, price_type_id, context)"/>
+				<field name="product_uom" position="attributes">
+					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="domain">
+						[('category_id','=', uom_category_filter_id),('is_auto_create','=',False)]
+					</attribute>
+					<attribute name="on_change">
+						onchange_product_tbvip(parent.pricelist_id,product_id,product_qty,product_uom,parent.partner_id,
+						parent.date_order,parent.fiscal_position,date_planned,False,False,parent.state,
+						parent.price_type_id,price_type_id,discount_from_subtotal,context)
+					</attribute>
 				</field>
-				<field name="product_qty" position="replace">
-					<field name="product_qty"
-							on_change=""/>
+				<field name="product_qty" position="after">
+					<field name="uom_category_filter_id" invisible="1"/>
 				</field>
+				<xpath expr="//page[@string='RFQ &amp; Bid']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				<xpath expr="//page[@string='Deliveries &amp; Invoices']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
 			</field>
 		</record>
 

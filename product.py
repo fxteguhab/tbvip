@@ -10,12 +10,43 @@ class product_category(osv.osv):
 	
 	_columns = {
 		'codex_id': fields.integer('MySQL Product ID'),
+		'brand_id': fields.many2one('product.brand', 'Brand'),
+		'tonnage': fields.float('Tonnage/Weight (kg)'),
+		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
 	}
+	
+	def write(self, cr, uid, ids, data, context=None):
+		result = super(product_category, self).write(cr, uid, ids, data, context)
+		for category_id in ids:
+			product_obj = self.pool.get('product.template')
+			product_ids = product_obj.search(cr, uid, [
+				('categ_id', '=', category_id),
+			])
+			if data.get('brand_id', False):
+				product_obj.write(cr, uid, product_ids, {
+					'brand_id': data['brand_id'],
+				})
+			if data.get('tonnage', False):
+				product_obj.write(cr, uid, product_ids, {
+					'tonnage': data['tonnage'],
+				})
+			if data.get('stock_unit_id', False):
+				product_obj.write(cr, uid, product_ids, {
+					'stock_unit_id': data['stock_unit_id'],
+				})
+		return result
 
+# ==========================================================================================================================
 
-# ORDER --------------------------------------------------------------------------------------------------------------------
-
-# _order = 'parent_id, codex_id'
+class product_brand(osv.osv):
+	
+	_name = "product.brand"
+	
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'name': fields.char('Name'),
+	}
 
 # ==========================================================================================================================
 
@@ -40,6 +71,38 @@ class product_template(osv.osv):
 			result[data.id] = unique_supplier_order_line_ids
 		return result
 	
+	def _product_current_stock(self, cr, uid, ids, field_name, arg, context={}):
+		result = {}
+		quant_obj = self.pool.get('stock.quant')
+		for product in self.browse(cr, uid, ids, context=context):
+			stocks = ''
+			for variant in product.product_variant_ids:
+				map = {}
+				quant_ids = quant_obj.search(cr, uid, [('product_id', '=', variant.id), ('location_id.usage', '=', 'internal')])
+				for quant in quant_obj.browse(cr, uid, quant_ids):
+					default_uom = quant.product_id.uom_id.name
+					map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
+				# stocks += variant.name + '\n'
+				stock = ''
+				for key in sorted(map.iterkeys()):
+					stock += key + ': ' + str(map[key]) + ' ' + default_uom + '\n'
+				if len(stock) == 0:
+					stock = 'None'
+				stocks += stock + '\n'
+			result[product.id] = stocks
+		return result
+		
+	def _current_price_ids(self, cr, uid, ids, field_name, arg, context={}):
+		current_pricelist_obj = self.pool.get('product.current.price')
+		result = {}
+		for product in self.browse(cr, uid, ids):
+			price = 0
+			variants = product.product_variant_ids
+			if len(variants) > 0:
+				variant = variants[0]
+				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id)], limit=1)
+		return result
+	
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -47,13 +110,19 @@ class product_template(osv.osv):
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
 			string="Last Purchase", relation="purchase.order.line"),
 		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
-		'commission': fields.char('Commission', help="Discount string."),
+		'commission': fields.char('Commission'),
 		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
+		'product_current_stock': fields.function(_product_current_stock, string="Current Stock", type='text', store=False),
+		'current_price_ids': fields.function(_current_price_ids, string="Current Prices", type='one2many', relation='product.current.price'),
+		'brand_id': fields.many2one('product.brand', 'Brand'),
+		'tonnage': fields.float('Tonnage/Weight (kg)'),
+		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------
 	_defaults = {
 		'is_sup_bonus': False,
+		'type': 'product',
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
@@ -67,9 +136,6 @@ class product_template(osv.osv):
 				'variant_codex_id': new_data.codex_id,
 			})
 		return new_id
-	
-
-
 
 
 # ==========================================================================================================================

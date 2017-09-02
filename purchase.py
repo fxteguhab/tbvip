@@ -5,7 +5,13 @@ from openerp.tools.translate import _
 from datetime import datetime
 
 import openerp.addons.purchase_sale_discount as psd
-import openerp.addons.chjs_price_list as cpl
+import openerp.addons.sale as imported_sale
+import openerp.addons.portal_sale as imported_portal_sale
+import openerp.addons.sale_stock as imported_sale_stock
+import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
+import openerp.addons.sale_multiple_payment as imported_sale_multiple_payment
+import openerp.addons.product_custom_conversion as imported_product_custom_conversion
+import openerp.addons.chjs_price_list as imported_price_list
 import openerp.addons.decimal_precision as dp
 
 # ==========================================================================================================================
@@ -66,9 +72,9 @@ class purchase_order(osv.osv):
 	}
 	
 	_defaults = {
-		'partner_id': _default_partner_id,
+		# 'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
-		'shipped_or_taken': 'taken',
+		'shipped_or_taken': 'shipped',
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -95,7 +101,24 @@ class purchase_order(osv.osv):
 				demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
 				demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
 		return result
-				
+
+	def onchange_picking_type_id(self, cr, uid, ids, picking_type_id, context=None):
+		result = super(purchase_order, self).onchange_picking_type_id(cr, uid, ids, picking_type_id, context)
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		location_id =  user_data.branch_id.default_incoming_location_id.id or None
+		result.update({
+			'location_id': location_id,
+		})
+		return {'value': result}
+	
+	def onchange_branch_id(self, cr, uid, ids, branch_id, context=None):
+		result = {}
+		branch_obj = self.pool.get('tbvip.branch')
+		location_id =  branch_obj.browse(cr, uid, branch_id)[0].default_incoming_location_id.id or None
+		result.update({
+			'location_id': location_id,
+		})
+		return {'value': result}
 	
 	def picking_done(self, cr, uid, ids, context=None):
 		"""
@@ -103,7 +126,8 @@ class purchase_order(osv.osv):
 		"""
 		picking_ids = []
 		for po in self.browse(cr, uid, ids, context=context):
-			picking_ids += [picking.id for picking in po.picking_ids]
+			if po.shipped_or_taken == 'shipped':
+				picking_ids += [picking.id for picking in po.picking_ids]
 		picking_obj = self.pool.get('stock.picking')
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
@@ -165,7 +189,16 @@ class purchase_order_line(osv.osv):
 		'mysql_purchase_det_id': fields.integer('MySQL Purchase Detail ID'),
 		'purchase_hour': fields.function(_purchase_hour, method=True, string='Purchase Hour', type='float'),
 		'alert': fields.integer('Alert'),
+		'product_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True),
+		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
+			string='UoM Category', readonly=True)
 	}
+	
+	_sql_constraints = [
+		('po_quantity_less_than_zero', 'CHECK(product_qty > 0)', 'Quantity should be more than zero.'),
+		('po_price_unit_less_than_zero', 'CHECK(price_unit >= 0)', 'Price should be more than zero.'),
+		('po_price_subtotal_less_than_zero', 'CHECK(price_subtotal >= 0)', 'Price subtotal should be more than zero.'),
+	]
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
 	
@@ -182,6 +215,9 @@ class purchase_order_line(osv.osv):
 			product = product_obj.browse(cr, uid, vals['product_id'])
 			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
 			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
+			if vals.get('price_type_id', False) and vals.get('product_uom', False):
+				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
 		if not vals.get('location_id', False):
 			users_obj = self.pool.get('res.users')
 			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location_id
@@ -223,6 +259,17 @@ class purchase_order_line(osv.osv):
 		if vals.get('price_unit', False):
 			for purchase_line in self.browse(cr, uid, ids):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
+		for po_line in self.browse(cr, uid, ids):
+			product_id = po_line.product_id.id
+			price_type_id = po_line.price_type_id.id
+			product_uom = po_line.product_uom.id
+			price_unit = po_line.price_unit
+			if vals.get('product_id', False): product_id = vals['product_id']
+			if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
+			if vals.get('product_uom', False): product_uom = vals['product_uom']
+			if vals.get('price_unit', False): price_unit = vals['price_unit']
+			self.pool.get('price.list')._create_product_current_price_if_none(
+				cr, uid, price_type_id, product_id, product_uom, price_unit)
 		return edited_order_line
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -234,20 +281,94 @@ class purchase_order_line(osv.osv):
 		})
 		return result
 	
-	def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# 		partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+	# 		name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False, context=None):
+	# 	product_conversion_obj = self.pool.get('product.conversion')
+	# 	uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
+	# 	result = cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+	# 		partner_id, date_order, fiscal_position_id, date_planned,
+	# 		name, price_unit, state, parent_price_type_id, price_type_id, context)
+	# 	temp = super(purchase_order_line, self).onchange_product_uom(
+	# 		cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
+	# 		date_planned, name, price_unit, state, context={})
+	# 	if result.get('domain', False) and temp.get('domain', False):
+	# 		result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+	# 	product_obj = self.pool.get('product.product')
+	# 	product = product_obj.browse(cr, uid, product_id)
+	# 	result['value'].update({
+	# 		'product_uom': uom_id if uom_id else product.uom_id.id,
+	# 		'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
+	# 	})
+	# 	return result
+	
+	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
-			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False, context=None):
+			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
+			discount_from_subtotal=False, context=None):
+		result = self.onchange_product_tbvip(cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order,
+			fiscal_position_id, date_planned, name, price_unit, state, parent_price_type_id, price_type_id,
+			discount_from_subtotal, context)
+		if product_id:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, product_id)
+			result['value']['product_uom'] = product.uom_id.id
+		return result
+	
+	def onchange_product_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
+			discount_from_subtotal=False, context=None):
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
-		result = cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-			partner_id, date_order, fiscal_position_id, date_planned,
-			name, price_unit, state, parent_price_type_id, price_type_id, context)
-		temp = super(purchase_order_line, self).onchange_product_uom(
-			cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
-			date_planned, name, price_unit, state, context={})
-		if result.get('domain', False) and temp.get('domain', False):
-			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
+		
+		result_price_list = imported_price_list.purchase.purchase_order_line.onchange_product_id(
+			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
+			date_planned, name, price_unit, state, parent_price_type_id, price_type_id, context)
+		price_unit_current = result_price_list['value']['price_unit'] \
+			if result_price_list['value'].get('price_unit', False) else price_unit
+			
+		# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
+		result_price_list['warning'] = {}
+		
+		result = result_price_list
+		
+		result_purchase_sale_discount = \
+			imported_purchase_sale_discount.purchase_discount.purchase_order_line.onchange_product_id_purchase_sale_discount(
+			self, cr, uid, product_id, partner_id, uom_id, qty, discount_from_subtotal)
+		if result_purchase_sale_discount:
+			result['value'].update({
+				'price_unit': result_purchase_sale_discount['value']['price_unit'] if price_unit_current == False else price_unit_current,
+				'discount_string': result_purchase_sale_discount['value']['discount_string'],
+				'price_unit_nett': result_purchase_sale_discount['value']['price_unit_nett'],
+				'price_subtotal': result_purchase_sale_discount['value']['price_subtotal'],
+			})
+		
+		result_custom_conversion = imported_product_custom_conversion.purchase.purchase_order_line.onchange_product_uom(
+			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
+			date_planned, name, price_unit_current, state, context={})
+		if result.get('domain', False) and result_custom_conversion.get('domain', False):
+			result['domain']['product_uom'] = result['domain']['product_uom'] + result_custom_conversion['domain']['product_uom']
+		
+		custom_product_uom = False
+		if result_custom_conversion['value'].get('product_uom', False):
+			custom_product_uom = result_custom_conversion['value']['product_uom']
+			# cari current price untuk product uom ini
+			product_conversion_obj = self.pool.get('product.conversion')
+			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, custom_product_uom)
+			if uom_record:
+				product_current_price_obj = self.pool.get('product.current.price')
+				current_price = product_current_price_obj.get_current_price(cr, uid, product_id, price_type_id, uom_record.id)
+				if current_price:
+					result['value'].update({
+						'price_unit': current_price
+					})
+		
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
-			'product_uom' : temp['value']['product_uom']
+			'product_uom': custom_product_uom if custom_product_uom else uom_id if uom_id else product.uom_id.id,
+			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
 		})
+		
 		return result

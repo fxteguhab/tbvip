@@ -38,3 +38,7 @@ class account_journal_edc(osv.osv):
 		'qty_sum': fields.function(_qty_sum, type="integer", string="Qty Sum"),
 		'row_count': fields.function(_row_count, type="integer", string="Row Count"),
 	}
+	
+	def invoice_auto_done(self, cr, uid, ids, context=None):
+		for invoice in self.browse(cr, uid, ids):
+			invoice.signal_workflow('invoice_open')

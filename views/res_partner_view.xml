@@ -1,0 +1,15 @@
+<openerp>
+	<data>
+		<record id="view_partner_property_form_inherit" model="ir.ui.view">
+			<field name="name">res.partner.property.form.inherit.inherit</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="account.view_partner_property_form"/>
+			<field name="arch" type="xml">
+				<field name="bank_name" position="replace"/>
+				<field name="owner_name" position="after">
+					<field name="bank_name"/>
+				</field>
+			</field>
+		</record>
+	</data>
+</openerp>

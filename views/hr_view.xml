@@ -43,9 +43,9 @@
 				<xpath expr="//filter[@name='today']" position="attributes">
 					<attribute name="domain">[('name','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),('name','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]</attribute>
 				</xpath>
-				<xpath expr="//filter[@string='Date']" position="attributes">
-					<attribute name="context">{'group_by':'create_date:day'}</attribute>
-				</xpath>
+				<!--<xpath expr="//filter[@string='Date']" position="attributes">-->
+					<!--<attribute name="context">{'group_by':'create_date:day'}</attribute>-->
+				<!--</xpath>-->
 			</field>
 		</record>
 		

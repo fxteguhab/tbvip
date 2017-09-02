@@ -19,6 +19,33 @@
 						</field>
 					</page>
 				</notebook>
+				<field name="type" position="before">
+					<field name="brand_id" />
+					<field name="tonnage"/>
+					<field name="stock_unit_id"/>
+				</field>
+				<field name="description" position="before">
+					<group>
+						<field name="product_current_stock" readonly="1"/>
+					</group>
+					<group col="1">
+						<field name="current_price_ids">
+							<tree>
+								<field name="price_type_id"/>
+								<field name="uom_id_1"/>
+								<field name="price_1"/>
+								<field name="uom_id_2"/>
+								<field name="price_2"/>
+								<field name="uom_id_3"/>
+								<field name="price_3"/>
+								<field name="uom_id_4"/>
+								<field name="price_4"/>
+								<field name="uom_id_5"/>
+								<field name="price_5"/>
+							</tree>
+						</field>
+					</group>
+				</field>
 			</field>
 		</record>
 
@@ -40,7 +67,21 @@
 				</notebook>
 			</field>
 		</record>
-		
+
+		<record model="ir.ui.view" id="product_category_form_view_inherit">
+			<field name="name">product.category.form.inherit</field>
+			<field name="model">product.category</field>
+			<field name="priority">18</field>
+			<field name="inherit_id" ref="product.product_category_form_view"/>
+			<field name="arch" type="xml">
+				<field name="parent_id" position="after">
+					<field name="brand_id"/>
+					<field name="tonnage"/>
+					<field name="stock_unit_id"/>
+				</field>
+			</field>
+		</record>
+
 		<record model="ir.ui.view" id="product_template_supplier_form_inherit">
 			<field name="name">product.template.supplier.form.inherit</field>
 			<field name="model">product.template</field>
@@ -61,7 +102,7 @@
 				</group>
 			</field>
 		</record>
-		
+
 		<record model="ir.ui.view" id="product_template_search_view_inherit">
 			<field name="name">product.template.search.inherit</field>
 			<field name="model">product.template</field>

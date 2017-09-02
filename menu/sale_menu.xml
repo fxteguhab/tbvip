@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record model="ir.actions.act_window" id="sale.action_orders">
+			<field name="context" eval="{
+				'search_default_my_sale_orders_filter': 1,
+				'default_is_payment_cash': True
+			}"/>
+			<field name="domain" eval="[]"/>
+		</record>
+
+		<record id="action_pending_sales_order" model="ir.actions.act_window">
+			<field name="name">Pending Sales Orders</field>
+			<field name="res_model">sale.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('invoiced', '=', False)]</field>
+			<field name="context">{'search_default_my_sale_orders_filter': 1,'default_is_payment_cash': True}</field>
+		</record>
+
+		<record id="action_paid_sales_order" model="ir.actions.act_window">
+			<field name="name">Paid Sales Orders</field>
+			<field name="res_model">sale.order</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('invoiced', '=', True)]</field>
+			<field name="context">{'search_default_my_sale_orders_filter': 1,'default_is_payment_cash': True}</field>
+		</record>
+
+		<menuitem sequence="7" id="menu_pending_sales" parent="base.menu_sales"
+				action="action_pending_sales_order"/>
+		<menuitem sequence="8" id="menu_paid_sales" parent="base.menu_sales"
+				action="action_paid_sales_order"/>
+	</data>
+</openerp>
