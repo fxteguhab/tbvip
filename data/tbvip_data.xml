@@ -1,20 +1,6 @@
 <openerp>
 	<data>
 
-		<record id="tbvip_branch_22" model="tbvip.branch">
-			<field name="name">Pahlawan 22</field>
-			<field name="address">Jalan Pahlawan 22</field>
-			<!--<field name="default_incoming_location_id" ref="stock_location_branch_22"></field>-->
-			<!--<field name="default_outgoing_location_id" ref="stock_location_branch_22"></field>-->
-		</record>
-
-		<record id="tbvip_branch_85" model="tbvip.branch">
-			<field name="name">Pahlawan 85</field>
-			<field name="address">Jalan Pahlawan 85</field>
-			<!--<field name="default_incoming_location_id" ref="stock_location_branch_49"></field>-->
-			<!--<field name="default_outgoing_location_id" ref="stock_location_branch_49"></field>-->
-		</record>
-
 		<record id="tbvip_normal_price_sell" model="price.type">
 			<field name="name">NORMAL PRICE SELL</field>
 			<field name="type">sell</field>
