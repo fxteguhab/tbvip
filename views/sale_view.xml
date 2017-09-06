@@ -85,6 +85,9 @@
 				<xpath expr="/form/header/button[@name='action_quotation_send'][2]" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</xpath>
+				<xpath expr="/form/header/button[@name='cancel']" posistion="after">
+					<button name="action_return" states="manual,progress" string="Return Order" type="object" groups="base.group_user"/>
+				</xpath>
 				<field name="amount_untaxed" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>

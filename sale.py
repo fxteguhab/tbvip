@@ -192,6 +192,28 @@ class sale_order(osv.osv):
 					'used_numbers': (temp_book_number + ', ' + bon_number) if (len(temp_book_number)>=1) else bon_number,
 				})
 		return
+	
+	def action_return(self, cr, uid, ids, context=None):
+		for id in ids:
+			delivery = self.action_view_delivery(cr, uid, [id], context=context)
+			stock_picking_id = delivery['res_id']
+			if stock_picking_id:
+				# stock_return_picking_obj = self.pool.get('stock.return.picking')
+				return {
+					"type": "ir.actions.act_window",
+					"res_model": "stock.return.picking",
+					"src_model": "stock.picking",
+					# "views": [[False, "form"]],
+					# "res_id": stock_picking_id,
+					"view_mode": "form",
+					"target": "new",
+					"key2": "client_action_multi",
+					"multi": "True",
+					'context': {
+						'active_id': stock_picking_id,
+						'active_ids': [stock_picking_id]
+					}
+				}
 
 # ==========================================================================================================================
 
