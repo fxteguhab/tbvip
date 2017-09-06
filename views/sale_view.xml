@@ -58,6 +58,7 @@
 				</xpath>
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
 						position="attributes">
+					<attribute name="string">Unit</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 					<attribute name="domain">
 						[('category_id','=', uom_category_filter_id),('is_auto_create','=',False)]
@@ -80,6 +81,16 @@
 				<xpath expr="//page[@string='Other Information']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>
+
+				<button name="action_quotation_send" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</button>
+				<field name="amount_untaxed" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="amount_tax" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 			</field>
 		</record>
 
@@ -114,6 +125,9 @@
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale.view_order_tree"/>
 			<field name="arch" type="xml">
+				<field name="date_order" position="after">
+					<field name="client_order_ref"/>
+				</field>
 				<field name="amount_total" position="before">
 					<field name="employee_id"/>
 					<field name="commission_total"/>
