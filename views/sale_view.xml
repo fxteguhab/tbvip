@@ -79,9 +79,12 @@
 					<attribute name="invisible">1</attribute>
 				</xpath>
 
-				<button name="action_quotation_send" position="attributes">
+				<xpath expr="/form/header/button[@name='action_quotation_send'][1]" position="attributes">
 					<attribute name="invisible">True</attribute>
-				</button>
+				</xpath>
+				<xpath expr="/form/header/button[@name='action_quotation_send'][2]" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</xpath>
 				<field name="amount_untaxed" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
