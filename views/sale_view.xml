@@ -27,9 +27,6 @@
 				<field name="currency_id" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
-				<field name="sale_discount" position="attributes">
-					<attribute name="invisible">True</attribute>
-				</field>
 				<field name="line_discounts" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
