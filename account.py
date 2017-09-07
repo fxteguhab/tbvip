@@ -13,7 +13,7 @@ class account_journal_edc(osv.osv):
 	
 # ==========================================================================================================================
 
-class account_journal_edc(osv.osv):
+class account_invoice(osv.osv):
 	_inherit = 'account.invoice'
 	
 	# FIELD FUNCTION METHOD ----------------------------------------------------------------------------------------------------
