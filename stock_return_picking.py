@@ -13,7 +13,6 @@ class stock_return_picking(osv.osv_memory):
         if pop_up:
             stock_transfer_detail_id = pop_up['res_id']
             stock_transfer_detail_obj = self.pool.get(pop_up['res_model'])
-            stock_transfer = stock_transfer_detail_obj.browse(cr, uid, stock_transfer_detail_id)
             stock_transfer_detail_obj.do_detailed_transfer(cr, uid, stock_transfer_detail_id)
         return new_picking_id, pick_type_id
 
