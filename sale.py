@@ -96,10 +96,12 @@ class sale_order(osv.osv):
 		for sale in self.browse(cr, uid, ids):
 			if sale.bon_number and sale.date_order:
 				self._update_bon_book(cr, uid, sale.bon_number, sale.date_order)
-		# make invoice and make its state to open
-		self.signal_workflow(cr, uid, ids, 'manual_invoice', context)
-		invoice_id = self.browse(cr, uid, ids, context).invoice_ids[0]
-		invoice_obj.signal_workflow(cr, uid, [invoice_id.id], 'invoice_open', context)
+			# make invoice and make its state to open
+			self.signal_workflow(cr, uid, [sale.id], 'manual_invoice', context)
+			# append bon number to invoice
+			invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
+			# Make invoice open
+			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
