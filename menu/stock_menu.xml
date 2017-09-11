@@ -45,7 +45,7 @@
 					<field name="product_id"/>
 					<field name="product_qty"/>
 					<field name="location_id"/>
-					<field name="inventory_id"/>
+					<field name="inventory_id" string = "Inventory Adjustment"/>
 				</tree>
 			</field>
 		</record>
