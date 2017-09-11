@@ -22,3 +22,4 @@ import product_production
 import price_list
 import commission
 import stock_return_picking
+import sale_order_return

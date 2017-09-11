@@ -203,7 +203,7 @@ class sale_order(osv.osv):
 				# stock_return_picking_obj = self.pool.get('stock.return.picking')
 				return {
 					"type": "ir.actions.act_window",
-					"res_model": "stock.return.picking",
+					"res_model": "sale.order.return",
 					"src_model": "stock.picking",
 					# "views": [[False, "form"]],
 					# "res_id": stock_picking_id,
