@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="sale_order_return_form" model="ir.ui.view">
+            <field name="name">sale.order.return.form</field>
+            <field name="model">sale.order.return</field>
+            <field name="arch" type="xml">
+                <form string="Return lines">
+                    <group string="Provide the quantities of the returned products.">
+                        <field name="move_dest_exists" invisible="1"/>
+		            	<div attrs="{'invisible': [('move_dest_exists', '=', False)]}" class="oe_grey" colspan="4">
+                            <p>This picking appears to be chained with another operation. Later, if you receive the goods you are returning now, make sure to <b>reverse</b> the returned picking in order to avoid logistic rules to be applied again (which would create duplicated operations)</p>
+                        </div>
+                        <field name="product_return_moves" colspan="4">
+                            <tree editable="top">
+                                <field name="product_id"/>
+                                <field name="lot_id" domain="[('product_id', '=', product_id)]" context="{'default_product_id': product_id}"/>
+                                <field name="quantity"/>
+                                <field name="amount_price"/>
+                            </tree>
+                        </field>
+                    </group>
+                    <footer>
+                        <button name="create_returns" string="Return" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        
+    </data>
+</openerp>

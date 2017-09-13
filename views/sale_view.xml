@@ -27,9 +27,6 @@
 				<field name="currency_id" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
-				<field name="sale_discount" position="attributes">
-					<attribute name="invisible">True</attribute>
-				</field>
 				<field name="line_discounts" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
@@ -58,6 +55,7 @@
 				</xpath>
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_uom']"
 						position="attributes">
+					<attribute name="string">Unit</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 					<attribute name="domain">
 						[('category_id','=', uom_category_filter_id),('is_auto_create','=',False)]
@@ -80,6 +78,22 @@
 				<xpath expr="//page[@string='Other Information']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>
+
+				<xpath expr="/form/header/button[@name='action_quotation_send'][1]" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</xpath>
+				<xpath expr="/form/header/button[@name='action_quotation_send'][2]" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</xpath>
+				<xpath expr="/form/header/button[@name='cancel']" posistion="after">
+					<button name="action_return" states="manual,progress" string="Return Order" type="object" groups="base.group_user"/>
+				</xpath>
+				<field name="amount_untaxed" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="amount_tax" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 			</field>
 		</record>
 
@@ -90,6 +104,7 @@
 			<field name="arch" type="xml">
 				<field name="user_id" position="attributes">
 					<attribute name="invisible">1</attribute>
+					<attribute name="string">Cashier</attribute>
 				</field>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='discount']" position="attributes">
 					<attribute name="invisible">1</attribute>
@@ -113,20 +128,43 @@
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale.view_order_tree"/>
 			<field name="arch" type="xml">
+				<field name="date_order" position="after">
+					<field name="client_order_ref"/>
+				</field>
 				<field name="amount_total" position="before">
+					<field name="employee_id"/>
 					<field name="commission_total"/>
+				</field>
+				<field name="user_id" position="attributes">
+					<attribute name="string">Cashier</attribute>
 				</field>
 			</field>
 		</record>
 
-		<record model="ir.ui.view" id="sale_order_filter_inherit">
+		<record id="view_sales_order_search_inherit" model="ir.ui.view">
+			<field name="name">sale.order.search.inherit</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_sales_order_filter"/>
+			<field name="arch" type="xml">
+				<search string="Search Sales Order" position="inside">
+					<filter string="Today" name="filter_date_order_today"
+						domain="[('date_order','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+						('date_order','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+				</search>
+			</field>
+		</record>
+
+		<record id="view_sales_order_filter_inherit" model="ir.ui.view">
 			<field name="name">sale.order.list.select.inherit</field>
 			<field name="model">sale.order</field>
 			<field name="inherit_id" ref="sale.view_sales_order_filter"/>
 			<field name="arch" type="xml">
-				<field name="name" position="after">
-					<field name="bon_number" string="Bon Number"/>
-				</field>
+				<filter string="Salesperson" position="attributes">
+					<attribute name="string">Cashier</attribute>
+				</filter>
+				<group string="Group By" position="inside">
+					<filter string="Order Date" name="Date" context="{'group_by':'date_order:day'}" help="Ordered date of the sales order"/>
+				</group>
 			</field>
 		</record>
 	</data>

@@ -4,7 +4,8 @@
 		<record model="ir.actions.act_window" id="sale.action_orders">
 			<field name="context" eval="{
 				'search_default_my_sale_orders_filter': 1,
-				'default_is_payment_cash': True
+				'default_is_payment_cash': True,
+				'search_default_filter_date_order_today':1
 			}"/>
 			<field name="domain" eval="[]"/>
 		</record>
@@ -15,7 +16,11 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="domain">[('invoiced', '=', False)]</field>
-			<field name="context">{'search_default_my_sale_orders_filter': 1,'default_is_payment_cash': True}</field>
+			<field name="context">{
+				'search_default_my_sale_orders_filter': 1,
+				'default_is_payment_cash': True,
+				'search_default_filter_date_order_today':1}
+			</field>
 		</record>
 
 		<record id="action_paid_sales_order" model="ir.actions.act_window">
@@ -24,7 +29,11 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 			<field name="domain">[('invoiced', '=', True)]</field>
-			<field name="context">{'search_default_my_sale_orders_filter': 1,'default_is_payment_cash': True}</field>
+			<field name="context">{
+				'search_default_my_sale_orders_filter': 1,
+				'default_is_payment_cash': True,
+				'search_default_filter_date_order_today':1}
+			</field>
 		</record>
 
 		<menuitem sequence="7" id="menu_pending_sales" parent="base.menu_sales"

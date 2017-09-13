@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+from openerp import api
 from openerp.osv import osv, fields
 
 # ==========================================================================================================================
@@ -13,7 +15,7 @@ class account_journal_edc(osv.osv):
 	
 # ==========================================================================================================================
 
-class account_journal_edc(osv.osv):
+class account_invoice(osv.osv):
 	_inherit = 'account.invoice'
 	
 	# FIELD FUNCTION METHOD ----------------------------------------------------------------------------------------------------
@@ -37,8 +39,34 @@ class account_journal_edc(osv.osv):
 	_columns = {
 		'qty_sum': fields.function(_qty_sum, type="integer", string="Qty Sum"),
 		'row_count': fields.function(_row_count, type="integer", string="Row Count"),
+		'related_sales_bon_number': fields.char("Nomor Bon", readonly=True),
 	}
 	
 	def invoice_auto_done(self, cr, uid, ids, context=None):
 		for invoice in self.browse(cr, uid, ids):
 			invoice.signal_workflow('invoice_open')
+	
+	@api.model
+	def name_search(self, name, args=None, operator='ilike', limit=100):
+		"""
+		Update name_search (like in m2o search) domain to search with sale bon number for today (in infix):
+		('number', '=', name)
+			OR (('related_sales_bon_number', '=', name)
+				AND (date_invoice', '>=', today.strftime('%Y-%m-%d'))
+				AND ('date_invoice', '<', tommorow.strftime('%Y-%m-%d'))
+			)
+		"""
+		args = args or []
+		recs = self.browse()
+		if name:
+			today = datetime.today()
+			tommorow = datetime.today() + timedelta(1)
+			recs = self.search([
+					'|',
+					('number', '=', name),
+					'&', ('related_sales_bon_number', '=', name),
+					'&', ('date_invoice', '>=', today.strftime('%Y-%m-%d')),
+					('date_invoice', '<', tommorow.strftime('%Y-%m-%d'))] + args, limit=limit)
+		if not recs:
+			recs = self.search([('name', operator, name)] + args, limit=limit)
+		return recs.name_get()
