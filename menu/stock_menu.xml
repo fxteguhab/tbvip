@@ -37,11 +37,33 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
+		<record id="stock_inventory_line_list_stock_opname" model="ir.ui.view">
+			<field name="name">stock.inventory.line.list.stock.opname</field>
+			<field name="model">stock.inventory.line</field>
+			<field name="arch" type="xml">
+				<tree create="false" delete="false">
+					<field name="product_id"/>
+					<field name="product_qty"/>
+					<field name="location_id"/>
+					<field name="inventory_id" string = "Inventory Adjustment"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="stock_action_list_product_stock_opname" model="ir.actions.act_window">
+			<field name="name">List Product Stock Opname</field>
+			<field name="res_model">stock.inventory.line</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree</field>
+			<field name="view_id" ref="stock_inventory_line_list_stock_opname"/>
+			<field name="domain">[('inventory_id.state', '=', 'confirm')]</field>
+		</record>
+
 		<menuitem sequence="5" id="stock_menu_check_stock" parent="stock.menu_stock_inventory_control" action="stock_action_check_stock"/>
 		<menuitem sequence="20" id="stock_menu_stock_bonus_usage" parent="stock.menu_stock_inventory_control" action="stock_action_stock_bonus_usage"/>
 		<menuitem sequence="5" id="stock_opname_menu_product_supplier_bonus" parent="stock.menu_stock_product" action="stock_action_product_supplier_bonus"/>
 		<menuitem sequence="5" id="stock_menu_stock_sublocation" parent="stock.menu_stock_configuration" action="stock_action_stock_sublocation"/>
-		<menuitem sequence="6" id="stock_menu_stock_unit" parent="stock.menu_stock_configuration" action="stock_action_stock_unit"/>
+		<menuitem sequence="6" id="stock_menu_stock_unit" parent="stock.menu_stock_inventory_control" action="stock_action_list_product_stock_opname"/>
 
 	</data>
 </openerp>
