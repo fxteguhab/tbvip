@@ -10,24 +10,24 @@ class canvassing_canvas(osv.osv):
 	
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'total_distance': fields.float('Total Distance'),
+		# 'total_distance': fields.float('Total Distance'),
 	}
 	
 	# OVERRIDES
 	
 	def action_set_finish(self, cr, uid, ids, context={}):
 		super(canvassing_canvas, self).action_set_finish(cr, uid, ids, context=context)
-		for canvas_data in self.browse(cr, uid, ids):
-			total_distance = 0
-			for stock_line_data in canvas_data.stock_line_ids:
-				if stock_line_data.is_executed:
-					total_distance += stock_line_data.distance
-			for invoice_line_data in canvas_data.invoice_line_ids:
-				if invoice_line_data.is_executed:
-					total_distance += invoice_line_data.distance
-			self.write(cr, uid, ids, {
-				'total_distance': total_distance,
-			})
+		# for canvas_data in self.browse(cr, uid, ids):
+			# total_distance = 0
+			# for stock_line_data in canvas_data.stock_line_ids:
+			# 	if stock_line_data.is_executed:
+			# 		total_distance += stock_line_data.distance
+			# for invoice_line_data in canvas_data.invoice_line_ids:
+			# 	if invoice_line_data.is_executed:
+			# 		total_distance += invoice_line_data.distance
+			# self.write(cr, uid, ids, {
+			# 	'total_distance': total_distance,
+			# })
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
