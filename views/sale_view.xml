@@ -12,7 +12,9 @@
 					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
 							attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
 				</field>
-
+				<field name="partner_id" position="attributes">
+					<attribute name="options">{'no_create': True}</attribute>
+				</field>
 				<field name="client_order_ref" position="replace"/>
 				<field name="shipped_or_taken" position="before">
 					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
