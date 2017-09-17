@@ -43,9 +43,9 @@ class tbvip_bon_book(osv.osv):
 	
 # METHOD -------------------------------------------------------------------------------------------------------------------
 	
-	def _cek_crossing_bon_number(self, cr, uid, cek_bon_id, issue_date, start_from, end_at):
+	def _cek_crossing_bon_number(self, cr, uid, cek_bon_id, issue_date, start_from, end_at, branch_id):
 		bon_book_ids = self.search(cr, uid,
-			['&',('id','!=',cek_bon_id),'&',('issue_date','=',issue_date),'|','&',('end_at', '>=', start_from),('end_at', '<=', end_at),
+			['&',('branch_id','=',branch_id),'&',('id','!=',cek_bon_id),'&',('issue_date','=',issue_date),'|','&',('end_at', '>=', start_from),('end_at', '<=', end_at),
 				'|','&',('start_from', '>=', start_from),('start_from', '<=', end_at),
 				'&', ('start_from', '<=', start_from),('end_at', '>=', end_at)
 			])
@@ -60,15 +60,20 @@ class tbvip_bon_book(osv.osv):
 	def create(self, cr, uid, vals, context={}):
 		id = super(tbvip_bon_book, self).create(cr, uid, vals, context)
 		# Cek apakah ada bon yang saling bersilangan untuk issue date yang sama
-		self._cek_crossing_bon_number(cr, uid, id, vals.get('issue_date', False), vals.get('start_from', False), vals.get('end_at', False))
+		branch_id = self._default_branch_id(cr, uid, context)
+		self._cek_crossing_bon_number(cr, uid, id, vals.get('issue_date', False), vals.get('start_from', False), vals.get('end_at', False), branch_id)
 		return id
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		# Cek apakah ada bon yang saling bersilangan untuk issue date yang sama
+		user_obj = self.pool.get('res.users')
 		for bon in self.browse(cr, uid, ids):
 			start_from = bon.start_from
 			end_at = bon.end_at
 			issue_date = bon.issue_date
+			branch_id = bon.branch_id.id
+			
+			branch_id_temp = self._default_branch_id(cr, uid, context)
 			
 			if vals.get('start_from', False):
 				start_from = vals.get('start_from', False)
@@ -76,8 +81,10 @@ class tbvip_bon_book(osv.osv):
 				end_at = vals.get('end_at', False)
 			if vals.get('issue_date', False):
 				issue_date = vals.get('issue_date', False)
+			if branch_id_temp:
+				branch_id = branch_id_temp
 				
-			self._cek_crossing_bon_number(cr, uid, bon.id, issue_date, start_from, end_at)
+			self._cek_crossing_bon_number(cr, uid, bon.id, issue_date, start_from, end_at, branch_id)
 		
 		return super(tbvip_bon_book, self).write(cr, uid, ids, vals, context)
 	
