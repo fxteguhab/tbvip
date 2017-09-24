@@ -80,6 +80,12 @@ class canvassing_canvas(osv.osv):
 
 # ==========================================================================================================================
 
+"""
+20170924 JUNED: ditutup karena perhitungan jarak dikondisikan untuk satu perjalanan secara 
+keseluruhan, menggunakan API dari service GPS yang dipakai
+dengan demikian, perhitungan total_distance di model canvassing.canvas tidak tergantung pada 
+nilai field distance di canvas.stock.line
+
 class canvasssing_canvas_stock_line(osv.Model):
 	_inherit = 'canvassing.canvas.stock.line'
 
@@ -103,3 +109,4 @@ class canvasssing_canvas_stock_line(osv.Model):
 				self.write(cr, uid, [obj.id], {
 					'distance': google_map.distance(obj.address,obj.canvas_id.branch_id.address,'driving',api='masukkan_google_api_key_yang_benar'),
 				})
+"""
