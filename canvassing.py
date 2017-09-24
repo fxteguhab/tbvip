@@ -1,5 +1,9 @@
 from openerp.osv import osv, fields
-import google_maps
+import urllib2
+import json
+import requests
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+from datetime import datetime, date, timedelta
 
 # ==========================================================================================================================
 
@@ -10,24 +14,95 @@ class canvassing_canvas(osv.osv):
 	
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		# 'total_distance': fields.float('Total Distance'),
+		'total_distance': fields.float('Total Distance', readonly=True),
 	}
 	
-	# OVERRIDES
-	
+	# OVERRIDES --------------------------------------------------------------------------------------------------------------
+		
+	def calculate_distance(self, cr, uid, canvas_data):
+	# ambil parameter2 sistem
+		param_obj = self.pool.get('ir.config_parameter')
+		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_positions_url','gps_devices_url','gps_username','gps_password'])])
+		baseUrl = ""
+		login_url = ""
+		positions_url = ""
+		devices_url = ""
+		gps_username = ""
+		gps_password = ""
+		for param_data in param_obj.browse(cr, uid, param_ids):
+			if param_data.key == 'gps_base_url':
+				baseUrl = param_data.value
+			elif param_data.key == 'gps_login_path':
+				login_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_positions_url':
+				positions_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_devices_url':
+				devices_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_username':
+				gps_username = param_data.value
+			elif param_data.key == 'gps_password':
+				gps_password = param_data.value
+	# coba login ke sistem GPS
+		try:
+			request = urllib2.Request(login_url + '?payload=["'+gps_username+'","'+gps_password+'"]')
+			response = urllib2.urlopen(request)
+			cookie = response.headers.get('Set-Cookie')
+		except:
+			return -1 # -1 artinya error
+	# tentukan device id dari vehicle yang melakukan canvassing ini
+		vehicle_gps_id = canvas_data.fleet_vehicle_id and canvas_data.fleet_vehicle_id.gps_id or None
+		if not vehicle_gps_id:
+			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+		request = urllib2.Request(devices_url)
+		request.add_header('Cookie', cookie)
+		response = urllib2.urlopen(request)
+		j = json.load(response)
+		device_id = None
+		for i in j:
+			if (vehicle_gps_id == i['uniqueId']) :
+				device_id = i['id'] 
+				break
+		if not device_id:
+			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+	# ambil jarak antara waktu mulai dan selesai
+		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7)
+		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7)
+		date_depart = date_depart.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+		date_delivered = date_delivered.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+		header = {'cookie': cookie}
+		data = '[{"id":%s},"%s","%s",true]' % (device_id,date_depart+" +0700",date_delivered+' +0700')
+		results = requests.post(positions_url, headers=header, data=data)
+		j = results.json()
+		if not j: return 0
+	# find substring in 'other' group in first iterasion
+		substr = j[0]['other']
+		dist_pos = substr.find('totalDistance')
+		pos1 = substr.find(':',dist_pos) 
+		pos2 = substr.find('}',dist_pos)
+		start_distance = substr[pos1+1:pos2]
+	# trace to last index
+		index = 0
+		for i in j: index += 1
+	# find substring in 'other' group in last iteration
+		substr = j[index-1]['other']
+		dist_pos = substr.find('totalDistance')
+		pos1 = substr.find(':',dist_pos) 
+		pos2 = substr.find('}',dist_pos)
+		last_distance = substr[pos1+1:pos2]
+	# inilah jaraknya!
+		return float(last_distance) - float(start_distance)
+
+	def action_recalculate_distance(self, cr, uid, ids, context={}):
+		for canvas_data in self.browse(cr, uid, ids, context=context):
+			distance = self.calculate_distance(cr, uid, canvas_data)
+			self.write(cr, uid, [canvas_data.id], {
+				'total_distance': distance,
+				})
+		return True
+
 	def action_set_finish(self, cr, uid, ids, context={}):
 		super(canvassing_canvas, self).action_set_finish(cr, uid, ids, context=context)
-		# for canvas_data in self.browse(cr, uid, ids):
-			# total_distance = 0
-			# for stock_line_data in canvas_data.stock_line_ids:
-			# 	if stock_line_data.is_executed:
-			# 		total_distance += stock_line_data.distance
-			# for invoice_line_data in canvas_data.invoice_line_ids:
-			# 	if invoice_line_data.is_executed:
-			# 		total_distance += invoice_line_data.distance
-			# self.write(cr, uid, ids, {
-			# 	'total_distance': total_distance,
-			# })
+		return self.action_recalculate_distance(cr, uid, ids)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
@@ -80,6 +155,12 @@ class canvassing_canvas(osv.osv):
 
 # ==========================================================================================================================
 
+"""
+20170924 JUNED: ditutup karena perhitungan jarak dikondisikan untuk satu perjalanan secara 
+keseluruhan, menggunakan API dari service GPS yang dipakai
+dengan demikian, perhitungan total_distance di model canvassing.canvas tidak tergantung pada 
+nilai field distance di canvas.stock.line
+
 class canvasssing_canvas_stock_line(osv.Model):
 	_inherit = 'canvassing.canvas.stock.line'
 
@@ -103,3 +184,4 @@ class canvasssing_canvas_stock_line(osv.Model):
 				self.write(cr, uid, [obj.id], {
 					'distance': google_map.distance(obj.address,obj.canvas_id.branch_id.address,'driving',api='masukkan_google_api_key_yang_benar'),
 				})
+"""

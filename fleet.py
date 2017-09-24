@@ -11,18 +11,30 @@ class fleet_vehicle(osv.osv):
 	_inherit = 'fleet.vehicle'
 
 	def _location(self, cr, uid, ids, field_name, arg, context=None):
-		baseUrl = 'http://35.187.150.104:8082'
-		login_url = baseUrl + '/traccar/rest/login'
-		position_url = baseUrl + '/traccar/rest/getLatestPositions'
-		gps_username = 'tokobesivip'
-		gps_password = 'tokobesivip'
+		param_obj = self.pool.get('ir.config_parameter')
+		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_latest_position_url','gps_username','gps_password'])])
+		baseUrl = ""
+		login_url = ""
+		position_url = ""
+		gps_username = ""
+		gps_password = ""
+		for param_data in param_obj.browse(cr, uid, param_ids):
+			if param_data.key == 'gps_base_url':
+				baseUrl = param_data.value
+			elif param_data.key == 'gps_login_path':
+				login_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_latest_position_url':
+				position_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_username':
+				gps_username = param_data.value
+			elif param_data.key == 'gps_password':
+				gps_password = param_data.value
 		request = urllib2.Request(login_url + '?payload=["'+gps_username+'","'+gps_password+'"]')
 		login = urllib2.urlopen(request)
 		request = urllib2.Request(position_url)
 		request.add_header('Cookie', login.headers.get('Set-Cookie'))
 		response = urllib2.urlopen(request)
 		positions = json.load(response)
-
 		result = {}
 		for data in self.browse(cr, uid, ids, context=context):
 				result[data.id] = ''
