@@ -12,7 +12,7 @@ class fleet_vehicle(osv.osv):
 
 	def _location(self, cr, uid, ids, field_name, arg, context=None):
 		param_obj = self.pool.get('ir.config_parameter')
-		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_position_url','gps_username','gps_password'])])
+		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_latest_position_url','gps_username','gps_password'])])
 		baseUrl = ""
 		login_url = ""
 		position_url = ""
@@ -23,7 +23,7 @@ class fleet_vehicle(osv.osv):
 				baseUrl = param_data.value
 			elif param_data.key == 'gps_login_path':
 				login_url = baseUrl + param_data.value
-			elif param_data.key == 'gps_position_url':
+			elif param_data.key == 'gps_latest_position_url':
 				position_url = baseUrl + param_data.value
 			elif param_data.key == 'gps_username':
 				gps_username = param_data.value
