@@ -16,11 +16,13 @@
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
 				<field name="client_order_ref" position="replace"/>
+				<field name="customer_address" position="replace"/>
 				<field name="shipped_or_taken" position="before">
 					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
 					<field name="employee_id" readonly="True"/>
 				</field>
 				<field name="shipped_or_taken" position="after">
+					<field name="customer_address" attrs="{'invisible': [('shipped_or_taken','!=','shipped')]}"/>
 					<field name="client_order_ref"/>
 				</field>
 				<field name="pricelist_id" position="attributes">
