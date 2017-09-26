@@ -4,5 +4,12 @@
 		<record model="ir.ui.menu" id="purchase.menu_purchase_rfq">
 			<field name="name">Draft Purchase Orders</field>
 		</record>
+
+		<record model="ir.actions.act_window" id="purchase.purchase_form_action">
+			<field name="context" eval="{
+				'search_default_filter_date_order_today':1,
+			}"/>
+			<field name="domain">[('state','=','approved')]</field>
+		</record>
 	</data>
 </openerp>

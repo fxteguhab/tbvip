@@ -102,5 +102,18 @@
 			<field name="name">Draft Purchase Orders</field>
 		</record>
 
+		<record id="view_request_for_quotation_search_inherit" model="ir.ui.view">
+			<field name="name">request.for.quotation.search.inherit</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.view_request_for_quotation_filter"/>
+			<field name="arch" type="xml">
+				<search string="Search Purchase Order" position="inside">
+					<filter string="Today" name="filter_date_order_today"
+							domain="[('date_order','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+						('date_order','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+				</search>
+			</field>
+		</record>
+
 	</data>
 </openerp>
