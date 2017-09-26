@@ -13,6 +13,10 @@
 				<field name="date_delivered" position="after">
 					<field name="total_distance" />
 				</field>
+				<field name="invoice_id" position="replace">
+					<field name="bon_number" on_change="onchange_bon_number(bon_number)"/>
+					<field name="invoice_id" options="{'no_quick_create':True, 'no_create_edit':True}" readonly="1"/>
+				</field>
 				<xpath expr="//button[@name='action_set_finish']" position="after">
 					<button name="action_recalculate_distance" string="Recalculate Distance" type="object" states="finished" />
 				</xpath>
