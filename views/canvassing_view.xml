@@ -10,9 +10,6 @@
 				<field name="name" position="after">
 					<field name="branch_id" attrs="{'readonly': [('state', '=', 'finished')]}"/>
 				</field>
-				<field name="date_delivered" position="after">
-					<field name="total_distance" />
-				</field>
 				<xpath expr="//button[@name='action_set_finish']" position="after">
 					<button name="action_recalculate_distance" string="Recalculate Distance" type="object" states="finished" />
 				</xpath>
