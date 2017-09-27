@@ -159,6 +159,40 @@ class canvassing_canvas(osv.osv):
 
 # ==========================================================================================================================
 
+class canvasssing_canvas_stock_line(osv.Model):
+	_inherit = 'canvassing.canvas.invoice.line'
+	
+	_columns = {
+		'bon_number': fields.char('Bon Number', required=True),
+	}
+	
+	def onchange_bon_number(self, cr, uid, ids, bon_number, context=None):
+		result = {}
+		result['value'] = {}
+		if bon_number:
+			sale_order = self.pool.get('sale.order')
+			sale_order_ids = sale_order.search(cr, uid, [
+				('bon_number', '=', bon_number),
+			], limit=1, order='date_order DESC')
+			sale_order_data = sale_order.browse(cr, uid, sale_order_ids)
+			if len(sale_order_data) > 0:
+				if len(sale_order_data[0].invoice_ids) > 0:
+					result['value'].update({
+						'invoice_id': sale_order_data[0].invoice_ids[0].id
+					})
+				else:
+					result['warning'] = {
+						'title': 'Bon Number Error',
+						'message': 'You must confirm the sales order first.',
+					}
+			else:
+				result['warning'] = {
+					'title': 'Bon Number Error',
+					'message': 'No sales order found with the given bon number.',
+				}
+		return result
+
+
 """
 20170924 JUNED: ditutup karena perhitungan jarak dikondisikan untuk satu perjalanan secara 
 keseluruhan, menggunakan API dari service GPS yang dipakai
