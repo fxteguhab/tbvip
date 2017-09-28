@@ -19,7 +19,7 @@
 					<field name="sublocation" readonly="True"/>
 				</field>
 				<field name="employee_id" position="attributes">
-					<attribute name="on_change">onchange_employee_id(location_id, rule_id, employee_id)</attribute>
+					<attribute name="on_change">onchange_location_and_employee(location_id, rule_id, employee_id)</attribute>
 				</field>
 				<field name="location_id" position="attributes">
 					<attribute name="on_change">none</attribute>

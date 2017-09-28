@@ -23,20 +23,6 @@ class stock_opname_memory(osv.osv_memory):
 					})
 		return super(stock_opname_memory, self).action_generate_stock_opname(cr, uid, ids, context=context)
 	
-# ONCHANGES -------------------------------------------------------------------------------------------------------------
-	
-	def onchange_employee_id(self, cr, uid, ids, location_id, rule_id, employee_id,context={}):
-		if not context.get('is_override', False) and not rule_id:
-			raise osv.except_orm(_('Generating Stock Opname Error'),
-				_('There is no Stock Opname Rule marked as being used. Please select a rule to be used first.'))
-		line_ids = []
-		stock_location_obj = self.pool.get('stock.location')
-		if location_id and employee_id:
-			location = stock_location_obj.browse(cr, uid, location_id)
-			line_ids = self._get_line_ids(cr, uid, location, context)
-		return {'value': {'line_ids': line_ids}}
-
-
 class stock_opname_memory_line(osv.osv_memory):
 	_inherit = "stock.opname.memory.line"
 	
