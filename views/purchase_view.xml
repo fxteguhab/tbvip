@@ -101,6 +101,23 @@
 				<field name="minimum_planned_date" position="replace">
 					<field name="delivered_date"/>
 				</field>
+				<field name="amount_untaxed" position="replace"/>
+				<field name="origin" position="replace"/>
+				<field name="name" position="replace">
+					<field name="name" string="Supplier Reference"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="purchase_order_search">
+			<field name="name">purchase.order.search</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+			<field name="arch" type="xml">
+				<xpath expr="//filter[@string='Expected Month']" position="after">
+					<filter string="Delivered Month" icon="terp-go-month" domain="[]" context="{'group_by':'delivered_date'}"/>
+					<filter name="groupby_day" string="Day" context="{'group_by':'date_order:day'}"/>
+				</xpath>
 			</field>
 		</record>
 
