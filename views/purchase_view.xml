@@ -9,6 +9,9 @@
 				<field name="partner_id" position="before">
 					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
 				</field>
+				<field name="date_order" position="after">
+					<field name="delivered_date"/>
+				</field>
 				<field name="partner_id" position="attributes">
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
@@ -94,6 +97,9 @@
 			<field name="arch" type="xml">
 				<field name="state" position="before">
 					<field name="branch_id"/>
+				</field>
+				<field name="minimum_planned_date" position="replace">
+					<field name="delivered_date"/>
 				</field>
 			</field>
 		</record>
