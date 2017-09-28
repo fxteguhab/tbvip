@@ -133,6 +133,7 @@
 			<field name="inherit_id" ref="sale.view_order_tree"/>
 			<field name="arch" type="xml">
 				<field name="date_order" position="after">
+					<field name="branch_id"/>
 					<field name="client_order_ref"/>
 				</field>
 				<field name="amount_total" position="before">
@@ -141,6 +142,8 @@
 				</field>
 				<field name="employee_id" position="after">
 					<field name="branch_id"/>
+				<field name="amount_total" position="after">
+					<field name="shipped_or_taken"/>
 				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="string">Cashier</attribute>
