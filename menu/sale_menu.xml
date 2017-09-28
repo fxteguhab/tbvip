@@ -5,7 +5,8 @@
 			<field name="context" eval="{
 				'search_default_my_sale_orders_filter': 1,
 				'default_is_payment_cash': True,
-				'search_default_filter_date_order_today':1
+				'search_default_filter_date_order_today':1,
+				'search_default_groupby_branch':1
 			}"/>
 			<field name="domain" eval="[]"/>
 		</record>
