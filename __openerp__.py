@@ -62,6 +62,7 @@
 		'report/documents/stock_inventory.xml',
 		'report/purchase_report.xml',
 		'workflows/purchase_workflow.xml',
+		'menu/accounting_menu.xml',
 		# 'menu/account_receivable_limit.xml',
 		# 'security/ir.model.access.csv',
 	],
