@@ -21,7 +21,7 @@ class tbvip_bon_book(osv.osv):
 		return user_data.branch_id.id or None
 	
 	_columns = {
-		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True, readonly=True),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'issue_date': fields.date('Issue Date', required=True, help='Book released date.'),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, help='Whom the book is given to.'),
 		'start_from': fields.integer('Start From', required=True, help='Bon starting number.'),

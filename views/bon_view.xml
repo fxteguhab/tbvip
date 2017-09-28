@@ -13,7 +13,7 @@
 							<field name="end_at"/>
 						</group>
 						<group>
-							<field name="branch_id" readonly="1"/>
+							<field name="branch_id"/>
 							<field name="create_uid" readonly="1"/>
 							<field name="total_sheets" readonly="1"/>
 							<field name="total_used" readonly="1"/>
