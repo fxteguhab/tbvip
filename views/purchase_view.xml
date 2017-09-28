@@ -117,6 +117,7 @@
 				<xpath expr="//filter[@string='Expected Month']" position="after">
 					<filter string="Delivered Month" icon="terp-go-month" domain="[]" context="{'group_by':'delivered_date'}"/>
 					<filter name="groupby_day" string="Day" context="{'group_by':'date_order:day'}"/>
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
 				</xpath>
 			</field>
 		</record>
