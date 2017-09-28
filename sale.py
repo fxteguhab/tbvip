@@ -25,6 +25,7 @@ class sale_order(osv.osv):
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
+		'is_complex_payment': fields.boolean('Is Complex Payment'),
 	}
 
 	def _default_partner_id(self, cr, uid, context={}):
@@ -46,6 +47,7 @@ class sale_order(osv.osv):
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'taken',
 		'stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
+		'is_complex_payment': False
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
