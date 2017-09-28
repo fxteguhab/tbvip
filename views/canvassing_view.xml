@@ -13,6 +13,9 @@
 				<field name="date_delivered" position="after">
 					<field name="total_distance" />
 				</field>
+				<field name="journal_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 				<field name="invoice_id" position="replace">
 					<field name="invoice_id" options="{'no_quick_create':True, 'no_create_edit':True}" on_change="onchange_invoice_id(invoice_id)"/>
 				</field>

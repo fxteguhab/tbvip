@@ -12,15 +12,10 @@ class stock_quant(osv.osv):
 	
 	def _get_inventory_value(self, cr, uid, quant, context=None):
 		"""
-		Overrides so that inventory value is calculated from qty * product current price; instead of
+		Overrides so that inventory value is calculated from qty * quant.cost; instead of
 		product_id.standard_price
 		"""
-		model_obj = self.pool.get('ir.model.data')
-		product_current_price_obj = self.pool.get('product.current.price')
-		model, price_type_id = model_obj.get_object_reference(cr, uid, 'tbvip', 'tbvip_normal_price_sell')
-		current_price = product_current_price_obj.get_current_price(cr, uid, quant.product_id.id, price_type_id,
-			quant.product_id.uom_id.id, context)
-		return current_price * quant.qty
+		return quant.cost * quant.qty
 
 # ==========================================================================================================================
 

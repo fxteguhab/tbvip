@@ -133,11 +133,18 @@
 			<field name="inherit_id" ref="sale.view_order_tree"/>
 			<field name="arch" type="xml">
 				<field name="date_order" position="after">
+					<field name="branch_id"/>
 					<field name="client_order_ref"/>
 				</field>
 				<field name="amount_total" position="before">
 					<field name="employee_id"/>
 					<field name="commission_total"/>
+				</field>
+				<field name="employee_id" position="after">
+					<field name="branch_id"/>
+				</field>
+				<field name="amount_total" position="after">
+					<field name="shipped_or_taken"/>
 				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="string">Cashier</attribute>
@@ -155,6 +162,10 @@
 						domain="[('date_order','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
 						('date_order','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
 				</search>
+				<filter string="Order Month" position="after">
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+				</filter>
+
 			</field>
 		</record>
 
