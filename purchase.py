@@ -77,6 +77,7 @@ class purchase_order(osv.osv):
 		'delivered_date': lambda *a: (datetime.today() + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'shipped',
+		'payment_term_id': lambda self, cr, uid, ctx=None: self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'account_payment_term_net')[1],
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -147,6 +148,15 @@ class purchase_order(osv.osv):
 		invoice_obj = self.pool.get('account.invoice')
 		for invoice in invoice_obj.browse(cr, uid, [result]):
 			invoice.signal_workflow('invoice_open')
+		return result
+	
+	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
+		result = super(purchase_order, self).onchange_partner_id(cr, uid, ids, partner_id, context)
+		values = result.get('value', False)
+		if values:
+			payment_term_id = values.get('payment_term_id', False)
+			if not payment_term_id:
+				values.pop('payment_term_id')
 		return result
 
 # ==========================================================================================================================
