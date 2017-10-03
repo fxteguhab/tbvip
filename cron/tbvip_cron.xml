@@ -14,8 +14,8 @@
 			<field eval="" name="args" />
 		</record>
 
-		<record forcecreate="True" id="ir_cron_update_product_current_commission" model="ir.cron">
-			<field name="name">Update State Expired for Commision</field>
+		<record forcecreate="True" id="ir_cron_update_state_expired_ccommission" model="ir.cron">
+			<field name="name">Update State Expired Commision</field>
 			<field eval="True" name="active" />
 			<field name="user_id" ref="base.user_root" />
 			<field name="interval_number">1</field>

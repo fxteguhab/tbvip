@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 
 from openerp.osv import osv, fields
 from openerp.tools.translate import _

@@ -9,7 +9,7 @@
 				<form string="Commission" version="7.0">
 					<header>
 						<!-- <button name="test_cron_commission" type="object" string="Cron" class="oe_highlight"/> -->
-						 <button name="test_cron_expired" type="object" string="Cron Expired" class="oe_highlight"/>
+						 <!--<button name="test_cron_expired" type="object" string="Cron Expired" class="oe_highlight"/>-->
 						<button name="activate_commission" type="object" string="Activate Commission" class="oe_highlight"
 								confirm="Are you sure to activate this commission?" states="draft"/>
 						<field name="state" widget="statusbar"/>
