@@ -111,7 +111,7 @@ class commission(osv.osv):
 							com_running_ids = self.search(cr, uid, [
 								('id', 'not in', [commission_ids]),
 								('state', '=', 'running'),
-							], context=context)
+							], order="start_date DESC" , context=context)
 						
 							# Cari apakah terdapat commision line lain untuk product yang pengen di unlink, jika ada maka jangan unlink current commision untuk product itu
 							line_commission_ids = line_commision_product_obj.search(cr, uid, [
@@ -121,16 +121,25 @@ class commission(osv.osv):
 							if len(line_commission_ids) == 0:
 								product_current_commission_obj.unlink(cr, uid,
 									product_current_commission_ids, context=context)
+							else:
+								product_updated_ids = []
+								for commission_running in self.browse(cr, uid, com_running_ids):
+									#Pastikan bahwa current price product selalu yang terbaru, PENTING!
+									for product_line_commission in commission_running.line_product_ids:
+										if product_line.product_template_id.id == product_line_commission.product_template_id.id:
+											#Jika suatu current commission sudah diupdate jangan update lagi, karena sudah menggunakan yang paling baru
+											if len(product_current_commission_ids)>0 and product_line_commission.product_template_id.id not in product_updated_ids:
+												product_current_commission_obj._update_product_current_commission(cr, uid, product_current_commission_ids, product_line_commission, context=context)
+												product_updated_ids.append(product_line_commission.product_template_id.id)
 						else:
 							product_current_commission_obj._update_product_current_commission(cr, uid, product_current_commission_ids, product_line, context=context)
 					
-					# create new current prices with the same template as product line
-					product_with_no_current_commission_ids = product_obj.search(cr, uid, [
-						('product_tmpl_id', '=', product_line.product_template_id.id),
-						('id', 'not in', updated_product_ids),
-					], context=context)
-					
 					if not is_unlink:
+						# create new current prices with the same template as product line
+						product_with_no_current_commission_ids = product_obj.search(cr, uid, [
+							('product_tmpl_id', '=', product_line.product_template_id.id),
+							('id', 'not in', updated_product_ids),
+						], context=context)
 						product_current_commission_obj._create_product_current_commission(cr, uid,
 							product_with_no_current_commission_ids, product_line, context=context)
 						
@@ -146,23 +155,32 @@ class commission(osv.osv):
 						for product_current_commission_id in product_current_commission_obj.browse(cr, uid, product_current_commission_ids):
 							updated_product_ids.append(product_current_commission_id.product_id.id)
 						if is_unlink:
-							commision_ids = self.search(cr, uid, [
-								('id', 'not in', commission_ids),
+							com_running_ids = self.search(cr, uid, [
+								('id', 'not in', [commission_ids]),
 								('state', '=', 'running'),
-							], context=context)
+							], order="start_date DESC" , context=context)
 							
 							# Cari apakah terdapat commision line lain untuk product yang pengen di unlink, jika ada maka jangan unlink current commision untuk product itu
 							line_commission_ids = line_commision_category_obj.search(cr, uid, [
-								('product_tmpl_id.categ_id', '=', product_line.product_category_id.id),
-								('commission_id', 'in', commision_ids),
+								('product_category_id', '=', category_line.product_category_id.id),
+								('commission_id', 'in', com_running_ids),
 							], context=context)
 							if len(line_commission_ids) == 0:
 								product_current_commission_obj.unlink(cr, uid,
 									product_current_commission_ids, context=context)
+							else:
+								category_updated_ids = []
+								for commission_running in self.browse(cr, uid, com_running_ids):
+									#Pastikan bahwa current price product selalu yang terbaru, PENTING!
+									for category_line_commission in commission_running.line_category_ids:
+										if category_line.product_category_id.id == category_line_commission.product_category_id.id:
+											#Jika suatu current commission sudah diupdate jangan update lagi, karena sudah menggunakan yang paling baru
+											if len(product_current_commission_ids)>0 and category_line_commission.product_category_id.id not in category_updated_ids:
+												product_current_commission_obj._update_product_current_commission(cr, uid, product_current_commission_ids, category_line_commission, context=context)
+												category_updated_ids.append(category_line_commission.product_category_id.id)
 						else:
 							product_current_commission_obj._update_product_current_commission(cr, uid,
 								product_current_commission_ids, category_line, context=context)
-							
 					if not is_unlink:
 						# create new current prices with the same category as product line
 						product_with_no_current_commission_ids = product_obj.search(cr, uid, [
