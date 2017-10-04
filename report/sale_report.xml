@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-		<record model="ir.actions.report.xml" id="purchase.report_purchase_quotation">
-			<field name="name">Draft Purchase Order</field>
-		</record>
-
-		<template id="report_purchaseorder_document" inherit_id="purchase.report_purchaseorder_document">
+		<template id="report_saleorder_document" inherit_id="sale.report_saleorder_document">
 			<xpath expr="//div[@class='page']" position="replace">
 				<div class="oe_structure"/>
 				<div class="row">
@@ -13,6 +9,5 @@
 				</div>
 			</xpath>
 		</template>
-
 	</data>
 </openerp>
