@@ -1,5 +1,5 @@
 <openerp>
-	<data>
+	<data noupdate="1">
 		<record model="stock.location" id="stock_location_bonus_usage">
 			<field name="name">Bonus Usage</field>
 			<field name="usage">inventory</field>

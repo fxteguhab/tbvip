@@ -1,5 +1,5 @@
 <openerp>
-	<data>
+	<data noupdate="1">
 
 		<record model="product.category" id="product_category_uncategories">
 			<field name="name">UNCATEGORIES</field>
