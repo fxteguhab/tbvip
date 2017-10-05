@@ -46,7 +46,7 @@
 									<br/><b style="font-size:18px">Nota No. <span t-field="o.bon_number"/></b>
 								</div>
 								<div class="col-xs-4">
-									<b><span t-field="company.city"/></b>, <span t-esc="datetime.datetime.now().strftime('%d-%m-%Y')" />
+									<b><span t-field="company.city"/></b>, <span t-esc="datetime.datetime.strptime(o.date_order, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')" />
 									<br/><br/><b>Kepada Yth,</b>
 									<br/><span t-field="o.partner_id.name"/>
 									<br/><span t-field="o.partner_id.street"/>
