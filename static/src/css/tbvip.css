@@ -11,6 +11,18 @@
 	padding: 16px;
 }
 
+.table th {
+	text-align: center;
+}
+
+.no-margin {
+	margin: 0px;
+}
+
+.no-padding {
+	padding: 0px;
+}
+
 .table > tbody > tr > td.expense_cell {
   border-top: 0 none;
   padding: 0 8px;
