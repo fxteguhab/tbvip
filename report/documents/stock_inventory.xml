@@ -4,47 +4,52 @@
 		<template id="stock.report_inventory">
 			<t t-call="report.html_container">
 				<t t-foreach="docs" t-as="o">
-					<t t-call="report.external_layout">
 						<div class="page">
-
 							<h2>
-								Stock Inventory
+								Stock Opname
 							</h2>
+
+							<div class="row">
+								<div class="col-xs-8">
+									<table>
+										<tr>
+											<td>Tanggal</td>
+											<td> : </td>
+											<td><span t-field="o.date"/></td>
+										</tr>
+										<tr>
+											<td>Expired</td>
+											<td> : </td>
+											<td><span t-field="o.expiration_date"/></td>
+										</tr>
+									</table>
+								</div>
+								<div class="col-xs-4">
+									<table>
+										<tr>
+											<td>Employee</td>
+											<td> : </td>
+											<td><span t-field="o.employee_id"/></td>
+										</tr>
+									</table>
+								</div>
+							</div>
+
 							<table class="table table-condensed">
 								<thead>
 									<tr>
-										<th><strong>Inventory</strong></th>
-										<th><strong>Date</strong></th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>
-											<span t-field="o.name"/>
-										</td>
-										<td>
-											<span t-field="o.date"/>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-							<table class="table table-condensed">
-								<thead>
-									<tr>
-										<th><strong>Location</strong></th>
-										<th><strong>Sublocation</strong></th>
-										<th><strong>Product</strong></th>
-										<th><strong>Production Lot</strong></th>
-										<th><strong>Package</strong></th>
+										<th class="text-left"><strong>No.</strong></th>
+										<th class="text-left"><strong>Product</strong></th>
+										<th class="text-left"><strong>Location</strong></th>
 										<th class="text-right"><strong>Quantity</strong></th>
 									</tr>
 								</thead>
+								<t t-set="i" t-value="0"/>
 								<tr t-foreach="o.line_ids" t-as="line">
-									<td><span t-field="line.location_id"/></td>
-									<td><span t-field="line.sublocation"/></td>
+									<t t-set="i" t-value="i+1"/>
+									<td><span t-esc="i"/></td>
 									<td><span t-field="line.product_id"/></td>
-									<td><span t-field="line.prod_lot_id"/></td>
-									<td><span t-field="line.package_id"/></td>
+									<td><span t-field="line.location_id"/></td>
 									<td class="text-right"><span t-field="line.product_qty"/> <span t-field="line.product_uom_id" groups="product.group_uom"/></td>
 								</tr>
 								<tr>
@@ -68,7 +73,6 @@
 						</div>
 					</t>
 				</t>
-			</t>
 		</template>
 	</data>
 </openerp>

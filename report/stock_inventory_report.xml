@@ -9,5 +9,22 @@
 			name="stock.report_inventory"
 			file="stock.report_inventory"
 		/>
+
+		<record id="paperformat_report_inventory_data" model="report.paperformat">
+			<field name="name">Paper Format for Inventory</field>
+			<field name="format">custom</field>
+			<field name="page_width">139</field>
+			<field name="page_height">203</field>
+			<field name="header_line" eval="False"/>
+			<field name="header_spacing">0</field>
+			<field name="margin_top">8</field>
+			<field name="margin_bottom">8</field>
+			<field name="margin_left">8</field>
+			<field name="margin_right">8</field>
+		</record>
+
+		<record id="stock.action_report_inventory" model="ir.actions.report.xml">
+			<field name="paperformat_id" ref="paperformat_report_inventory_data"/>
+		</record>
 	</data>
 </openerp>
