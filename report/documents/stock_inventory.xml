@@ -5,12 +5,11 @@
 			<t t-call="report.html_container">
 				<t t-foreach="docs" t-as="o">
 						<div class="page">
-							<h2>
-								Stock Opname
-							</h2>
-
 							<div class="row">
 								<div class="col-xs-8">
+									<h4>
+										Stock Opname
+									</h4>
 									<table>
 										<tr>
 											<td>Tanggal</td>
