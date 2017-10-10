@@ -1,0 +1,46 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="view_koreksi_bon_form">
+			<field name="name">koreksi.bon.form</field>
+			<field name="model">koreksi.bon</field>
+			<field name="arch" type="xml">
+				<form string="Koreksi Bon">
+					<group>
+						<field name="sale_order_id" on_change="onchange_sale_order_id(sale_order_id)"/>
+					</group>
+					<group>
+						<group>
+							<field name="branch_id"/>
+							<field name="bon_number"/>
+							<field name="partner_id"/>
+							<field name="price_type_id"/>
+						</group>
+						<group>
+							<field name="date_order"/>
+							<field name="employee_id"/>
+							<field name="shipped_or_taken"/>
+							<field name="client_order_ref"/>
+						</group>
+					</group>
+					<field name="order_line">
+						<tree editable="bottom">
+							<field name="state" invisible="1"/>
+							<field name="product_id" />
+							<field name="price_type_id" />
+							<field name="product_uom_qty" />
+							<field name="product_uom" />
+							<field name="price_unit" />
+							<field name="discount_string" />
+							<field name="price_subtotal" />
+						</tree>
+					</field>
+					<footer>
+						<button name="action_save_koreksi_bon" type="object" string="Save" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+	</data>
+</openerp>
