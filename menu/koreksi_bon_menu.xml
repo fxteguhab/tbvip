@@ -10,11 +10,18 @@
 			<field name="target">new</field>
 		</record>
 
+		<record id="action_koreksi_bon_log" model="ir.actions.act_window">
+			<field name="name">Log Koreksi</field>
+			<field name="res_model">koreksi.bon.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
 		<menuitem id="menu_koreksi_bon" name="Koreksi Bon" parent="base.menu_base_partner" sequence="9"/>
 
 		<menuitem sequence="8" id="menu_koreksi_bon_koreksi_bon" parent="menu_koreksi_bon"
 				action="action_koreksi_bon"/>
 		<menuitem sequence="8" id="menu_koreksi_bon_log" parent="menu_koreksi_bon"
-				action="action_koreksi_bon"/>
+				action="action_koreksi_bon_log"/>
 	</data>
 </openerp>

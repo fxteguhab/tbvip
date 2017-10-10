@@ -67,10 +67,11 @@ class sale_order(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for sale_order_data in self.browse(cr, uid, ids):
-			bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
-			bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
-			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
-			vals['name'] = name
+			if vals.get('name', False):
+				bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
+				bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
+				name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
+				vals['name'] = name
 			
 			if vals.get('bon_number', False) or vals.get('date_order', False):
 				bon_number = sale_order_data.bon_number
@@ -127,6 +128,7 @@ class sale_order(osv.osv):
 		branch_id = user_data.branch_id.id or None
 		bon_book_same_number_ids = self.search(cr, uid, [
 			('branch_id', '=', branch_id),
+			('state', '!=', 'cancel'),
 			('bon_number', '=', bon_number),
 			('date_order', '>=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 00:00:00")),
 			('date_order', '<=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 23:59:59")),

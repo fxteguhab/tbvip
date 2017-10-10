@@ -42,5 +42,36 @@
 				</form>
 			</field>
 		</record>
+
+		<record model="ir.ui.view" id="view_koreksi_bon_log_form">
+			<field name="name">koreksi.bon.log.form</field>
+			<field name="model">koreksi.bon.log</field>
+			<field name="arch" type="xml">
+				<form string="Log Koreksi Bon"  create="false" edit="false" delete="false">
+					<group>
+						<group>
+							<field name="create_uid" string="Corrected By"/>
+							<field name="old_sale_order_id"/>
+						</group>
+						<group>
+							<field name="create_date" string="Corrected Date"/>
+							<field name="new_sale_order_id"/>
+						</group>
+					</group>
+				</form>
+			</field>
+
+		</record><record model="ir.ui.view" id="view_koreksi_bon_log_tree">
+			<field name="name">koreksi.bon.log.tree</field>
+			<field name="model">koreksi.bon.log</field>
+			<field name="arch" type="xml">
+				<tree create="false" edit="false" delete="false">
+					<field name="create_uid" string="Corrected By"/>
+					<field name="create_date" string="Corrected Date"/>
+					<field name="old_sale_order_id"/>
+					<field name="new_sale_order_id"/>
+				</tree>
+			</field>
+		</record>
 	</data>
 </openerp>
