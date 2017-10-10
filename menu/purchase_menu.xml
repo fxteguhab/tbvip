@@ -16,7 +16,6 @@
 				'search_default_filter_date_order_today':1,
 				'search_default_groupby_day':1,
 			}"/>
-			<field name="domain">[('state','=','approved')]</field>
 		</record>
 	</data>
 </openerp>
