@@ -200,7 +200,9 @@ class sale_order(osv.osv):
 	def action_return(self, cr, uid, ids, context=None):
 		for id in ids:
 			delivery = self.action_view_delivery(cr, uid, [id], context=context)
+			invoice = self.action_view_invoice(cr, uid, [id], context=context)
 			stock_picking_id = delivery['res_id']
+			invoice_id = invoice['res_id']
 			if stock_picking_id:
 				# stock_return_picking_obj = self.pool.get('stock.return.picking')
 				return {
@@ -214,8 +216,10 @@ class sale_order(osv.osv):
 					"key2": "client_action_multi",
 					"multi": "True",
 					'context': {
-						'active_id': stock_picking_id,
-						'active_ids': [stock_picking_id]
+						'stock_picking_id': stock_picking_id,
+						'stock_picking_ids': [stock_picking_id],
+						'invoice_id' : invoice_id,
+						'invoice_ids' : [invoice_id],
 					}
 				}
 
