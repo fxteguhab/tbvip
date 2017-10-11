@@ -50,11 +50,11 @@
 				<form string="Log Koreksi Bon"  create="false" edit="false" delete="false">
 					<group>
 						<group>
+							<field name="create_date" string="Corrected Date"/>
 							<field name="create_uid" string="Corrected By"/>
-							<field name="old_sale_order_id"/>
 						</group>
 						<group>
-							<field name="create_date" string="Corrected Date"/>
+							<field name="old_sale_order_id"/>
 							<field name="new_sale_order_id"/>
 						</group>
 					</group>

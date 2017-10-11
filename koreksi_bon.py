@@ -65,6 +65,20 @@ class koreksi_bon(osv.osv_memory):
 			sale_order_obj = self.pool.get('sale.order')
 			koreksi_bon_log_obj = self.pool.get('koreksi.bon.log')
 			
+			order_lines = []
+			for order_line in koreksi_bon.sale_order_id.order_line:
+				order_lines.append([0, False,{
+					'name': 'name',
+					'state': order_line.state,
+					'product_id': order_line.product_id.id,
+					'price_type_id': order_line.price_type_id.id,
+					'product_uom_qty': order_line.product_uom_qty,
+					'product_uom': order_line.product_uom.id,
+					'price_unit': order_line.price_unit,
+					'discount_string': order_line.discount_string,
+					'price_subtotal': order_line.price_subtotal,
+				}])
+			
 			new_sale_order_id = sale_order_obj.create(cr, uid, {
 				'name': 'Koreksi ' + koreksi_bon.sale_order_id.name,
 				'branch_id': koreksi_bon.sale_order_id.branch_id.id,
@@ -76,6 +90,7 @@ class koreksi_bon(osv.osv_memory):
 				'shipped_or_taken': koreksi_bon.sale_order_id.shipped_or_taken,
 				'client_order_ref': koreksi_bon.sale_order_id.client_order_ref,
 				'customer_address': koreksi_bon.sale_order_id.customer_address,
+				'order_line': order_lines,
 			})
 			
 			koreksi_bon_log_obj.create(cr, uid, {
