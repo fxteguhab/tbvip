@@ -1,7 +1,17 @@
 from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
 import time
-from openerp.tools.translate import _
+from openerp import models, api, _
+from openerp import fields as hole
+
+TYPE2REFUND = {
+	'out_invoice': 'out_refund',        # Customer Invoice
+	'in_invoice': 'in_refund',          # Supplier Invoice
+	'out_refund': 'out_invoice',        # Customer Refund
+	'in_refund': 'in_invoice',          # Supplier Refund
+}
+
+MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
 
 # ==========================================================================================================================
 
@@ -21,24 +31,24 @@ class sale_order_return_line(osv.osv_memory):
 
 # ==========================================================================================================================
 	
-class sale_order_return(osv.osv_memory):
+class sale_order_return(models.TransientModel):
 	_name = 'sale.order.return'
 	_description = 'Return Sale Order'
 	
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 		
-	_columns = {
-		#return stock
-		'product_return_moves': fields.one2many('sale.order.return.line', 'sale_order_return_id', 'Moves'),
-		'move_dest_exists': fields.boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed"),
-		
-		#refund invoice
-		'date': fields.date('Date'),
-		'period': fields.many2one('account.period', 'Force period'),
-		'journal_id': fields.many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.'),
-		'description': fields.char('Reason', required=True),
-		'filter_refund': fields.selection([('refund', 'Create a draft refund'), ('cancel', 'Cancel: create refund and reconcile'),('modify', 'Modify: create refund, reconcile and create a new draft invoice')], "Refund Method", required=True, help='Refund base on this type. You can not Modify and Cancel if the invoice is already reconciled'),
-	}
+
+	#return stock
+	product_return_moves = hole.One2many('sale.order.return.line', 'sale_order_return_id', 'Moves')
+	move_dest_exists= hole.Boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed")
+	
+	#refund invoice
+	date = hole.Date('Date')
+	period = hole.Many2one('account.period', 'Force period')
+	journal_id = hole.Many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.')
+	description = hole.Char('Reason', required=True)
+	filter_refund = hole.Selection([('refund', 'Create a draft refund'), ('cancel', 'Cancel: create refund and reconcile'),('modify', 'Modify: create refund, reconcile and create a new draft invoice')], "Refund Method", required=True, help='Refund base on this type. You can not Modify and Cancel if the invoice is already reconciled')
+	
 	
 	def _get_journal(self, cr, uid, context=None):
 		obj_journal = self.pool.get('account.journal')
@@ -219,7 +229,7 @@ class sale_order_return(osv.osv_memory):
 		if context is None:
 			context = {}
 		
-		for form in self.browse(cr, uid, ids, mode, context=context):
+		for form in self.browse(cr, uid, ids, context=context):
 			created_inv = []
 			company = res_users_obj.browse(cr, uid, uid, context=context).company_id
 			journal_id = form.journal_id.id
@@ -265,7 +275,15 @@ class sale_order_return(osv.osv_memory):
 					raise osv.except_osv(_('Insufficient Data!'), \
 						_('No period found on the invoice.'))
 				
-				refund_id = inv_obj.refund(cr, uid, [inv.id], date, period, description, journal_id, context=context)
+				#edit line akun piutang
+				dict_line = {}
+				
+				for return_line in form.product_return_moves:
+					dict_line[return_line.product_id.id] = {'quantity' : return_line.quantity,
+															'price_subtotal': return_line.amount_price,
+															'price_unit': return_line.amount_price/return_line.quantity}
+								
+				refund_id = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
 				inv_obj.write(cr, uid, [refund.id], {'date_due': date,
 					'check_total': inv.check_total})
@@ -336,22 +354,100 @@ class sale_order_return(osv.osv_memory):
 			
 			invoice_domain = eval(result['domain'])
 			invoice_domain.append(('id', 'in', created_inv))
-			
-			#edit line akun piutang
-			return_line = self.read(cr, uid, ids, ['product_return_moves'],context=context)[0]['product_return_moves']
-			
+					
 			result['domain'] = invoice_domain
 			return result
 		
-	def _create_invoice_refund(self, cr, uid, ids, date=None, period_id=None, description=None, journal_id=None):
-		new_invoices = []
-		inv_obj = self.pool.get('account.invoice')
-		for invoice in inv_obj.browse(cr, uid, ids):
+	@api.multi
+	@api.returns('self')
+	def _create_invoice_refund(self, date=None, period_id=None, description=None, journal_id=None, invoice_ids = [], retur_line = {}):
+		inv_obj = self.env['account.invoice']
+		new_invoices = inv_obj.browse()
+		for invoice in inv_obj.browse(invoice_ids):
 			# create the new invoice
 			values = self._prepare_refund(invoice, date=date, period_id=period_id,
-				description=description, journal_id=journal_id)
+				description=description, journal_id=journal_id, retur_line = retur_line)
 			new_invoices += inv_obj.create(values)
 		return new_invoices
+	
+	@api.model
+	def _prepare_refund(self, invoice, date=None, period_id=None, description=None, journal_id=None, retur_line = {}):
+		""" Diambil dari modul account_invoice
+		"""
+		values = {}
+		for field in ['name', 'reference', 'comment', 'date_due', 'partner_id', 'company_id',
+			'account_id', 'currency_id', 'payment_term', 'user_id', 'fiscal_position']:
+			if invoice._fields[field].type == 'many2one':
+				values[field] = invoice[field].id
+			else:
+				values[field] = invoice[field] or False
+		
+		values['invoice_line'] = self._refund_cleanup_lines(invoice.invoice_line, retur_line)
+		
+		tax_lines = filter(lambda l: l.manual, invoice.tax_line)
+		values['tax_line'] = self._refund_cleanup_lines(tax_lines)
+		
+		if journal_id:
+			journal = self.env['account.journal'].browse(journal_id)
+		elif invoice['type'] == 'in_invoice':
+			journal = self.env['account.journal'].search([('type', '=', 'purchase_refund')], limit=1)
+		else:
+			journal = self.env['account.journal'].search([('type', '=', 'sale_refund')], limit=1)
+		values['journal_id'] = journal.id
+		
+		values['type'] = TYPE2REFUND[invoice['type']]
+		values['date_invoice'] = date or fields.Date.context_today(invoice)
+		values['state'] = 'draft'
+		values['number'] = False
+		values['origin'] = invoice.number
+		
+		if period_id:
+			values['period_id'] = period_id
+		if description:
+			values['name'] = description
+		return values
+	
+	@api.model
+	def _refund_cleanup_lines(self, lines, retur_line = False):
+		""" Convert records to dict of values suitable for one2many line creation
+	
+			:param recordset lines: records to convert
+			:return: list of command tuple for one2many line creation [(0, 0, dict of valueis), ...]
+		"""
+		result = []
+		for line in lines:
+			values = {}
+			if retur_line:
+				if line.product_id.id in retur_line:
+					for name, field in line._fields.iteritems():
+						if name in MAGIC_COLUMNS:
+							continue
+						elif field.type == 'many2one':
+							values[name] = line[name].id
+						elif field.type not in ['many2many', 'one2many']:
+							if name == 'quantity':
+								values[name] = retur_line[line.product_id.id]['quantity']
+							elif name == 'price_unit':
+								values[name] = retur_line[line.product_id.id]['price_unit']
+							elif name == 'price_subtotal':
+								values[name] = retur_line[line.product_id.id]['price_subtotal']
+							else:
+								values[name] = line[name]
+						elif name == 'invoice_line_tax_id':
+							values[name] = [(6, 0, line[name].ids)]
+					
+			else:
+				for name, field in line._fields.iteritems():
+					if name in MAGIC_COLUMNS:
+						continue
+					elif field.type == 'many2one':
+						values[name] = line[name].id
+					elif field.type not in ['many2many', 'one2many']:
+						values[name] = line[name]
+					elif name == 'invoice_line_tax_id':
+						values[name] = [(6, 0, line[name].ids)]
+			result.append((0, 0, values))
+		return result
 
 	def create_returns(self, cr, uid, ids, context=None):
 		"""
