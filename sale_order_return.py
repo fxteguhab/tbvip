@@ -293,16 +293,19 @@ class sale_order_return(models.TransientModel):
 				if mode in ('cancel', 'modify'):
 					movelines = inv.move_id.line_id
 					to_reconcile_ids = {}
-					for line in movelines:
-						if line.account_id.id == inv.account_id.id:
-							to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
-						if line.reconcile_id:
-							line.reconcile_id.unlink()
+					# for line in movelines:
+					# 	if line.account_id.id == inv.account_id.id:
+					# 		to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
+					# 	if line.reconcile_id:
+					# 		line.reconcile_id.unlink()
 					refund.signal_workflow('invoice_open')
 					refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
 					for tmpline in  refund.move_id.line_id:
 						if tmpline.account_id.id == inv.account_id.id:
-							to_reconcile_ids[tmpline.account_id.id].append(tmpline.id)
+							if not to_reconcile_ids.get(tmpline.account_id.id, False):
+								to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
+							else:
+								to_reconcile_ids[tmpline.account_id.id].append(tmpline.id)
 					for account in to_reconcile_ids:
 						account_m_line_obj.reconcile(cr, uid, to_reconcile_ids[account],
 							writeoff_period_id=period,
