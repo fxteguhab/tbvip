@@ -252,9 +252,6 @@ class koreksi_bon_log(osv.osv):
 class koreksi_bon_sale_order_line(osv.osv_memory):
 	_name = "koreksi.bon.sale.order.line"
 	
-	def _amount_line(self, cr, uid, ids, field_name, arg, context=None):
-		return self.pool.get('sale.order.line')._amount_line(cr, uid, ids, field_name, arg, context)
-	
 	_columns = {
 		'koreksi_bon_id': fields.many2one('koreksi.bon', string="Koreksi Bon"),
 		'name': fields.text('Description', required=True),
@@ -264,7 +261,7 @@ class koreksi_bon_sale_order_line(osv.osv_memory):
 		'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True),
 		'price_unit': fields.float('Unit Price', required=True, digits_compute=dp.get_precision('Product Price')),
 		'discount_string': fields.char('Discount'),
-		'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute=dp.get_precision('Account')),
+		'price_subtotal': fields.float('Subtotal', digits_compute=dp.get_precision('Account')),
 		
 		'product_uos_qty': fields.float('Quantity (UoS)', digits_compute= dp.get_precision('Product UoS')),
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),

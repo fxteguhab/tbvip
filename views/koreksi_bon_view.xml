@@ -27,8 +27,8 @@
 						</group>
 					</group>
 					<group>
-						<field name="product_return_moves"/>
-						<field name="move_dest_exists"/>
+						<field name="product_return_moves" invisible="1"/>
+						<field name="move_dest_exists" invisible="1"/>
 					</group>
 					<field name="order_line">
 						<tree editable="bottom">
