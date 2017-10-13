@@ -56,8 +56,6 @@ class sale_order_return(models.TransientModel):
 	period = hole.Many2one('account.period', 'Force period')
 	journal_id = hole.Many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.')
 	description = hole.Char('Reason', required=True)
-	filter_refund = hole.Selection([('refund', 'Create a draft refund'), ('cancel', 'Cancel: create refund and reconcile'),('modify', 'Modify: create refund, reconcile and create a new draft invoice')], "Refund Method", required=True, help='Refund base on this type. You can not Modify and Cancel if the invoice is already reconciled')
-	
 	
 	def _get_journal(self, cr, uid, context=None):
 		"""
@@ -79,7 +77,6 @@ class sale_order_return(models.TransientModel):
 	_defaults = {
 		'date': lambda *a: time.strftime('%Y-%m-%d'),
 		'journal_id': _get_journal,
-		'filter_refund': 'cancel',
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
@@ -230,7 +227,7 @@ class sale_order_return(models.TransientModel):
 		
 		return new_picking, pick_type_id
 	
-	def compute_refund(self, cr, uid, ids, mode='refund', context=None):
+	def compute_refund(self, cr, uid, ids, context=None):
 		"""
 		 Fungsi ini didapat dari account_invoice_refund dan dimodifikasi
 		"""
@@ -248,9 +245,9 @@ class sale_order_return(models.TransientModel):
 			journal_id = form.journal_id.id
 			for inv in inv_obj.browse(cr, uid, context.get('invoice_ids'), context=context):
 				if inv.state in ['draft', 'proforma2', 'cancel']:
-					raise osv.except_osv(_('Error!'), _('Cannot %s draft/proforma/cancel invoice.') % (mode))
-				if inv.reconciled and mode in ('cancel', 'modify'):
-					raise osv.except_osv(_('Error!'), _('Cannot %s invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.') % (mode))
+					raise osv.except_osv(_('Error!'), _('Cannot cancel draft/proforma/cancel invoice.'))
+				if inv.reconciled:
+					raise osv.except_osv(_('Error!'), _('Cannot cancel invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.'))
 				if form.period.id:
 					period = form.period.id
 				else:
@@ -308,36 +305,35 @@ class sale_order_return(models.TransientModel):
 				
 				created_inv.append(refund_id[0])
 				created_inv.append(refund_id_copy[0])
-				if mode in ('cancel', 'modify'):
-					movelines = inv.move_id.line_id
-					to_reconcile_ids = {}
-					
-				# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal
-				# Invoice refund baru di reooncile
-					# for line in movelines:
-					# 	if line.account_id.id == inv.account_id.id:
-					# 		to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
-					# 	if line.reconcile_id:
-					# 		line.reconcile_id.unlink()
-					refund.signal_workflow('invoice_open')
-					refund_copy.signal_workflow('invoice_open')
-					refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
-					refund_copy = inv_obj.browse(cr, uid, refund_id_copy[0], context=context)
-					
-					temp_reconcile_ids = refund.move_id.line_id.ids
-					temp_reconcile_ids.extend(refund_copy.move_id.line_id.ids)
-					for tmpline in account_m_line_obj.browse(cr, uid, temp_reconcile_ids):
-						if tmpline.account_id.id == inv.account_id.id:
-							if not to_reconcile_ids.get(tmpline.account_id.id, False):
-								to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
-							else:
-								to_reconcile_ids[tmpline.account_id.id].append(tmpline.id)
-					for account in to_reconcile_ids:
-						account_m_line_obj.reconcile(cr, uid, to_reconcile_ids[account],
-							writeoff_period_id=period,
-							writeoff_journal_id = inv.journal_id.id,
-							writeoff_acc_id=inv.account_id.id
-						)
+				movelines = inv.move_id.line_id
+				to_reconcile_ids = {}
+				
+			# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal
+			# Invoice refund baru di reooncile
+				# for line in movelines:
+				# 	if line.account_id.id == inv.account_id.id:
+				# 		to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
+				# 	if line.reconcile_id:
+				# 		line.reconcile_id.unlink()
+				refund.signal_workflow('invoice_open')
+				refund_copy.signal_workflow('invoice_open')
+				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
+				refund_copy = inv_obj.browse(cr, uid, refund_id_copy[0], context=context)
+				
+				temp_reconcile_ids = refund.move_id.line_id.ids
+				temp_reconcile_ids.extend(refund_copy.move_id.line_id.ids)
+				for tmpline in account_m_line_obj.browse(cr, uid, temp_reconcile_ids):
+					if tmpline.account_id.id == inv.account_id.id:
+						if not to_reconcile_ids.get(tmpline.account_id.id, False):
+							to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
+						else:
+							to_reconcile_ids[tmpline.account_id.id].append(tmpline.id)
+				for account in to_reconcile_ids:
+					account_m_line_obj.reconcile(cr, uid, to_reconcile_ids[account],
+						writeoff_period_id=period,
+						writeoff_journal_id = inv.journal_id.id,
+						writeoff_acc_id=inv.account_id.id
+					)
 			
 			xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
 					 (inv.type == 'in_refund') and 'action_invoice_tree2' or \
@@ -481,7 +477,6 @@ class sale_order_return(models.TransientModel):
 		# }
 
 		#refund invoice
-		data_refund = self.read(cr, uid, ids, ['filter_refund'],context=context)[0]['filter_refund']
-		form_customer_refund = self.compute_refund(cr, uid, ids, data_refund, context=context)
+		form_customer_refund = self.compute_refund(cr, uid, ids, context=context)
 		
 		return form_customer_refund
