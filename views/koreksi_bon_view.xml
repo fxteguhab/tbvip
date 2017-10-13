@@ -1,0 +1,120 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="view_koreksi_bon_form">
+			<field name="name">koreksi.bon.form</field>
+			<field name="model">koreksi.bon</field>
+			<field name="arch" type="xml">
+				<form string="Koreksi Bon">
+					<group>
+						<field name="sale_order_id" on_change="onchange_sale_order_id(sale_order_id)"/>
+					</group>
+					<group>
+						<group>
+							<field name="branch_id"/>
+							<field name="bon_number"/>
+							<field name="partner_id"/>
+							<field name="price_type_id"/>
+						</group>
+						<group>
+							<field name="date_order"/>
+							<field name="employee_id"/>
+							<field name="shipped_or_taken"/>
+							<field name="client_order_ref"/>
+
+							<field name="pricelist_id" invisible="1"/>
+							<field name="fiscal_position" invisible="1"/>
+							<field name="warehouse_id" invisible="1"/>
+						</group>
+					</group>
+					<group>
+						<field name="product_return_moves"/>
+						<field name="move_dest_exists"/>
+					</group>
+					<field name="order_line">
+						<tree editable="bottom">
+							<field name="product_id"
+									on_change="onchange_product_id_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+									product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+									product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+									parent.price_type_id, price_type_id, parent.sale_order_id, context)"/>
+							<field name="price_type_id"
+									on_change="onchange_product_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+									product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+									product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+									parent.price_type_id, price_type_id, context)"/>
+							<field name="product_uom_qty"
+									on_change="onchange_product_uom_qty_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+									product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order, product_packaging,
+									parent.fiscal_position, False, parent.warehouse_id, price_unit, discount_string, context)"/>
+							<field name="product_uom"
+									on_change="onchange_product_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
+									product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
+									product_packaging, parent.fiscal_position, False, parent.warehouse_id,
+									parent.price_type_id, price_type_id, context)"/>
+							<field name="price_unit"
+									on_change="onchange_order_line(product_uom_qty, price_unit, product_uom, product_id, discount_string)" />
+							<field name="discount_string"
+									on_change="onchange_order_line(product_uom_qty, price_unit, product_uom, product_id, discount_string)"
+									groups="purchase_sale_discount.group_purchase_sale_discount_discount_on_sale"/>
+							<field name="price_subtotal" readonly="1"/>
+
+							<!-- Not important part -->
+							<field name="name" invisible="1"/>
+							<field name="product_packaging" invisible="1"/>
+							<field name="product_uos_qty" groups="product.group_uos" invisible="1"/>
+						</tree>
+					</field>
+					<footer>
+						<button name="action_save_koreksi_bon" type="object" string="Save" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_koreksi_bon_log_form">
+			<field name="name">koreksi.bon.log.form</field>
+			<field name="model">koreksi.bon.log</field>
+			<field name="arch" type="xml">
+				<form string="Log Koreksi Bon"  create="false" edit="false" delete="false">
+					<group>
+						<group>
+							<field name="create_date" string="Corrected Date"/>
+							<field name="create_uid" string="Corrected By"/>
+						</group>
+						<group>
+							<field name="old_sale_order_id"/>
+							<field name="new_sale_order_id"/>
+						</group>
+					</group>
+				</form>
+			</field>
+
+		</record><record model="ir.ui.view" id="view_koreksi_bon_log_tree">
+			<field name="name">koreksi.bon.log.tree</field>
+			<field name="model">koreksi.bon.log</field>
+			<field name="arch" type="xml">
+				<tree create="false" edit="false" delete="false">
+					<field name="create_uid" string="Corrected By"/>
+					<field name="create_date" string="Corrected Date"/>
+					<field name="old_sale_order_id"/>
+					<field name="new_sale_order_id"/>
+				</tree>
+			</field>
+		</record>
+
+
+		<record id="koreksi_bon_return_line_tree" model="ir.ui.view">
+			<field name="name">koreksi.bon.return.picking.line.tree</field>
+			<field name="model">koreksi.bon.return.picking.line</field>
+			<field name="arch" type="xml">
+				<tree string="Product Moves">
+					<field name="product_id" />
+					<field name="lot_id" groups="stock.group_production_lot"/>
+					<field name="quantity" />
+				</tree>
+			</field>
+		</record>
+	</data>
+</openerp>

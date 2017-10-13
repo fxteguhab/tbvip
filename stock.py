@@ -326,6 +326,13 @@ class stock_move(osv.osv):
 			'state': 'requested'
 		})
 		return result
+	
+	def get_price_unit(self, cr, uid, move, context=None):
+		""" Returns the unit price to store on the quant """
+		if move.purchase_line_id:
+			return move.purchase_line_id.price_unit_nett
+		
+		return super(stock_move, self).get_price_unit(cr, uid, move, context=context)
 
 # ==========================================================================================================================
 

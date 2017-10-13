@@ -22,6 +22,7 @@ class sale_order(osv.osv):
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
 		'bon_number': fields.char('Bon Number', required=True),
+		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
@@ -59,6 +60,7 @@ class sale_order(osv.osv):
 			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
 			if bon_book:
 				vals.update({
+					'bon_book_id': bon_book.id,
 					'employee_id': bon_book.employee_id.id
 				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
@@ -67,10 +69,28 @@ class sale_order(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for sale_order_data in self.browse(cr, uid, ids):
-			bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
-			bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
-			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
-			vals['name'] = name
+			if vals.get('name', False):
+				pass
+			else:
+				bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
+				bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
+				name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
+				if 'Koreksi' not in sale_order_data.name:
+					vals['name'] = name
+			
+			# Kalau SO di cancel, hapus used number tersebut dari bon book nya
+			if vals.get('state', False) == 'cancel':
+				bon_book_obj = self.pool.get('tbvip.bon.book')
+				bon_book = bon_book_obj.browse(cr, uid, [sale_order_data.bon_book_id.id])
+				if bon_book.used_numbers:
+					used_numbers = bon_book.used_numbers.split(', ')
+					new_used_numbers = ''
+					for used_number in used_numbers:
+						if used_number != bon_number:
+							new_used_numbers += used_number + ', '
+					bon_book_obj.write(cr, uid, bon_book.id, {
+						'used_numbers': new_used_numbers
+					})
 			
 			if vals.get('bon_number', False) or vals.get('date_order', False):
 				bon_number = sale_order_data.bon_number
@@ -82,6 +102,7 @@ class sale_order(osv.osv):
 				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
 				if bon_book:
 					vals.update({
+						'bon_book_id': bon_book.id,
 						'employee_id': bon_book.employee_id.id
 					})
 			result = super(sale_order, self).write(cr, uid, sale_order_data.id, vals, context)
@@ -127,6 +148,7 @@ class sale_order(osv.osv):
 		branch_id = user_data.branch_id.id or None
 		bon_book_same_number_ids = self.search(cr, uid, [
 			('branch_id', '=', branch_id),
+			('state', '!=', 'cancel'),
 			('bon_number', '=', bon_number),
 			('date_order', '>=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 00:00:00")),
 			('date_order', '<=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 23:59:59")),
@@ -378,7 +400,7 @@ class sale_order_line(osv.osv):
 	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist, product, qty=0,
 			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
-			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+			warehouse_id=False, parent_price_type_id=False, price_type_id=False, sale_order_id=None, context=None):
 		result = self.onchange_product_tbvip(cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)
@@ -386,6 +408,10 @@ class sale_order_line(osv.osv):
 			product_obj = self.pool.get('product.product')
 			product_browsed = product_obj.browse(cr, uid, product)
 			result['value']['product_uom'] = product_browsed.uom_id.id
+		
+		# koreksi bon
+		if sale_order_id:
+			result['value']['order_id'] = sale_order_id
 		return result
 	
 	def onchange_product_tbvip(self, cr, uid, ids, pricelist, product, qty=0,
