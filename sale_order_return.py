@@ -1,3 +1,13 @@
+##############################################################################
+#
+#    Kelas ini merupakan gabungan dari modul account - account_invoice_refund.py,
+# 	 modul stock - stock_return_picking.py, dan modul account - account_invoice.py
+#
+#    Kelas ini menggabungkan fungsi-fungsi dan field-field dari account_invoice_refund.py,
+# 	 stock_return_picking.py, dan account_invoice dengan memodifikasi beberapa fungsi
+#
+##############################################################################
+
 from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
 import time
@@ -36,8 +46,7 @@ class sale_order_return(models.TransientModel):
 	_description = 'Return Sale Order'
 	
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
-		
-
+	
 	#return stock
 	product_return_moves = hole.One2many('sale.order.return.line', 'sale_order_return_id', 'Moves')
 	move_dest_exists= hole.Boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed")
@@ -51,6 +60,9 @@ class sale_order_return(models.TransientModel):
 	
 	
 	def _get_journal(self, cr, uid, context=None):
+		"""
+		Fungsi ini didapat dari account_invoice_refund tanpa ada perubahan fungsi
+		"""
 		obj_journal = self.pool.get('account.journal')
 		user_obj = self.pool.get('res.users')
 		if context is None:
@@ -73,6 +85,9 @@ class sale_order_return(models.TransientModel):
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
+		"""
+		Fungsi ini didapat dari account_invoice_refund tanpa ada perubahan fungsi
+		"""
 		journal_obj = self.pool.get('account.journal')
 		user_obj = self.pool.get('res.users')
 		# remove the entry with key 'form_view_ref', otherwise fields_view_get crashes
@@ -89,13 +104,7 @@ class sale_order_return(models.TransientModel):
 	
 	def default_get(self, cr, uid, fields, context=None):
 		"""
-		 To get default values for the object.
-		 @param self: The object pointer.
-		 @param cr: A database cursor
-		 @param uid: ID of the user currently logged in
-		 @param fields: List of fields for which we want default values
-		 @param context: A standard dictionary
-		 @return: A dictionary with default values for all field in ``fields``
+		 Fungsi ini didapat dari stock_return_picking tanpa ada perubahan fungsi
 		"""
 		result1 = []
 		if context is None:
@@ -137,6 +146,9 @@ class sale_order_return(models.TransientModel):
 # FUNCTION ------------------------------------------------------------------------------------------------------------------
 
 	def _create_returns(self, cr, uid, ids, context=None):
+		"""
+		 Fungsi ini didapat dari stock_return_picking dan dimodifikasi
+		"""
 		if context is None:
 			context = {}
 		record_id = context and context.get('stock_picking_id', False) or False
@@ -209,7 +221,7 @@ class sale_order_return(models.TransientModel):
 		pick_obj.action_confirm(cr, uid, [new_picking], context=context)
 		pick_obj.action_assign(cr, uid, [new_picking], context)
 		
-	# Modify to make state done
+	# Modify to make state done (stock transferred)
 		pop_up = pick_obj.do_enter_transfer_details(cr, uid, [new_picking], context)
 		if pop_up:
 			stock_transfer_detail_id = pop_up['res_id']
@@ -219,12 +231,13 @@ class sale_order_return(models.TransientModel):
 		return new_picking, pick_type_id
 	
 	def compute_refund(self, cr, uid, ids, mode='refund', context=None):
+		"""
+		 Fungsi ini didapat dari account_invoice_refund dan dimodifikasi
+		"""
 		inv_obj = self.pool.get('account.invoice')
 		account_m_line_obj = self.pool.get('account.move.line')
 		mod_obj = self.pool.get('ir.model.data')
 		act_obj = self.pool.get('ir.actions.act_window')
-		inv_tax_obj = self.pool.get('account.invoice.tax')
-		inv_line_obj = self.pool.get('account.invoice.line')
 		res_users_obj = self.pool.get('res.users')
 		if context is None:
 			context = {}
@@ -275,32 +288,45 @@ class sale_order_return(models.TransientModel):
 					raise osv.except_osv(_('Insufficient Data!'), \
 						_('No period found on the invoice.'))
 				
-				#edit line akun piutang
 				dict_line = {}
-				
+			# bikin dictionary retur_line untuk fungsi _refund_cleanup_lines
 				for return_line in form.product_return_moves:
 					dict_line[return_line.product_id.id] = {'quantity' : return_line.quantity,
 															'price_subtotal': return_line.amount_price,
 															'price_unit': return_line.amount_price/return_line.quantity}
 								
+			#  Bikin Invoice refund 2x, dengan demikian pada awalnya duit yang dibalikkan 2x dari harusnya. Hal ini dilakukan karena
+			#  tidak bisa mengedit jumlah yang harus dibayarkan dari invoice yang akan direfund, sehingga jumlah yang akan dibayarkan tetap.
+			#  Dengan demikian jumlah uang yang kelebihan menjadi balance lagi ketika invoice sudah lunas.
 				refund_id = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
+				refund_id_copy = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
-				inv_obj.write(cr, uid, [refund.id], {'date_due': date,
+				refund_copy = inv_obj.browse(cr, uid, refund_id_copy[0], context=context)
+				inv_obj.write(cr, uid, [refund.id, refund_copy.id], {'date_due': date,
 					'check_total': inv.check_total})
-				inv_obj.button_compute(cr, uid, refund_id)
+				inv_obj.button_compute(cr, uid, refund_id.extend(refund_id_copy))
 				
 				created_inv.append(refund_id[0])
+				created_inv.append(refund_id_copy[0])
 				if mode in ('cancel', 'modify'):
 					movelines = inv.move_id.line_id
 					to_reconcile_ids = {}
+					
+				# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal
+				# Invoice refund baru di reooncile
 					# for line in movelines:
 					# 	if line.account_id.id == inv.account_id.id:
 					# 		to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
 					# 	if line.reconcile_id:
 					# 		line.reconcile_id.unlink()
 					refund.signal_workflow('invoice_open')
+					refund_copy.signal_workflow('invoice_open')
 					refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
-					for tmpline in  refund.move_id.line_id:
+					refund_copy = inv_obj.browse(cr, uid, refund_id_copy[0], context=context)
+					
+					temp_reconcile_ids = refund.move_id.line_id.ids
+					temp_reconcile_ids.extend(refund_copy.move_id.line_id.ids)
+					for tmpline in account_m_line_obj.browse(cr, uid, temp_reconcile_ids):
 						if tmpline.account_id.id == inv.account_id.id:
 							if not to_reconcile_ids.get(tmpline.account_id.id, False):
 								to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
@@ -312,39 +338,6 @@ class sale_order_return(models.TransientModel):
 							writeoff_journal_id = inv.journal_id.id,
 							writeoff_acc_id=inv.account_id.id
 						)
-					if mode == 'modify':
-						invoice = inv_obj.read(cr, uid, [inv.id],
-							['name', 'type', 'number', 'reference',
-								'comment', 'date_due', 'partner_id',
-								'partner_insite', 'partner_contact',
-								'partner_ref', 'payment_term', 'account_id',
-								'currency_id', 'invoice_line', 'tax_line',
-								'journal_id', 'period_id'], context=context)
-						invoice = invoice[0]
-						del invoice['id']
-						invoice_lines = inv_line_obj.browse(cr, uid, invoice['invoice_line'], context=context)
-						invoice_lines = inv_obj._refund_cleanup_lines(cr, uid, invoice_lines, context=context)
-						tax_lines = inv_tax_obj.browse(cr, uid, invoice['tax_line'], context=context)
-						tax_lines = inv_obj._refund_cleanup_lines(cr, uid, tax_lines, context=context)
-						invoice.update({
-							'type': inv.type,
-							'date_invoice': date,
-							'state': 'draft',
-							'number': False,
-							'invoice_line': invoice_lines,
-							'tax_line': tax_lines,
-							'period_id': period,
-							'name': description
-						})
-						for field in ('partner_id', 'account_id', 'currency_id',
-						'payment_term', 'journal_id'):
-							invoice[field] = invoice[field] and invoice[field][0]
-						inv_id = inv_obj.create(cr, uid, invoice, {})
-						if inv.payment_term.id:
-							data = inv_obj.onchange_payment_term_date_invoice(cr, uid, [inv_id], inv.payment_term.id, date)
-							if 'value' in data and data['value']:
-								inv_obj.write(cr, uid, [inv_id], data['value'])
-						created_inv.append(inv_id)
 			
 			xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
 					 (inv.type == 'in_refund') and 'action_invoice_tree2' or \
@@ -364,6 +357,10 @@ class sale_order_return(models.TransientModel):
 	@api.multi
 	@api.returns('self')
 	def _create_invoice_refund(self, date=None, period_id=None, description=None, journal_id=None, invoice_ids = [], retur_line = {}):
+		"""
+		 Fungsi ini didapat dari account_invoice - fungsi refund, direname menjadi _create_invoice_refund
+		 Fungsi ini di tambahkan paramater retur_line untuk dipassing ke _prepare_refund
+		"""
 		inv_obj = self.env['account.invoice']
 		new_invoices = inv_obj.browse()
 		for invoice in inv_obj.browse(invoice_ids):
@@ -375,7 +372,9 @@ class sale_order_return(models.TransientModel):
 	
 	@api.model
 	def _prepare_refund(self, invoice, date=None, period_id=None, description=None, journal_id=None, retur_line = {}):
-		""" Diambil dari modul account_invoice
+		"""
+		 Fungsi ini didapat dari account_invoice,
+		 Fungsi ini juga di tambahkan paramater retur_line untuk dipassing ke _refund_cleanup_lines
 		"""
 		values = {}
 		for field in ['name', 'reference', 'comment', 'date_due', 'partner_id', 'company_id',
@@ -412,15 +411,19 @@ class sale_order_return(models.TransientModel):
 	
 	@api.model
 	def _refund_cleanup_lines(self, lines, retur_line = False):
-		""" Convert records to dict of values suitable for one2many line creation
-	
-			:param recordset lines: records to convert
-			:return: list of command tuple for one2many line creation [(0, 0, dict of valueis), ...]
+		"""
+		 Fungsi ini didapat dari account_invoice, fungsi ini di tambahkan paramater retur_line
+		 retur_line merupakan dictionary dari line sale_order_return, berisi product-product yang akan di retur dan uang yang akan di refund.
+		 
+		 Fungsi ini pada awalnya berguna untuk membuat line account_invoice untuk refund dari account_invoice yang akan direfund (linenya anggapan dicopy sama persis)
+		 Fungsi ini dimodifikasi agar line dari account_invoice refund berisi product yang akan direfund saja, serta dimodifikasi quantity dan price_unit sesuai dengan input dari refund
 		"""
 		result = []
 		for line in lines:
 			values = {}
+		# Jika tidak diberikan retur_line, maka lines tersebut berisi line tax, bukan line invoice
 			if retur_line:
+				# Product untuk line account refund hanya berisi sesuai dengan line dari sale_order_return
 				if line.product_id.id in retur_line:
 					for name, field in line._fields.iteritems():
 						if name in MAGIC_COLUMNS:
@@ -453,18 +456,8 @@ class sale_order_return(models.TransientModel):
 		return result
 
 	def create_returns(self, cr, uid, ids, context=None):
-		"""
-		 Creates return picking.
-		 @param self: The object pointer.
-		 @param cr: A database cursor
-		 @param uid: ID of the user currently logged in
-		 @param ids: List of ids selected
-		 @param context: A standard dictionary
-		 @return: A dictionary which of fields with values.
-		"""
 		
 		#return stock
-		
 		new_picking_id, pick_type_id = self._create_returns(cr, uid, ids, context=context)
 		
 		# # Override the context to disable all the potential filters that could have been set previously
