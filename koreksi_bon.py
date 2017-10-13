@@ -12,7 +12,7 @@ class koreksi_bon(osv.osv_memory):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'sale_order_id': fields.many2one('sale.order', 'Sale Order', required=True),
+		'sale_order_id': fields.many2one('sale.order', 'Sale Order', required=True,  domain=[('state', '!=', 'cancel')]),
 		'order_line': fields.one2many('koreksi.bon.sale.order.line', 'koreksi_bon_id', 'Order Lines'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', readonly=True),
 		'date_order': fields.date('Date Order', readonly=True),
