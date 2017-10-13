@@ -155,7 +155,7 @@ class koreksi_bon(osv.osv_memory):
 		move_obj = self.pool.get('stock.move')
 		pick_obj = self.pool.get('stock.picking')
 		uom_obj = self.pool.get('product.uom')
-		data_obj = self.pool.get('stock.return.picking.line')
+		data_obj = self.pool.get('koreksi.bon.return.picking.line')
 		pick = pick_obj.browse(cr, uid, record_id, context=context)
 		data = self.read(cr, uid, ids[0], context=context)
 		returned_lines = 0
