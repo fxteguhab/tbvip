@@ -376,7 +376,7 @@ class sale_order_line(osv.osv):
 	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist, product, qty=0,
 			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
-			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+			warehouse_id=False, parent_price_type_id=False, price_type_id=False, sale_order_id=None, context=None):
 		result = self.onchange_product_tbvip(cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)
@@ -384,6 +384,10 @@ class sale_order_line(osv.osv):
 			product_obj = self.pool.get('product.product')
 			product_browsed = product_obj.browse(cr, uid, product)
 			result['value']['product_uom'] = product_browsed.uom_id.id
+		
+		# koreksi bon
+		if sale_order_id:
+			result['value']['order_id'] = sale_order_id
 		return result
 	
 	def onchange_product_tbvip(self, cr, uid, ids, pricelist, product, qty=0,

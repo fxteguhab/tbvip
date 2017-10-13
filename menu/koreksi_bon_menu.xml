@@ -8,6 +8,7 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">form</field>
 			<field name="target">new</field>
+			<field name="context">{'from': 'koreksi_bon'}</field>
 		</record>
 
 		<record id="action_koreksi_bon_log" model="ir.actions.act_window">
