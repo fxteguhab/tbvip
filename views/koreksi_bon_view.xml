@@ -26,10 +26,12 @@
 							<field name="warehouse_id" invisible="1"/>
 						</group>
 					</group>
+					<group>
+						<field name="product_return_moves"/>
+						<field name="move_dest_exists"/>
+					</group>
 					<field name="order_line">
 						<tree editable="bottom">
-							<field name="order_id" invisible="1"/>
-							<field name="state" invisible="1"/>
 							<field name="product_id"
 									on_change="onchange_product_id_tbvip(parent.pricelist_id,product_id,product_uom_qty,product_uom,
 									product_uos_qty,False,name,parent.partner_id, False, True, parent.date_order,
@@ -98,6 +100,19 @@
 					<field name="create_date" string="Corrected Date"/>
 					<field name="old_sale_order_id"/>
 					<field name="new_sale_order_id"/>
+				</tree>
+			</field>
+		</record>
+
+
+		<record id="koreksi_bon_return_line_tree" model="ir.ui.view">
+			<field name="name">koreksi.bon.return.picking.line.tree</field>
+			<field name="model">koreksi.bon.return.picking.line</field>
+			<field name="arch" type="xml">
+				<tree string="Product Moves">
+					<field name="product_id" />
+					<field name="lot_id" groups="stock.group_production_lot"/>
+					<field name="quantity" />
 				</tree>
 			</field>
 		</record>
