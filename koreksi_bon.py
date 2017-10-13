@@ -120,6 +120,10 @@ class koreksi_bon(osv.osv_memory):
 			# cancel SO
 			sale_order_obj.action_cancel(cr, uid, sale_order.id, context)
 			
+			sale_order_obj.write(cr, uid, koreksi_bon.sale_order_id.id, {
+				'state': 'cancel'
+			})
+			
 			# create new SO
 			new_sale_order_id = sale_order_obj.create(cr, uid, {
 				'name': 'Koreksi ' + koreksi_bon.sale_order_id.name,
@@ -131,7 +135,7 @@ class koreksi_bon(osv.osv_memory):
 				'employee_id': koreksi_bon.sale_order_id.employee_id.id,
 				'shipped_or_taken': koreksi_bon.sale_order_id.shipped_or_taken,
 				'client_order_ref': koreksi_bon.sale_order_id.client_order_ref,
-				'pricelist_id': koreksi_bon.sale_order_id.pricelist_id,
+				'pricelist_id': koreksi_bon.sale_order_id.pricelist_id.id,
 				'customer_address': koreksi_bon.sale_order_id.customer_address,
 				'order_line': order_lines,
 			})
