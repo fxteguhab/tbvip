@@ -114,15 +114,12 @@ class koreksi_bon(osv.osv_memory):
 			# stock_picking_obj.action_cancel(cr, uid, sale_order.picking_ids.ids)
 			if len(sale_order.picking_ids.ids) > 1:
 				raise osv.except_osv(_('Warning!'), _("This sale order has a return picking, koreksi bon cannot be done."))
-			context = dict(context or {})
-			context['active_id'] = sale_order.picking_ids.ids[0] if len(sale_order.picking_ids.ids) == 1 else False
-			new_picking, picking_type_id = self._create_returns(cr, uid, [koreksi_bon.id], context)
+			if len(sale_order.picking_ids.ids) == 1:
+				context = dict(context or {})
+				context['active_id'] = sale_order.picking_ids.ids[0]
+				new_picking, picking_type_id = self._create_returns(cr, uid, [koreksi_bon.id], context)
 			# cancel SO
 			sale_order_obj.action_cancel(cr, uid, sale_order.id, context)
-			
-			sale_order_obj.write(cr, uid, koreksi_bon.sale_order_id.id, {
-				'state': 'cancel'
-			})
 			
 			# create new SO
 			new_sale_order_id = sale_order_obj.create(cr, uid, {
