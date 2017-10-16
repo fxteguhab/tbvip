@@ -174,10 +174,7 @@ class koreksi_bon(osv.osv_memory):
 			
 			
 			# cancel invoice
-			# invoice cannot be canceled if paid, instead ???????????????
-			
-			# ANTON HELP
-			
+			# invoice yang sudah lunas atau dibayar sebagian tidak dapat di cancel, jika demikian maka lakukan refund invoice
 			if total_paid==0:
 				account_invoice_cancel_obj.invoice_cancel(cr, uid, [], context={'active_ids':sale_order.invoice_ids.ids})
 			else:
