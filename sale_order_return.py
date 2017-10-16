@@ -247,7 +247,7 @@ class sale_order_return(models.TransientModel):
 			for inv in inv_obj.browse(cr, uid, context.get('invoice_ids'), context=context):
 				if inv.state in ['draft', 'proforma2', 'cancel']:
 					raise osv.except_osv(_('Error!'), _('Cannot cancel draft/proforma/cancel invoice.'))
-				# Ko teguh pengen ketika sudah di reconciled juga dapat di retur, tetapi invoice yang sudah paid tidak dapat di cancel karena
+				# Ko teguh pengen ketika sudah di reconciled juga dapat di retur, tetapi invoice yang sudah paid tidak dapat di cancel karena stock picking sudah done
 				# Dengan demikian pengecekan raise di comment, tidak tau apakah effect buruknya, karena diliat dari journal saldo tetap balance
 				# if inv.reconciled:
 				# 	raise osv.except_osv(_('Error!'), _('Cannot cancel invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.'))

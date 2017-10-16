@@ -98,7 +98,7 @@ class koreksi_bon(osv.osv_memory):
 		for inv in inv_obj.browse(cr, uid, invoice_ids, context=context):
 			if inv.state in ['draft', 'proforma2', 'cancel']:
 				raise osv.except_osv(_('Error!'), _('Cannot cancel draft/proforma/cancel invoice.'))
-			# Ko teguh pengen ketika sudah di reconciled juga dapat di retur, tetapi invoice yang sudah paid tidak dapat di cancel karena
+			# Ko teguh pengen ketika sudah di reconciled juga dapat di retur, tetapi invoice yang sudah paid tidak dapat di cancel karena stock picking sudah done
 			# Dengan demikian pengecekan raise di comment, tidak tau apakah effect buruknya, karena diliat dari journal saldo tetap balance
 			# if inv.reconciled:
 			# 	raise osv.except_osv(_('Error!'), _('Cannot cancel invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.'))
@@ -178,8 +178,8 @@ class koreksi_bon(osv.osv_memory):
 			
 			# ANTON HELP
 			
-			if total_paid>0:
-				account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
+			if total_paid==0:
+				account_invoice_cancel_obj.invoice_cancel(cr, uid, [], context={'active_ids':sale_order.invoice_ids.ids})
 			else:
 				self._refund_invoice(cr, uid, sale_order.invoice_ids.ids, context)
 			
