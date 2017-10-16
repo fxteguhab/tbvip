@@ -326,20 +326,21 @@ class sale_order_return(models.TransientModel):
 						writeoff_acc_id=inv.account_id.id
 					)
 			
-			xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
-					 (inv.type == 'in_refund') and 'action_invoice_tree2' or \
-					 (inv.type == 'out_invoice') and 'action_invoice_tree3' or \
-					 (inv.type == 'in_invoice') and 'action_invoice_tree4'
-			result = mod_obj.get_object_reference(cr, uid, 'account', xml_id)
-			id = result and result[1] or False
-			
-			result = act_obj.read(cr, uid, [id], context=context)[0]
-			
-			invoice_domain = eval(result['domain'])
-			invoice_domain.append(('id', 'in', created_inv))
-					
-			result['domain'] = invoice_domain
-			return result
+			# xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
+			# 		 (inv.type == 'in_refund') and 'action_invoice_tree2' or \
+			# 		 (inv.type == 'out_invoice') and 'action_invoice_tree3' or \
+			# 		 (inv.type == 'in_invoice') and 'action_invoice_tree4'
+			# result = mod_obj.get_object_reference(cr, uid, 'account', xml_id)
+			# id = result and result[1] or False
+			#
+			# result = act_obj.read(cr, uid, [id], context=context)[0]
+			#
+			# invoice_domain = eval(result['domain'])
+			# invoice_domain.append(('id', 'in', created_inv))
+			#
+			# result['domain'] = invoice_domain
+			# return result
+			return True
 		
 	@api.multi
 	@api.returns('self')
@@ -470,5 +471,9 @@ class sale_order_return(models.TransientModel):
 
 		#refund invoice
 		form_customer_refund = self.compute_refund(cr, uid, ids, context=context)
-		
-		return form_customer_refund
+		# return form_customer_refund
+		return {
+			'warning': {
+				'title': 'Successful!',
+				'message': 'Retur succeeded'}
+		}
