@@ -84,6 +84,67 @@ class koreksi_bon(osv.osv_memory):
 			}
 		return
 	
+	def _refund_invoice(self, cr, uid, invoice_ids, context=None):
+		"""
+		 Fungsi ini didapat dari account_invoice_refund dan dimodifikasi
+		 Fungsi ini menggunakan filter_refund = 'cancel'
+		"""
+		inv_obj = self.pool.get('account.invoice')
+		account_m_line_obj = self.pool.get('account.move.line')
+		if context is None:
+			context = {}
+		
+		created_inv = []
+		for inv in inv_obj.browse(cr, uid, invoice_ids, context=context):
+			if inv.state in ['draft', 'proforma2', 'cancel']:
+				raise osv.except_osv(_('Error!'), _('Cannot cancel draft/proforma/cancel invoice.'))
+			# Ko teguh pengen ketika sudah di reconciled juga dapat di retur, tetapi invoice yang sudah paid tidak dapat di cancel karena
+			# Dengan demikian pengecekan raise di comment, tidak tau apakah effect buruknya, karena diliat dari journal saldo tetap balance
+			# if inv.reconciled:
+			# 	raise osv.except_osv(_('Error!'), _('Cannot cancel invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.'))
+
+			period = inv.period_id and inv.period_id.id or False
+			journal_id = inv.journal_id.id
+			date = inv.date_invoice
+			description = "Koreksi Bon " + inv.name
+			
+			if not period:
+				raise osv.except_osv(_('Insufficient Data!'), \
+					_('No period found on the invoice.'))
+			
+			#  Bikin Invoice refund
+			refund_id = inv_obj.refund(cr, uid, [inv.id], date, period, description, journal_id, context=context)
+			refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
+			inv_obj.write(cr, uid, [refund.id], {'date_due': date,
+				'check_total': inv.check_total})
+			inv_obj.button_compute(cr, uid, refund_id)
+			
+			created_inv.append(refund_id[0])
+			movelines = inv.move_id.line_id
+			to_reconcile_ids = {}
+			
+			for line in movelines:
+				if line.account_id.id == inv.account_id.id:
+					to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
+				if line.reconcile_id:
+					line.reconcile_id.unlink()
+			refund.signal_workflow('invoice_open')
+			refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
+			
+			for tmpline in refund.move_id.line_id:
+				if tmpline.account_id.id == inv.account_id.id:
+					if not to_reconcile_ids.get(tmpline.account_id.id, False):
+						to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
+					else:
+						to_reconcile_ids[tmpline.account_id.id].append(tmpline.id)
+			for account in to_reconcile_ids:
+				account_m_line_obj.reconcile(cr, uid, to_reconcile_ids[account],
+					writeoff_period_id=period,
+					writeoff_journal_id = inv.journal_id.id,
+					writeoff_acc_id=inv.account_id.id
+				)
+			return
+	
 	def action_save_koreksi_bon(self, cr, uid, ids, context=None):
 		sale_order_obj = self.pool.get('sale.order')
 		koreksi_bon_log_obj = self.pool.get('koreksi.bon.log')
@@ -106,10 +167,12 @@ class koreksi_bon(osv.osv_memory):
 				}])
 			
 			sale_order = sale_order_obj.browse(cr, uid, koreksi_bon.sale_order_id.id)
+			
 			# cancel invoice
 			# invoice cannot be canceled if paid, instead ???????????????
-			account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
+			#account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
 			# ANTON HELP
+			self._refund_invoice(cr, uid, sale_order.invoice_ids.ids, context)
 			
 			# cancel picking
 			# action_cancel cannot be used because stock picking state is done, instead create return stock picking

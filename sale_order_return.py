@@ -230,6 +230,7 @@ class sale_order_return(models.TransientModel):
 	def compute_refund(self, cr, uid, ids, context=None):
 		"""
 		 Fungsi ini didapat dari account_invoice_refund dan dimodifikasi
+		 Fungsi ini menggunakan filter_refund = 'cancel'
 		"""
 		inv_obj = self.pool.get('account.invoice')
 		account_m_line_obj = self.pool.get('account.move.line')
@@ -246,8 +247,10 @@ class sale_order_return(models.TransientModel):
 			for inv in inv_obj.browse(cr, uid, context.get('invoice_ids'), context=context):
 				if inv.state in ['draft', 'proforma2', 'cancel']:
 					raise osv.except_osv(_('Error!'), _('Cannot cancel draft/proforma/cancel invoice.'))
-				if inv.reconciled:
-					raise osv.except_osv(_('Error!'), _('Cannot cancel invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.'))
+				# Ko teguh pengen ketika sudah di reconciled juga dapat di retur, tetapi invoice yang sudah paid tidak dapat di cancel karena
+				# Dengan demikian pengecekan raise di comment, tidak tau apakah effect buruknya, karena diliat dari journal saldo tetap balance
+				# if inv.reconciled:
+				# 	raise osv.except_osv(_('Error!'), _('Cannot cancel invoice which is already reconciled, invoice should be unreconciled first. You can only refund this invoice.'))
 				if form.period.id:
 					period = form.period.id
 				else:
