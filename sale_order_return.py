@@ -292,19 +292,14 @@ class sale_order_return(models.TransientModel):
 															'price_subtotal': return_line.amount_price,
 															'price_unit': return_line.amount_price/return_line.quantity}
 								
-			#  Bikin Invoice refund 2x, dengan demikian pada awalnya duit yang dibalikkan 2x dari harusnya. Hal ini dilakukan karena
-			#  tidak bisa mengedit jumlah yang harus dibayarkan dari invoice yang akan direfund, sehingga jumlah yang akan dibayarkan tetap.
-			#  Dengan demikian jumlah uang yang kelebihan menjadi balance lagi ketika invoice sudah lunas.
+			#  Bikin Invoice refund
 				refund_id = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
-				refund_id_copy = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
-				refund_copy = inv_obj.browse(cr, uid, refund_id_copy[0], context=context)
-				inv_obj.write(cr, uid, [refund.id, refund_copy.id], {'date_due': date,
+				inv_obj.write(cr, uid, [refund.id], {'date_due': date,
 					'check_total': inv.check_total})
-				inv_obj.button_compute(cr, uid, refund_id.extend(refund_id_copy))
+				inv_obj.button_compute(cr, uid, refund_id)
 				
 				created_inv.append(refund_id[0])
-				created_inv.append(refund_id_copy[0])
 				movelines = inv.move_id.line_id
 				to_reconcile_ids = {}
 				
@@ -316,13 +311,9 @@ class sale_order_return(models.TransientModel):
 				# 	if line.reconcile_id:
 				# 		line.reconcile_id.unlink()
 				refund.signal_workflow('invoice_open')
-				refund_copy.signal_workflow('invoice_open')
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
-				refund_copy = inv_obj.browse(cr, uid, refund_id_copy[0], context=context)
 				
-				temp_reconcile_ids = refund.move_id.line_id.ids
-				temp_reconcile_ids.extend(refund_copy.move_id.line_id.ids)
-				for tmpline in account_m_line_obj.browse(cr, uid, temp_reconcile_ids):
+				for tmpline in refund.move_id.line_id:
 					if tmpline.account_id.id == inv.account_id.id:
 						if not to_reconcile_ids.get(tmpline.account_id.id, False):
 							to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
@@ -448,7 +439,8 @@ class sale_order_return(models.TransientModel):
 						values[name] = line[name]
 					elif name == 'invoice_line_tax_id':
 						values[name] = [(6, 0, line[name].ids)]
-			result.append((0, 0, values))
+			if values:
+				result.append((0, 0, values))
 		return result
 
 	def create_returns(self, cr, uid, ids, context=None):
