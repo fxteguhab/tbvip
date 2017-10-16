@@ -154,7 +154,7 @@ class koreksi_bon(osv.osv_memory):
 		for koreksi_bon in self.browse(cr, uid, ids):
 			# copy SO lines
 			order_lines = []
-			for order_line in koreksi_bon.sale_order_id.order_line:
+			for order_line in koreksi_bon.order_line:
 				order_lines.append([0, False,{
 					'name': order_line.name,
 					'product_id': order_line.product_id.id,
@@ -167,12 +167,21 @@ class koreksi_bon(osv.osv_memory):
 				}])
 			
 			sale_order = sale_order_obj.browse(cr, uid, koreksi_bon.sale_order_id.id)
+			total_paid = sale_order.payment_transfer_amount + \
+						 sale_order.payment_cash_amount + \
+						 sale_order.payment_receivable_amount + \
+						 sale_order.payment_giro_amount
+			
 			
 			# cancel invoice
 			# invoice cannot be canceled if paid, instead ???????????????
-			#account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
+			
 			# ANTON HELP
-			self._refund_invoice(cr, uid, sale_order.invoice_ids.ids, context)
+			
+			if total_paid>0:
+				account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
+			else:
+				self._refund_invoice(cr, uid, sale_order.invoice_ids.ids, context)
 			
 			# cancel picking
 			# action_cancel cannot be used because stock picking state is done, instead create return stock picking
