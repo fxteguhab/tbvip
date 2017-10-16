@@ -109,6 +109,8 @@ class koreksi_bon(osv.osv_memory):
 			# cancel invoice
 			# invoice cannot be canceled if paid, instead ???????????????
 			account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
+			# ANTON HELP
+			
 			# cancel picking
 			# action_cancel cannot be used because stock picking state is done, instead create return stock picking
 			# stock_picking_obj.action_cancel(cr, uid, sale_order.picking_ids.ids)
@@ -118,8 +120,12 @@ class koreksi_bon(osv.osv_memory):
 				context = dict(context or {})
 				context['active_id'] = sale_order.picking_ids.ids[0]
 				new_picking, picking_type_id = self._create_returns(cr, uid, [koreksi_bon.id], context)
+				
 			# cancel SO
-			sale_order_obj.action_cancel(cr, uid, sale_order.id, context)
+			# sale_order_obj.action_cancel(cr, uid, sale_order.id, context)
+			sale_order_obj.write(cr, uid, koreksi_bon.sale_order_id.id, {
+				'state': 'cancel'
+			}, context=context)
 			
 			# create new SO
 			new_sale_order_id = sale_order_obj.create(cr, uid, {
