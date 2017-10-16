@@ -109,20 +109,23 @@ class koreksi_bon(osv.osv_memory):
 			# cancel invoice
 			# invoice cannot be canceled if paid, instead ???????????????
 			account_invoice_cancel_obj.invoice_cancel(cr, uid, sale_order.invoice_ids.ids)
+			# ANTON HELP
+			
 			# cancel picking
 			# action_cancel cannot be used because stock picking state is done, instead create return stock picking
 			# stock_picking_obj.action_cancel(cr, uid, sale_order.picking_ids.ids)
 			if len(sale_order.picking_ids.ids) > 1:
 				raise osv.except_osv(_('Warning!'), _("This sale order has a return picking, koreksi bon cannot be done."))
-			context = dict(context or {})
-			context['active_id'] = sale_order.picking_ids.ids[0] if len(sale_order.picking_ids.ids) == 1 else False
-			new_picking, picking_type_id = self._create_returns(cr, uid, [koreksi_bon.id], context)
+			if len(sale_order.picking_ids.ids) == 1:
+				context = dict(context or {})
+				context['active_id'] = sale_order.picking_ids.ids[0]
+				new_picking, picking_type_id = self._create_returns(cr, uid, [koreksi_bon.id], context)
+				
 			# cancel SO
-			sale_order_obj.action_cancel(cr, uid, sale_order.id, context)
-			
+			# sale_order_obj.action_cancel(cr, uid, sale_order.id, context)
 			sale_order_obj.write(cr, uid, koreksi_bon.sale_order_id.id, {
 				'state': 'cancel'
-			})
+			}, context=context)
 			
 			# create new SO
 			new_sale_order_id = sale_order_obj.create(cr, uid, {
@@ -155,7 +158,7 @@ class koreksi_bon(osv.osv_memory):
 		move_obj = self.pool.get('stock.move')
 		pick_obj = self.pool.get('stock.picking')
 		uom_obj = self.pool.get('product.uom')
-		data_obj = self.pool.get('stock.return.picking.line')
+		data_obj = self.pool.get('koreksi.bon.return.picking.line')
 		pick = pick_obj.browse(cr, uid, record_id, context=context)
 		data = self.read(cr, uid, ids[0], context=context)
 		returned_lines = 0
@@ -252,9 +255,6 @@ class koreksi_bon_log(osv.osv):
 class koreksi_bon_sale_order_line(osv.osv_memory):
 	_name = "koreksi.bon.sale.order.line"
 	
-	def _amount_line(self, cr, uid, ids, field_name, arg, context=None):
-		return self.pool.get('sale.order.line')._amount_line(cr, uid, ids, field_name, arg, context)
-	
 	_columns = {
 		'koreksi_bon_id': fields.many2one('koreksi.bon', string="Koreksi Bon"),
 		'name': fields.text('Description', required=True),
@@ -264,7 +264,7 @@ class koreksi_bon_sale_order_line(osv.osv_memory):
 		'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True),
 		'price_unit': fields.float('Unit Price', required=True, digits_compute=dp.get_precision('Product Price')),
 		'discount_string': fields.char('Discount'),
-		'price_subtotal': fields.function(_amount_line, string='Subtotal', digits_compute=dp.get_precision('Account')),
+		'price_subtotal': fields.float('Subtotal', digits_compute=dp.get_precision('Account')),
 		
 		'product_uos_qty': fields.float('Quantity (UoS)', digits_compute= dp.get_precision('Product UoS')),
 		'product_packaging': fields.many2one('product.packaging', 'Packaging'),
