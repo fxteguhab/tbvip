@@ -9,6 +9,12 @@
                     <field name="check_maturity_date" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
                     <field name="bank_id" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
                 </field>
+                <label for="line_cr_ids" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </label>
+                <field name="line_cr_ids" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </field>
             </field>
         </record>
     </data>

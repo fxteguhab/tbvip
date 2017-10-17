@@ -24,5 +24,27 @@
 				</field>
 			</field>
 		</record>
+
+		<record model="ir.ui.view" id="invoice_tree_inherit">
+			<field name="name">account.invoice.tree.inherit</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_tree"/>
+			<field name="arch" type="xml">
+				<field name="state" position="before">
+					<field name="journal_id"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="view_account_invoice_filter_inherit">
+			<field name="name">view.account.invoice.filter.inherit</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.view_account_invoice_filter"/>
+			<field name="arch" type="xml">
+				<filter name="group_by_partner_id" position="after">
+					<filter name="group_by_journal_id" string="Journal" domain="[]" context="{'group_by':'journal_id'}"/>
+				</filter>
+			</field>
+		</record>
 	</data>
 </openerp>

@@ -9,6 +9,7 @@
 			<field name="context">{
 				'search_default_filter_bon_total_used': '1',
 				'search_default_filter_branch_login': '1',
+				'search_default_groupby_branch':1
 				}</field>
 		</record>
 

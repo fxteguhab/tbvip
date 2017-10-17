@@ -2,7 +2,7 @@
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 import openerp.addons.purchase_sale_discount as psd
 import openerp.addons.sale as imported_sale
@@ -69,12 +69,15 @@ class purchase_order(osv.osv):
 			('shipped', 'Shipped'),
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
+		'delivered_date': fields.datetime('Delivered Date', required=True),
 	}
 	
 	_defaults = {
 		# 'partner_id': _default_partner_id,
+		'delivered_date': lambda *a: (datetime.today() + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'shipped',
+		'payment_term_id': lambda self, cr, uid, ctx=None: self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account', 'account_payment_term_net')[1],
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
@@ -100,6 +103,9 @@ class purchase_order(osv.osv):
 			for po in self.browse(cr, uid, ids):
 				demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
 				demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
+			self.write(cr, uid, ids, {
+				'delivered_date': datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+			})
 		return result
 
 	def onchange_picking_type_id(self, cr, uid, ids, picking_type_id, context=None):
@@ -142,6 +148,15 @@ class purchase_order(osv.osv):
 		invoice_obj = self.pool.get('account.invoice')
 		for invoice in invoice_obj.browse(cr, uid, [result]):
 			invoice.signal_workflow('invoice_open')
+		return result
+	
+	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
+		result = super(purchase_order, self).onchange_partner_id(cr, uid, ids, partner_id, context)
+		values = result.get('value', False)
+		if values:
+			payment_term_id = values.get('payment_term_id', False)
+			if not payment_term_id:
+				values.pop('payment_term_id')
 		return result
 
 # ==========================================================================================================================

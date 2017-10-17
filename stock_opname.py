@@ -22,8 +22,7 @@ class stock_opname_memory(osv.osv_memory):
 					'location_id': memory.location_id.id,
 					})
 		return super(stock_opname_memory, self).action_generate_stock_opname(cr, uid, ids, context=context)
-
-
+	
 class stock_opname_memory_line(osv.osv_memory):
 	_inherit = "stock.opname.memory.line"
 	

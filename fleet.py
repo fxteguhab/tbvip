@@ -39,11 +39,8 @@ class fleet_vehicle(osv.osv):
 		for data in self.browse(cr, uid, ids, context=context):
 				result[data.id] = ''
 				for position in positions:
-					if data.gps_id == position['device']['uniqueId']:
-						try:
-							result[data.id] = position['address']
-						except KeyError:
-							result[data.id] = '-'
+					if position.get('device', False) and data.gps_id == position['device']['uniqueId']:
+						result[data.id] = position.get("address","-")
 		return result
 
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------

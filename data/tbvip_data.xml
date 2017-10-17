@@ -1,14 +1,26 @@
 <openerp>
-	<data>
+	<data noupdate="1">
+
+		<record id="tbvip_normal_price_sell" model="price.type">
+			<field name="name">DEFAULT PRICE</field>
+			<field name="type">sell</field>
+		</record>
+
+		<record id="tbvip_normal_price_buy" model="price.type">
+			<field name="name">DEFAULT PRICE</field>
+			<field name="type">buy</field>
+		</record>
 
 		<record id="tbvip_customer_general" model="res.partner">
 			<field name="name">GENERAL CUSTOMER</field>
 			<field name="customer" eval="True" />
+			<field name="sell_price_type_id" ref="tbvip_normal_price_sell"/>
 		</record>
 
 		<record id="tbvip_supplier_general" model="res.partner">
 			<field name="name">GENERAL SUPPLIER</field>
 			<field name="supplier" eval="True" />
+			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"/>
 			<field name="active" eval="False" />
 		</record>
 

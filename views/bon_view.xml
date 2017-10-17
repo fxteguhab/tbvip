@@ -13,7 +13,7 @@
 							<field name="end_at"/>
 						</group>
 						<group>
-							<field name="branch_id" readonly="1"/>
+							<field name="branch_id"/>
 							<field name="create_uid" readonly="1"/>
 							<field name="total_sheets" readonly="1"/>
 							<field name="total_used" readonly="1"/>
@@ -51,8 +51,7 @@
 					<field string = "Nomor Bon" name="start_from" filter_domain="['&amp;',('start_from','&lt;=',self),('end_at','&gt;=',self)]"/>
 					<filter string="Total_Used" name="filter_bon_total_used"
 							domain="['|',('total_used','&lt;=',50), ('total_used','=', False)]"/>
-					<!--<filter string="branch_login" name="filter_branch_login"-->
-							<!--domain="[('branch_id','=', user.branch_id)]"/>-->
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
 				</search>
 
 			</field>

@@ -1,4 +1,5 @@
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 import urllib2
 import json
 import requests
@@ -88,7 +89,8 @@ class canvassing_canvas(osv.osv):
 		start_distance = substr[pos1+1:pos2]
 	# trace to last index
 		index = 0
-		for i in j: index += 1
+		for i in j:
+			index += 1
 	# find substring in 'other' group in last iteration
 		substr = j[index-1]['other']
 		dist_pos = substr.find('totalDistance')
@@ -101,6 +103,7 @@ class canvassing_canvas(osv.osv):
 	def action_recalculate_distance(self, cr, uid, ids, context={}):
 		for canvas_data in self.browse(cr, uid, ids, context=context):
 			distance = self.calculate_distance(cr, uid, canvas_data)
+			distance = round(distance / 1000, 2) # dalam km
 			self.write(cr, uid, [canvas_data.id], {
 				'total_distance': distance,
 				'distance': distance,

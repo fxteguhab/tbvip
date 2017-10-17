@@ -9,6 +9,9 @@
 				<field name="partner_id" position="before">
 					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
 				</field>
+				<field name="date_order" position="after">
+					<field name="delivered_date"/>
+				</field>
 				<field name="partner_id" position="attributes">
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
@@ -37,8 +40,10 @@
 				<field name="pricelist_id" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
+				<field name="payment_term_id" position="replace"/>
 				<field name="picking_type_id" position="before">
 					<field name="shipped_or_taken"/>
+					<field name="payment_term_id"/>
 				</field>
 				<xpath expr="//field[@name='order_line']/tree//field[@name='name']" position="attributes">
 					<attribute name="invisible">True</attribute>
@@ -95,11 +100,45 @@
 				<field name="state" position="before">
 					<field name="branch_id"/>
 				</field>
+				<field name="minimum_planned_date" position="replace">
+					<field name="delivered_date"/>
+				</field>
+				<field name="amount_untaxed" position="replace"/>
+				<field name="origin" position="replace"/>
+				<field name="name" position="replace">
+					<field name="name" string="Supplier Reference"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="purchase_order_search">
+			<field name="name">purchase.order.search</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+			<field name="arch" type="xml">
+				<xpath expr="//filter[@string='Expected Month']" position="after">
+					<filter string="Delivered Month" icon="terp-go-month" domain="[]" context="{'group_by':'delivered_date'}"/>
+					<filter name="groupby_day" string="Day" context="{'group_by':'date_order:day'}"/>
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+				</xpath>
 			</field>
 		</record>
 
 		<record id="purchase.purchase_rfq" model="ir.actions.act_window">
 			<field name="name">Draft Purchase Orders</field>
+		</record>
+
+		<record id="view_request_for_quotation_search_inherit" model="ir.ui.view">
+			<field name="name">request.for.quotation.search.inherit</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.view_request_for_quotation_filter"/>
+			<field name="arch" type="xml">
+				<search string="Search Purchase Order" position="inside">
+					<filter string="Today" name="filter_date_order_today"
+							domain="[('date_order','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+						('date_order','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+				</search>
+			</field>
 		</record>
 
 	</data>

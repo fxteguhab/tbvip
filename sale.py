@@ -22,9 +22,11 @@ class sale_order(osv.osv):
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
 		'bon_number': fields.char('Bon Number', required=True),
+		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
+		'is_complex_payment': fields.boolean('Is Complex Payment'),
 	}
 
 	def _default_partner_id(self, cr, uid, context={}):
@@ -46,6 +48,7 @@ class sale_order(osv.osv):
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'taken',
 		'stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
+		'is_complex_payment': False
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
@@ -57,6 +60,7 @@ class sale_order(osv.osv):
 			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
 			if bon_book:
 				vals.update({
+					'bon_book_id': bon_book.id,
 					'employee_id': bon_book.employee_id.id
 				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
@@ -65,10 +69,28 @@ class sale_order(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for sale_order_data in self.browse(cr, uid, ids):
-			bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
-			bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
-			name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
-			vals['name'] = name
+			if vals.get('name', False):
+				pass
+			else:
+				bon_number = vals['bon_number'] if vals.get('bon_number', False) else sale_order_data.bon_number
+				bon_name = ' / ' + bon_number if bon_number else ' / ' + datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
+				name = '%s%s' % (datetime.strptime(sale_order_data.date_order, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'), bon_name)
+				if 'Koreksi' not in sale_order_data.name:
+					vals['name'] = name
+			
+			# Kalau SO di cancel, hapus used number tersebut dari bon book nya
+			if vals.get('state', False) == 'cancel':
+				bon_book_obj = self.pool.get('tbvip.bon.book')
+				bon_book = bon_book_obj.browse(cr, uid, [sale_order_data.bon_book_id.id])
+				if bon_book.used_numbers:
+					used_numbers = bon_book.used_numbers.split(', ')
+					new_used_numbers = ''
+					for used_number in used_numbers:
+						if used_number != bon_number:
+							new_used_numbers += used_number + ', '
+					bon_book_obj.write(cr, uid, bon_book.id, {
+						'used_numbers': new_used_numbers
+					})
 			
 			if vals.get('bon_number', False) or vals.get('date_order', False):
 				bon_number = sale_order_data.bon_number
@@ -80,6 +102,7 @@ class sale_order(osv.osv):
 				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
 				if bon_book:
 					vals.update({
+						'bon_book_id': bon_book.id,
 						'employee_id': bon_book.employee_id.id
 					})
 			result = super(sale_order, self).write(cr, uid, sale_order_data.id, vals, context)
@@ -90,6 +113,76 @@ class sale_order(osv.osv):
 		
 		return result
 	
+	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, context=None):
+		"""
+		Register payment. Return
+		"""
+		if payment_method not in ['transfer', 'cash', 'receivable', 'giro']:
+			return False
+		
+		voucher_obj = self.pool.get('account.voucher')
+		journal_obj = self.pool.get('account.journal')
+		account_move_line_obj = self.pool.get('account.move.line')
+		
+		account_move_id = account_move_line_obj.search(cr, uid, [('invoice', '=', invoice_id)])[0]
+		account_move = account_move_line_obj.browse(cr, uid, [account_move_id])
+		
+		# Prepare voucher values for payment
+		voucher_vals = {
+			'partner_id': partner_id.id,
+			# 'company_id': 1,
+			# 'period_id': 11,
+			# 'payment_rate_currency_id': 38,
+			# 'date': '2017-10-16',
+			# 'payment_rate': 1,
+			# 'reference': False,
+			# 'writeoff_acc_id': False,
+			# 'analytic_id': False,
+			# 'is_multi_currency': False,
+			# 'narration': False,
+			# 'name': False
+			'payment_method_type': payment_method,
+			'comment': 'Write-Off',
+			'payment_option': 'without_writeoff',
+			# 'journal_id': 8,
+			# 'account_id': 172,
+			'pre_line': True,
+			'amount': amount,
+			'type': 'receipt',
+			'line_cr_ids': [(0, False, {
+				'date_due': fields.date.today(),
+				'reconcile': True if amount >= account_move.debit - account_move.credit else False,
+				'date_original': fields.date.today(),
+				'move_line_id': account_move.id,
+				'amount_unreconciled': account_move.debit - account_move.credit,
+				'amount': amount,
+				'amount_original': account_move.debit,
+				'account_id': account_move.account_id.id
+			})],
+		}
+		
+		if payment_method == 'transfer':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+			pass
+		elif payment_method == 'cash':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['cash'])], limit=1)
+			pass
+		elif payment_method == 'receivable':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+			pass
+		elif payment_method == 'giro':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+			pass
+		
+		journal = journal_obj.browse(cr, uid, journal_id, context)
+		voucher_vals.update({
+			'account_id': journal.default_debit_account_id.id or journal.default_credit_account_id.id}
+		)
+		
+		# Create payment
+		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
+		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
+
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
 		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
@@ -102,6 +195,16 @@ class sale_order(osv.osv):
 			invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
 			# Make invoice open
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
+			
+			order = sale
+			if order.payment_transfer_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, order.invoice_ids[0].id, 'transfer', context=None)
+			if order.payment_cash_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
+			if order.payment_receivable_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, order.invoice_ids[0].id, 'receivable', context=None)
+			if order.payment_giro_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, order.invoice_ids[0].id, 'giro', context=None)
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
@@ -125,6 +228,7 @@ class sale_order(osv.osv):
 		branch_id = user_data.branch_id.id or None
 		bon_book_same_number_ids = self.search(cr, uid, [
 			('branch_id', '=', branch_id),
+			('state', '!=', 'cancel'),
 			('bon_number', '=', bon_number),
 			('date_order', '>=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 00:00:00")),
 			('date_order', '<=', datetime.strptime(date_order,'%Y-%m-%d %H:%M:%S').strftime("%Y-%m-%d 23:59:59")),
@@ -198,7 +302,9 @@ class sale_order(osv.osv):
 	def action_return(self, cr, uid, ids, context=None):
 		for id in ids:
 			delivery = self.action_view_delivery(cr, uid, [id], context=context)
+			invoice = self.action_view_invoice(cr, uid, [id], context=context)
 			stock_picking_id = delivery['res_id']
+			invoice_id = invoice['res_id']
 			if stock_picking_id:
 				# stock_return_picking_obj = self.pool.get('stock.return.picking')
 				return {
@@ -212,8 +318,10 @@ class sale_order(osv.osv):
 					"key2": "client_action_multi",
 					"multi": "True",
 					'context': {
-						'active_id': stock_picking_id,
-						'active_ids': [stock_picking_id]
+						'stock_picking_id': stock_picking_id,
+						'stock_picking_ids': [stock_picking_id],
+						'invoice_id' : invoice_id,
+						'invoice_ids' : [invoice_id],
 					}
 				}
 
@@ -372,7 +480,7 @@ class sale_order_line(osv.osv):
 	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist, product, qty=0,
 			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
-			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+			warehouse_id=False, parent_price_type_id=False, price_type_id=False, sale_order_id=None, context=None):
 		result = self.onchange_product_tbvip(cr, uid, ids, pricelist, product, qty,
 			uom, qty_uos, uos, name, partner_id, lang, update_tax, date_order, packaging, fiscal_position, flag,
 			warehouse_id, parent_price_type_id, price_type_id, context)
@@ -380,6 +488,10 @@ class sale_order_line(osv.osv):
 			product_obj = self.pool.get('product.product')
 			product_browsed = product_obj.browse(cr, uid, product)
 			result['value']['product_uom'] = product_browsed.uom_id.id
+		
+		# koreksi bon
+		if sale_order_id:
+			result['value']['order_id'] = sale_order_id
 		return result
 	
 	def onchange_product_tbvip(self, cr, uid, ids, pricelist, product, qty=0,
