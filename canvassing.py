@@ -16,6 +16,11 @@ class canvassing_canvas(osv.osv):
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'total_distance': fields.float('Total Distance', readonly=True),
+		'is_recalculated': fields.boolean('Is Recalculated?', search=False)
+	}
+
+	_defaults = {
+		'is_recalculated': False,
 	}
 	
 	# OVERRIDES --------------------------------------------------------------------------------------------------------------
@@ -66,8 +71,9 @@ class canvassing_canvas(osv.osv):
 		if not device_id:
 			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
 	# ambil jarak antara waktu mulai dan selesai
-		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7)
-		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7)
+	# dikasih teloransi 10 menit sebelum dan sesudah, as per request 20170929
+		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
+		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) + timedelta(minutes=10)
 		date_depart = date_depart.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 		date_delivered = date_delivered.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 		header = {'cookie': cookie}
@@ -101,6 +107,7 @@ class canvassing_canvas(osv.osv):
 			self.write(cr, uid, [canvas_data.id], {
 				'total_distance': distance,
 				'distance': distance,
+				'is_recalculated': True,
 				})
 		return True
 
@@ -156,6 +163,12 @@ class canvassing_canvas(osv.osv):
 		for po in po_obj.browse(cr, uid, po_ids, context):
 			picking_ids += [picking.id for picking in po.picking_ids]
 		return picking_ids
+
+	# CRON -------------------------------------------------------------------------------------------------------------------
+
+	def cron_recalculate_distance(self, cr, uid, context={}):
+		trip_ids = self.search(cr, uid, [('state','=','finished'),('is_recalculated','=',False)])
+		self.action_recalculate_distance(cr, uid, trip_ids)
 
 # ==========================================================================================================================
 

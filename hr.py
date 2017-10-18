@@ -13,7 +13,7 @@ class hr_employee(osv.osv):
 	_columns = {
 		'mysql_employee_id': fields.integer('MySQL Employee ID'),
 		'address': fields.text('Address'),
-		'type': fields.selection([('is_spg', "SPG"), ('is_non_spg', "Non-SPG")], 'Type'),
+		'is_spg': fields.boolean('Is SPG?'),
 		'employee_no': fields.char('Employee No.'),
 		'fingerprint_id': fields.char('Fingerprint ID'),
 	}

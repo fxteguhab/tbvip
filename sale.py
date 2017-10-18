@@ -113,6 +113,76 @@ class sale_order(osv.osv):
 		
 		return result
 	
+	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, context=None):
+		"""
+		Register payment. Return
+		"""
+		if payment_method not in ['transfer', 'cash', 'receivable', 'giro']:
+			return False
+		
+		voucher_obj = self.pool.get('account.voucher')
+		journal_obj = self.pool.get('account.journal')
+		account_move_line_obj = self.pool.get('account.move.line')
+		
+		account_move_id = account_move_line_obj.search(cr, uid, [('invoice', '=', invoice_id)])[0]
+		account_move = account_move_line_obj.browse(cr, uid, [account_move_id])
+		
+		# Prepare voucher values for payment
+		voucher_vals = {
+			'partner_id': partner_id.id,
+			# 'company_id': 1,
+			# 'period_id': 11,
+			# 'payment_rate_currency_id': 38,
+			# 'date': '2017-10-16',
+			# 'payment_rate': 1,
+			# 'reference': False,
+			# 'writeoff_acc_id': False,
+			# 'analytic_id': False,
+			# 'is_multi_currency': False,
+			# 'narration': False,
+			# 'name': False
+			'payment_method_type': payment_method,
+			'comment': 'Write-Off',
+			'payment_option': 'without_writeoff',
+			# 'journal_id': 8,
+			# 'account_id': 172,
+			'pre_line': True,
+			'amount': amount,
+			'type': 'receipt',
+			'line_cr_ids': [(0, False, {
+				'date_due': fields.date.today(),
+				'reconcile': True if amount >= account_move.debit - account_move.credit else False,
+				'date_original': fields.date.today(),
+				'move_line_id': account_move.id,
+				'amount_unreconciled': account_move.debit - account_move.credit,
+				'amount': amount,
+				'amount_original': account_move.debit,
+				'account_id': account_move.account_id.id
+			})],
+		}
+		
+		if payment_method == 'transfer':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+			pass
+		elif payment_method == 'cash':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['cash'])], limit=1)
+			pass
+		elif payment_method == 'receivable':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+			pass
+		elif payment_method == 'giro':
+			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+			pass
+		
+		journal = journal_obj.browse(cr, uid, journal_id, context)
+		voucher_vals.update({
+			'account_id': journal.default_debit_account_id.id or journal.default_credit_account_id.id}
+		)
+		
+		# Create payment
+		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
+		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
+
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
 		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
@@ -125,6 +195,16 @@ class sale_order(osv.osv):
 			invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
 			# Make invoice open
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
+			
+			order = sale
+			if order.payment_transfer_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, order.invoice_ids[0].id, 'transfer', context=None)
+			if order.payment_cash_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
+			if order.payment_receivable_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, order.invoice_ids[0].id, 'receivable', context=None)
+			if order.payment_giro_amount > 0:
+				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, order.invoice_ids[0].id, 'giro', context=None)
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
