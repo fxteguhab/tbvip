@@ -12,7 +12,7 @@ from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
 import time
 from openerp import models, api, _
-from openerp import fields as hole
+from openerp import fields as fields10
 
 TYPE2REFUND = {
 	'out_invoice': 'out_refund',        # Customer Invoice
@@ -48,14 +48,14 @@ class sale_order_return(models.TransientModel):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	#return stock
-	product_return_moves = hole.One2many('sale.order.return.line', 'sale_order_return_id', 'Moves')
-	move_dest_exists= hole.Boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed")
+	product_return_moves = fields10.One2many('sale.order.return.line', 'sale_order_return_id', 'Moves')
+	move_dest_exists= fields10.Boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed")
 	
 	#refund invoice
-	date = hole.Date('Date')
-	period = hole.Many2one('account.period', 'Force period')
-	journal_id = hole.Many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.')
-	description = hole.Char('Reason', required=True)
+	date = fields10.Date('Date')
+	period = fields10.Many2one('account.period', 'Force period')
+	journal_id = fields10.Many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.')
+	description = fields10.Char('Reason', required=True)
 	
 	def _get_journal(self, cr, uid, context=None):
 		"""
