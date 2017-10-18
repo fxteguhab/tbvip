@@ -41,6 +41,7 @@
 			<field name="res_model">tbvip.additional.activity.log</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
+			<field name="domain">[('point', '>=', 0)]</field>
 			<field name="context">{'menu_from': 'extra'}</field>
 		</record>
 
@@ -49,6 +50,7 @@
 			<field name="res_model">tbvip.additional.activity.log</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
+			<field name="domain">[('point', '&lt;', 0)]</field>
 			<field name="context">{'menu_from': 'penalty'}</field>
 		</record>
 

@@ -838,9 +838,9 @@ class tbvip_branch_working_hour(osv.osv):
 	
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'start_date': fields.date('Start Date'),
-		'open_hour': fields.float('Open Hour'),
-		'closed_hour': fields.float('Closed Hour'),
+		'start_date': fields.date('Start Date', required=True),
+		'open_hour': fields.float('Open Hour', required=True),
+		'closed_hour': fields.float('Closed Hour', required=True),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -886,8 +886,8 @@ class tbvip_additional_activity(osv.osv):
 	# COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'name': fields.char('Name'),
-		'desc': fields.text('Description'),
+		'name': fields.char('Name', required=True),
+		'desc': fields.text('Description', required=True),
 	}
 
 # ==========================================================================================================================
@@ -900,11 +900,11 @@ class tbvip_additional_activity_log(osv.osv):
 	# COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'employee_id': fields.many2one('hr.employee', 'Employee'),
-		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
-		'activity_time': fields.datetime('Time'),
-		'additional_activity_id': fields.many2one('tbvip.additional.activity', 'Activity'),
-		'point': fields.float('Point'),
+		'employee_id': fields.many2one('hr.employee', 'Employee', required=True),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
+		'activity_time': fields.datetime('Time', required=True),
+		'additional_activity_id': fields.many2one('tbvip.additional.activity', 'Activity', required=True),
+		'point': fields.float('Point', required=True),
 		'employee_point_id': fields.many2one('hr.point.employee.point', 'Employee Point', ondelete='set null'),
 	}
 	
@@ -912,7 +912,7 @@ class tbvip_additional_activity_log(osv.osv):
 	
 	_defaults = {
 		'activity_time': datetime.now(),
-		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
+		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id.id,
 	}
 	
 	# OVERRIDES ------------------------------------------------------------------------------------------------------------------
