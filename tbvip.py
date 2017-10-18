@@ -934,7 +934,9 @@ class tbvip_additional_activity_log(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		self._check_point(cr, uid, ids, vals, context)
-		return super(tbvip_additional_activity_log, self).write(cr, uid, ids, vals, context)
+		result = super(tbvip_additional_activity_log, self).write(cr, uid, ids, vals, context)
+		self._edit_employee_point(cr, uid, ids, vals, context)
+		return result
 	
 	def _check_point(self, cr, uid, ids, vals, context=None):
 		if vals.get('point', False):
@@ -952,7 +954,10 @@ class tbvip_additional_activity_log(osv.osv):
 		"""
 		employee_point_obj = self.pool.get('hr.point.employee.point')
 		model_obj = self.pool.get('ir.model.data')
-		model, point_type_id = model_obj.get_object_reference(cr, uid, 'hr_employee_point', 'hr_point_type_xtra')
+		reference = 'hr_point_type_xtra'
+		if context.get('menu_from', False) and context['menu_from'] == 'penalty':
+			reference = 'hr_point_type_penalty'
+		model, point_type_id = model_obj.get_object_reference(cr, uid, 'hr_employee_point', reference)
 		additional_activity_log = self.browse(cr, uid, [additional_activity_log_id], context)
 		employee_point_vals = {
 			'event_date': additional_activity_log.activity_time,
@@ -965,5 +970,23 @@ class tbvip_additional_activity_log(osv.osv):
 		new_employee_point_id = employee_point_obj.create(cr, uid, employee_point_vals, context)
 		# Update employee_point_id
 		self.write(cr, uid, [additional_activity_log_id], {'employee_point_id': new_employee_point_id})
+	
+	
+	def _edit_employee_point(self, cr, uid, ids, vals, context=None):
+		"""
+		Edit previous hr_point_employee_point based on newly created tbvip_additional_activity_log and update its point
+		:param ids of edited tbvip_additional_activity_log
+		:param vals of edited tbvip_additional_activity_log
+		"""
+		if vals.get('point', False):
+			employee_point_obj = self.pool.get('hr.point.employee.point')
+			employee_point_ids = employee_point_obj.search(cr, uid, [
+				('reference_model', '=', 'tbvip.additional.activity.log'),
+				('reference_id', 'in', ids)
+			], context=context)
+			employee_point_obj.write(cr, uid, employee_point_ids, {
+				'point': vals['point']
+			}, context=context)
+		
 		
 # ==========================================================================================================================
