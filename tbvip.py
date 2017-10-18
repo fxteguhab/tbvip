@@ -3,6 +3,7 @@ from datetime import datetime
 
 import os
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 
 # ==========================================================================================================================
@@ -929,6 +930,15 @@ class tbvip_additional_activity_log(osv.osv):
 		result = super(tbvip_additional_activity_log, self).create(cr, uid, vals, context)
 		self._create_employee_point(cr, uid, result, context)
 		return result
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		if vals.get('point', False):
+			if context.get('menu_from', False):
+				if context['menu_from'] == 'extra' and vals['point'] < 0:
+					raise osv.except_osv(_('Warning!'), _("Extra point should be positive."))
+				if context['menu_from'] == 'penalty' and vals['point'] > 0:
+					raise osv.except_osv(_('Warning!'), _("Extra point should be negative."))
+		return super(tbvip_additional_activity_log, self).write(cr, uid, ids, vals, context)
 	
 	def _create_employee_point(self, cr, uid, additional_activity_log_id, context=None):
 		"""

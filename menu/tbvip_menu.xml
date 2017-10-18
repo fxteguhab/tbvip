@@ -36,11 +36,20 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<record id="action_tbvip_additional_activity_log" model="ir.actions.act_window">
-			<field name="name">Additional Activities</field>
+		<record id="action_tbvip_additional_activity_extra_log" model="ir.actions.act_window">
+			<field name="name">Extra</field>
 			<field name="res_model">tbvip.additional.activity.log</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
+			<field name="context">{'menu_from': 'extra'}</field>
+		</record>
+
+		<record id="action_tbvip_additional_activity_penalty_log" model="ir.actions.act_window">
+			<field name="name">Penalty</field>
+			<field name="res_model">tbvip.additional.activity.log</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{'menu_from': 'penalty'}</field>
 		</record>
 
 		<menuitem id="menu_tbvip_branch" parent="base.menu_config"
@@ -53,6 +62,9 @@
 				sequence="5" action="action_tbvip_additional_activity"/>
 
 		<menuitem id="menu_tbvip_additional_activity_log" parent="hr_employee_point.menu_hr_point"
-			sequence="6" action="action_tbvip_additional_activity_log"/>
+				sequence="6" action="action_tbvip_additional_activity_extra_log"/>
+
+		<menuitem id="menu_tbvip_additional_activity_log" parent="hr_employee_point.menu_hr_point"
+				sequence="7" action="action_tbvip_additional_activity_penalty_log"/>
 	</data>
 </openerp>
