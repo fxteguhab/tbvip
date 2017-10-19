@@ -981,7 +981,7 @@ class tbvip_additional_activity_log(osv.osv):
 		if vals.get('point', False):
 			employee_point_obj = self.pool.get('hr.point.employee.point')
 			employee_point_ids = employee_point_obj.search(cr, uid, [
-				('reference_model', '=', 'tbvip.additional.activity.log'),
+				('reference_model', '=', self._name),
 				('reference_id', 'in', ids)
 			], context=context)
 			employee_point_obj.write(cr, uid, employee_point_ids, {
