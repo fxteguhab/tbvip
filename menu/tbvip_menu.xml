@@ -60,13 +60,13 @@
 		<menuitem id="menu_tbvip_branch_working_hour" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch_working_hour"/>
 
-		<menuitem id="menu_tbvip_additional_activity" parent="hr_employee_point.menu_hr_point_configuration"
+		<menuitem id="menu_tbvip_additional_activity" parent="hr_point_payroll.menu_hr_point_configuration"
 				sequence="5" action="action_tbvip_additional_activity"/>
 
-		<menuitem id="menu_tbvip_additional_activity_extra_log" parent="hr_employee_point.menu_hr_point"
+		<menuitem id="menu_tbvip_additional_activity_extra_log" parent="hr_point_payroll.menu_hr_point"
 				sequence="6" action="action_tbvip_additional_activity_extra_log"/>
 
-		<menuitem id="menu_tbvip_additional_activity_penalty_log" parent="hr_employee_point.menu_hr_point"
+		<menuitem id="menu_tbvip_additional_activity_penalty_log" parent="hr_point_payroll.menu_hr_point"
 				sequence="7" action="action_tbvip_additional_activity_penalty_log"/>
 	</data>
 </openerp>

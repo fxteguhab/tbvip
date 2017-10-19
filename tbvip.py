@@ -957,7 +957,7 @@ class tbvip_additional_activity_log(osv.osv):
 		reference = 'hr_point_type_xtra'
 		if context.get('menu_from', False) and context['menu_from'] == 'penalty':
 			reference = 'hr_point_type_penalty'
-		model, point_type_id = model_obj.get_object_reference(cr, uid, 'hr_employee_point', reference)
+		model, point_type_id = model_obj.get_object_reference(cr, uid, 'hr_point_payroll', reference)
 		additional_activity_log = self.browse(cr, uid, [additional_activity_log_id], context)
 		employee_point_vals = {
 			'event_date': additional_activity_log.activity_time,
