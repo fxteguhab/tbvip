@@ -29,44 +29,10 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<record id="action_tbvip_additional_activity" model="ir.actions.act_window">
-			<field name="name">Additional Activities</field>
-			<field name="res_model">tbvip.additional.activity</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>
-		</record>
-
-		<record id="action_tbvip_additional_activity_extra_log" model="ir.actions.act_window">
-			<field name="name">Extra</field>
-			<field name="res_model">tbvip.additional.activity.log</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>
-			<field name="domain">[('point', '>=', 0)]</field>
-			<field name="context">{'menu_from': 'extra'}</field>
-		</record>
-
-		<record id="action_tbvip_additional_activity_penalty_log" model="ir.actions.act_window">
-			<field name="name">Penalty</field>
-			<field name="res_model">tbvip.additional.activity.log</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">tree,form</field>
-			<field name="domain">[('point', '&lt;', 0)]</field>
-			<field name="context">{'menu_from': 'penalty'}</field>
-		</record>
-
 		<menuitem id="menu_tbvip_branch" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch"/>
 
 		<menuitem id="menu_tbvip_branch_working_hour" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch_working_hour"/>
-
-		<menuitem id="menu_tbvip_additional_activity" parent="hr_point_payroll.menu_hr_point_configuration"
-				sequence="5" action="action_tbvip_additional_activity"/>
-
-		<menuitem id="menu_tbvip_additional_activity_extra_log" parent="hr_point_payroll.menu_hr_point"
-				sequence="6" action="action_tbvip_additional_activity_extra_log"/>
-
-		<menuitem id="menu_tbvip_additional_activity_penalty_log" parent="hr_point_payroll.menu_hr_point"
-				sequence="7" action="action_tbvip_additional_activity_penalty_log"/>
 	</data>
 </openerp>
