@@ -935,7 +935,7 @@ class tbvip_additional_activity_log(osv.osv):
 	def write(self, cr, uid, ids, vals, context=None):
 		self._check_point(cr, uid, ids, vals, context)
 		result = super(tbvip_additional_activity_log, self).write(cr, uid, ids, vals, context)
-		self._edit_employee_point(cr, uid, ids, vals, context)
+		# self._edit_employee_point(cr, uid, ids, vals, context)
 		return result
 	
 	def _check_point(self, cr, uid, ids, vals, context=None):
@@ -964,29 +964,29 @@ class tbvip_additional_activity_log(osv.osv):
 			'employee_id': additional_activity_log.employee_id.id,
 			'point_type_id': point_type_id,
 			'point': additional_activity_log.point,
-			'reference_model': self._name,
-			'reference_id': additional_activity_log_id,
+			# 'reference_model': self._name,
+			# 'reference_id': additional_activity_log_id,
 		}
 		new_employee_point_id = employee_point_obj.create(cr, uid, employee_point_vals, context)
 		# Update employee_point_id
-		self.write(cr, uid, [additional_activity_log_id], {'employee_point_id': new_employee_point_id})
+		return self.write(cr, uid, [additional_activity_log_id], {'employee_point_id': new_employee_point_id})
 	
-	
-	def _edit_employee_point(self, cr, uid, ids, vals, context=None):
-		"""
-		Edit previous hr_point_employee_point based on newly created tbvip_additional_activity_log and update its point
-		:param ids of edited tbvip_additional_activity_log
-		:param vals of edited tbvip_additional_activity_log
-		"""
-		if vals.get('point', False):
-			employee_point_obj = self.pool.get('hr.point.employee.point')
-			employee_point_ids = employee_point_obj.search(cr, uid, [
-				('reference_model', '=', self._name),
-				('reference_id', 'in', ids)
-			], context=context)
-			employee_point_obj.write(cr, uid, employee_point_ids, {
-				'point': vals['point']
-			}, context=context)
+	# commented, cannot edit employee point
+	# def _edit_employee_point(self, cr, uid, ids, vals, context=None):
+	# 	"""
+	# 	Edit previous hr_point_employee_point based on newly created tbvip_additional_activity_log and update its point
+	# 	:param ids of edited tbvip_additional_activity_log
+	# 	:param vals of edited tbvip_additional_activity_log
+	# 	"""
+	# 	if vals.get('point', False):
+	# 		employee_point_obj = self.pool.get('hr.point.employee.point')
+	# 		employee_point_ids = employee_point_obj.search(cr, uid, [
+	# 			# ('reference_model', '=', self._name),
+	# 			# ('reference_id', 'in', ids)
+	# 		], context=context)
+	# 		return employee_point_obj.write(cr, uid, employee_point_ids, {
+	# 			'point': vals['point']
+	# 		}, context=context)
 		
 		
 # ==========================================================================================================================

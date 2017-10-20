@@ -150,7 +150,7 @@
 			<field name="name">tbvip.additional.activity.log.form</field>
 			<field name="model">tbvip.additional.activity.log</field>
 			<field name="arch" type="xml">
-				<form>
+				<form edit="false" delete="false">
 					<group>
 						<field name="branch_id"/>
 						<field name="activity_time"/>
@@ -166,7 +166,7 @@
 			<field name="name">tbvip.additional.activity.log.tree</field>
 			<field name="model">tbvip.additional.activity.log</field>
 			<field name="arch" type="xml">
-				<tree>
+				<tree edit="false" delete="false">
 					<field name="branch_id"/>
 					<field name="activity_time"/>
 					<field name="employee_id"/>
