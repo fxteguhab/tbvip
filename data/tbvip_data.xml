@@ -23,6 +23,6 @@
 			<field name="buy_price_type_id" ref="tbvip_normal_price_buy"/>
 			<field name="active" eval="False" />
 		</record>
-		
+
 	</data>
 </openerp>
