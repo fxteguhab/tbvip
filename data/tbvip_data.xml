@@ -24,42 +24,5 @@
 			<field name="active" eval="False" />
 		</record>
 
-		<!-- EMPLOYEE POINT ROLE -->
-
-		<record id="tbvip_employee_point_role_admin" model="hr.point.employee.role">
-			<field name="name">Admin</field>
-			<field name="code">ADM</field>
-		</record>
-
-		<record id="tbvip_employee_point_role_employee" model="hr.point.employee.role">
-			<field name="name">Employee</field>
-			<field name="code">EMP</field>
-		</record>
-
-		<record id="tbvip_employee_point_role_driver" model="hr.point.employee.role">
-			<field name="name">Driver</field>
-			<field name="code">DRV1</field>
-		</record>
-
-		<record id="tbvip_employee_point_role_driver2" model="hr.point.employee.role">
-			<field name="name">Co-Driver</field>
-			<field name="code">DRV2</field>
-		</record>
-
-		<record id="tbvip_employee_point_role_pic" model="hr.point.employee.role">
-			<field name="name">PIC</field>
-			<field name="code">PIC</field>
-		</record>
-
-		<record id="tbvip_employee_point_role_spg" model="hr.point.employee.role">
-			<field name="name">SPG</field>
-			<field name="code">SPG</field>
-		</record>
-
-		<record id="tbvip_employee_point_role_employee_all" model="hr.point.employee.role">
-			<field name="name">All Employees</field>
-			<field name="code">EMPALL</field>
-		</record>
-
 	</data>
 </openerp>
