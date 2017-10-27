@@ -90,3 +90,16 @@ class account_move_line(osv.osv):
 						'is_complex_payment': True
 					})
 		return new_id
+
+# ==========================================================================================================================
+
+class tbvip_day_end(osv.osv):
+	_name = 'tbvip.day.end'
+	_description = 'Ending Day'
+	
+	_columns = {
+		'hundred_qty': fields.integer('Hundred Quantity'),
+	}
+	
+	def action_end_day(self, cr, uid, vals, context={}):
+		return True

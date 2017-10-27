@@ -24,5 +24,22 @@
 			</field>
 		</record>
 
+		<record id="stock_opname_memory_form" model="ir.ui.view">
+			<field name="name">tbvip.day.end.form</field>
+			<field name="model">tbvip.day.end</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<field name="hundred_qty"/>
+					</group>
+					<footer>
+						<button name="action_end_day" type="object" string="End Day" help="Ending the Day" class="oe_highlight"/>
+						or
+						<button string="Cancel" class="oe_link" special="cancel"/>
+					</footer>
+				</form>
+			</field>
+		</record>
+
 	</data>
 </openerp>
