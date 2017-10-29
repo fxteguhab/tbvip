@@ -8,7 +8,7 @@
 			<field name="inherit_id" ref="hr.view_employee_form"/>
 			<field name="arch" type="xml">
 				<field name="department_id" position="before">
-					<field name="type"/>
+					<field name="is_spg"/>
 				</field>
 			</field>
 		</record>

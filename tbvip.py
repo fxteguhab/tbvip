@@ -3,6 +3,7 @@ from datetime import datetime
 
 import os
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 
 # ==========================================================================================================================
@@ -837,9 +838,9 @@ class tbvip_branch_working_hour(osv.osv):
 	
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'start_date': fields.date('Start Date'),
-		'open_hour': fields.float('Open Hour'),
-		'closed_hour': fields.float('Closed Hour'),
+		'start_date': fields.date('Start Date', required=True),
+		'open_hour': fields.float('Open Hour', required=True),
+		'closed_hour': fields.float('Closed Hour', required=True),
 	}
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -874,82 +875,3 @@ class tbvip_branch_working_hour(osv.osv):
 			)
 			result.append((working_hour.id, name))
 		return result
-
-# ==========================================================================================================================
-
-
-class tbvip_additional_activity(osv.osv):
-	_name = 'tbvip.additional.activity'
-	_description = 'Additional Activity'
-	
-	# COLUMNS ------------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'name': fields.char('Name'),
-		'desc': fields.text('Description'),
-	}
-
-# ==========================================================================================================================
-
-
-class tbvip_additional_activity_log(osv.osv):
-	_name = 'tbvip.additional.activity.log'
-	_description = 'Additional Activity Log'
-	
-	# COLUMNS ------------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'employee_id': fields.many2one('hr.employee', 'Employee'),
-		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
-		'activity_time': fields.datetime('Time'),
-		'additional_activity_id': fields.many2one('tbvip.additional.activity', 'Activity'),
-		'point': fields.float('Point'),
-		'employee_point_id': fields.many2one('hr.point.employee.point', 'Employee Point', ondelete='set null'),
-	}
-	
-	# DEFAULTS --------------------------------------------------------------------------------------------------------------
-	
-	_defaults = {
-		'activity_time': datetime.now(),
-		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
-	}
-	
-	# OVERRIDES ------------------------------------------------------------------------------------------------------------------
-	
-	def name_get(self, cr, uid, ids, context=None):
-		result = []
-		for activity_log in self.browse(cr, uid, ids, context):
-			name = "{log.activity_time} | {log.employee_id.name} -> {log.additional_activity_id.name}".format(
-				log=activity_log
-			)
-			result.append((activity_log.id, name))
-		return result
-	
-	def create(self, cr, uid, vals, context=None):
-		result = super(tbvip_additional_activity_log, self).create(cr, uid, vals, context)
-		self._create_employee_point(cr, uid, result, context)
-		return result
-	
-	def _create_employee_point(self, cr, uid, additional_activity_log_id, context=None):
-		"""
-		Create new hr.point.employee.point based on newly created tbvip.additional.activity.log and update its
-		employee_point_id
-		:param additional_activity_log_id:
-		"""
-		employee_point_obj = self.pool.get('hr.point.employee.point')
-		model_obj = self.pool.get('ir.model.data')
-		model, point_type_id = model_obj.get_object_reference(cr, uid, 'hr_employee_point', 'hr_point_type_xtra')
-		additional_activity_log = self.browse(cr, uid, [additional_activity_log_id], context)
-		employee_point_vals = {
-			'event_date': additional_activity_log.activity_time,
-			'employee_id': additional_activity_log.employee_id.id,
-			'point_type_id': point_type_id,
-			'point': additional_activity_log.point,
-			'reference_model': self._name,
-			'reference_id': additional_activity_log_id,
-		}
-		new_employee_point_id = employee_point_obj.create(cr, uid, employee_point_vals, context)
-		# Update employee_point_id
-		self.write(cr, uid, [additional_activity_log_id], {'employee_point_id': new_employee_point_id})
-		
-# ==========================================================================================================================

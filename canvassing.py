@@ -18,7 +18,7 @@ class canvassing_canvas(osv.osv):
 		'total_distance': fields.float('Total Distance', readonly=True),
 		'is_recalculated': fields.boolean('Is Recalculated?', search=False)
 	}
-	
+
 	_defaults = {
 		'is_recalculated': False,
 	}
