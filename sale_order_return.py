@@ -239,7 +239,7 @@ class sale_order_return(models.TransientModel):
 		res_users_obj = self.pool.get('res.users')
 		if context is None:
 			context = {}
-		
+				
 		for form in self.browse(cr, uid, ids, context=context):
 			created_inv = []
 			company = res_users_obj.browse(cr, uid, uid, context=context).company_id
@@ -290,6 +290,9 @@ class sale_order_return(models.TransientModel):
 				
 				dict_line = {}
 			# bikin dictionary retur_line untuk fungsi _refund_cleanup_lines
+				
+				inv_obj.write(cr, uid, [inv.id], {'name': "Retur " + inv.name})
+				
 				for return_line in form.product_return_moves:
 					dict_line[return_line.product_id.id] = {'quantity' : return_line.quantity,
 															'price_subtotal': return_line.amount_price,
