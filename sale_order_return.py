@@ -291,7 +291,7 @@ class sale_order_return(models.TransientModel):
 				dict_line = {}
 			# bikin dictionary retur_line untuk fungsi _refund_cleanup_lines
 				
-				inv_obj.write(cr, uid, [inv.id], {'name': "Retur " + inv.name})
+				inv_obj.write(cr, uid, [inv.id], {'number': inv.number + " <Retur>"})
 				
 				for return_line in form.product_return_moves:
 					dict_line[return_line.product_id.id] = {'quantity' : return_line.quantity,
