@@ -25,7 +25,7 @@ class canvassing_canvas(osv.osv):
 	
 	# OVERRIDES --------------------------------------------------------------------------------------------------------------
 		
-	def calculate_distance(self, cr, uid, canvas_data):
+	def calculate_distance(self, cr, uid, canvas_data, context={}):
 	# ambil parameter2 sistem
 		param_obj = self.pool.get('ir.config_parameter')
 		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_positions_url','gps_devices_url','gps_username','gps_password'])])
@@ -58,7 +58,10 @@ class canvassing_canvas(osv.osv):
 	# tentukan device id dari vehicle yang melakukan canvassing ini
 		vehicle_gps_id = canvas_data.fleet_vehicle_id and canvas_data.fleet_vehicle_id.gps_id or None
 		if not vehicle_gps_id:
-			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			if not context.get('cron_mode', False):
+				raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			else:
+				return 0
 		request = urllib2.Request(devices_url)
 		request.add_header('Cookie', cookie)
 		response = urllib2.urlopen(request)
@@ -69,7 +72,10 @@ class canvassing_canvas(osv.osv):
 				device_id = i['id'] 
 				break
 		if not device_id:
-			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			if not context.get('cron_mode', False):
+				raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			else:
+				return 0
 	# ambil jarak antara waktu mulai dan selesai
 	# dikasih teloransi 10 menit sebelum dan sesudah, as per request 20170929
 		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
@@ -102,7 +108,7 @@ class canvassing_canvas(osv.osv):
 
 	def action_recalculate_distance(self, cr, uid, ids, context={}):
 		for canvas_data in self.browse(cr, uid, ids, context=context):
-			distance = self.calculate_distance(cr, uid, canvas_data)
+			distance = self.calculate_distance(cr, uid, canvas_data, context=context)
 			distance = round(distance / 1000, 2) # dalam km
 			self.write(cr, uid, [canvas_data.id], {
 				'total_distance': distance,
@@ -113,7 +119,7 @@ class canvassing_canvas(osv.osv):
 
 	def action_set_finish(self, cr, uid, ids, context={}):
 		super(canvassing_canvas, self).action_set_finish(cr, uid, ids, context=context)
-		return self.action_recalculate_distance(cr, uid, ids)
+		return self.action_recalculate_distance(cr, uid, ids, context=context)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
@@ -168,7 +174,7 @@ class canvassing_canvas(osv.osv):
 
 	def cron_recalculate_distance(self, cr, uid, context={}):
 		trip_ids = self.search(cr, uid, [('state','=','finished'),('is_recalculated','=',False)])
-		self.action_recalculate_distance(cr, uid, trip_ids)
+		self.action_recalculate_distance(cr, uid, trip_ids, context={'cron_mode': True})
 
 # ==========================================================================================================================
 
