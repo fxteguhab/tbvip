@@ -9,6 +9,7 @@
 			<field name="arch" type="xml">
 				<field name="department_id" position="before">
 					<field name="is_spg"/>
+					<field name="default_modal_cash"/>
 				</field>
 			</field>
 		</record>

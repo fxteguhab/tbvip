@@ -17,6 +17,7 @@ class hr_employee(osv.osv):
 		'is_spg': fields.boolean('Is SPG?'),
 		'employee_no': fields.char('Employee No.'),
 		'fingerprint_id': fields.char('Fingerprint ID'),
+		'default_modal_cash': fields.float('Default Modal Cash', help='Only needed when the employee is an administrator.')
 	}
 
 class hr_attendance(osv.osv):
