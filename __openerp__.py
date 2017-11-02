@@ -68,6 +68,7 @@
 		'menu/accounting_menu.xml',
 		# 'menu/account_receivable_limit.xml',
 		# 'security/ir.model.access.csv',
+		'security/tbvip_hidden.xml',
 	],
 	'demo': [
 	],
