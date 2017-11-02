@@ -20,13 +20,11 @@
 
 
 		<!-- DAY END -->
-
 		<record id="tbvip_action_stock_day_end" model="ir.actions.act_window">
 			<field name="name">Day End</field>
 			<field name="res_model">tbvip.day.end</field>
 			<field name="view_type">form</field>
-			<field name="view_mode">form</field>
-			<field name="target">new</field>
+			<field name="view_mode">tree,form</field>
 		</record>
 
 		<menuitem sequence="3" id="tbvip_menu_day_end" name="Day End" parent="account.menu_finance"/>
