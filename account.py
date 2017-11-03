@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from openerp import api
 from openerp.osv import osv, fields
+from openerp.tools.translate import _
 
 # ==========================================================================================================================
 
@@ -122,8 +123,14 @@ class tbvip_day_end(osv.osv):
 		else:
 			return 0
 	
+	def _default_branch_id(self, cr, uid, context={}):
+		# default branch adalah tempat user sekarang ditugaskan
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		return user_data.branch_id.id or None
+	
 	_columns = {
 		'day_end_date': fields.datetime('Day End Date', required=True),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 
 		'qty_100': fields.integer('100', help='A Hundred Quantity'),
 		'qty_200': fields.integer('200', help='Two Hundred Quantity'),
@@ -164,11 +171,22 @@ class tbvip_day_end(osv.osv):
 	
 	_defaults = {
 		'day_end_date': datetime.now(),
+		'branch_id': _default_branch_id,
 		'omzet_cash': _default_omzet_cash,
 		'modal_cash': _default_modal_cash
 	}
 	
 	def create(self, cr, uid, vals, context=None):
+		today = datetime.now()
+		vals['branch_id'] = self._default_branch_id(cr, uid, context=context)
+		today_day_end_ids = self.search(cr, uid, [
+			('branch_id', '=', vals['branch_id']),
+			('day_end_date', '>=', today.strftime("%Y-%m-%d 00:00:00")),
+			('day_end_date', '<', (today + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")),
+		], context=context)
+		if today_day_end_ids and len(today_day_end_ids) > 0:
+			raise osv.except_osv(_('Error!'), _('Day End for this branch has already done for today.'))
+
 		vals.update({
 			'amount_100': vals['qty_100'] * 100,
 			'amount_200': vals['qty_200'] * 200,
