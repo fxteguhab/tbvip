@@ -12,6 +12,8 @@
 						 <!--<button name="test_cron_expired" type="object" string="Cron Expired" class="oe_highlight"/>-->
 						<button name="activate_commission" type="object" string="Activate Commission" class="oe_highlight"
 								confirm="Are you sure to activate this commission?" states="draft"/>
+						<button name="set_to_expired" type="object" string="Expire Commission" class="oe_highlight"
+								confirm="Are you sure to expire this commission?" states="draft,running"/>
 						<field name="state" widget="statusbar"/>
 					</header>
 					<group>

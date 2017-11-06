@@ -89,7 +89,7 @@ class commission(osv.osv):
 		self._update_current_commision(cr, uid, ids, True, context)
 		return True
 	
-	def _update_current_commision(self, cr, uid, commission_ids, is_unlink = False, context={}):
+	def _update_current_commision(self, cr, uid, commission_ids, is_unlink=False, context={}):
 		product_current_commission_obj = self.pool.get('product.current.commission')
 		line_commision_product_obj = self.pool.get('tbvip.commission.line.product')
 		line_commision_category_obj = self.pool.get('tbvip.commission.line.category')
