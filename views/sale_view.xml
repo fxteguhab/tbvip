@@ -146,7 +146,6 @@
 				</field>
 				<field name="amount_total" position="after">
 					<field name="shipped_or_taken"/>
-					<field name="is_complex_payment"/>
 				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="string">Cashier</attribute>

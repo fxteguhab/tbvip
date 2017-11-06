@@ -243,13 +243,3 @@ class tbvip_day_end(osv.osv):
 
 
 # ==========================================================================================================================
-
-class tbvip_day_end_extra(osv.osv):
-	_name = 'tbvip.day.end.extra'
-	_description = 'Day End Extra'
-	
-	_columns = {
-		'day_end_id': fields.many2one('tbvip.day.end', 'Day End'),
-		'name': fields.float('Name'),
-		'amount': fields.integer('Amount', help='Can be positive or negative'),
-	}
