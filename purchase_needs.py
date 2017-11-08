@@ -7,8 +7,6 @@ import math
 from dateutil.relativedelta import relativedelta
 
 class sale_history(osv.Model):
-	_name = 'sale.history'
-	_description = 'Sale History'
 	_inherit = 'sale.history'
 	
 # OVERRIDES -----------------------------------------------------------------------------------------------------------------
