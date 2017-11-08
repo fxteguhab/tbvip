@@ -123,6 +123,7 @@ class sale_order(osv.osv):
 		voucher_obj = self.pool.get('account.voucher')
 		journal_obj = self.pool.get('account.journal')
 		account_move_line_obj = self.pool.get('account.move.line')
+		invoice_obj = self.pool.get('account.invoice')
 		
 		account_move_id = account_move_line_obj.search(cr, uid, [('invoice', '=', invoice_id)])[0]
 		account_move = account_move_line_obj.browse(cr, uid, [account_move_id])
@@ -182,6 +183,11 @@ class sale_order(osv.osv):
 		# Create payment
 		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
 		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
+		
+		# if residual==0, paid
+		for invoice in invoice_obj.browse(cr, uid, invoice_id):
+			if invoice.residual == 0:
+				invoice.confirm_paid()
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
@@ -205,6 +211,7 @@ class sale_order(osv.osv):
 				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, order.invoice_ids[0].id, 'receivable', context=None)
 			if order.payment_giro_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, order.invoice_ids[0].id, 'giro', context=None)
+			
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
