@@ -187,7 +187,8 @@ class sale_order(osv.osv):
 		# if residual==0, paid
 		for invoice in invoice_obj.browse(cr, uid, invoice_id):
 			if invoice.residual == 0:
-				invoice.confirm_paid()
+				invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
+				pass
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
