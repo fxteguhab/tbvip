@@ -1,0 +1,38 @@
+<openerp>
+	<data>
+
+		<record id="view_sale_history_form_inherit" model="ir.ui.view">
+			<field name="name">view.sale.history.form.inherit</field>
+			<field name="model">sale.history</field>
+			<field name="inherit_id" ref="purchase_needs.sale_history_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="branch_id"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_sale_history_tree_inherit" model="ir.ui.view">
+			<field name="name">view.sale.history.tree.inherit</field>
+			<field name="model">sale.history</field>
+			<field name="inherit_id" ref="purchase_needs.sale_history_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="branch_id"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_sales_history_search_inherit" model="ir.ui.view">
+			<field name="name">view.sale.history.search.inherit</field>
+			<field name="model">sale.history</field>
+			<field name="inherit_id" ref="purchase_needs.sale_history_search"/>
+			<field name="arch" type="xml">
+				<search string="Search Sale History" position="inside">
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+				</search>
+			</field>
+		</record>
+
+	</data>
+</openerp>

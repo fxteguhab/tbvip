@@ -113,6 +113,33 @@ class sale_order(osv.osv):
 		
 		return result
 	
+	def create_or_update_sale_history_from_sale_done(self, cr, uid, sale_ids, context={}):
+		sale_history_obj = self.pool.get('sale.history')
+		month_now = datetime.now().month
+		dict_product_sale = {}
+		for sale in self.browse(cr, uid, sale_ids):
+			month_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').month
+			year_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').year
+			if month_sale!=month_now:
+				dict_product_sale = sale_history_obj.create_dict_for_sale_history(cr, uid, sale_ids, context)
+			for product_id, dict_branch_id in dict_product_sale.iteritems():
+				for branch_id, value in dict_branch_id.iteritems():
+					# cari dahulu apakah sudah terdapat sale_history yang lama, jika ada maka write, jika tidak maka create
+					history_id =  sale_history_obj.search(cr, uid, [('month', '=', month_sale),
+						('year', '=', year_sale),
+						('product_id', '=', product_id),
+						('branch_id', '=', branch_id)], limit = 1)
+					if history_id:
+						sale_history = sale_history_obj.browse(cr, uid, history_id)
+						sale_history_obj.write(cr, uid, history_id,  {'number_of_sales': sale_history.number_of_sales + value['qty']})
+					else:
+						sale_history_obj.create(cr, uid, {
+							'product_id': product_id,
+							'number_of_sales': value['qty'],
+							'year' : year_sale,
+							'month': month_sale,
+							'branch_id': branch_id})
+	
 	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, context=None):
 		"""
 		Register payment. Return
