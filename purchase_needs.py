@@ -11,7 +11,7 @@ class sale_history(osv.Model):
 	_description = 'Sale History'
 	_inherit = 'sale.history'
 	
-# FUNCTION ------------------------------------------------------------------------------------------------------------------
+# OVERRIDES -----------------------------------------------------------------------------------------------------------------
 	
 	def count_uom_qty(self,cr, uid, product_id, qty, uom_id, context={}):
 		"""
