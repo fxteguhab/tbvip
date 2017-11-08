@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record model="ir.actions.act_window" id="purchase_needs.purchase_needs_action_sale_history">
+			<field name="context" eval="{
+				'search_default_groupby_branch':1,
+			}"/>
+		</record>
+	</data>
+</openerp>
