@@ -142,6 +142,26 @@ class purchase_needs(osv.TransientModel):
 		'branch_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.id,
 	}
 	
+	def _create_value_purchase_order(self, cr, uid, purchase_need, context = {}):
+		value_po = super(purchase_needs, self)._create_value_purchase_order(cr, uid, purchase_need, context = context)
+		data_obj = self.pool.get('ir.model.data')
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		value_po['price_type_id'] = price_type_id
+		
+		return value_po
+	
+	def _create_value_purchase_order_line(self, cr, uid, draft_need, partner, context = {}):
+		po_line = super(purchase_needs, self)._create_value_purchase_order_line(cr, uid, draft_need, partner,context = context)
+		data_obj = self.pool.get('ir.model.data')
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
+		product_current_price_obj = self.pool.get('product.current.price')
+		
+		product = draft_need.product_id
+		current_price = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, unit_id)
+		po_line['price_unit'] = current_price
+		return po_line
+	
 	def onchange_supplier_id(self, cr, uid, ids, supplier_id, context=None):
 		""" override """
 		result = {'value': {
