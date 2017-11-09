@@ -238,17 +238,26 @@ class purchase_needs(osv.TransientModel):
 						if 'branch_id' in line_line[2] and line_line[2]['branch_id'] == user_branch_id:
 							product_qty += line_line[2]['order'] if 'order' in line_line[2] else 0
 					if product_qty > 0:
-						purchase_needs_draft_obj.create(cr, uid, {
-							'branch_id': user_branch_id,
-							'supplier_id': supplier_id,
-							'product_id': purchase_needs_line[2]['product_id'],
-							'product_qty': product_qty,
-						}, context=context)
-						result['value']['draft_needs_ids'].append((0, False, {
-							'branch_id': user_branch_id,
-							'product_id': purchase_needs_line[2]['product_id'],
-							'product_qty': product_qty,
-						}))
+						same_draft_ids = purchase_needs_draft_obj.search(cr, uid, [
+							('branch_id', '=', user_branch_id),
+							('supplier_id', '=', supplier_id),
+							('product_id', '=', purchase_needs_line[2]['product_id']),
+						], context=context)
+						if same_draft_ids and len(same_draft_ids) == 0:
+							new_needs_draft_id = purchase_needs_draft_obj.create(cr, uid, {
+								'branch_id': user_branch_id,
+								'supplier_id': supplier_id,
+								'product_id': purchase_needs_line[2]['product_id'],
+								'product_qty': product_qty,
+							}, context=context)
+							if new_needs_draft_id:
+								result['value']['draft_needs_ids'].append((0, False, {
+									'branch_id': user_branch_id,
+									'needs_draft_id': new_needs_draft_id,
+									'supplier_id': supplier_id,
+									'product_id': purchase_needs_line[2]['product_id'],
+									'product_qty': product_qty,
+								}))
 		# last purchase
 		for purchase_needs_line in purchase_needs_line_ids:
 			if 'last_purchase' in purchase_needs_line[2] and purchase_needs_line[2]['last_purchase']:

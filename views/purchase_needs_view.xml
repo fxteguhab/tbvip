@@ -48,6 +48,17 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="purchase_needs_draft_tree_inherit">
+			<field name="name">purchase.needs.draft.tree.inherit</field>
+			<field name="model">purchase.needs.draft</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_tree"/>
+			<field name="arch" type="xml">
+				<field name="supplier_id" position="before">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+
 		<record model="ir.ui.view" id="purchase_needs_draft_form_inherit">
 			<field name="name">purchase.needs.draft.form.inherit</field>
 			<field name="model">purchase.needs.draft</field>
