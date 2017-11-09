@@ -143,6 +143,7 @@ class purchase_needs(osv.TransientModel):
 	}
 	
 	def onchange_supplier_id(self, cr, uid, ids, supplier_id, context=None):
+		""" override """
 		result = {'value': {
 			'draft_po_line_ids': [],
 			'draft_needs_ids': [],
@@ -206,9 +207,6 @@ class purchase_needs(osv.TransientModel):
 			# line
 			qty_string, last_sale_date, min_string, max_string, order_string = \
 				purchase_needs_line_obj.get_purchase_needs_line_required_fields(cr, uid, product_id, line_line_arr, context=context)
-			# remove branch_name
-			for line_line in line_line_arr:
-				line_line[2].pop('branch_id', None)
 			result['value']['purchase_needs_line_ids'].append((0, False, {
 				'product_id': 		product_id,
 				'line_ids': 		line_line_arr,
@@ -219,8 +217,32 @@ class purchase_needs(osv.TransientModel):
 				'order_string': 	order_string,
 			}))
 		return result
-
-
+	
+	def onchange_purchase_needs_line_ids(self, cr, uid, ids, supplier_id, purchase_needs_line_ids, context=None):
+		""" override """
+		result = super(purchase_needs, self).onchange_purchase_needs_line_ids(cr, uid, ids, supplier_id, purchase_needs_line_ids, context=context)
+		# draft needs
+		user_branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
+		purchase_needs_draft_obj = self.pool.get('purchase.needs.draft')
+		for purchase_needs_line in purchase_needs_line_ids:
+			if 'add_to_draft' in purchase_needs_line[2] and purchase_needs_line[2]['add_to_draft']:
+				if 'line_ids' in purchase_needs_line[2]:
+					product_qty = 0
+					for line_line in purchase_needs_line[2]['line_ids']:
+						if 'branch_id' in line_line[2] and line_line[2]['branch_id'] == user_branch_id:
+							product_qty += line_line[2]['order'] if 'order' in line_line[2] else 0
+					if product_qty > 0:
+						purchase_needs_draft_obj.create(cr, uid, {
+							'supplier_id': supplier_id,
+							'product_id': purchase_needs_line[2]['product_id'],
+							'product_qty': product_qty,
+						}, context=context)
+						result['value']['draft_needs_ids'].append((0, False, {
+							'supplier_id': supplier_id,
+							'product_id': purchase_needs_line[2]['product_id'],
+							'product_qty': product_qty,
+						}))
+		return result
 
 
 # ===========================================================================================================================
@@ -256,6 +278,7 @@ class purchase_needs_line(osv.TransientModel):
 	# 	return latest_date
 	
 	def get_purchase_needs_line_required_fields(self, cr, uid, product_id, line_line_arr=[], context=None):
+		""" override """
 		if len(line_line_arr) == 0:
 			return super(purchase_needs_line_line, self).get_purchase_needs_line_required_fields(cr, uid, product_id, context=context)
 		else:
@@ -310,7 +333,14 @@ class purchase_needs_line(osv.TransientModel):
 class purchase_needs_line_line(osv.TransientModel):
 	_inherit = 'purchase.needs.line.line'
 	
+	# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+	}
+	
 	def get_year_ids(self, cr, uid, product_id, branch_id=False, context={}):
+		""" override """
 		purchase_needs_config_settings_obj = self.pool.get('purchase.needs.config.settings')
 		purchase_needs_line_line_year_obj = self.pool.get('purchase.needs.line.line.year')
 		start_year, end_year, start_month, end_month, leap_year_before, leap_year_after = \
