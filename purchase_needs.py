@@ -230,6 +230,7 @@ class purchase_needs(osv.TransientModel):
 		# draft needs
 		user_branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
 		purchase_needs_draft_obj = self.pool.get('purchase.needs.draft')
+		purchase_needs_draft_memory_obj = self.pool.get('purchase.needs.draft.memory')
 		for purchase_needs_line in purchase_needs_line_ids:
 			if 'add_to_draft' in purchase_needs_line[2] and purchase_needs_line[2]['add_to_draft']:
 				if 'line_ids' in purchase_needs_line[2]:
@@ -244,20 +245,12 @@ class purchase_needs(osv.TransientModel):
 							('product_id', '=', purchase_needs_line[2]['product_id']),
 						], context=context)
 						if len(same_draft_ids) == 0:
-							new_needs_draft_id = purchase_needs_draft_obj.create(cr, uid, {
+							result['value']['draft_needs_ids'].append(purchase_needs_draft_memory_obj.create(cr, uid, {
 								'branch_id': user_branch_id,
 								'supplier_id': supplier_id,
 								'product_id': purchase_needs_line[2]['product_id'],
 								'product_qty': product_qty,
-							}, context=context)
-							if new_needs_draft_id:
-								result['value']['draft_needs_ids'].append((0, False, {
-									'branch_id': user_branch_id,
-									'needs_draft_id': new_needs_draft_id,
-									'supplier_id': supplier_id,
-									'product_id': purchase_needs_line[2]['product_id'],
-									'product_qty': product_qty,
-								}))
+							}, context=context))
 		# last purchase
 		for purchase_needs_line in purchase_needs_line_ids:
 			if 'last_purchase' in purchase_needs_line[2] and purchase_needs_line[2]['last_purchase']:
