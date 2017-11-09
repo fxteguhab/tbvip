@@ -148,12 +148,14 @@ class purchase_needs(osv.TransientModel):
 			'draft_needs_ids': [],
 			'purchase_needs_line_ids': [],
 		}}
-		branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
+		branch_obj = self.pool.get('tbvip.branch')
+		user_branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
+		all_branch_ids = branch_obj.search(cr, uid, [], context=context)
 		
 		# get all draft purchase order line from supplier
 		purchase_order_obj = self.pool.get('purchase.order')
 		draft_purchase_order_ids = purchase_order_obj.search(cr, uid, [
-			('branch_id', '=', branch_id),
+			('branch_id', '=', user_branch_id),
 			('state', '=', 'draft'),
 			('partner_id', '=', supplier_id),
 		], context=context)
@@ -168,12 +170,12 @@ class purchase_needs(osv.TransientModel):
 		# get all draft needs
 		purchase_needs_draft_obj = self.pool.get('purchase.needs.draft')
 		purchase_needs_draft_ids = purchase_needs_draft_obj.search(cr, uid, [
-			('branch_id', '=', branch_id),
+			('branch_id', '=', user_branch_id),
 			('supplier_id', '=', supplier_id),
 		], context=context)
 		for needs_draft in purchase_needs_draft_obj.browse(cr, uid, purchase_needs_draft_ids, context=context):
 			result['value']['draft_needs_ids'].append((0, False, {
-				'branch_id': branch_id,
+				'branch_id': user_branch_id,
 				'product_id': needs_draft.product_id.id,
 				'product_qty': needs_draft.product_qty,
 			}))
@@ -187,27 +189,34 @@ class purchase_needs(osv.TransientModel):
 		for product_supplierinfo in product_supplierinfo_obj.browse(cr, uid, product_supplierinfo_ids, context=context):
 			product_ids.extend(product_supplierinfo.product_tmpl_id.product_variant_ids.ids)
 		for product_id in product_ids:
-			# line
-			qty_string, last_sale_date, min_string, max_string, order_string = \
-				purchase_needs_line_obj.get_purchase_needs_line_required_fields(cr, uid, product_id, branch_id, context=context)
 			# line line
-			year_ids, min_stock, max_stock, weight, data_count, order = \
-				purchase_needs_line_line_obj.get_purchase_needs_line_line_required_fields(cr, uid, product_id, branch_id, context=context)
-			result['value']['purchase_needs_line_ids'].append((0, False, {
-				'product_id': product_id,
-				'line_ids': [(0, False, {
+			line_line_arr = []
+			for branch_id in all_branch_ids:
+				year_ids, min_stock, max_stock, weight, data_count, order = \
+					purchase_needs_line_line_obj.get_purchase_needs_line_line_required_fields(cr, uid, product_id, branch_id, context=context)
+				line_line_arr.append((0, False, {
+					'branch_id':	branch_id,
 					'year_ids': 	year_ids,
 					'min_stock': 	min_stock,
 					'max_stock': 	max_stock,
 					'weight': 		weight,
 					'data_count': 	data_count,
 					'order': 		order,
-				})],
-				'qty_string': qty_string,
-				'last_sale_date': last_sale_date,
-				'min_string': min_stock,  # still the same because no branch here, one line = one line line
-				'max_string': max_stock,  # still the same because no branch here, one line = one line line
-				'order_string': order,  # still the same because no branch here, one line = one line line
+				}))
+			# line
+			qty_string, last_sale_date, min_string, max_string, order_string = \
+				purchase_needs_line_obj.get_purchase_needs_line_required_fields(cr, uid, product_id, line_line_arr, context=context)
+			# remove branch_name
+			for line_line in line_line_arr:
+				line_line[2].pop('branch_id', None)
+			result['value']['purchase_needs_line_ids'].append((0, False, {
+				'product_id': 		product_id,
+				'line_ids': 		line_line_arr,
+				'qty_string': 		qty_string,
+				'last_sale_date': 	last_sale_date,
+				'min_string': 		min_string,
+				'max_string': 		max_string,
+				'order_string': 	order_string,
 			}))
 		return result
 
@@ -221,53 +230,41 @@ class purchase_needs_line(osv.TransientModel):
 	
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 
-	def _get_last_sale_date(self, cr, uid, product_id, branch_id=False, context=None):
-		"""
-		Get the latest date of a sale.order.line with the given product_id and branch_id
-		:param product_id: int id of product.product
-		:param branch_id: int id of tbvip.branch; if not given or equals to False, omit branch_id filter
-		:return: string date or False if not exist
-		"""
-		latest_date = False
-		if not branch_id:
-			latest_date = super(purchase_needs_line, self)._get_last_sale_date(cr, uid, product_id, context=context)
-		else:
-			cr.execute("""
-				SELECT
-					max(so.date_order)
-				FROM sale_order_line so_line
-					LEFT JOIN sale_order so
-						ON so_line.order_id = so.id
-				WHERE so_line.product_id = {} and so.branch_id = {};
-			""".format(product_id, branch_id))
-			records = cr.fetchall()
-			for record in records:
-				latest_date = record[0]
-				break
-		return latest_date
+	# def _get_last_sale_date(self, cr, uid, product_id, branch_id=False, context=None):
+	# 	"""
+	# 	Get the latest date of a sale.order.line with the given product_id and branch_id
+	# 	:param product_id: int id of product.product
+	# 	:param branch_id: int id of tbvip.branch; if not given or equals to False, omit branch_id filter
+	# 	:return: string date or False if not exist
+	# 	"""
+	# 	latest_date = False
+	# 	if not branch_id:
+	# 		latest_date = super(purchase_needs_line, self)._get_last_sale_date(cr, uid, product_id, context=context)
+	# 	else:
+	# 		cr.execute("""
+	# 			SELECT
+	# 				max(so.date_order)
+	# 			FROM sale_order_line so_line
+	# 				LEFT JOIN sale_order so
+	# 					ON so_line.order_id = so.id
+	# 			WHERE so_line.product_id = {} and so.branch_id = {};
+	# 		""".format(product_id, branch_id))
+	# 		records = cr.fetchall()
+	# 		for record in records:
+	# 			latest_date = record[0]
+	# 			break
+	# 	return latest_date
 	
-	def get_purchase_needs_line_required_fields(self, cr, uid, product_id, branch_id=False, context=None):
-		if not branch_id:
+	def get_purchase_needs_line_required_fields(self, cr, uid, product_id, line_line_arr=[], context=None):
+		if len(line_line_arr) == 0:
 			return super(purchase_needs_line_line, self).get_purchase_needs_line_required_fields(cr, uid, product_id, context=context)
 		else:
+			branch_obj = self.pool.get('tbvip.branch')
 			qty_string = ""
 			last_sale_date = False
 			min_string = ""
 			max_string = ""
 			order_string = ""
-			
-			# qty
-			branch = self.pool.get('tbvip.branch').browse(cr, uid, branch_id, context=context)
-			quant_obj = self.pool.get('stock.quant')
-			quant_ids = quant_obj.search(cr, uid, [
-				('product_id', '=', product_id),
-				('location_id.usage','=', 'internal'),
-				('location_id', '=', branch.default_stock_location_id.id)
-			])
-			qty_total = 0
-			for quant in quant_obj.browse(cr, uid, quant_ids):
-				qty_total += quant.qty
-			qty_string += str(qty_total)
 			
 			# last sale date
 			cr.execute("""
@@ -276,18 +273,35 @@ class purchase_needs_line(osv.TransientModel):
 				FROM sale_order_line so_line
 					LEFT JOIN sale_order so
 						ON so_line.order_id = so.id
-				WHERE so_line.product_id = {} AND so.branch_id = {};
-			""".format(product_id, branch_id))
+				WHERE so_line.product_id = {};
+			""".format(product_id))
 			records = cr.fetchall()
 			for record in records:
 				last_sale_date = record[0]
 				break
 			
-			# min
-			
-			# max
-			
-			# order
+			for line_line in line_line_arr:
+				# qty
+				branch = self.pool.get('tbvip.branch').browse(cr, uid, line_line[2]['branch_id'], context=context)
+				quant_obj = self.pool.get('stock.quant')
+				quant_ids = quant_obj.search(cr, uid, [
+					('product_id', '=', product_id),
+					('location_id.usage', '=', 'internal'),
+					('location_id', '=', branch.default_stock_location_id.id)
+				])
+				qty_total = 0
+				for quant in quant_obj.browse(cr, uid, quant_ids):
+					qty_total += quant.qty
+				qty_string += branch.name + ": " + str(qty_total) + "\n"
+				
+				# min
+				min_string += branch.name + ": " + str(line_line[2]['min_stock']) + "\n"
+				
+				# max
+				max_string += branch.name + ": " + str(line_line[2]['max_stock']) + "\n"
+				
+				# order
+				order_string += branch.name + ": " + str(line_line[2]['order']) + "\n"
 			
 			return (qty_string, last_sale_date, min_string, max_string, order_string)
 
@@ -354,8 +368,8 @@ class purchase_needs_line_line(osv.TransientModel):
 						cur_year += 1
 				# data count
 				data_count += year[2]['month_count'] if 'month_count' in year[2] else 0
-			if weekly_count == 0:
-				min_stock = math.floor(weekly_total/weekly_count) * coef_min
+			if weekly_count != 0:
+				min_stock = math.floor(float(weekly_total)/weekly_count) * coef_min
 			max_stock = max_weekly * coef_max
 			return (year_ids, min_stock, max_stock, weight, data_count)
 	
@@ -368,7 +382,7 @@ class purchase_needs_line_line(osv.TransientModel):
 			year_ids, min_stock, max_stock, weight, data_count = self.get_year_min_max_weight_count(cr, uid, product_id, branch_id, context=context)
 			if data_count == 0:
 				return (year_ids, min_stock, max_stock, weight, data_count, 0)
-			return (year_ids, min_stock, max_stock, weight, data_count, (((1.0*weight)/data_count) * coef_order) + min_stock)
+			return (year_ids, min_stock, max_stock, weight, data_count, ((float(weight)/data_count) * coef_order) + min_stock)
 
 # ===========================================================================================================================
 
@@ -399,7 +413,7 @@ class purchase_needs_line_line_year(osv.TransientModel):
 				if month_count == 0:
 					return (0, 0.0, 0.0)
 				else:
-					average = total_sales / month_count
+					average = float(total_sales) / month_count
 					weekly = math.floor(average / 4)
 					return (month_count, average, weekly)
 
