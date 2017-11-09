@@ -96,3 +96,28 @@ class purchase_needs_line(osv.TransientModel):
 				latest_date = record[0]
 				break
 		return latest_date
+
+class purchase_needs(osv.TransientModel):
+	_inherit = 'purchase.needs'
+	
+# OVERRIDES -----------------------------------------------------------------------------------------------------------------
+	
+	def _create_value_purchase_order(self, cr, uid, purchase_need, context = {}):
+		value_po = super(purchase_needs, self)._create_value_purchase_order(cr, uid, purchase_need, context = context)
+		data_obj = self.pool.get('ir.model.data')
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		value_po['price_type_id'] = price_type_id
+		
+		return value_po
+	
+	def _create_value_purchase_order_line(self, cr, uid, draft_need, partner, context = {}):
+		po_line = super(purchase_needs, self)._create_value_purchase_order_line(cr, uid, draft_need, partner,context = context)
+		data_obj = self.pool.get('ir.model.data')
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
+		product_current_price_obj = self.pool.get('product.current.price')
+		
+		product = draft_need.product_id
+		current_price = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, unit_id)
+		po_line['price_unit'] = current_price
+		return po_line
