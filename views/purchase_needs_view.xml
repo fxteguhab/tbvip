@@ -37,6 +37,17 @@
 
 
 
+		<record model="ir.ui.view" id="purchase_needs_draft_memory_tree_inherit">
+			<field name="name">purchase.needs.draft.memory.tree.inherit</field>
+			<field name="model">purchase.needs.draft.memory</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_memory_tree"/>
+			<field name="arch" type="xml">
+				<field name="product_id" position="before">
+					<field name="branch_id" invisible="1"/>
+				</field>
+			</field>
+		</record>
+
 		<record model="ir.ui.view" id="purchase_needs_draft_form_inherit">
 			<field name="name">purchase.needs.draft.form.inherit</field>
 			<field name="model">purchase.needs.draft</field>
