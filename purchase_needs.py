@@ -243,7 +243,7 @@ class purchase_needs(osv.TransientModel):
 							('supplier_id', '=', supplier_id),
 							('product_id', '=', purchase_needs_line[2]['product_id']),
 						], context=context)
-						if same_draft_ids and len(same_draft_ids) == 0:
+						if len(same_draft_ids) == 0:
 							new_needs_draft_id = purchase_needs_draft_obj.create(cr, uid, {
 								'branch_id': user_branch_id,
 								'supplier_id': supplier_id,
