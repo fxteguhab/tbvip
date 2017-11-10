@@ -155,9 +155,13 @@ class purchase_needs(osv.TransientModel):
 	
 	def _create_value_purchase_order(self, cr, uid, purchase_need, context = {}):
 		value_po = super(purchase_needs, self)._create_value_purchase_order(cr, uid, purchase_need, context = context)
+		branch_obj = self.pool.get('tbvip.branch')
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		branch_id =  user_data.branch_id.id or None
 		data_obj = self.pool.get('ir.model.data')
 		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
 		value_po['price_type_id'] = price_type_id
+		value_po['location_id'] = branch_obj.browse(cr, uid, branch_id)[0].default_incoming_location_id.id or None,
 		
 		return value_po
 	
