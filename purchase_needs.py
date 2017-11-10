@@ -46,12 +46,23 @@ class sale_history(osv.Model):
 		
 		# REASON, di titik ini harus dimasukkan branchnya. Di titik ini create sale history, jika menggunakan cara manggil super(),
 		# kita tidak tahu sale_history mana yang harus dimasukkan branch_id sesuai dengan branch SO
+		list_product_ids = []
 		for product_id, dict_branch_id in dict_product_sale.iteritems():
+			list_product_ids.append(product_id)
 			for branch_id, value in dict_branch_id.iteritems():
 				self.create(cr, uid, {
 					'product_id': product_id,
 					'number_of_sales': value['qty'],
 					'branch_id' : branch_id})
+		
+		# untuk setiap product yang tidak ada SO, tetap bikin sale_history dengan number_of_sales = 0
+		product_obj = self.pool.get('product.product')
+		product_ids = product_obj.search(cr, uid, [])
+		for product_id in product_ids:
+			if product_id not in list_product_ids:
+				self.create(cr, uid, {
+					'product_id': product_id,
+					'number_of_sales': 0})
 	
 	def create_dict_for_sale_history(self, cr, uid, sale_ids, context={}):
 		dict_product_sale = {}
