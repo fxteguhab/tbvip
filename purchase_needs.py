@@ -62,7 +62,8 @@ class sale_history(osv.Model):
 			if product_id not in list_product_ids:
 				self.create(cr, uid, {
 					'product_id': product_id,
-					'number_of_sales': 0})
+					'number_of_sales': 0,
+					'branch_id' : branch_id})
 	
 	def create_dict_for_sale_history(self, cr, uid, sale_ids, context={}):
 		dict_product_sale = {}

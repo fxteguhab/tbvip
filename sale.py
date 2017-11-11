@@ -116,11 +116,12 @@ class sale_order(osv.osv):
 	def create_or_update_sale_history_from_sale_done(self, cr, uid, sale_ids, context={}):
 		sale_history_obj = self.pool.get('sale.history')
 		month_now = datetime.now().month
+		year_now = datetime.now().year
 		dict_product_sale = {}
 		for sale in self.browse(cr, uid, sale_ids):
 			month_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').month
 			year_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').year
-			if month_sale!=month_now:
+			if month_sale!=month_now or year_now != year_sale:
 				dict_product_sale = sale_history_obj.create_dict_for_sale_history(cr, uid, sale_ids, context)
 			for product_id, dict_branch_id in dict_product_sale.iteritems():
 				for branch_id, value in dict_branch_id.iteritems():
