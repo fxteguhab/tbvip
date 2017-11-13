@@ -14,6 +14,10 @@ class sale_history(osv.Model):
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
+	
+	_defaults = {
+		'branch_id': lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id,
+	}
 
 # OVERRIDES -----------------------------------------------------------------------------------------------------------------
 
@@ -105,13 +109,17 @@ class sale_history(osv.Model):
 
 # ===========================================================================================================================
 
-class purchase_needs_draft_memory(osv.Model):
+class purchase_needs_draft_all(osv.Model):
 	_inherit = 'purchase.needs.draft.all'
 
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+	}
+	
+	_defaults = {
+		'branch_id': lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id,
 	}
 
 
@@ -125,15 +133,83 @@ class purchase_needs_draft(osv.Model):
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
+	
+	_defaults = {
+		'branch_id': lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id,
+	}
+	
+	def unlink(self, cr, uid, ids, context=None):
+		""" override """
+		# remove real draft too
+		new_context = context
+		if context.get('remove_draft_real', False):
+			purchase_needs_draft_all_obj = self.pool.get('purchase.needs.draft.all')
+			user_branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
+			for draft_cache in self.browse(cr, uid, ids, context=context):
+				remove_real_draft_ids = purchase_needs_draft_all_obj.search(cr, uid, [
+					('branch_id', '=', user_branch_id),
+					('supplier_id', '=', draft_cache.supplier_id.id),
+					('product_id', '=', draft_cache.product_id.id),
+				], context=context)
+				purchase_needs_draft_all_obj.unlink(cr, uid, remove_real_draft_ids, context=context)
+			new_context = dict(context)
+			new_context.pop('remove_draft_real')
+		return super(purchase_needs_draft, self).unlink(cr, uid, ids, new_context)
 
 
 # ===========================================================================================================================
 
 class purchase_needs(osv.Model):
 	_inherit = 'purchase.needs'
-
-	# COLUMNS ---------------------------------------------------------------------------------------------------------------
-
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		""" override """
+		new_context = context
+		if 'draft_needs_ids' in vals:
+			purchase_needs_draft_all_obj = self.pool.get('purchase.needs.draft.all')
+			purchase_needs_draft_obj = self.pool.get('purchase.needs.draft')
+			user_branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
+			all_ids = ids if isinstance(ids, list) else [ids]
+			for id in all_ids:
+				# get supplier_id
+				if vals.get('supplier_id', False):
+					supplier_id = vals['supplier_id']
+				else:
+					supplier_id = self.browse(cr, uid, id, context=context).supplier_id.id
+				# remove old drafts real
+				for draft_needs in vals['draft_needs_ids']:
+					if len(draft_needs) == 3 and draft_needs[0] == 0 or draft_needs[0] == 1:
+						draft_needs = draft_needs[2]
+						# remove old drafts
+						remove_draft_ids = purchase_needs_draft_obj.search(cr, uid, [
+							('branch_id', '=', user_branch_id),
+							('purchase_needs_id', '=', id),
+							('supplier_id', '=', supplier_id),
+							('product_id', '=', draft_needs['product_id']),
+						], context=context)
+						remove_draft_ids.extend(purchase_needs_draft_obj.search(cr, uid, [
+							('purchase_needs_id', '=', id),
+							('supplier_id', '!=', supplier_id),
+						], context=context))
+						purchase_needs_draft_obj.unlink(cr, uid, remove_draft_ids, context=context)
+						# search same ids
+						if 'supplier_id' not in draft_needs:
+							draft_needs['supplier_id'] = supplier_id
+						# search for same id
+						same_draft_ids = purchase_needs_draft_all_obj.search(cr, uid, [
+							('branch_id', '=', user_branch_id),
+							('supplier_id', '=', supplier_id),
+							('product_id', '=', draft_needs['product_id']),
+						], context=context)
+						if len(same_draft_ids) > 0:
+							# rewrite
+							purchase_needs_draft_all_obj.write(cr, uid, same_draft_ids, {
+								'product_qty': draft_needs['product_qty'],
+							}, context=context)
+							new_context = dict(context)
+							new_context['not_create_draft_real'] = True
+		return super(purchase_needs, self).write(cr, uid, ids, vals, new_context)
+	
 	def _create_value_purchase_order(self, cr, uid, purchase_need, context = {}):
 		value_po = super(purchase_needs, self)._create_value_purchase_order(cr, uid, purchase_need, context = context)
 		data_obj = self.pool.get('ir.model.data')
@@ -203,6 +279,8 @@ class purchase_needs(osv.Model):
 			('branch_id', '=', user_branch_id),
 			('supplier_id', '=', supplier_id),
 		], context=context)
+		new_context = dict(context)
+		new_context['not_create_draft_real'] = True
 		for needs_draft in purchase_needs_draft_all_obj.browse(cr, uid, purchase_needs_draft_all_ids, context=context):
 			result['value']['draft_needs_ids'].append(purchase_needs_draft_obj.create(cr, uid, {
 				'purchase_needs_id': this_id,
@@ -210,7 +288,7 @@ class purchase_needs(osv.Model):
 				'supplier_id': supplier_id,
 				'product_id': needs_draft.product_id.id,
 				'product_qty': needs_draft.product_qty,
-			}, context=context))
+			}, context=new_context))
 		
 		# get all products from supplier
 		product_supplierinfo_obj = self.pool.get('product.supplierinfo')
@@ -363,6 +441,10 @@ class purchase_needs_line_line(osv.Model):
 
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+	}
+	
+	_defaults = {
+		'branch_id': lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id,
 	}
 
 	def get_year_ids(self, cr, uid, product_id, branch_id=False, context={}):
