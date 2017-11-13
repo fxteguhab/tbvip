@@ -1,96 +1,107 @@
 <openerp>
 	<data>
 
-		<!--<record id="view_sale_history_form_inherit" model="ir.ui.view">-->
-			<!--<field name="name">view.sale.history.form.inherit</field>-->
-			<!--<field name="model">sale.history</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.sale_history_form"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<xpath expr="//field[@name='product_id']" position="before">-->
-					<!--<field name="branch_id"/>-->
-				<!--</xpath>-->
-			<!--</field>-->
-		<!--</record>-->
+		<record id="view_sale_history_form_inherit" model="ir.ui.view">
+			<field name="name">view.sale.history.form.inherit</field>
+			<field name="model">sale.history</field>
+			<field name="inherit_id" ref="purchase_needs.sale_history_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="branch_id"/>
+				</xpath>
+			</field>
+		</record>
 
-		<!--<record id="view_sale_history_tree_inherit" model="ir.ui.view">-->
-			<!--<field name="name">view.sale.history.tree.inherit</field>-->
-			<!--<field name="model">sale.history</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.sale_history_tree"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<xpath expr="//field[@name='product_id']" position="before">-->
-					<!--<field name="branch_id"/>-->
-				<!--</xpath>-->
-			<!--</field>-->
-		<!--</record>-->
+		<record id="view_sale_history_tree_inherit" model="ir.ui.view">
+			<field name="name">view.sale.history.tree.inherit</field>
+			<field name="model">sale.history</field>
+			<field name="inherit_id" ref="purchase_needs.sale_history_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='product_id']" position="before">
+					<field name="branch_id"/>
+				</xpath>
+			</field>
+		</record>
 
-		<!--<record id="view_sales_history_search_inherit" model="ir.ui.view">-->
-			<!--<field name="name">view.sale.history.search.inherit</field>-->
-			<!--<field name="model">sale.history</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.sale_history_search"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<search string="Search Sale History" position="inside">-->
-					<!--<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>-->
-				<!--</search>-->
-			<!--</field>-->
-		<!--</record>-->
-
-
+		<record id="view_sales_history_search_inherit" model="ir.ui.view">
+			<field name="name">view.sale.history.search.inherit</field>
+			<field name="model">sale.history</field>
+			<field name="inherit_id" ref="purchase_needs.sale_history_search"/>
+			<field name="arch" type="xml">
+				<search string="Search Sale History" position="inside">
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+				</search>
+			</field>
+		</record>
 
 
-		<!--<record model="ir.ui.view" id="purchase_needs_draft_memory_tree_inherit">-->
-			<!--<field name="name">purchase.needs.draft.memory.tree.inherit</field>-->
-			<!--<field name="model">purchase.needs.draft.memory</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_memory_tree"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<field name="product_id" position="before">-->
-					<!--<field name="branch_id" invisible="1"/>-->
-				<!--</field>-->
-			<!--</field>-->
-		<!--</record>-->
 
-		<!--<record model="ir.ui.view" id="purchase_needs_draft_tree_inherit">-->
-			<!--<field name="name">purchase.needs.draft.tree.inherit</field>-->
-			<!--<field name="model">purchase.needs.draft</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_tree"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<field name="supplier_id" position="before">-->
-					<!--<field name="branch_id"/>-->
-				<!--</field>-->
-			<!--</field>-->
-		<!--</record>-->
 
-		<!--<record model="ir.ui.view" id="purchase_needs_draft_form_inherit">-->
-			<!--<field name="name">purchase.needs.draft.form.inherit</field>-->
-			<!--<field name="model">purchase.needs.draft</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_form"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<field name="supplier_id" position="before">-->
-					<!--<field name="branch_id"/>-->
-				<!--</field>-->
-			<!--</field>-->
-		<!--</record>-->
+		<record model="ir.ui.view" id="purchase_needs_draft_all_tree_inherit">
+			<field name="name">purchase.needs.draft.all.tree.inherit</field>
+			<field name="model">purchase.needs.draft.all</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_all_tree"/>
+			<field name="arch" type="xml">
+				<field name="product_id" position="before">
+					<field name="branch_id" invisible="1"/>
+				</field>
+			</field>
+		</record>
 
-		<!--<record model="ir.ui.view" id="purchase_needs_line_line_form_inherit">-->
-			<!--<field name="name">purchase.needs.line.line.form.inherit</field>-->
-			<!--<field name="model">purchase.needs.line.line</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.purchase_needs_line_line_form"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<field name="purchase_needs_line_id" position="before" invisible="1">-->
-					<!--<field name="branch_id"/>-->
-				<!--</field>-->
-			<!--</field>-->
-		<!--</record>-->
+		<record model="ir.ui.view" id="purchase_needs_draft_all_form_inherit">
+			<field name="name">purchase.needs.draft.all.form.inherit</field>
+			<field name="model">purchase.needs.draft.all</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_all_form"/>
+			<field name="arch" type="xml">
+				<field name="product_id" position="before">
+					<field name="branch_id" invisible="1"/>
+				</field>
+			</field>
+		</record>
 
-		<!--<record model="ir.ui.view" id="purchase_needs_line_line_tree">-->
-			<!--<field name="name">purchase.needs.line.line.tree.inherit</field>-->
-			<!--<field name="model">purchase.needs.line.line</field>-->
-			<!--<field name="inherit_id" ref="purchase_needs.purchase_needs_line_line_tree"/>-->
-			<!--<field name="arch" type="xml">-->
-				<!--<field name="purchase_needs_line_id" position="before" invisible="1">-->
-					<!--<field name="branch_id"/>-->
-				<!--</field>-->
-			<!--</field>-->
-		<!--</record>-->
+		<record model="ir.ui.view" id="purchase_needs_draft_tree_inherit">
+			<field name="name">purchase.needs.draft.tree.inherit</field>
+			<field name="model">purchase.needs.draft</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_tree"/>
+			<field name="arch" type="xml">
+				<field name="supplier_id" position="before">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="purchase_needs_draft_form_inherit">
+			<field name="name">purchase.needs.draft.form.inherit</field>
+			<field name="model">purchase.needs.draft</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_draft_form"/>
+			<field name="arch" type="xml">
+				<field name="supplier_id" position="before">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="purchase_needs_line_line_form_inherit">
+			<field name="name">purchase.needs.line.line.form.inherit</field>
+			<field name="model">purchase.needs.line.line</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_line_line_form"/>
+			<field name="arch" type="xml">
+				<field name="purchase_needs_line_id" position="before" invisible="1">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="purchase_needs_line_line_tree">
+			<field name="name">purchase.needs.line.line.tree.inherit</field>
+			<field name="model">purchase.needs.line.line</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_line_line_tree"/>
+			<field name="arch" type="xml">
+				<field name="purchase_needs_line_id" position="before" invisible="1">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
 
 	</data>
 </openerp>
