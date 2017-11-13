@@ -411,17 +411,12 @@ class purchase_needs_line_line(osv.Model):
 						# max stock
 						max_weekly = year[2]['weekly']
 				# weight
-				if start_year <= end_year:
-					cur_year = start_year
-					while cur_year <= end_year:
-						cur_start_year = cur_year - leap_year_before
-						cur_end_year = cur_year + leap_year_after
-						sale_history_ids = sale_history_obj.get_sale_history_ids(
-							cr, uid, product_id, cur_start_year, cur_end_year, start_month, end_month, branch_id, context=context)
-						for sale_hist in sale_history_obj.browse(cr, uid, sale_history_ids, context=context):
-							if 'average' in year[2] and sale_hist.number_of_sales > year[2]['average']:
-								weight += 1
-						cur_year += 1
+				if 'year' in year[2]:
+					sale_history_ids = sale_history_obj.get_sale_history_ids(
+						cr, uid, product_id, year[2]['year'], year[2]['year'], start_month, end_month, branch_id, context=context)
+					for sale_hist in sale_history_obj.browse(cr, uid, sale_history_ids, context=context):
+						if 'average' in year[2] and sale_hist.number_of_sales >= year[2]['average']:
+							weight += 1
 				# data count
 				data_count += year[2]['month_count'] if 'month_count' in year[2] else 0
 			if weekly_count != 0:
@@ -470,6 +465,6 @@ class purchase_needs_line_line_year(osv.Model):
 					return (0, 0.0, 0.0)
 				else:
 					average = float(total_sales) / month_count
-					weekly = math.floor(average / 4)
+					weekly = math.ceil(average / 4)
 					return (month_count, average, weekly)
 
