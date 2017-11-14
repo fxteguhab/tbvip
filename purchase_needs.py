@@ -138,6 +138,22 @@ class purchase_needs_draft(osv.Model):
 		'branch_id': lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id,
 	}
 	
+	def write(self, cr, uid, ids, vals, context=None):
+		""" override """
+		# rewrite draft real too, no matter what
+		if not context.get('from_totally_overriden', False):
+			purchase_needs_draft_all_obj = self.pool.get('purchase.needs.draft.all')
+			draft_vals = vals.copy()
+			draft_vals.pop('purchase_needs_id', None)
+			for draft_needs in self.browse(cr, uid, ids, context=context):
+				draft_real_ids = purchase_needs_draft_all_obj.search(cr, uid, [
+					('branch_id', '=', draft_needs.branch_id.id),
+					('supplier_id', '=', draft_needs.supplier_id.id),
+					('product_id', '=', draft_needs.product_id.id),
+				], context=context)
+				purchase_needs_draft_all_obj.write(cr, uid, draft_real_ids, draft_vals, context=context)
+		return super(purchase_needs_draft, self).write(cr, uid, ids, vals, context)
+	
 	def unlink(self, cr, uid, ids, context=None):
 		""" override """
 		# remove real draft too
@@ -178,14 +194,15 @@ class purchase_needs(osv.Model):
 					supplier_id = self.browse(cr, uid, id, context=context).supplier_id.id
 				# remove old drafts real
 				for draft_needs in vals['draft_needs_ids']:
-					if len(draft_needs) == 3 and draft_needs[0] == 0 or draft_needs[0] == 1:
+					if len(draft_needs) == 3 and draft_needs[0] == 0:
 						draft_needs = draft_needs[2]
+						product_id = draft_needs['product_id']
 						# remove old drafts
 						remove_draft_ids = purchase_needs_draft_obj.search(cr, uid, [
 							('branch_id', '=', user_branch_id),
 							('purchase_needs_id', '=', id),
 							('supplier_id', '=', supplier_id),
-							('product_id', '=', draft_needs['product_id']),
+							('product_id', '=', product_id),
 						], context=context)
 						remove_draft_ids.extend(purchase_needs_draft_obj.search(cr, uid, [
 							('purchase_needs_id', '=', id),
@@ -199,15 +216,13 @@ class purchase_needs(osv.Model):
 						same_draft_ids = purchase_needs_draft_all_obj.search(cr, uid, [
 							('branch_id', '=', user_branch_id),
 							('supplier_id', '=', supplier_id),
-							('product_id', '=', draft_needs['product_id']),
+							('product_id', '=', product_id),
 						], context=context)
 						if len(same_draft_ids) > 0:
 							# rewrite
 							purchase_needs_draft_all_obj.write(cr, uid, same_draft_ids, {
 								'product_qty': draft_needs['product_qty'],
 							}, context=context)
-							new_context = dict(context)
-							new_context['not_create_draft_real'] = True
 		return super(purchase_needs, self).write(cr, uid, ids, vals, new_context)
 	
 	def _create_value_purchase_order(self, cr, uid, purchase_need, context = {}):
