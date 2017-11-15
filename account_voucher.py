@@ -35,6 +35,12 @@ class account_voucher(osv.osv):
 				else:
 					result[account_voucher_data.id] = None
 		return result
+	
+	def _is_ready(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for account_voucher_data in self.browse(cr, uid, ids, context=context):
+			result[account_voucher_data.id] = True if account_voucher_data.reference and account_voucher_data.reference != '' else False
+		return result
 				
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
@@ -43,4 +49,5 @@ class account_voucher(osv.osv):
 			readonly=True, states={'draft': [('readonly', False)]}),
 		# 'bank_id': fields.function(_bank_ids, string="Bank Account", type='many2one', relation="res.partner.bank", readonly=False),
 		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
+		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 	}

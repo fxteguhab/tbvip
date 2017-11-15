@@ -8,6 +8,7 @@
                 <field name="journal_id" position="after">
                     <field name="check_maturity_date" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
                     <field name="bank_id" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
+                    <field name="is_ready" readonly="1"/>
                 </field>
                 <label for="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
@@ -15,6 +16,22 @@
                 <field name="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </field>
+            </field>
+        </record>
+
+
+
+        <record id="view_voucher_filter_inherit" model="ir.ui.view">
+            <field name="name">account.voucher.select.inherit</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor_pay"/>
+            <field name="arch" type="xml">
+                <search string="Search Vouchers" position="inside">
+                    <filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>
+                    <!--<group expand="0" string="Readiness">-->
+                        <!--<filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>-->
+                    <!--</group>-->
+                </search>
             </field>
         </record>
     </data>

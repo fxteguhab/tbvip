@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record model="ir.actions.act_window" id="account_voucher.action_vendor_payment">
+			<field name="context" eval="{
+				'type':'payment',
+				'search_default_groupby_ready':1,
+			}"/>
+		</record>
+
+	</data>
+</openerp>

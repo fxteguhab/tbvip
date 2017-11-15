@@ -41,6 +41,7 @@
 		'menu/stock_menu.xml',
 		'menu/sale_menu.xml',
 		'menu/koreksi_bon_menu.xml',
+		'menu/account_voucher_menu.xml',
 		'views/account_invoice_view.xml',
 		'views/account_view.xml',
 		'views/account_voucher_view.xml',
