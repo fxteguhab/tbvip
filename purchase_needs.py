@@ -424,19 +424,19 @@ class purchase_needs_line(osv.Model):
 			for line_line in line_line_arr:
 				# qty
 				branch = self.pool.get('tbvip.branch').browse(cr, uid, line_line[2]['branch_id'], context=context)
-				qty_string += branch.name + ": " + str(line_line[2]['qty']) + "\n"
+				qty_string += "{}: {:.2f}\n".format(branch.name, line_line[2]['qty'])
 				line_line[2].pop('qty', None)
 
 				# min
-				min_string += branch.name + ": " + str(line_line[2]['min_stock']) + "\n"
+				min_string += "{}: {:.2f}\n".format(branch.name, line_line[2]['min_stock'])
 
 				# max
-				max_string += branch.name + ": " + str(line_line[2]['max_stock']) + "\n"
+				max_string += "{}: {:.2f}\n".format(branch.name, line_line[2]['max_stock'])
 
 				# order
-				order_string += branch.name + ": " + str(line_line[2]['order']) + "\n"
+				order_string += "{}: {:.2f}\n".format(branch.name, line_line[2]['order'])
 
-			return (qty_string, last_sale_date, min_string, max_string, order_string)
+			return qty_string, last_sale_date, min_string, max_string, order_string
 	
 	def add_to_draft(self, cr, uid, ids, context=None):
 		""" override """
