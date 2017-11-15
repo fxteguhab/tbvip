@@ -341,9 +341,11 @@ class purchase_needs(osv.Model):
 		for product_id in product_ids:
 			# line line
 			line_line_arr = []
+			total_can_be_ordered = 0
 			for branch_id in all_branch_ids:
-				year_ids, min_stock, max_stock, weight, data_count, order = \
+				year_ids, qty, min_stock, max_stock, weight, data_count, order = \
 					purchase_needs_line_line_obj.get_purchase_needs_line_line_required_fields(cr, uid, product_id, branch_id, context=context)
+				total_can_be_ordered += order
 				line_line_arr.append((0, False, {
 					'branch_id':	branch_id,
 					'year_ids': 	year_ids,
@@ -352,20 +354,22 @@ class purchase_needs(osv.Model):
 					'weight': 		weight,
 					'data_count': 	data_count,
 					'order': 		order,
+					'qty':			qty,
 				}))
 			# line
-			qty_string, last_sale_date, min_string, max_string, order_string = \
-				purchase_needs_line_obj.get_purchase_needs_line_required_fields(cr, uid, product_id, line_line_arr, context=context)
-			purchase_needs_line_ids.append(purchase_needs_line_obj.create(cr, uid, {
-				'purchase_needs_id': 	this_id,
-				'product_id': 			product_id,
-				'line_ids': 			line_line_arr,
-				'qty_string': 			qty_string,
-				'last_sale_date': 		last_sale_date,
-				'min_string': 			min_string,
-				'max_string': 			max_string,
-				'order_string': 		order_string,
-			}, context=context))
+			if total_can_be_ordered > 0:
+				qty_string, last_sale_date, min_string, max_string, order_string = \
+					purchase_needs_line_obj.get_purchase_needs_line_required_fields(cr, uid, product_id, line_line_arr, context=context)
+				purchase_needs_line_ids.append(purchase_needs_line_obj.create(cr, uid, {
+					'purchase_needs_id': 	this_id,
+					'product_id': 			product_id,
+					'line_ids': 			line_line_arr,
+					'qty_string': 			qty_string,
+					'last_sale_date': 		last_sale_date,
+					'min_string': 			min_string,
+					'max_string': 			max_string,
+					'order_string': 		order_string,
+				}, context=context))
 		result['value']['purchase_needs_line_ids'] = purchase_needs_line_ids
 		return result
 
@@ -406,16 +410,8 @@ class purchase_needs_line(osv.Model):
 			for line_line in line_line_arr:
 				# qty
 				branch = self.pool.get('tbvip.branch').browse(cr, uid, line_line[2]['branch_id'], context=context)
-				quant_obj = self.pool.get('stock.quant')
-				quant_ids = quant_obj.search(cr, uid, [
-					('product_id', '=', product_id),
-					('location_id.usage', '=', 'internal'),
-					('location_id', '=', branch.default_stock_location_id.id)
-				])
-				qty_total = 0
-				for quant in quant_obj.browse(cr, uid, quant_ids):
-					qty_total += quant.qty
-				qty_string += branch.name + ": " + str(qty_total) + "\n"
+				qty_string += branch.name + ": " + str(line_line[2]['qty']) + "\n"
+				line_line[2].pop('qty', None)
 
 				# min
 				min_string += branch.name + ": " + str(line_line[2]['min_stock']) + "\n"
@@ -541,11 +537,29 @@ class purchase_needs_line_line(osv.Model):
 		if not branch_id:
 			return super(purchase_needs_line_line, self).get_purchase_needs_line_line_required_fields(cr, uid, product_id, context=context)
 		else:
+			# qty
+			branch = self.pool.get('tbvip.branch').browse(cr, uid, branch_id, context=context)
+			quant_obj = self.pool.get('stock.quant')
+			quant_ids = quant_obj.search(cr, uid, [
+				('product_id', '=', product_id),
+				('location_id.usage', '=', 'internal'),
+				('location_id', '=', branch.default_stock_location_id.id)
+			])
+			qty_total = 0.0
+			for quant in quant_obj.browse(cr, uid, quant_ids):
+				qty_total += quant.qty
+			
+			# stock recommendation and order quantity
 			coef_order = float(self.pool.get('ir.config_parameter').get_param(cr, uid, 'purchase_needs.coef_order', '').strip())
 			year_ids, min_stock, max_stock, weight, data_count = self.get_year_min_max_weight_count(cr, uid, product_id, branch_id, context=context)
 			if data_count == 0:
-				return (year_ids, min_stock, max_stock, weight, data_count, 0)
-			return (year_ids, min_stock, max_stock, weight, data_count, ((float(weight)/data_count) * coef_order) + min_stock)
+				return (year_ids, qty_total, min_stock, max_stock, weight, data_count, 0)
+			stock_recommendation = ((float(weight)/data_count) * coef_order) + min_stock
+			if stock_recommendation - qty_total <= 0:
+				return (year_ids, qty_total, min_stock, max_stock, weight, data_count, 0)
+			return (year_ids, qty_total, min_stock, max_stock, weight, data_count, stock_recommendation-qty_total)
+
+
 
 # ===========================================================================================================================
 
