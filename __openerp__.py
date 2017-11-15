@@ -65,6 +65,7 @@
 		'views/chjs_price_list_view.xml',
 		'views/sale_order_return_view.xml',
 		'views/koreksi_bon_view.xml',
+		'views/res_config_view.xml',
 		'workflows/purchase_workflow.xml',
 		'menu/accounting_menu.xml',
 		# 'menu/account_receivable_limit.xml',

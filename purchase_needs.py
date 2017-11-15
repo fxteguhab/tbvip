@@ -338,7 +338,19 @@ class purchase_needs(osv.Model):
 		purchase_needs_line_obj.unlink(cr, uid, remove_line_ids, context=context)
 		# create new
 		purchase_needs_line_ids = []
-		for product_id in product_ids:
+		
+		# sort product by sales
+		product_array = []
+		product_product_obj = self.pool.get('product.product')
+		for product in product_product_obj.browse(cr, uid, product_ids, context=context):
+			product_array.append({
+				'product_id': product.id,
+				'rank': product.rank,
+			})
+		product_array_sorted = sorted(product_array, key=lambda r: r['rank'])
+		
+		for product in product_array_sorted:
+			product_id = product['product_id']
 			# line line
 			line_line_arr = []
 			total_can_be_ordered = 0
