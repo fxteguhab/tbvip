@@ -1,3 +1,4 @@
+from openerp import api
 from openerp.osv import osv, fields
 
 
@@ -20,3 +21,19 @@ class res_partner(osv.osv):
 			self.pool.get('ir.model.data').xmlid_to_res_id(cr, uid, 'tbvip.tbvip_normal_price_sell'),
 	}
 
+# ==========================================================================================================================
+
+class res_partner_bank(osv.Model):
+	_inherit = 'res.partner.bank'
+	
+	@api.multi
+	def name_get(self):
+		"""
+		Append owner_name to bank name_get
+		:return:
+		"""
+		result = super(res_partner_bank, self).name_get()
+		for idx, tuple in enumerate(result):
+			bank = self.browse(tuple[0])
+			result[idx] = (result[idx][0], result[idx][1] + ' - {}'.format(bank.owner_name))
+		return result
