@@ -131,7 +131,7 @@ class tbvip_day_end(osv.osv):
 	_columns = {
 		'day_end_date': fields.datetime('Day End Date', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'amend_number': fields.float('Amend Number'),
+		'amend_number': fields.integer('Amend Number'),
 
 		'qty_100': fields.integer('100', help='A Hundred Quantity'),
 		'qty_200': fields.integer('200', help='Two Hundred Quantity'),
