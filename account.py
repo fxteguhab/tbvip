@@ -112,6 +112,15 @@ class tbvip_day_end(osv.osv):
 			omzet_cash_total += sale_order.payment_cash_amount
 		return omzet_cash_total
 	
+	def calculate_amend_number(self, cr, uid, branch_id, day_end_date, context={}):
+		day_end_date_datetime = datetime.strptime(day_end_date, '%Y-%m-%d %H:%M:%S')
+		day_end_ids = self.search(cr, uid, [
+			('branch_id', '=', branch_id),
+			('day_end_date', '>=', day_end_date_datetime.strftime("%Y-%m-%d 00:00:00")),
+			('day_end_date', '<', (day_end_date_datetime + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")),
+		], context=context)
+		return len(day_end_ids)
+	
 	def _default_modal_cash(self, cr, uid, context={}):
 		# default from employee setting
 		employee_obj = self.pool.get('hr.employee')
@@ -173,20 +182,15 @@ class tbvip_day_end(osv.osv):
 	_defaults = {
 		'day_end_date': datetime.now(),
 		'branch_id': _default_branch_id,
-		'modal_cash': _default_modal_cash
+		'modal_cash': _default_modal_cash,
 	}
 	
 	def create(self, cr, uid, vals, context=None):
 		vals['branch_id'] = self._default_branch_id(cr, uid, context=context)
 		day_end_date = vals['day_end_date']
-		day_end_date_datetime = datetime.strptime(day_end_date, '%Y-%m-%d %H:%M:%S')
-		day_end_ids = self.search(cr, uid, [
-			('branch_id', '=', vals['branch_id']),
-			('day_end_date', '>=', day_end_date_datetime.strftime("%Y-%m-%d 00:00:00")),
-			('day_end_date', '<', (day_end_date_datetime + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")),
-		], context=context)
+		
 		vals.update({
-			'amend_number': len(day_end_ids),
+			'amend_number': self.calculate_amend_number(cr, uid, vals['branch_id'], day_end_date, context=context),
 			'amount_100': vals['qty_100'] * 100,
 			'amount_200': vals['qty_200'] * 200,
 			'amount_500': vals['qty_500'] * 500,
@@ -208,10 +212,11 @@ class tbvip_day_end(osv.osv):
 		vals['balance'] = vals['total_cash'] - vals['omzet_cash'] - vals['modal_cash']
 		return super(tbvip_day_end, self).create(cr, uid, vals, context)
 	
-	def onchange_day_end_date(self, cr, uid, ids, day_end_date, context=None):
+	def onchange_day_end_date(self, cr, uid, ids, day_end_date, branch_id, context=None):
 		return {
 			'value': {
-				'omzet_cash': self.calculate_omzet_cash(cr, uid, day_end_date, context=context)
+				'omzet_cash': self.calculate_omzet_cash(cr, uid, day_end_date, context=context),
+				'amend_number': self.calculate_amend_number(cr, uid, branch_id, day_end_date, context=context)
 			}
 		}
 	
