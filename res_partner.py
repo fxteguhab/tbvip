@@ -26,6 +26,10 @@ class res_partner(osv.osv):
 class res_partner_bank(osv.Model):
 	_inherit = 'res.partner.bank'
 	
+	_defaults = {
+		'state': 'bank',
+	}
+	
 	@api.multi
 	def name_get(self):
 		"""
