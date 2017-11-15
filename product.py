@@ -1,5 +1,5 @@
 from openerp.osv import osv, fields
-
+from datetime import datetime, timedelta
 
 # ==========================================================================================================================
 
@@ -147,7 +147,43 @@ class product_product(osv.osv):
 	
 	_columns = {
 		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
+		'rank': fields.integer('Rank'),
 	}
+	
+	def cron_product_rank(self, cr, uid, context={}):
+		sale_order_obj = self.pool.get('sale.order')
+		config_param_obj = self.pool.get('ir.config_parameter')
+		
+		# date
+		today = datetime.now()
+		purchase_needs_latest_sale_days = int(config_param_obj.get_param(cr, uid, 'purchase_needs_latest_sale', ''))
+		last_sale_date = today + timedelta(days=-purchase_needs_latest_sale_days)
+		
+		# product sales
+		product_array = []
+		all_product_ids = self.search(cr, uid, [], context=context)
+		for product_id in all_product_ids:
+			product_sale_order_ids = sale_order_obj.search(cr, uid, [
+				('product_id', '=', product_id),
+				('state', '=', 'done'),
+				('date_order', '>=', last_sale_date.strftime("%Y-%m-%d 00:00:00")),
+				('date_order', '<=', today.strftime("%Y-%m-%d %H:%M:%S")),
+			], context=context)
+			product_sales_count = len(product_sale_order_ids) if product_sale_order_ids else 0
+			product_array.append({
+				'product_id': product_id,
+				'sales': product_sales_count,
+			})
+			
+		# ranking
+		product_array_sorted = sorted(product_array, key=lambda r: r['sales'], reverse=True)
+		rank = 1
+		for product in product_array_sorted:
+			self.write(cr, uid, product['product_id'], {
+				'rank': rank,
+			}, context=context)
+			rank += 1
+		return True
 
 # ==========================================================================================================================
 

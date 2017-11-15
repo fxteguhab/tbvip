@@ -340,7 +340,19 @@ class purchase_needs(osv.Model):
 		purchase_needs_line_obj.unlink(cr, uid, remove_line_ids, context=context)
 		# create new
 		purchase_needs_line_ids = []
-		for product_id in product_ids:
+		
+		# sort product by sales
+		product_array = []
+		product_product_obj = self.pool.get('product.product')
+		for product in product_product_obj.browse(cr, uid, product_ids, context=context):
+			product_array.append({
+				'product_id': product.id,
+				'rank': product.rank,
+			})
+		product_array_sorted = sorted(product_array, key=lambda r: r['rank'])
+		
+		for product in product_array_sorted:
+			product_id = product['product_id']
 			# line line
 			line_line_arr = []
 			total_can_be_ordered = 0
@@ -431,11 +443,14 @@ class purchase_needs_line(osv.Model):
 		purchase_needs_obj = self.pool.get('purchase.needs')
 		purchase_needs_draft_obj = self.pool.get('purchase.needs.draft')
 		purchase_needs_draft_all_obj = self.pool.get('purchase.needs.draft.all')
+		group_id_admin = self.pool.get('res.users').has_group(cr, uid, 'tbvip.group_management_administrator')
+		group_id_central = self.pool.get('res.users').has_group(cr, uid, 'tbvip.group_management_central')
 		branch_id = self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id
+		get_all_branch = group_id_admin or group_id_central
 		for line in self.browse(cr, uid, ids, context=context):
 			product_qty = 0
 			for line_line in line.line_ids:
-				if line_line.branch_id.id == branch_id:
+				if get_all_branch or line_line.branch_id.id == branch_id:
 					product_qty += line_line.order
 			if product_qty > 0:
 				same_draft_ids = purchase_needs_draft_all_obj.search(cr, uid, [
