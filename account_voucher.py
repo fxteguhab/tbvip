@@ -63,16 +63,15 @@ class account_voucher_line(osv.osv):
 		result = {}
 		for line in self.browse(cr, uid, ids, context=context):
 			invoice_id = line.move_line_id.invoice.id
-			cr.execute("""
-				SELECT purchase_id
-				FROM purchase_invoice_rel
-				WHERE invoice_id = {}
-			""".format(invoice_id))
-			res = cr.fetchone()
-			if res and len(res) > 0:
-				result[line.id] = res[0]
-			else:
-				result[line.id] = 0
+			if invoice_id:
+				cr.execute("""
+					SELECT purchase_id
+					FROM purchase_invoice_rel
+					WHERE invoice_id = {}
+				""".format(invoice_id))
+				res = cr.fetchone()
+				if res and len(res) > 0:
+					result[line.id] = res[0]
 		return result
 
 	_columns = {
