@@ -21,6 +21,7 @@
 		'report/documents/stock_inventory.xml',
 		'report/documents/account_voucher.xml',
 		'report/documents/stock_inventory.xml',
+		'report/documents/sale_receipt.xml',
 		'report/purchase_report.xml',
 		'report/sale_report.xml',
 		'security/ir_rule.xml',
