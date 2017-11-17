@@ -16,6 +16,9 @@
                 <field name="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </field>
+                <xpath expr="//field[@name='line_dr_ids']/tree/field[@name='amount']" position="after">
+                    <field name="purchase_order_id" readonly="1"/>
+                </xpath>
             </field>
         </record>
 

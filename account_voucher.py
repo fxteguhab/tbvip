@@ -51,3 +51,31 @@ class account_voucher(osv.osv):
 		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 	}
+
+
+# ==========================================================================================================================
+
+
+class account_voucher_line(osv.osv):
+	_inherit = 'account.voucher.line'
+	
+	def _purchase_order_id(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			invoice_id = line.move_line_id.invoice.id
+			cr.execute("""
+				SELECT purchase_id
+				FROM purchase_invoice_rel
+				WHERE invoice_id = {}
+			""".format(invoice_id))
+			res = cr.fetchone()
+			if res and len(res) > 0:
+				result[line.id] = res[0]
+			else:
+				result[line.id] = 0
+		return result
+
+	_columns = {
+		'purchase_order_id': fields.function(_purchase_order_id, type='many2one', relation='purchase.order',
+			store=True, string='Purchase Order'),
+	}
