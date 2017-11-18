@@ -70,6 +70,7 @@ class purchase_order(osv.osv):
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
 		'delivered_date': fields.datetime('Delivered Date', required=True),
+		'purchase_needs_id': fields.boolean('TO BE DELETED'),
 	}
 	
 	_defaults = {
