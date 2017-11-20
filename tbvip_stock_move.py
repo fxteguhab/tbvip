@@ -22,7 +22,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'move_date': fields.datetime('Move Date', required=True),
 		'state': fields.selection([
 			('draft', 'Draft'),
-			('accepted', 'Accepeted'),
+			('accepted', 'Accepted'),
 			('rejected', 'Rejected')]
 			, 'State', readonly=True),
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by'),
