@@ -309,13 +309,12 @@ class sale_order_return(models.TransientModel):
 				movelines = inv.move_id.line_id
 				to_reconcile_ids = {}
 				
-			# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal
-			# Invoice refund baru di reooncile
-				# for line in movelines:
-				# 	if line.account_id.id == inv.account_id.id:
-				# 		to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
-				# 	if line.reconcile_id:
-				# 		line.reconcile_id.unlink()
+			# reconcile(dilunasin) untuk invoice yang direfund
+				for line in movelines:
+					if line.account_id.id == inv.account_id.id:
+						to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
+					if line.reconcile_id:
+						line.reconcile_id.unlink()
 				refund.signal_workflow('invoice_open')
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
 				
