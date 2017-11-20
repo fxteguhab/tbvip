@@ -26,6 +26,11 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by'),
 		'interbranch_stock_move_line_ids': fields.one2many('koreksi.bon.sale.order.line', 'koreksi_bon_id', 'Order Lines'),
 	}
+	
+	_defaults = {
+		'from_stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
+		'state': 'draft',
+	}
 
 
 # ==========================================================================================================================
