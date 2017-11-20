@@ -19,7 +19,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'to_stock_location_id': fields.many2one('stock.location', 'Outgoing Location', required=True),
 		'input_user_id': fields.many2one('res.users', 'Input by', required=True),
 		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', required=True),
-		'move_date': fields.datetime('Move Date'),
+		'move_date': fields.datetime('Move Date', required=True),
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('accepted', 'Accepeted'),
