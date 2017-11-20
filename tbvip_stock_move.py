@@ -44,7 +44,11 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# METHODS --------------------------------------------------------------------------------------------------------------
 	
 	def action_accept(self, cr, uid, ids, context=None):
-		pass
+		# accepted by user uid
+		self.write(cr, uid, ids, {
+			'accepted_by_user_id': uid,
+		}, context=context)
+		return True
 	
 	def action_reject(self, cr, uid, ids, context=None):
 		pass
