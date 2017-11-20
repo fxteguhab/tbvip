@@ -237,9 +237,13 @@ class sale_order_return(models.TransientModel):
 		mod_obj = self.pool.get('ir.model.data')
 		act_obj = self.pool.get('ir.actions.act_window')
 		res_users_obj = self.pool.get('res.users')
+		sale_order_obj = self.pool.get('sale.order')
 		if context is None:
 			context = {}
-				
+
+		sale_order_id = context.get('so_id', 0)
+		return_amount = 0
+		
 		for form in self.browse(cr, uid, ids, context=context):
 			created_inv = []
 			company = res_users_obj.browse(cr, uid, uid, context=context).company_id
@@ -297,6 +301,7 @@ class sale_order_return(models.TransientModel):
 					dict_line[return_line.product_id.id] = {'quantity' : return_line.quantity,
 															'price_subtotal': return_line.amount_price,
 															'price_unit': return_line.amount_price/return_line.quantity}
+					return_amount += return_line.amount_price
 								
 			#  Bikin Invoice refund
 				refund_id = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
@@ -309,12 +314,14 @@ class sale_order_return(models.TransientModel):
 				movelines = inv.move_id.line_id
 				to_reconcile_ids = {}
 				
-			# reconcile(dilunasin) untuk invoice yang direfund
-				for line in movelines:
-					if line.account_id.id == inv.account_id.id:
-						to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
-					if line.reconcile_id:
-						line.reconcile_id.unlink()
+			# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal. Karena bisa aja kasusnya balikin duit doang, belum lunasin
+			# Invoice refund baru di reooncile
+				# for line in movelines:
+				#     if line.account_id.id == inv.account_id.id:
+				#         to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
+				#     if line.reconcile_id:
+				#         line.reconcile_id.unlink()
+	
 				refund.signal_workflow('invoice_open')
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
 				
@@ -330,6 +337,11 @@ class sale_order_return(models.TransientModel):
 						writeoff_journal_id = inv.journal_id.id,
 						writeoff_acc_id=inv.account_id.id
 					)
+					
+			if sale_order_id:
+				sale_order_obj.write(cr, uid, sale_order_id, {
+					'return_amount': return_amount
+				})
 			
 			# xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
 			# 		 (inv.type == 'in_refund') and 'action_invoice_tree2' or \
