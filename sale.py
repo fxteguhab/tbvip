@@ -27,6 +27,7 @@ class sale_order(osv.osv):
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_complex_payment': fields.boolean('Is Complex Payment'),
+		'return_amount' : fields.float('Return Amount'),
 	}
 
 	def _default_partner_id(self, cr, uid, context={}):
@@ -358,6 +359,7 @@ class sale_order(osv.osv):
 						'stock_picking_ids': [stock_picking_id],
 						'invoice_id' : invoice_id,
 						'invoice_ids' : [invoice_id],
+						'so_id' : id,
 					}
 				}
 
