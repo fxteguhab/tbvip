@@ -22,9 +22,10 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'state': fields.selection([
 			('draft', 'Draft'),
 			('accepted', 'Accepted'),
-			('rejected', 'Rejected')]
-			, 'State', readonly=True),
+			('rejected', 'Rejected')
+		], 'State', readonly=True),
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by'),
+		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by'),
 		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines'),
 	}
 	
@@ -46,12 +47,18 @@ class tbvip_interbranch_stock_move(osv.Model):
 	def action_accept(self, cr, uid, ids, context=None):
 		# accepted by user uid
 		self.write(cr, uid, ids, {
+			'state': 'accepted',
 			'accepted_by_user_id': uid,
 		}, context=context)
 		return True
 	
 	def action_reject(self, cr, uid, ids, context=None):
-		pass
+		# rejected by user uid
+		self.write(cr, uid, ids, {
+			'state': 'rejected',
+			'rejected_by_user_id': uid,
+		}, context=context)
+		return True
 
 # ==========================================================================================================================
 
