@@ -156,7 +156,7 @@ class product_product(osv.osv):
 		
 		# date
 		today = datetime.now()
-		purchase_needs_latest_sale_days = int(config_param_obj.get_param(cr, uid, 'purchase_needs_latest_sale', ''))
+		purchase_needs_latest_sale_days = int(config_param_obj.get_param(cr, uid, 'purchase_needs_latest_sale', '0'))
 		last_sale_date = today + timedelta(days=-purchase_needs_latest_sale_days)
 		
 		# product sales
