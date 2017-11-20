@@ -30,7 +30,10 @@ class tbvip_interbranch_stock_move(osv.Model):
 	}
 	
 	_defaults = {
-		'from_stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
+		'from_stock_location_id': lambda self, cr, uid, ctx:
+			self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
+		'input_user_id': lambda self, cr, uid, ctx: uid,
+		'move_date': datetime.now(),
 		'state': 'draft',
 	}
 	
@@ -45,7 +48,6 @@ class tbvip_interbranch_stock_move(osv.Model):
 class tbvip_interbranch_stock_move_line(osv.Model):
 	_name = 'tbvip.interbranch.stock.move.line'
 	_description = 'Detail Stock Move between branches'
-	_order = "move_date DESC, id DESC"
 	
 	# COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
@@ -65,6 +67,45 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 	
 	
 	# ==========================================================================================================================
+	
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(tbvip_interbranch_stock_move_line, self).create(cr, uid, vals, context)
+		# when created, message post to header
+		tbvip_interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+		if vals.get('header_id', False):
+			product_obj = self.pool.get('product.product')
+			new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
+			tbvip_interbranch_stock_move_obj.message_post(cr, uid, vals['header_id'],
+				body=_("New line added: %s %s %s") % (new_product.name, vals['qty'], vals['uom_id']))
+		return new_id
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		# if there are any changes, message post to header
+		tbvip_interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+		product_obj = self.pool.get('product.product')
+		for line in self.browse(cr, uid, ids, context=context):
+			if vals.get('header_id', False):
+				product_obj = self.pool.get('product.product')
+				new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
+				tbvip_interbranch_stock_move_obj.message_post(cr, uid, vals['header_id'],
+					body=_("New line added: %s - %s %s") % (new_product.name, vals['qty'], vals['uom_id']))
+			if vals.get('product_id', False):
+				new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
+				tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
+					body=_("Product \"%s\" changed into \"%s\"") % (line.product_id.name, new_product.name))
+			if vals.get('qty', False):
+				tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
+					body=_("There is a change on quantity for product \"%s\" from %s to %s") %
+						 (line.product_id.name, line.qty, vals['qty']))
+		return super(tbvip_interbranch_stock_move_line, self).write(cr, uid, ids, vals, context)
+	
+	def unlink(self, cr, uid, ids, context=None):
+		# when deleted, message post to header
+		tbvip_interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+		for line in self.browse(cr, uid, ids, context=context):
+			tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
+				body=_("Line removed: %s - %s %s") % (line.product_id.name, line.qty, line.uom_id.name))
+		return super(tbvip_interbranch_stock_move_line, self).unlink(cr, uid, ids, context)
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
 		product_obj = self.pool.get('product.product')
