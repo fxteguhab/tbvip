@@ -2,7 +2,6 @@ from openerp.osv import osv, fields
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
-from lxml import etree
 
 # ==========================================================================================================================
 
@@ -12,7 +11,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 	_inherit = ['mail.thread']
 	_order = "move_date DESC, id DESC"
 	
-# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'from_stock_location_id': fields.many2one('stock.location', 'Incoming Location', required=True),
@@ -37,6 +36,13 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'state': 'draft',
 	}
 	
+	# OVERRIDES ------------------------------------------------------------------------------------------------------------
+
+	
+	
+	
+	# METHODS --------------------------------------------------------------------------------------------------------------
+	
 	def action_accept(self, cr, uid, ids, context=None):
 		pass
 	
@@ -49,7 +55,7 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 	_name = 'tbvip.interbranch.stock.move.line'
 	_description = 'Detail Stock Move between branches'
 	
-	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'header_id': fields.many2one('tbvip.interbranch.stock.move', 'Interbranch Stock Move'),
@@ -65,8 +71,7 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		'is_changed': False,
 	}
 	
-	
-	# ==========================================================================================================================
+	# OVERRIDES ------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(tbvip_interbranch_stock_move_line, self).create(cr, uid, vals, context)
@@ -97,6 +102,12 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 				tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
 					body=_("There is a change on quantity for product \"%s\" from %s to %s") %
 						 (line.product_id.name, line.qty, vals['qty']))
+			# any changes, if uid not the same as header_id.input_user_id.id, then set is_changed to True
+			if not vals.get('is_changed', False):
+				if uid != line.header_id.input_user_id.id:
+					self.write(cr, uid, line.id, {
+						'is_changed': True,
+					}, context=context)
 		return super(tbvip_interbranch_stock_move_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -106,6 +117,8 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 			tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
 				body=_("Line removed: %s - %s %s") % (line.product_id.name, line.qty, line.uom_id.name))
 		return super(tbvip_interbranch_stock_move_line, self).unlink(cr, uid, ids, context)
+	
+	# METHODS --------------------------------------------------------------------------------------------------------------
 	
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
 		product_obj = self.pool.get('product.product')
