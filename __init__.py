@@ -26,4 +26,4 @@ import sale_order_return
 import koreksi_bon
 import purchase_needs
 import res_config
-# import tbvip_stock_move
+import tbvip_stock_move
