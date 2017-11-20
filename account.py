@@ -109,7 +109,7 @@ class tbvip_day_end(osv.osv):
 		], context=context)
 		omzet_cash_total = 0
 		for sale_order in sale_order_obj.browse(cr, uid, sale_order_done_ids, context=context):
-			omzet_cash_total += sale_order.payment_cash_amount
+			omzet_cash_total += (sale_order.payment_cash_amount - sale_order.return_amount)
 		return omzet_cash_total
 	
 	def calculate_amend_number(self, cr, uid, branch_id, day_end_date, context={}):
