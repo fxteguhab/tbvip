@@ -62,11 +62,10 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	def _create_picking_draft(self,cr, uid, interbranch_stock_move, context={}):
 		picking_obj = self.pool.get('stock.picking')
-		seq_obj = self.pool.get('ir.sequence')
-		picking_type_obj = self.pool.get('stock.picking.type')
 		stock_move_obj = self.pool.get('stock.move')
 		warehouse_obj = self.pool.get('stock.warehouse')
 		stock_location_obj = self.pool.get('stock.location')
+		model_obj = self.pool.get('ir.model.data')
 		if len(interbranch_stock_move.interbranch_stock_move_line_ids)>0:
 			#order the picking types with a sequence allowing to have the following suit for each warehouse: reception, internal, pick, pack, ship.
 			max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
@@ -77,19 +76,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 			
 			warehouse_id = warehouse_obj.search(cr, uid, [('lot_stock_id', '=', location_src.id)], limit = 1)
 			warehouse = warehouse_obj.browse(cr, uid, warehouse_id)
-			int_seq_id = seq_obj.create(cr, SUPERUSER_ID, {'name': warehouse.name + _(' Sequence internal'), 'prefix': warehouse.code + '/INT/', 'padding': 5}, context=context)
-			
-			# contoh create dapet dari stock, create_sequences_and_picking_types, baris 3461
-			picking_type_id = picking_type_obj.create(cr, uid, vals={
-				'name': _('Receipts'),
-				'warehouse_id': warehouse.id,
-				'code': 'internal',
-				'sequence_id': int_seq_id,
-				'default_location_src_id': location_src.id,
-				'default_location_dest_id': location_dest.id,
-				'sequence': max_sequence + 1,
-				# 'color': color
-			}, context=context)
+			picking_type_id = model_obj.get_object_reference(cr, uid, 'stock', 'picking_type_internal')[1]
 			
 			# contoh create dapet dari point_of_sale, create_picking, baris 843
 			picking_id =  picking_obj.create(cr, uid, {
@@ -98,11 +85,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 				'note': 'Interbranch Stock Move ' + location_src.name + '/' + location_dest.name,
 				'location_id': location_src.id,
 				'location_dest_id': location_dest.id,
-				# 'origin': order.name,
-				# 'partner_id': addr.get('delivery',False),
-				# 'date_done' : order.date_order,
-				# 'invoice_state': 'none',
-				# 'company_id': self.pool.get('res.company')._company_default_get(cr, uid, 'stock.location', context=c),
+				'origin' : 'Interbranch Stock Move ' + str(interbranch_stock_move.id)
 			}, context=context)
 			#untuk setiap product, bikin stock movenya
 			for line in interbranch_stock_move.interbranch_stock_move_line_ids:
@@ -115,7 +98,6 @@ class tbvip_interbranch_stock_move(osv.Model):
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'picking_id' : picking_id
-					# 'color': color
 				}, context=context)
 				
 			#call workflow to make picking transferred
@@ -124,6 +106,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	def _transfer_stock_picking(self, cr, uid, ids_picking, context = {}):
 		stock_picking_obj = self.pool.get('stock.picking')
+		stock_picking_obj.action_confirm(cr, uid, ids_picking, context = context)
+		stock_picking_obj.force_assign(cr, uid, ids_picking, context = context)
 		pop_up = stock_picking_obj.do_enter_transfer_details(cr, uid, ids_picking, context)
 		if pop_up:
 			stock_transfer_detail_id = pop_up['res_id']
