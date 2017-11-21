@@ -4,6 +4,7 @@ from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 import openerp.addons.decimal_precision as dp
 
+
 import openerp.addons.sale as imported_sale
 import openerp.addons.portal_sale as imported_portal_sale
 import openerp.addons.sale_stock as imported_sale_stock
@@ -11,6 +12,31 @@ import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
 import openerp.addons.sale_multiple_payment as imported_sale_multiple_payment
 import openerp.addons.product_custom_conversion as imported_product_custom_conversion
 import openerp.addons.chjs_price_list as imported_price_list
+
+
+
+
+
+from mako.template import Template
+from mako.lookup import TemplateLookup
+import time
+import os
+
+# Mendefinisikan path dari modul report terkait
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
+# Membuat field teks beserta parameternya dan menyimpannya dalam variabel print_fields
+print_fields = {'body': {
+	'type': 'text',
+	'default': 'Printing...',
+	'readonly': True,
+}}
+
+# Membuat tampilan formnya dari field teks secara simple
+print_form = '''<?xml version="1.0"?>
+	<form string="AUOUOOOOOOOOOOOOOOOOO">
+		<field name="body"/>
+	</form>'''
 
 # ==========================================================================================================================
 
@@ -362,6 +388,63 @@ class sale_order(osv.osv):
 						'so_id' : id,
 					}
 				}
+
+
+# PRINTS -------------------------------------------------------------------------------------------------------------------
+	
+	# Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
+	
+	def print_sale_order(self, cr, uid, ids, context):
+		# Mendefinikan template report berdasarkan path modul terkait
+		tpl = tpl_lookup.get_template('sale_order.txt')
+		tpl_line = tpl_lookup.get_template('sale_order_line.txt')
+		
+		# static data header
+		company_name = "tokobesiVIP"
+		company_address = "Jl. Somewhereeeee Over the Rainbooow"
+		company_phone = "29834834578"
+		
+		for so in self.browse(cr, uid, ids, context=context):
+			row_number = 0
+			order_line_rows = []
+			for line in so.order_line:
+				row_number += 1
+				row = tpl_line.render(
+					no=str(row_number),
+					qty=str(line.product_uom_qty),
+					uom=line.product_uom.name,
+					name=line.product_id.name,
+					unit_price=str(line.price_unit),
+					discount=line.discount_string,
+					subtotal=str(line.price_subtotal),
+				)
+				order_line_rows.append(row)
+			sale_order = tpl.render(
+				company_name=company_name,
+				company_address=company_address,
+				company_phone=company_phone,
+				bon_number=so.bon_number,
+				
+				date=so.date_order,
+				customer_name=so.partner_id.name,
+				customer_address=so.partner_id.street,
+				
+				order_lines=order_line_rows,
+				discount_total=str(so.total_discount_amount),
+				total=str(so.amount_total),
+			)
+			
+			# Membuat temporary file yang akan dicetak beserta pathnya
+			filename = 'openerp/addons/tbvip/tmp/print_sale_order.txt'
+			# Mengisi file tersebut dengan data yang telah dirender
+			f = open(filename, 'w')
+			f.write(sale_order)
+			f.close()
+			# Proses cetak dijalankan dan pastikan variabel nama_printer adalah nama printer yang anda setting atau tambahkan dengan webmin diatas
+			os.system('lpr -Pnama_printer %s' % filename)
+			# Hapus file yang telah dicetak
+			os.remove(filename)
+			return True
 
 # ==========================================================================================================================
 

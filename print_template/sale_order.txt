@@ -1,0 +1,22 @@
+${'RECEIVING REPORTEEEEEEEEEEEE'.rjust(45)}
+
+${company_name}
+${company_address}
+${company_phone}
+Nota No. ${bon_number}
+
+${'-'*70}
+No. ${'Banyak'.ljust(10)} ${'Satuan'.ljust(10)} ${'Nama Barang'.ljust(40)} ${'Harga Satuan'.ljust(12)} ${'Diskon'.ljust(10)} ${'Subtotal'.ljust(15)}
+${'-'*70}
+% for val in order_lines:
+${val}
+% endfor
+${'-'*70}
+
+${'Diskon:'.rjust(10)} ${discount_total}
+${'TOTAL:'.rjust(10)} ${total}
+
+
+
+${'Tanda terima,'.ljust(20)}
+${'Hormat kami,'.rjust(20)}
