@@ -16,7 +16,8 @@ class canvassing_canvas(osv.osv):
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'total_distance': fields.float('Total Distance', readonly=True),
-		'is_recalculated': fields.boolean('Is Recalculated?', search=False)
+		'is_recalculated': fields.boolean('Is Recalculated?', search=False),
+		'interbranch_move_ids': fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
 	}
 
 	_defaults = {
@@ -119,6 +120,12 @@ class canvassing_canvas(osv.osv):
 
 	def action_set_finish(self, cr, uid, ids, context={}):
 		super(canvassing_canvas, self).action_set_finish(cr, uid, ids, context=context)
+		# set interbranch stock move to accepted if is_executed
+		interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+		for canvas in self.browse(cr, uid, ids, context=context):
+			for interbranch_canvas_line in canvas.interbranch_move_ids:
+				if interbranch_canvas_line.is_executed:
+					interbranch_stock_move_obj.action_accept(cr, uid, interbranch_canvas_line.interbranch_move_id.id, context=context)
 		return self.action_recalculate_distance(cr, uid, ids, context=context)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
@@ -208,3 +215,27 @@ class canvasssing_canvas_stock_line(osv.Model):
 					'distance': google_map.distance(obj.address,obj.canvas_id.branch_id.address,'driving',api='masukkan_google_api_key_yang_benar'),
 				})
 """
+
+
+
+
+# ==========================================================================================================================
+
+class canvassing_canvas_interbranch_line(osv.Model):
+	_name = 'canvassing.canvas.interbranch.line'
+	_description = 'Interbranch Line for Canvassing'
+	
+	# COLUMNS --------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'canvas_id': fields.many2one('canvassing.canvas', 'Canvas'),
+		'interbranch_move_id': fields.many2one('tbvip.interbranch.stock.move', 'Interbranch Stock Move', required=True),
+		'is_executed': fields.boolean('Is Executed'),
+		'notes': fields.text('Notes'),
+		'canvas_state': fields.related('canvas_id', 'state', type="char", string="Canvas State"),
+		# not needed, can see from interbranch_move_id.name
+		# 'from_stock_location_id': fields.related('interbranch_move_id', 'from_stock_location_id',
+		# 	type="many2one", relation="stock.location", string="Incoming Location"),
+		# 'to_stock_location_id': fields.related('interbranch_move_id', 'to_stock_location_id',
+		# 	type="many2one", relation="stock.location", string="Outgoing Location"),
+	}

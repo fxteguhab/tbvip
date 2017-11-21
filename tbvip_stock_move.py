@@ -38,9 +38,17 @@ class tbvip_interbranch_stock_move(osv.Model):
 	}
 	
 	# OVERRIDES ------------------------------------------------------------------------------------------------------------
-
 	
 	
+	
+	def name_get(self, cr, uid, ids, context=None):
+		result = []
+		for interbranch_move in self.browse(cr, uid, ids, context):
+			result.append((
+				interbranch_move.id,
+				interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name
+			))
+		return result
 	
 	# METHODS --------------------------------------------------------------------------------------------------------------
 	
