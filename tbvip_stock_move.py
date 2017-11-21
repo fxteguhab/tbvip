@@ -77,7 +77,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 			
 			warehouse_id = warehouse_obj.search(cr, uid, [('lot_stock_id', '=', location_src.id)], limit = 1)
 			warehouse = warehouse_obj.browse(cr, uid, warehouse_id)
-			int_seq_id = seq_obj.create(cr, SUPERUSER_ID, {'name': warehouse.name + _(' Sequence internal'), 'prefix': warehouse.code + '/INT/', 'padding': 5, 'implementation' : 'no_gap'}, context=context)
+			int_seq_id = seq_obj.create(cr, SUPERUSER_ID, {'name': warehouse.name + _(' Sequence internal'), 'prefix': warehouse.code + '/INT/', 'padding': 5}, context=context)
 			
 			# contoh create dapet dari stock, create_sequences_and_picking_types, baris 3461
 			picking_type_id = picking_type_obj.create(cr, uid, vals={
@@ -112,8 +112,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 					'location_id': location_src.id,
 					'location_dest_id': location_dest.id,
 					'sequence': max_sequence + 1,
-					'product_id': line[2]['product_id'],
-					'product_uom': line[2]['uom_id'],
+					'product_id': line.product_id.id,
+					'product_uom': line.uom_id.id,
 					'picking_id' : picking_id
 					# 'color': color
 				}, context=context)
