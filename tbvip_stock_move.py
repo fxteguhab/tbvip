@@ -54,6 +54,10 @@ class tbvip_interbranch_stock_move(osv.Model):
 	def action_accept(self, cr, uid, ids, context=None):
 		for interbranch_stock_move in self.browse(cr, uid, ids):
 			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
+		
+		# tandai semua canvassing untuk interbranch ini is_executed = True
+		self._write_is_executed_canvassing(cr, uid, ids, context=context)
+			
 		# accepted by user uid
 		self.write(cr, uid, ids, {
 			'state': 'accepted',
@@ -69,6 +73,12 @@ class tbvip_interbranch_stock_move(osv.Model):
 		}, context=context)
 		return True
 	
+	def _write_is_executed_canvassing(self, cr, uid, interbranch_ids, context={}):
+		canvassing_interbranch_obj = self.pool.get('canvassing.canvas.interbranch.line')
+		canvassing_interbranch_ids = canvassing_interbranch_obj.search(cr, uid, [('interbranch_move_id', 'in', interbranch_ids)])
+		if len(canvassing_interbranch_ids)>0:
+			canvassing_interbranch_obj.write(cr, uid, canvassing_interbranch_ids,  {'is_executed': True})
+			
 	def _create_picking_draft(self,cr, uid, interbranch_stock_move, context={}):
 		picking_obj = self.pool.get('stock.picking')
 		stock_move_obj = self.pool.get('stock.move')
