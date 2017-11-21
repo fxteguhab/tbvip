@@ -29,8 +29,9 @@
 							<tree editable="bottom">
 								<field name="product_id" on_change="onchange_product_id(product_id)" options="{'no_create': 1}"/>
 								<field name="qty"/>
-								<field name="uom_id" options="{'no_create': 1}"/>
+								<field name="uom_id" domain = "[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]" options="{'no_create': 1}" on_change="onchange_product_uom(product_id, uom_id)"/>
 								<field name="move_date" readonly="1" invisible="1"/>
+								<field name="uom_category_filter_id" invisible="1"/>
 								<field name="is_changed" readonly="1"/>
 								<field name="notes"/>
 							</tree>

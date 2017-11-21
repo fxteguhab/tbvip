@@ -139,6 +139,8 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		'is_changed': fields.boolean('Is Changed?'),
 		'move_date': fields.related('header_id', 'move_date', type="datetime", string="Move Date"),
 		'notes': fields.text('Notes'),
+		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
+			string='UoM Category', readonly=True)
 	}
 	
 	_defaults = {
@@ -197,7 +199,31 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
 		product_obj = self.pool.get('product.product')
 		product = product_obj.browse(cr, uid, product_id)
-		return {
+		result = {
 			'value': {'uom_id': product.product_tmpl_id.uom_id.id},
 			'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}
 		}
+		result = self._update_uom_domain_custom_conversion(result)
+		return result
+	
+	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id, context = {}):
+		product_conversion_obj = self.pool.get('product.conversion')
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
+		uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, uom_id)
+		result = {
+			'value': {'uom_id': uom_record.id},
+			'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}
+		}
+		result = self._update_uom_domain_custom_conversion(result)
+		return result
+	
+	def _update_uom_domain_custom_conversion(self, onchange_result):
+		if onchange_result.get('domain', False):
+			if onchange_result['domain'].get('uom_id', False):
+				onchange_result['domain']['uom_id'].append(('is_auto_create', '=', False))
+			else:
+				onchange_result['domain']['uom_id'] = [('is_auto_create', '=', False)]
+		else:
+			onchange_result.update({'domain': {'uom_id': [('is_auto_create', '=', False)]}})
+		return onchange_result
