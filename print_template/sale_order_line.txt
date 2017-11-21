@@ -1,1 +1,1 @@
-${no.rjust(3)} ${qty.rjust(10)} ${uom.ljust(10)} ${name.ljust(40)} ${unit_price.rjust(12)} ${discount.ljust(10)} ${subtotal.rjust(15)}
+| ${no.rjust(3)} | ${qty.rjust(8)} | ${uom.ljust(10)} | ${name.ljust(40)} | ${unit_price.rjust(12)} | ${discount.ljust(10)} | ${subtotal.rjust(15)} |

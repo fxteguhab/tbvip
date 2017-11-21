@@ -1,22 +1,19 @@
-${'RECEIVING REPORTEEEEEEEEEEEE'.rjust(45)}
+${company_name.ljust(50)}
+${company_address.ljust(50)}
+${company_phone.ljust(50)}
+Nota No. ${bon_number.ljust(41)}
 
-${company_name}
-${company_address}
-${company_phone}
-Nota No. ${bon_number}
-
-${'-'*70}
-No. ${'Banyak'.ljust(10)} ${'Satuan'.ljust(10)} ${'Nama Barang'.ljust(40)} ${'Harga Satuan'.ljust(12)} ${'Diskon'.ljust(10)} ${'Subtotal'.ljust(15)}
-${'-'*70}
+${'-'*120}
+| ${'No.'.ljust(3)} | ${'Banyak'.ljust(8)} | ${'Satuan'.ljust(10)} | ${'Nama Barang'.ljust(40)} | ${'Harga Satuan'.ljust(12)} | ${'Diskon'.ljust(10)} | ${'Subtotal'.ljust(15)} |
+${'-'*120}
 % for val in order_lines:
 ${val}
 % endfor
-${'-'*70}
+${'-'*120}
 
-${'Diskon:'.rjust(10)} ${discount_total}
-${'TOTAL:'.rjust(10)} ${total}
+${''.rjust(87)} | ${'Diskon:'.rjust(10)} | ${discount_total.rjust(15)} |
+${' '*88}${'-'*32}
+${''.rjust(87)} | ${'TOTAL:'.rjust(10)} | ${total.rjust(15)} |
+${' '*88}${'-'*32}
 
-
-
-${'Tanda terima,'.ljust(20)}
-${'Hormat kami,'.rjust(20)}
+${'Tanda terima,'.ljust(25)} ${'PERINGATAN!'.rjust(41)} ${''.rjust(28)} ${'Hormat kami,'.rjust(25)}

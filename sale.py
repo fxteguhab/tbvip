@@ -435,7 +435,8 @@ class sale_order(osv.osv):
 			)
 			
 			# Membuat temporary file yang akan dicetak beserta pathnya
-			filename = 'openerp/addons/tbvip/tmp/print_sale_order.txt'
+			path_file = 'openerp/addons/tbvip/tmp/'
+			filename = path_file + 'print_sale_order ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
 			# Mengisi file tersebut dengan data yang telah dirender
 			f = open(filename, 'w')
 			f.write(sale_order)
@@ -443,7 +444,7 @@ class sale_order(osv.osv):
 			# Proses cetak dijalankan dan pastikan variabel nama_printer adalah nama printer yang anda setting atau tambahkan dengan webmin diatas
 			os.system('lpr -Pnama_printer %s' % filename)
 			# Hapus file yang telah dicetak
-			os.remove(filename)
+			# os.remove(filename)
 			return True
 
 # ==========================================================================================================================
