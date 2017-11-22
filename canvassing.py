@@ -125,7 +125,7 @@ class canvassing_canvas(osv.osv):
 		for canvas in self.browse(cr, uid, ids, context=context):
 			for interbranch_canvas_line in canvas.interbranch_move_ids:
 				if interbranch_canvas_line.is_executed:
-					interbranch_stock_move_obj.action_accept(cr, uid, interbranch_canvas_line.interbranch_move_id.id, context=context)
+					interbranch_stock_move_obj.action_accept(cr, uid, [interbranch_canvas_line.interbranch_move_id.id], context=context)
 		return self.action_recalculate_distance(cr, uid, ids, context=context)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
