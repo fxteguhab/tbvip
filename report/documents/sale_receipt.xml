@@ -16,6 +16,7 @@
 							display: inline-block;
 							font-family: sans-serif;
 							overflow: hidden;
+							-moz-transform: scale(0.5);
 						}
 						.sale_receipt .center-align {
 							text-align: center;
