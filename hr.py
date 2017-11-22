@@ -104,7 +104,7 @@ class hr_payslip(osv.osv):
 	
 	def print_payslip_dot_matrix(self, cr, uid, ids, context):
 		# Mendefinisikan path dari modul report terkait
-		tpl_lookup = TemplateLookup(directories=['E:/Workstation/Odoo Addons/v8/Christian Juniady and Associates/tbvip/print_template']) # 'openerp/addons/tbvip/print_template
+		tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 		
 		# Mendefinikan template report berdasarkan path modul terkait
 		template = tpl_lookup.get_template('payslip.txt')
@@ -128,87 +128,87 @@ class hr_payslip(osv.osv):
 			for payslip_line in payslip.line_ids:
 				line.update({payslip_line.code: payslip_line.total})
 			
-			total_bonus_point = bonus.get('POIN_XTRA_POINT', -333) \
-					+ bonus.get('POIN_PENALTY_POINT', -333) \
-					+ bonus.get('POIN_TOP_POINT', -333) \
-					+ bonus.get('POIN_MOBIL_POINT', -333) \
-					+ bonus.get('POIN_MOTOR_POINT', -333) \
-					+ bonus.get('POIN_SO_POINT', -333) \
-					+ bonus.get('POIN_SALES_POINT', -333) \
-					+ bonus.get('POIN_ADM_POINT', -333)
+			total_bonus_point = bonus.get('POIN_XTRA_POINT', 0) \
+					+ bonus.get('POIN_PENALTY_POINT', 0) \
+					+ bonus.get('POIN_TOP_POINT', 0) \
+					+ bonus.get('POIN_MOBIL_POINT', 0) \
+					+ bonus.get('POIN_MOTOR_POINT', 0) \
+					+ bonus.get('POIN_SO_POINT', 0) \
+					+ bonus.get('POIN_SALES_POINT', 0) \
+					+ bonus.get('POIN_ADM_POINT', 0)
 			
-			total_bonus_value = bonus.get('POIN_XTRA_BONUS', -333) \
-					+ bonus.get('POIN_PENALTY_BONUS', -333) \
-					+ bonus.get('POIN_TOP_BONUS', -333) \
-					+ bonus.get('POIN_MOBIL_BONUS', -333) \
-					+ bonus.get('POIN_MOTOR_BONUS', -333) \
-					+ bonus.get('POIN_SO_BONUS', -333) \
-					+ bonus.get('POIN_SALES_BONUS', -333) \
-					+ bonus.get('POIN_ADM_BONUS', -333)
+			total_bonus_value = bonus.get('POIN_XTRA_BONUS', 0) \
+					+ bonus.get('POIN_PENALTY_BONUS', 0) \
+					+ bonus.get('POIN_TOP_BONUS', 0) \
+					+ bonus.get('POIN_MOBIL_BONUS', 0) \
+					+ bonus.get('POIN_MOTOR_BONUS', 0) \
+					+ bonus.get('POIN_SO_BONUS', 0) \
+					+ bonus.get('POIN_SALES_BONUS', 0) \
+					+ bonus.get('POIN_ADM_BONUS', 0)
 			
 			payslip_print = template.render(
 				print_date=str(datetime.now()),
 				from_date=str(payslip.date_from),
 				name=str(payslip.employee_id.name),
-				masuk=str(worked_days.get('masuk', -333)),
-				pokok=str(bonus.get('MASUK_BONUS_BASIC', -333)),
-				full=str(worked_days.get('full', -333)),
-				makan=str(bonus.get('FULL_BONUS_BASIC', -333)),
-				full_minggu=str(worked_days.get('full_minggu', -333)),
-				mingguan=str(bonus.get('FULL_MINGGU_BONUS_BASIC', -333)),
-				total_pokok=str(line.get('BASIC', -333)),
+				masuk=str(worked_days.get('masuk', 0)),
+				pokok=str(bonus.get('MASUK_BONUS_BASIC', 0)),
+				full=str(worked_days.get('full', 0)),
+				makan=str(bonus.get('FULL_BONUS_BASIC', 0)),
+				full_minggu=str(worked_days.get('full_minggu', 0)),
+				mingguan=str(bonus.get('FULL_MINGGU_BONUS_BASIC', 0)),
+				total_pokok=str(line.get('BASIC', 0)),
 				
 				to_date=str(payslip.date_to),
 				
-				total_minggu=str(total_bonus_value + line.get('BASIC', -333)),
+				total_minggu=str(total_bonus_value + line.get('BASIC', 0)),
 				
 				potongan=str(0),
 				
-				point_mobil=str(bonus.get('POIN_MOBIL_POINT', -333)),
-				lvl_mobil=str(bonus.get('POIN_MOBIL_LEVEL', -333)),
-				bonus_mobil=str(bonus.get('POIN_MOBIL_BONUS', -333)),
+				point_mobil=str(bonus.get('POIN_MOBIL_POINT', 0)),
+				lvl_mobil=str(bonus.get('POIN_MOBIL_LEVEL', 0)),
+				bonus_mobil=str(bonus.get('POIN_MOBIL_BONUS', 0)),
 				nabung=str(0),
 				
-				point_motor=str(bonus.get('POIN_MOTOR_POINT', -333)),
-				lvl_motor=str(bonus.get('POIN_MOTOR_LEVEL', -333)),
-				bonus_motor=str(bonus.get('POIN_MOTOR_BONUS', -333)),
+				point_motor=str(bonus.get('POIN_MOTOR_POINT', 0)),
+				lvl_motor=str(bonus.get('POIN_MOTOR_LEVEL', 0)),
+				bonus_motor=str(bonus.get('POIN_MOTOR_BONUS', 0)),
 				
-				point_so=str(bonus.get('POIN_SO_POINT', -333)),
-				lvl_so=str(bonus.get('POIN_SO_LEVEL', -333)),
-				bonus_so=str(bonus.get('POIN_SO_BONUS', -333)),
-				gaji=str(line.get('NET', -333)),
+				point_so=str(bonus.get('POIN_SO_POINT', 0)),
+				lvl_so=str(bonus.get('POIN_SO_LEVEL', 0)),
+				bonus_so=str(bonus.get('POIN_SO_BONUS', 0)),
+				gaji=str(line.get('NET', 0)),
 				
-				point_sales=str(bonus.get('POIN_SALES_POINT', -333)),
-				lvl_sales=str(bonus.get('POIN_SALES_LEVEL', -333)),
-				bonus_sales=str(bonus.get('POIN_SALES_BONUS', -333)),
+				point_sales=str(bonus.get('POIN_SALES_POINT', 0)),
+				lvl_sales=str(bonus.get('POIN_SALES_LEVEL', 0)),
+				bonus_sales=str(bonus.get('POIN_SALES_BONUS', 0)),
 				
-				point_adm=str(bonus.get('POIN_ADM_POINT', -333)),
-				lvl_adm=str(bonus.get('POIN_ADM_LEVEL', -333)),
-				bonus_adm=str(bonus.get('POIN_ADM_BONUS', -333)),
+				point_adm=str(bonus.get('POIN_ADM_POINT', 0)),
+				lvl_adm=str(bonus.get('POIN_ADM_LEVEL', 0)),
+				bonus_adm=str(bonus.get('POIN_ADM_BONUS', 0)),
 				tabungan=str(0),
 								
-				point_xtra=str(bonus.get('POIN_XTRA_POINT', -333)),
-				lvl_xtra=str(bonus.get('POIN_XTRA_LEVEL', -333)),
-				bonus_xtra=str(bonus.get('POIN_XTRA_BONUS', -333)),
+				point_xtra=str(bonus.get('POIN_XTRA_POINT', 0)),
+				lvl_xtra=str(bonus.get('POIN_XTRA_LEVEL', 0)),
+				bonus_xtra=str(bonus.get('POIN_XTRA_BONUS', 0)),
 				pinjaman=str(0),
 				
-				point_penalti=str(bonus.get('POIN_PENALTY_POINT', -333)),
-				lvl_penalti=str(bonus.get('POIN_PENALTY_LEVEL', -333)),
-				bonus_penalti=str(bonus.get('POIN_PENALTY_BONUS', -333)),
-				level=str(bonus.get('CURRENT_LEVEL', -333)), # TODO
+				point_penalti=str(bonus.get('POIN_PENALTY_POINT', 0)),
+				lvl_penalti=str(bonus.get('POIN_PENALTY_LEVEL', 0)),
+				bonus_penalti=str(bonus.get('POIN_PENALTY_BONUS', 0)),
+				level=str(bonus.get('CURRENT_LEVEL_BASIC', 0)),
 				
-				point_top=str(bonus.get('POIN_TOP_POINT', -333)),
-				lvl_top=str(bonus.get('POIN_TOP_LEVEL', -333)),
-				bonus_top=str(bonus.get('POIN_TOP_BONUS', -333)),
-				total_poin=str(bonus.get('TOTAL_POINT_BASIC', -333)),
+				point_top=str(bonus.get('POIN_TOP_POINT', 0)),
+				lvl_top=str(bonus.get('POIN_TOP_LEVEL', 0)),
+				bonus_top=str(bonus.get('POIN_TOP_BONUS', 0)),
+				total_poin=str(bonus.get('TOTAL_POINT_BASIC', 0)),
 				
 				total_bonus_point=str(total_bonus_point),
 				total_bonus_value=str(total_bonus_value),
-				target_poin=str(bonus.get('NEXT_POINT_BASIC', -333)), # TODO
+				target_poin=str(bonus.get('NEXT_LEVEL_POINT_BASIC', 0)),
 			)
 			
 			# Create temporary file
-			path_file = 'D:/' # 'openerp/addons/tbvip/tmp/'
+			path_file = 'openerp/addons/tbvip/tmp/'
 			filename = path_file + 'print_payslip ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
 			# Put rendered string to file
 			f = open(filename, 'w')

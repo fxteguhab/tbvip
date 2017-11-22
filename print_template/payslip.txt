@@ -12,5 +12,5 @@ ${print_date.ljust(10)}
 |${'XTRA'.ljust(16)}|${point_xtra.ljust(16)}|${lvl_xtra.ljust(16)}|${bonus_xtra.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Pinjaman ::'.ljust(16)}|${pinjaman.ljust(16)}|
 |${'PENALTI'.ljust(16)}|${point_penalti.ljust(16)}|${lvl_penalti.ljust(16)}|${bonus_penalti.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Level ::'.ljust(16)}|${level.ljust(16)}|
 |${'TOP'.ljust(16)}|${point_top.ljust(16)}|${lvl_top.ljust(16)}|${bonus_top.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Total Poin ::'.ljust(16)}|${total_poin.ljust(16)}|
-|${'-'*16}|${'-'*16}|${'-'*16}|${'-'.*16}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}| ${'-'*16}| ${'-'*16}|
+|${'-'*16}|${'-'*16}|${'-'*16}|${'-'*16}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'-'*16}|${'-'*16}|
 |${'TOTAL BONUS'.ljust(16)}|${total_bonus_point.ljust(16)}|${''.ljust(16)}|${total_bonus_value.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Target Poin ::'.ljust(16)}|${target_poin.ljust(16)}|
