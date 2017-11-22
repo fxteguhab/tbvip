@@ -1,3 +1,5 @@
+import os
+from mako.lookup import TemplateLookup
 from openerp.osv import osv, fields
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
@@ -95,3 +97,89 @@ class hr_attendance(osv.osv):
 			res['arch'] = etree.tostring(doc)
 		
 		return res
+
+
+class hr_payslip(osv.osv):
+	_inherit = 'hr.payslip'
+	
+	def print_payslip_dot_matrix(self, cr, uid, ids, context):
+		# Mendefinisikan path dari modul report terkait
+		tpl_lookup = TemplateLookup(directories=['E:/Workstation/Odoo Addons/v8/Christian Juniady and Associates/tbvip/print_template']) # 'openerp/addons/tbvip/print_template
+
+		# Mendefinikan template report berdasarkan path modul terkait
+		template = tpl_lookup.get_template('payslip.txt')
+		
+		for payslip in self.browse(cr, uid, ids, context=context):
+			payslip_print = template.render(
+				print_date=str(datetime.now()),
+				from_date=str(payslip.date_from),
+				name=str(payslip.employee_id.name),
+				masuk=str(123),
+				pokok=str(123),
+				full=str(123),
+				makan=str(123),
+				full_minggu=str(123),
+				mingguan=str(123),
+				total_pokok=str(123),
+				
+				to_date=str(payslip.date_to),
+				
+				total_minggu=str(123),
+				
+				potongan=str(123),
+				
+				point_mobil=str(123),
+				lvl_mobil=str(123),
+				bonus_mobil=str(123),
+				nabung=str(123),
+				
+				point_motor=str(123),
+				lvl_motor=str(123),
+				bonus_motor=str(123),
+				
+				point_so=str(123),
+				lvl_so=str(123),
+				bonus_so=str(123),
+				gaji=str(123),
+				
+				point_sales=str(123),
+				lvl_sales=str(123),
+				bonus_sales=str(123),
+				
+				point_adm=str(123),
+				lvl_adm=str(123),
+				bonus_adm=str(123),
+				tabungan=str(123),
+								
+				point_xtra=str(123),
+				lvl_xtra=str(123),
+				bonus_xtra=str(123),
+				pinjaman=str(123),
+				
+				point_penalti=str(123),
+				lvl_penalti=str(123),
+				bonus_penalti=str(123),
+				level=str(123),
+				
+				point_top=str(123),
+				lvl_top=str(123),
+				bonus_top=str(123),
+				total_poin=str(123),
+				
+				total_bonus_point=str(123),
+				total_bonus_value=str(123),
+				target_poin=str(123),
+			)
+			
+			# Create temporary file
+			path_file = 'D:/' # 'openerp/addons/tbvip/tmp/'
+			filename = path_file + 'print_payslip ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
+			# Put rendered string to file
+			f = open(filename, 'w')
+			f.write(payslip_print.replace("\r\n", "\n"))
+			f.close()
+			# Process printing
+			os.system('lpr -Pnama_printer %s' % filename)
+			# Remove printed file
+			# os.remove(filename) #TODO UNCOMMENT
+			return True
