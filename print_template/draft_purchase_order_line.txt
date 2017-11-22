@@ -1,0 +1,1 @@
+| ${name.ljust(44)} | ${qty.rjust(9)} |

@@ -17,26 +17,10 @@ import openerp.addons.chjs_price_list as imported_price_list
 
 
 
-from mako.template import Template
 from mako.lookup import TemplateLookup
-import time
 import os
-
-# Mendefinisikan path dari modul report terkait
+# Define path to templates
 tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
-
-# Membuat field teks beserta parameternya dan menyimpannya dalam variabel print_fields
-print_fields = {'body': {
-	'type': 'text',
-	'default': 'Printing...',
-	'readonly': True,
-}}
-
-# Membuat tampilan formnya dari field teks secara simple
-print_form = '''<?xml version="1.0"?>
-	<form string="AUOUOOOOOOOOOOOOOOOOO">
-		<field name="body"/>
-	</form>'''
 
 # ==========================================================================================================================
 
@@ -455,18 +439,18 @@ class sale_order(osv.osv):
 				total=str(so.amount_total),
 			)
 			
-			# Membuat temporary file yang akan dicetak beserta pathnya
+			# Create temporary file
 			path_file = 'openerp/addons/tbvip/tmp/'
 			filename = path_file + 'print_sale_order ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
-			# Mengisi file tersebut dengan data yang telah dirender
+			# Put rendered string to file
 			f = open(filename, 'w')
 			f.write(sale_order.replace("\r\n", "\n"))
 			f.close()
-			# Proses cetak dijalankan dan pastikan variabel nama_printer adalah nama printer yang anda setting atau tambahkan dengan webmin diatas
+			# Process printing
 			os.system('lpr -Pnama_printer %s' % filename)
-			# Hapus file yang telah dicetak
+			# Remove printed file
 			# os.remove(filename) #TODO UNCOMMENT
-			return True
+		return True
 
 # ==========================================================================================================================
 
