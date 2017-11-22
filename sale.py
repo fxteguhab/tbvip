@@ -399,12 +399,17 @@ class sale_order(osv.osv):
 		tpl = tpl_lookup.get_template('sale_order.txt')
 		tpl_line = tpl_lookup.get_template('sale_order_line.txt')
 		
-		# static data header
-		company_name = "tokobesiVIP"
-		company_address = "Jl. Somewhereeeee Over the Rainbooow"
-		company_phone = "29834834578"
-		
 		for so in self.browse(cr, uid, ids, context=context):
+			company = so.create_uid.company_id
+			company_name = company.name if company.name else ''
+			company_address = so.branch_id.address if so.branch_id.address else ''
+			company_city = company.city if company.city else ''
+			company_phone = company.phone if company.phone else ''
+			branch_name = so.branch_id.name if so.branch_id.name else ''
+			customer_name = so.partner_id.name if so.partner_id.name else ''
+			customer_address = so.partner_id.street if so.partner_id.street else ''
+			
+			# add sale order lines
 			row_number = 0
 			order_line_rows = []
 			for line in so.order_line:
@@ -419,15 +424,31 @@ class sale_order(osv.osv):
 					subtotal=str(line.price_subtotal),
 				)
 				order_line_rows.append(row)
+			# add blank rows
+			while row_number < 15:
+				row_number += 1
+				row = tpl_line.render(
+					no=str(row_number),
+					qty='',
+					uom='',
+					name='',
+					unit_price='',
+					discount='',
+					subtotal='',
+				)
+				order_line_rows.append(row)
+			# render sale order
 			sale_order = tpl.render(
+				branch_name=branch_name,
 				company_name=company_name,
 				company_address=company_address,
+				company_city=company_city,
 				company_phone=company_phone,
 				bon_number=so.bon_number,
 				
-				date=so.date_order,
-				customer_name=so.partner_id.name,
-				customer_address=so.partner_id.street,
+				date=datetime.strptime(so.date_order, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
+				customer_name=customer_name,
+				customer_address=customer_address,
 				
 				order_lines=order_line_rows,
 				discount_total=str(so.total_discount_amount),
@@ -439,12 +460,12 @@ class sale_order(osv.osv):
 			filename = path_file + 'print_sale_order ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
 			# Mengisi file tersebut dengan data yang telah dirender
 			f = open(filename, 'w')
-			f.write(sale_order)
+			f.write(sale_order.replace("\r\n", "\n"))
 			f.close()
 			# Proses cetak dijalankan dan pastikan variabel nama_printer adalah nama printer yang anda setting atau tambahkan dengan webmin diatas
 			os.system('lpr -Pnama_printer %s' % filename)
 			# Hapus file yang telah dicetak
-			# os.remove(filename)
+			# os.remove(filename) #TODO UNCOMMENT
 			return True
 
 # ==========================================================================================================================
