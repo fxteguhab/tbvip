@@ -165,9 +165,10 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		tbvip_interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
 		if vals.get('header_id', False):
 			product_obj = self.pool.get('product.product')
+			uom_obj = self.pool.get('product.uom')
 			new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
 			tbvip_interbranch_stock_move_obj.message_post(cr, uid, vals['header_id'],
-				body=_("New line added: %s %s %s") % (new_product.name, vals['qty'], vals['uom_id']))
+				body=_("New line added: %s | %s %s") % (new_product.name, vals['qty'], uom_obj.browse(cr, uid, vals['uom_id'], context=context).name))
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -177,9 +178,10 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		for line in self.browse(cr, uid, ids, context=context):
 			if vals.get('header_id', False):
 				product_obj = self.pool.get('product.product')
+				uom_obj = self.pool.get('product.uom')
 				new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
 				tbvip_interbranch_stock_move_obj.message_post(cr, uid, vals['header_id'],
-					body=_("New line added: %s - %s %s") % (new_product.name, vals['qty'], vals['uom_id']))
+					body=_("New line added: %s | %s %s") % (new_product.name, vals['qty'], uom_obj.browse(cr, uid, vals['uom_id'], context=context).name))
 			if vals.get('product_id', False):
 				new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
 				tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
