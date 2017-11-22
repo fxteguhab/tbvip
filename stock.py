@@ -2,6 +2,12 @@ from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime
 
+
+from mako.lookup import TemplateLookup
+import os
+# Define path to templates
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
 # ==========================================================================================================================
 
 class stock_quant(osv.osv):
@@ -399,3 +405,49 @@ class stock_inventory_line(osv.osv):
 			'sublocation': onchange_result['value']['sublocation']
 			})
 		return new_id
+
+
+# ==========================================================================================================================
+
+class stock_inventory(osv.osv):
+	_inherit = 'stock.inventory'
+	
+	# PRINTS ---------------------------------------------------------------------------------------------------------------
+	
+	def print_stock_inventory(self, cr, uid, ids, context):
+		tpl = tpl_lookup.get_template('stock_opname.txt')
+		tpl_line = tpl_lookup.get_template('stock_opname_line.txt')
+		
+		for inv_adj in self.browse(cr, uid, ids, context=context):
+			# get inventory adjustment lines
+			row_number = 0
+			stock_opname_rows = []
+			for line in inv_adj.line_ids:
+				row_number += 1
+				row = tpl_line.render(
+					no=str(row_number),
+					name=line.product_id.name if line.product_id.name else '',
+					location=line.location_id.name if line.location_id.name else '',
+					qty='',
+				)
+				stock_opname_rows.append(row)
+			# render stock opname
+			stock_opname = tpl.render(
+				datetime=datetime.strptime(inv_adj.date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
+				expiration_datetime=datetime.strptime(inv_adj.expiration_date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
+				employee_name=inv_adj.employee_id.name,
+				stock_opname_line=stock_opname_rows,
+			)
+			
+			# Create temporary file
+			path_file = 'openerp/addons/tbvip/tmp/'
+			filename = path_file + 'print_stock_opname ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
+			# Put rendered string to file
+			f = open(filename, 'w')
+			f.write(stock_opname.replace("\r\n", "\n"))
+			f.close()
+			# Process printing
+			os.system('lpr -Pnama_printer %s' % filename)
+		# Remove printed file
+		# os.remove(filename) #TODO UNCOMMENT
+		return True
