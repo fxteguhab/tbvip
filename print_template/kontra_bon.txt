@@ -1,0 +1,17 @@
+${(company_name+' - '+branch_name).ljust(85)}
+${('KONTRA BON : '+supplier_name).ljust(85)}
+${('Untuk pembayaran tanggal: '+payment_date).ljust(85)}
+${'Telah diterima bon-bon sbb:'.ljust(85)}
+${'-'*85}
+| ${'No'.ljust(2)} | ${'Invoice'.ljust(40)} | ${'Delivery Date'.ljust(15)} | ${'Subtotal'.ljust(15)} |
+${'-'*85}
+% for val in lines:
+${val}
+% endfor
+${'-'*85}
+${''.rjust(47)} | ${'Total Bon:'.rjust(15)} | ${subtotal.rjust(15)} |
+${' '*48}${'-'*37}
+${''.rjust(47)} | ${'Potongan:'.rjust(15)} | ${discount.rjust(15)} |
+${' '*48}${'-'*37}
+${''.rjust(47)} | ${'Total Bayar:'.rjust(15)} | ${total.rjust(15)} |
+${' '*48}${'-'*37}
