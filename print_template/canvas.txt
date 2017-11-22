@@ -1,0 +1,19 @@
+${'SURAT JALAN'.center(60)}
+
+${'Tanggal'.ljust(10)}${(': '+date).ljust(50)}
+${'Mobil'.ljust(10)}${(': '+vehicle_name+' - '+driver_name_1).ljust(50)}
+${'Tujuan'.ljust(10)}${(': '+receiver_name+', '+receiver_address).ljust(50)}
+
+${'-'*60}
+| ${'Nama Barang'.ljust(44)} | ${'Qty'.ljust(9)} |
+${'-'*60}
+% for val in invoice_line:
+${val}
+% endfor
+${'-'*60}
+
+${' '*50}${'Penerima:'.center(10)}
+
+
+
+${' '*49}${'_'*11}

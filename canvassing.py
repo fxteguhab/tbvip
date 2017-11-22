@@ -6,6 +6,11 @@ import requests
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, date, timedelta
 
+
+from mako.lookup import TemplateLookup
+import os
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
 # ==========================================================================================================================
 
 class canvassing_canvas(osv.osv):
@@ -182,6 +187,50 @@ class canvassing_canvas(osv.osv):
 	def cron_recalculate_distance(self, cr, uid, context={}):
 		trip_ids = self.search(cr, uid, [('state','=','finished'),('is_recalculated','=',False)])
 		self.action_recalculate_distance(cr, uid, trip_ids, context={'cron_mode': True})
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_delivery_order(self, cr, uid, ids, context):
+		# define template for printing
+		tpl = tpl_lookup.get_template('canvas.txt')
+		tpl_line = tpl_lookup.get_template('canvas_line.txt')
+		
+		for cvs in self.browse(cr, uid, ids, context=context):
+			vehicle_name = cvs.fleet_vehicle_id.name if cvs.fleet_vehicle_id.name else ''
+			driver_name_1 = cvs.driver1_id.name if cvs.driver1_id.name else ''
+			# print for every invoices
+			for inv in cvs.invoice_line_ids:
+				receiver_name = inv.invoice_id.partner_id.name if inv.invoice_id.partner_id.name else ''
+				receiver_address = inv.address if inv.address else ''
+				account_invoice_line = []
+				for acc_inv_line in inv.invoice_id.invoice_line:
+					row = tpl_line.render(
+						name=acc_inv_line.product_id.name,
+						qty=str(acc_inv_line.quantity),
+					)
+					account_invoice_line.append(row)
+				# render invoice
+				invoice_rendered = tpl.render(
+					date=datetime.strptime(cvs.date_created, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
+					vehicle_name=vehicle_name,
+					driver_name_1=driver_name_1,
+					receiver_name=receiver_name,
+					receiver_address=receiver_address,
+					invoice_line=account_invoice_line,
+				)
+				
+				# Create temporary file
+				path_file = 'openerp/addons/tbvip/tmp/'
+				filename = path_file + 'print_canvas ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + ' inv-' + str(inv.id) + '.txt'
+				# Put rendered string to file
+				f = open(filename, 'w')
+				f.write(invoice_rendered.replace("\r\n", "\n"))
+				f.close()
+				# Process printing
+				os.system('lpr -Pnama_printer %s' % filename)
+		# Remove printed file
+		# os.remove(filename) #TODO UNCOMMENT
+		return True
 
 # ==========================================================================================================================
 
