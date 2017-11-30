@@ -35,6 +35,7 @@
 					<field name="omzet_cash"/>
 					<field name="modal_cash"/>
 					<field name="balance"/>
+					<field name="create_uid"/>
 				</tree>
 			</field>
 		</record>
