@@ -401,10 +401,10 @@ class sale_order(osv.osv):
 				row = tpl_line.render(
 					no=str(row_number),
 					qty=str(line.product_uom_qty),
-					uom=line.product_uom.name,
-					name=line.product_id.name,
+					uom=line.product_uom.name if line.product_uom.name else '',
+					name=line.product_id.name if line.product_id.name else '',
 					unit_price=str(line.price_unit),
-					discount=line.discount_string,
+					discount=line.discount_string if line.discount_string else '',
 					subtotal=str(line.price_subtotal),
 				)
 				order_line_rows.append(row)

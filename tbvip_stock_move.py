@@ -26,8 +26,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'from_stock_location_id': fields.many2one('stock.location', 'Incoming Location', required=True),
-		'to_stock_location_id': fields.many2one('stock.location', 'Outgoing Location', required=True),
+		'from_stock_location_id': fields.many2one('stock.location', 'From Location', required=True),
+		'to_stock_location_id': fields.many2one('stock.location', 'To Location', required=True),
 		'input_user_id': fields.many2one('res.users', 'Input by', required=True),
 		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', required=True),
 		'move_date': fields.datetime('Move Date', required=True),
