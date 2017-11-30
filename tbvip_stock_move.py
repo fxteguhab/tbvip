@@ -41,7 +41,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'from_stock_location_id': lambda self, cr, uid, ctx:
 			self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
 		'input_user_id': lambda self, cr, uid, ctx: uid,
-		'move_date': datetime.now(),
+		'move_date': lambda self, cr, uid, ctx: datetime.now(),
 		'state': 'draft',
 	}
 	

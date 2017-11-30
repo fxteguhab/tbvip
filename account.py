@@ -180,7 +180,7 @@ class tbvip_day_end(osv.osv):
 	}
 	
 	_defaults = {
-		'day_end_date': datetime.now(),
+		'day_end_date': lambda self, cr, uid, ctx: datetime.now(),
 		'branch_id': _default_branch_id,
 		'modal_cash': _default_modal_cash,
 	}

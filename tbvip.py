@@ -846,7 +846,7 @@ class tbvip_branch_working_hour(osv.osv):
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
 	
 	_defaults = {
-		'start_date': datetime.now(),
+		'start_date': lambda self, cr, uid, ctx: datetime.now(),
 		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
 	}
 	
