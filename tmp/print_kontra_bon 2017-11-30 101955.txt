@@ -1,0 +1,13 @@
+                                  INTERBRANCH STOCK MOVE                                  
+
+Move Date      : 2017-11-22                  Input by       : Orang 1                     
+From Location  : Gudang 22                   Prepare by     : Employee Lain               
+To Location    : Gudang 85                   Accepted by    :                             
+State          : Rejected                    Rejected by    :                             
+
+------------------------------------------------------------------------------------------
+| No  | Product Name                                | Qty       | UoM       | Is Changed |
+------------------------------------------------------------------------------------------
+|   1 | Product 3                                   |      30.0 | Unit(s)   |            |
+|   2 | Product 4                                   |      45.0 | Unit(s)   |     v      |
+------------------------------------------------------------------------------------------
