@@ -23,6 +23,7 @@
 						<field name="to_stock_location_id"/>
 						<field name="input_user_id"/>
 						<field name="prepare_employee_id"/>
+						<field name="checked_by_id"/>
 						<field name="accepted_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'rejected'])]}"/>
 						<field name="rejected_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'accepted'])]}"/>
 						<field name="interbranch_stock_move_line_ids">

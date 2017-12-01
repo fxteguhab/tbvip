@@ -19,6 +19,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'to_stock_location_id': fields.many2one('stock.location', 'Outgoing Location', domain=[('usage', '=', 'internal')], readonly=True,required=True, states={'draft': [('readonly', False)]}),
 		'input_user_id': fields.many2one('res.users', 'Input by', required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, required=True, states={'draft': [('readonly', False)]}),
+		'checked_by_id': fields.many2one('hr.employee', 'Checked by', readonly=True, states={'draft': [('readonly', False)]}),
 		'move_date': fields.datetime('Move Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection([
 			('draft', 'Draft'),
@@ -53,6 +54,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	def action_accept(self, cr, uid, ids, context=None):
 		for interbranch_stock_move in self.browse(cr, uid, ids):
+			if not interbranch_stock_move.checked_by_id:
+				raise osv.except_osv(_('Warning!'), _("Please Fill field Checked By"))
 			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
 		
 		# tandai semua canvassing untuk interbranch ini is_executed = True
