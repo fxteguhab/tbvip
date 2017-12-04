@@ -165,48 +165,18 @@ class purchase_order(osv.osv):
 				values.pop('payment_term_id')
 		return result
 	
-	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
 	def print_draft_purchase_order(self, cr, uid, ids, context):
-		# define template for printing
-		tpl = tpl_lookup.get_template('draft_purchase_order.txt')
-		tpl_line = tpl_lookup.get_template('draft_purchase_order_line.txt')
-		
-		for dpo in self.browse(cr, uid, ids, context=context):
-			branch_address = dpo.branch_id.address if dpo.branch_id.address else ''
-			branch_name = dpo.branch_id.name if dpo.branch_id.name else ''
-			supplier_name = dpo.partner_id.name if dpo.partner_id.name else ''
-			
-			# add purchase order lines
-			order_line_rows = []
-			for line in dpo.order_line:
-				row = tpl_line.render(
-					qty=str(line.product_qty),
-					name=line.product_id.name,
-				)
-				order_line_rows.append(row)
-			# render purchase order
-			draft_po = tpl.render(
-				date=datetime.strptime(dpo.date_order, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
-				branch_name=branch_name,
-				branch_address=branch_address,
-				supplier_name=supplier_name,
-				order_lines=order_line_rows,
-			)
-			
-			# Create temporary file
-			path_file = 'openerp/addons/tbvip/tmp/'
-			filename = path_file + 'print_draft_purchase_order ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
-			# Put rendered string to file
-			f = open(filename, 'w')
-			f.write(draft_po.replace("\r\n", "\n"))
-			f.close()
-			# Process printing
-			os.system('lpr -Pnama_printer %s' % filename)
-			# Remove printed file
-			# os.remove(filename) #TODO UNCOMMENT
-		return True
+		if self.browse(cr,uid,ids)[0].order_line:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/purchase.order/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Draft PO Error'),_('PO must have at least one line to be printed.'))
+
 
 # ==========================================================================================================================
 

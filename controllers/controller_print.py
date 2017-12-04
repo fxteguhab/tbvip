@@ -24,6 +24,8 @@ class controller_print(http.Controller):
 			data_string = self.print_sale_order(data)
 		elif model == 'canvassing.canvas':
 			data_string = self.print_delivery_order(data)
+		elif model == 'purchase.order':
+			data_string = self.print_draft_purchase_order(data)
 		
 		data_string = data_string.replace("\r\n", "\n").encode('utf-8')
 		filecontent = base64.b64encode(data_string)
@@ -36,7 +38,32 @@ class controller_print(http.Controller):
 				[('Content-Type', 'application/octet-stream'),
 					('Content-Disposition', content_disposition(filename))])
 	
+	def print_draft_purchase_order(self, dpo):
+		# define template for printing
+		tpl = tpl_lookup.get_template('draft_purchase_order.txt')
+		tpl_line = tpl_lookup.get_template('draft_purchase_order_line.txt')
 	
+		branch_address = dpo.branch_id.address if dpo.branch_id.address else ''
+		branch_name = dpo.branch_id.name if dpo.branch_id.name else ''
+		supplier_name = dpo.partner_id.name if dpo.partner_id.name else ''
+		
+		# add purchase order lines
+		order_line_rows = []
+		for line in dpo.order_line:
+			row = tpl_line.render(
+				qty=str(line.product_qty),
+				name=line.product_id.name,
+			)
+			order_line_rows.append(row)
+		# render purchase order
+		draft_po = tpl.render(
+			date=datetime.strptime(dpo.date_order, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
+			branch_name=branch_name,
+			branch_address=branch_address,
+			supplier_name=supplier_name,
+			order_lines=order_line_rows,
+		)
+		return draft_po
 	
 	def print_delivery_order(self, cvs):
 		# define template for printing

@@ -377,11 +377,14 @@ class sale_order(osv.osv):
 # PRINTS -------------------------------------------------------------------------------------------------------------------
 	
 	def print_sale_order(self, cr, uid, ids, context):
-		return {
-			'type' : 'ir.actions.act_url',
-			'url': '/tbvip/print/sale.order/' + str(ids[0]),
-			'target': 'self',
-		}
+		if self.browse(cr,uid,ids)[0].order_line:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/sale.order/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print SO Error'),_('SO must have at least one line to be printed.'))
 
 # ==========================================================================================================================
 
