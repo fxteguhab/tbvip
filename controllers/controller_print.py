@@ -34,6 +34,8 @@ class controller_print(http.Controller):
 			data_string = self.print_draft_purchase_order(data)
 		elif model == 'tbvip.interbranch.stock.move':
 			data_string = self.print_interbranch_stock_move(data)
+		elif model == 'account.voucher':
+			data_string = self.print_kontra_bon(data)
 		
 		data_string = data_string.replace("\r\n", "\n").encode('utf-8')
 		filecontent = base64.b64encode(data_string)
@@ -45,6 +47,42 @@ class controller_print(http.Controller):
 			return request.make_response(filecontent,
 				[('Content-Type', 'application/octet-stream'),
 					('Content-Disposition', content_disposition(filename))])
+	
+	
+	def print_kontra_bon(self, acc_vou):
+		tpl = tpl_lookup.get_template('kontra_bon.txt')
+		tpl_line = tpl_lookup.get_template('kontra_bon_line.txt')
+		
+		company = acc_vou.create_uid.company_id
+		company_name = company.name if company.name else ''
+		branch_name = acc_vou.create_uid.branch_id.name if acc_vou.create_uid.branch_id.name else ''
+		supplier_name = acc_vou.partner_id.name if acc_vou.partner_id.name else ''
+		
+		# add lines
+		row_number = 0
+		account_voucher_line = []
+		for line in acc_vou.line_dr_ids:
+			row_number += 1
+			row = tpl_line.render(
+				no=str(row_number),
+				reference_number=line.move_line_id.invoice.name if line.move_line_id and line.move_line_id.invoice else '-',
+				delivery_date=datetime.strptime(line.date_original, '%Y-%m-%d').strftime('%Y-%m-%d'),
+				total=str(line.amount),
+			)
+			account_voucher_line.append(row)
+		# render account voucher
+		account_voucher = tpl.render(
+			branch_name=branch_name,
+			company_name=company_name,
+			supplier_name=supplier_name,
+			payment_date=datetime.strptime(acc_vou.date, '%Y-%m-%d').strftime('%Y-%m-%d'),
+			lines=account_voucher_line,
+			subtotal=str(acc_vou.amount),
+			discount=str(0),
+			total=str(acc_vou.amount),
+		)
+		return account_voucher
+	
 	
 	def print_interbranch_stock_move(self, ism):
 		tpl = tpl_lookup.get_template('interbranch_stock_move.txt')

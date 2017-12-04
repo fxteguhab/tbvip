@@ -62,51 +62,14 @@ class account_voucher(osv.osv):
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
 	def print_kontra_bon(self, cr, uid, ids, context):
-		tpl = tpl_lookup.get_template('kontra_bon.txt')
-		tpl_line = tpl_lookup.get_template('kontra_bon_line.txt')
-		
-		for acc_vou in self.browse(cr, uid, ids, context=context):
-			company = acc_vou.create_uid.company_id
-			company_name = company.name if company.name else ''
-			branch_name = acc_vou.create_uid.branch_id.name if acc_vou.create_uid.branch_id.name else ''
-			supplier_name = acc_vou.partner_id.name if acc_vou.partner_id.name else ''
-			
-			# add lines
-			row_number = 0
-			account_voucher_line = []
-			for line in acc_vou.line_dr_ids:
-				row_number += 1
-				row = tpl_line.render(
-					no=str(row_number),
-					reference_number=line.move_line_id.invoice.name if line.move_line_id and line.move_line_id.invoice else '-',
-					delivery_date=datetime.strptime(line.date_original, '%Y-%m-%d').strftime('%Y-%m-%d'),
-					total=str(line.amount),
-				)
-				account_voucher_line.append(row)
-			# render account voucher
-			account_voucher = tpl.render(
-				branch_name=branch_name,
-				company_name=company_name,
-				supplier_name=supplier_name,
-				payment_date=datetime.strptime(acc_vou.date, '%Y-%m-%d').strftime('%Y-%m-%d'),
-				lines=account_voucher_line,
-				subtotal=str(acc_vou.amount),
-				discount=str(0),
-				total=str(acc_vou.amount),
-			)
-			
-			# Create temporary file
-			path_file = 'openerp/addons/tbvip/tmp/'
-			filename = path_file + 'print_kontra_bon ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
-			# Put rendered string to file
-			f = open(filename, 'w')
-			f.write(account_voucher.replace("\r\n", "\n"))
-			f.close()
-			# Process printing
-			os.system('lpr -Pnama_printer %s' % filename)
-		# Remove printed file
-		# os.remove(filename) #TODO UNCOMMENT
-		return True
+		if self.browse(cr,uid,ids)[0].line_dr_ids:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/account.voucher/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Kontra Bon Error'),_('Kontra Bon must have at least one line to be printed.'))
 
 
 # ==========================================================================================================================
