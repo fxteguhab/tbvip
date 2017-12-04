@@ -1,16 +1,16 @@
 ${print_date.ljust(10)}
-|${'Tanggal'.ljust(16)}|${'Nama'.ljust(16)}|${'Masuk'.ljust(16)}|${'Pokok'.ljust(16)}|${'Full'.ljust(16)}|${'Makan'.ljust(16)}|${'Full Minggu'.ljust(16)}|${'Mingguan'.ljust(16)}|${'Tanggal Pokok'.ljust(16)}|
-|${from_date.ljust(16)}|${name.ljust(16)}|${masuk.ljust(16)}|${pokok.ljust(16)}|${full.ljust(16)}|${makan.ljust(16)}|${full_minggu.ljust(16)}|${mingguan.ljust(16)}|${total_pokok.ljust(16)}|
-|${to_date.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|
-|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Total Mgg ::'.ljust(16)}|${total_minggu.ljust(16)}|${''.ljust(16)}|
-|${'Jenis'.ljust(16)}|${'Poin'.ljust(16)}|${'LV'.ljust(16)}|${'Bonus'.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Potongan ::'.ljust(16)}|${potongan.ljust(16)}|${''.ljust(16)}|
-|${'Mobil'.ljust(16)}|${point_mobil.ljust(16)}|${lvl_mobil.ljust(16)}|${bonus_mobil.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Nabung ::'.ljust(16)}|${nabung.ljust(16)}|${''.ljust(16)}|
-|${'Motor'.ljust(16)}|${point_motor.ljust(16)}|${lvl_motor.ljust(16)}|${bonus_motor.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|
-|${'S.O.'.ljust(16)}|${point_so.ljust(16)}|${lvl_so.ljust(16)}|${bonus_so.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'GAJI ::'.ljust(16)}|${gaji.ljust(16)}|${''.ljust(16)}|
-|${'Sales'.ljust(16)}|${point_sales.ljust(16)}|${lvl_sales.ljust(16)}|${bonus_sales.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|
-|${'ADM'.ljust(16)}|${point_adm.ljust(16)}|${lvl_adm.ljust(16)}|${bonus_adm.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Tabungan ::'.ljust(16)}|${tabungan.ljust(16)}|
-|${'XTRA'.ljust(16)}|${point_xtra.ljust(16)}|${lvl_xtra.ljust(16)}|${bonus_xtra.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Pinjaman ::'.ljust(16)}|${pinjaman.ljust(16)}|
-|${'PENALTI'.ljust(16)}|${point_penalti.ljust(16)}|${lvl_penalti.ljust(16)}|${bonus_penalti.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Level ::'.ljust(16)}|${level.ljust(16)}|
-|${'TOP'.ljust(16)}|${point_top.ljust(16)}|${lvl_top.ljust(16)}|${bonus_top.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Total Poin ::'.ljust(16)}|${total_poin.ljust(16)}|
-|${'-'*16}|${'-'*16}|${'-'*16}|${'-'*16}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'-'*16}|${'-'*16}|
-|${'TOTAL BONUS'.ljust(16)}|${total_bonus_point.ljust(16)}|${''.ljust(16)}|${total_bonus_value.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${''.ljust(16)}|${'Target Poin ::'.ljust(16)}|${target_poin.ljust(16)}|
+|${'Tanggal'.ljust(10)}|${'Nama'.ljust(10)}|${'Masuk'.ljust(10)}|${'Pokok'.ljust(10)}|${'Full'.ljust(10)}|${'Makan'.ljust(10)}|${'Full Minggu'.ljust(10)}|${'Mingguan'.ljust(10)}|${'Gaji Pokok'.ljust(10)}|
+|${from_date.ljust(10)}|${name.ljust(10)}|${masuk.ljust(10)}|${pokok.ljust(10)}|${full.ljust(10)}|${makan.ljust(10)}|${full_minggu.ljust(10)}|${mingguan.ljust(10)}|${total_pokok.ljust(10)}|
+|${to_date.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|
+|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Total Mgg ::'.ljust(10)}|${total_minggu.ljust(10)}|${''.ljust(10)}|
+|${'Jenis'.ljust(10)}|${'Poin'.ljust(10)}|${'LV'.ljust(10)}|${'Bonus'.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Potongan ::'.ljust(10)}|${potongan.ljust(10)}|${''.ljust(10)}|
+|${'Mobil'.ljust(10)}|${point_mobil.ljust(10)}|${lvl_mobil.ljust(10)}|${bonus_mobil.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Nabung ::'.ljust(10)}|${nabung.ljust(10)}|${''.ljust(10)}|
+|${'Motor'.ljust(10)}|${point_motor.ljust(10)}|${lvl_motor.ljust(10)}|${bonus_motor.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|
+|${'S.O.'.ljust(10)}|${point_so.ljust(10)}|${lvl_so.ljust(10)}|${bonus_so.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'GAJI ::'.ljust(10)}|${gaji.ljust(10)}|${''.ljust(10)}|
+|${'Sales'.ljust(10)}|${point_sales.ljust(10)}|${lvl_sales.ljust(10)}|${bonus_sales.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|
+|${'ADM'.ljust(10)}|${point_adm.ljust(10)}|${lvl_adm.ljust(10)}|${bonus_adm.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Tabungan ::'.ljust(10)}|${tabungan.ljust(10)}|
+|${'XTRA'.ljust(10)}|${point_xtra.ljust(10)}|${lvl_xtra.ljust(10)}|${bonus_xtra.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Pinjaman ::'.ljust(10)}|${pinjaman.ljust(10)}|
+|${'PENALTI'.ljust(10)}|${point_penalti.ljust(10)}|${lvl_penalti.ljust(10)}|${bonus_penalti.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Level ::'.ljust(10)}|${level.ljust(10)}|
+|${'TOP'.ljust(10)}|${point_top.ljust(10)}|${lvl_top.ljust(10)}|${bonus_top.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Total Poin ::'.ljust(10)}|${total_poin.ljust(10)}|
+|${'-'*10}|${'-'*10}|${'-'*10}|${'-'*10}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'-'*10}|${'-'*10}|
+|${'TOTAL BONUS'.ljust(10)}|${total_bonus_point.ljust(10)}|${''.ljust(10)}|${total_bonus_value.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${''.ljust(10)}|${'Target Poin ::'.ljust(10)}|${target_poin.ljust(10)}|
