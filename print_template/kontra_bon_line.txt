@@ -1,1 +1,1 @@
-| ${no.rjust(2)} | ${reference_number.ljust(40)} | ${delivery_date.ljust(15)} | ${total.rjust(15)} |
+| ${no[:2].rjust(2)} | ${reference_number[:40].ljust(40)} | ${delivery_date.ljust(15)} | ${total.rjust(15)} |

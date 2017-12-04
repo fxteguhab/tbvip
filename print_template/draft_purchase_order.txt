@@ -1,6 +1,6 @@
 ${'Tanggal'.ljust(20)}${(': '+date).ljust(40)}
-${'PURCHASE ORDER'.ljust(20)}${(': '+supplier_name).ljust(40)}
-${'Dikirim ke'.ljust(20)}${(': '+branch_name+', '+branch_address).ljust(40)}
+${'PURCHASE ORDER'.ljust(20)}${(': '+supplier_name)[:40].ljust(40)}
+${'Dikirim ke'.ljust(20)}${(': '+branch_name+', '+branch_address)[:40].ljust(40)}
 
 ${'-'*60}
 | ${'Nama Barang'.ljust(44)} | ${'Qty'.ljust(9)} |

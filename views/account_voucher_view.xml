@@ -6,7 +6,7 @@
             <field name="inherit_id" ref="account_voucher.view_vendor_payment_form"/>
             <field name="arch" type="xml">
                 <button name="cancel_voucher" position="after">
-                    <button name="print_kontra_bon" string="Print Dot Matrix" type="object" icon="gtk-print"/>
+                    <button name="print_kontra_bon" string="" type="object" icon="gtk-print"/>
                 </button>
                 <field name="partner_id" position="attributes">
                     <attribute name="on_change">onchange_partner_id_tbvip(partner_id, journal_id, amount, currency_id, type, date, context)</attribute>

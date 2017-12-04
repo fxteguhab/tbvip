@@ -1,1 +1,1 @@
-| ${no.rjust(3)} | ${name.ljust(43)} | ${qty.rjust(9)} | ${uom.ljust(9)} | ${is_changed.center(10)} |
+| ${no.rjust(3)} | ${name[:43].ljust(43)} | ${qty.rjust(9)} | ${uom[:9].ljust(9)} | ${is_changed.center(10)} |

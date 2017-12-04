@@ -15,7 +15,7 @@
 								states="draft" confirm="Are you sure to accept this interbranch stock move?"/>
 						<button name="action_reject" string="Reject" type="object"
 								states="draft" confirm="Are you sure to reject this interbranch stock move?" />
-						<button name="print_interbranch_stock_move" string="Print Dot Matrix" type="object" icon="gtk-print"/>
+						<button name="print_interbranch_stock_move" string="" type="object" icon="gtk-print"/>
 						<field name="state" widget="statusbar" readonly="1"/>
 					</header>
 					<group>

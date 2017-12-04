@@ -1,1 +1,1 @@
-| ${no.ljust(2)} | ${name.ljust(40)} | ${location.ljust(16)} | ${qty.ljust(9)} |
+| ${no[:2].ljust(2)} | ${name[:40].ljust(40)} | ${location[:16].ljust(16)} | ${qty[:9].ljust(9)} |
