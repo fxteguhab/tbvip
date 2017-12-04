@@ -9,17 +9,25 @@ class account_voucher(osv.osv):
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 	
-	def onchange_partner_id(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
+	def onchange_partner_id_tbvip(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
+		"""
+		ATTENTION!!!!
+		This method stops all future overrides that's loaded after it.
+		This method does not override onchange_partner_id (instead use _tbvip in the method name)
+		because overriding partner_id with additional 'domain' key in the result will cause an error.
+		It will trigger buggy odoo code on account_voucher/account_voucher.py:917 because
+		res['domain'] is not expected via Register Additional Payment button on Sales Order.
+		"""
 		result = super(account_voucher, self).onchange_partner_id(
 			cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context)
 		
 		partner_obj = self.pool.get('res.partner')
 		partner = partner_obj.browse(cr, uid, [partner_id])
-		# if not result.get('domain', False):
-		# 	result['domain'] = {}
-		# result['domain'].update({
-		# 	'bank_id': [('id', 'in', partner.bank_ids.ids)],
-		# })
+		if not result.get('domain', False):
+			result['domain'] = {}
+		result['domain'].update({
+			'bank_id': [('id', 'in', partner.bank_ids.ids)],
+		})
 		
 		return result
 	
