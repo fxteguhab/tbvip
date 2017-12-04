@@ -130,7 +130,7 @@ class canvassing_canvas(osv.osv):
 		for canvas in self.browse(cr, uid, ids, context=context):
 			for interbranch_canvas_line in canvas.interbranch_move_ids:
 				if interbranch_canvas_line.is_executed:
-					interbranch_stock_move_obj.action_accept(cr, uid, interbranch_canvas_line.interbranch_move_id.id, context=context)
+					interbranch_stock_move_obj.action_accept(cr, uid, [interbranch_canvas_line.interbranch_move_id.id], context=context)
 		return self.action_recalculate_distance(cr, uid, ids, context=context)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
@@ -257,3 +257,28 @@ class canvassing_canvas_interbranch_line(osv.Model):
 		# 'to_stock_location_id': fields.related('interbranch_move_id', 'to_stock_location_id',
 		# 	type="many2one", relation="stock.location", string="Outgoing Location"),
 	}
+	
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(canvassing_canvas_interbranch_line, self).create(cr, uid, vals, context=context)
+		# check if interbranch stock move already rejected, cannot be executed
+		if vals.get('is_executed', False):
+			interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+			interbranch_move_id = vals['interbranch_move_id']
+			interbranch_move = interbranch_stock_move_obj.browse(cr, uid, interbranch_move_id, context=context)
+			if interbranch_move.state == 'rejected':
+				raise osv.except_osv(_('Warning!'), _("Interbranch Stock Move \"%s\" had already been rejected!") %
+					(interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name,))
+		return new_id
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		result = super(canvassing_canvas_interbranch_line, self).write(cr, uid, ids, vals, context=context)
+		# check if interbranch stock move already rejected, cannot be executed
+		if vals.get('is_executed', False):
+			for line in self.browse(cr, uid, ids, context=context):
+				interbranch_move_id = vals['interbranch_move_id'] if vals.get('interbranch_move_id', False) else line.interbranch_move_id.id
+				interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+				interbranch_move = interbranch_stock_move_obj.browse(cr, uid, interbranch_move_id, context=context)
+				if interbranch_move.state == 'rejected':
+					raise osv.except_osv(_('Warning!'), _("Interbranch Stock Move \"%s\" had already been rejected!") %
+						(interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name,))
+		return result

@@ -24,14 +24,16 @@
 						<field name="to_stock_location_id"/>
 						<field name="input_user_id"/>
 						<field name="prepare_employee_id"/>
+						<field name="checked_by_id"/>
 						<field name="accepted_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'rejected'])]}"/>
 						<field name="rejected_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'accepted'])]}"/>
 						<field name="interbranch_stock_move_line_ids">
 							<tree editable="bottom">
 								<field name="product_id" on_change="onchange_product_id(product_id)" options="{'no_create': 1}"/>
 								<field name="qty"/>
-								<field name="uom_id" options="{'no_create': 1}"/>
+								<field name="uom_id" domain = "[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]" options="{'no_create': 1}" on_change="onchange_product_uom(product_id, uom_id)"/>
 								<field name="move_date" readonly="1" invisible="1"/>
+								<field name="uom_category_filter_id" invisible="1"/>
 								<field name="is_changed" readonly="1"/>
 								<field name="notes"/>
 							</tree>

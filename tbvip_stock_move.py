@@ -26,22 +26,23 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'from_stock_location_id': fields.many2one('stock.location', 'From Location', required=True),
-		'to_stock_location_id': fields.many2one('stock.location', 'To Location', required=True),
-		'input_user_id': fields.many2one('res.users', 'Input by', required=True),
-		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', required=True),
-		'move_date': fields.datetime('Move Date', required=True),
+		'from_stock_location_id': fields.many2one('stock.location', 'Incoming Location', domain=[('usage', '=', 'internal')], readonly=True, required=True, states={'draft': [('readonly', False)]}),
+		'to_stock_location_id': fields.many2one('stock.location', 'Outgoing Location', domain=[('usage', '=', 'internal')], readonly=True,required=True, states={'draft': [('readonly', False)]}),
+		'input_user_id': fields.many2one('res.users', 'Input by', required=True, readonly=True, states={'draft': [('readonly', False)]}),
+		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, required=True, states={'draft': [('readonly', False)]}),
+		'checked_by_id': fields.many2one('hr.employee', 'Checked by', readonly=True, states={'draft': [('readonly', False)]}),
+		'move_date': fields.datetime('Move Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection(_INTERBRANCH_STATE, 'State', readonly=True),
-		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by'),
-		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by'),
-		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines'),
+		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by', readonly=True, states={'draft': [('readonly', False)]}),
+		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by', readonly=True, states={'draft': [('readonly', False)]}),
+		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)]}),
 	}
 	
 	_defaults = {
 		'from_stock_location_id': lambda self, cr, uid, ctx:
 			self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
 		'input_user_id': lambda self, cr, uid, ctx: uid,
-		'move_date': lambda self, cr, uid, ctx: datetime.now(),
+		'move_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'state': 'draft',
 	}
 	
@@ -60,7 +61,13 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	def action_accept(self, cr, uid, ids, context=None):
 		for interbranch_stock_move in self.browse(cr, uid, ids):
+			if not interbranch_stock_move.checked_by_id:
+				raise osv.except_osv(_('Warning!'), _("Please Fill field Checked By"))
 			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
+		
+		# tandai semua canvassing untuk interbranch ini is_executed = True
+		self._write_is_executed_canvassing(cr, uid, ids, context=context)
+			
 		# accepted by user uid
 		self.write(cr, uid, ids, {
 			'state': 'accepted',
@@ -76,13 +83,18 @@ class tbvip_interbranch_stock_move(osv.Model):
 		}, context=context)
 		return True
 	
+	def _write_is_executed_canvassing(self, cr, uid, interbranch_ids, context={}):
+		canvassing_interbranch_obj = self.pool.get('canvassing.canvas.interbranch.line')
+		canvassing_interbranch_ids = canvassing_interbranch_obj.search(cr, uid, [('interbranch_move_id', 'in', interbranch_ids)])
+		if len(canvassing_interbranch_ids)>0:
+			canvassing_interbranch_obj.write(cr, uid, canvassing_interbranch_ids,  {'is_executed': True})
+			
 	def _create_picking_draft(self,cr, uid, interbranch_stock_move, context={}):
 		picking_obj = self.pool.get('stock.picking')
-		seq_obj = self.pool.get('ir.sequence')
-		picking_type_obj = self.pool.get('stock.picking.type')
 		stock_move_obj = self.pool.get('stock.move')
 		warehouse_obj = self.pool.get('stock.warehouse')
 		stock_location_obj = self.pool.get('stock.location')
+		model_obj = self.pool.get('ir.model.data')
 		if len(interbranch_stock_move.interbranch_stock_move_line_ids)>0:
 			#order the picking types with a sequence allowing to have the following suit for each warehouse: reception, internal, pick, pack, ship.
 			max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
@@ -93,19 +105,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 			
 			warehouse_id = warehouse_obj.search(cr, uid, [('lot_stock_id', '=', location_src.id)], limit = 1)
 			warehouse = warehouse_obj.browse(cr, uid, warehouse_id)
-			int_seq_id = seq_obj.create(cr, SUPERUSER_ID, {'name': warehouse.name + _(' Sequence internal'), 'prefix': warehouse.code + '/INT/', 'padding': 5}, context=context)
-			
-			# contoh create dapet dari stock, create_sequences_and_picking_types, baris 3461
-			picking_type_id = picking_type_obj.create(cr, uid, vals={
-				'name': _('Receipts'),
-				'warehouse_id': warehouse.id,
-				'code': 'internal',
-				'sequence_id': int_seq_id,
-				'default_location_src_id': location_src.id,
-				'default_location_dest_id': location_dest.id,
-				'sequence': max_sequence + 1,
-				# 'color': color
-			}, context=context)
+			picking_type_id = model_obj.get_object_reference(cr, uid, 'stock', 'picking_type_internal')[1]
 			
 			# contoh create dapet dari point_of_sale, create_picking, baris 843
 			picking_id =  picking_obj.create(cr, uid, {
@@ -114,11 +114,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 				'note': 'Interbranch Stock Move ' + location_src.name + '/' + location_dest.name,
 				'location_id': location_src.id,
 				'location_dest_id': location_dest.id,
-				# 'origin': order.name,
-				# 'partner_id': addr.get('delivery',False),
-				# 'date_done' : order.date_order,
-				# 'invoice_state': 'none',
-				# 'company_id': self.pool.get('res.company')._company_default_get(cr, uid, 'stock.location', context=c),
+				'origin' : 'Interbranch Stock Move ' + str(interbranch_stock_move.id)
 			}, context=context)
 			#untuk setiap product, bikin stock movenya
 			for line in interbranch_stock_move.interbranch_stock_move_line_ids:
@@ -131,7 +127,6 @@ class tbvip_interbranch_stock_move(osv.Model):
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'picking_id' : picking_id
-					# 'color': color
 				}, context=context)
 				
 			#call workflow to make picking transferred
@@ -140,6 +135,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	def _transfer_stock_picking(self, cr, uid, ids_picking, context = {}):
 		stock_picking_obj = self.pool.get('stock.picking')
+		stock_picking_obj.action_confirm(cr, uid, ids_picking, context = context)
+		stock_picking_obj.force_assign(cr, uid, ids_picking, context = context)
 		pop_up = stock_picking_obj.do_enter_transfer_details(cr, uid, ids_picking, context)
 		if pop_up:
 			stock_transfer_detail_id = pop_up['res_id']
@@ -219,6 +216,8 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		'is_changed': fields.boolean('Is Changed?'),
 		'move_date': fields.related('header_id', 'move_date', type="datetime", string="Move Date"),
 		'notes': fields.text('Notes'),
+		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
+			string='UoM Category', readonly=True)
 	}
 	
 	_defaults = {
@@ -233,9 +232,10 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		tbvip_interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
 		if vals.get('header_id', False):
 			product_obj = self.pool.get('product.product')
+			uom_obj = self.pool.get('product.uom')
 			new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
 			tbvip_interbranch_stock_move_obj.message_post(cr, uid, vals['header_id'],
-				body=_("New line added: %s %s %s") % (new_product.name, vals['qty'], vals['uom_id']))
+				body=_("New line added: %s | %s %s") % (new_product.name, vals['qty'], uom_obj.browse(cr, uid, vals['uom_id'], context=context).name))
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -245,9 +245,10 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 		for line in self.browse(cr, uid, ids, context=context):
 			if vals.get('header_id', False):
 				product_obj = self.pool.get('product.product')
+				uom_obj = self.pool.get('product.uom')
 				new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
 				tbvip_interbranch_stock_move_obj.message_post(cr, uid, vals['header_id'],
-					body=_("New line added: %s - %s %s") % (new_product.name, vals['qty'], vals['uom_id']))
+					body=_("New line added: %s | %s %s") % (new_product.name, vals['qty'], uom_obj.browse(cr, uid, vals['uom_id'], context=context).name))
 			if vals.get('product_id', False):
 				new_product = product_obj.browse(cr, uid, vals['product_id'], context=context)
 				tbvip_interbranch_stock_move_obj.message_post(cr, uid, line.header_id.id,
@@ -277,7 +278,31 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 	def onchange_product_id(self, cr, uid, ids, product_id, context=None):
 		product_obj = self.pool.get('product.product')
 		product = product_obj.browse(cr, uid, product_id)
-		return {
+		result = {
 			'value': {'uom_id': product.product_tmpl_id.uom_id.id},
 			'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}
 		}
+		result = self._update_uom_domain_custom_conversion(result)
+		return result
+	
+	def onchange_product_uom(self, cr, uid, ids, product_id, uom_id, context = {}):
+		product_conversion_obj = self.pool.get('product.conversion')
+		product_obj = self.pool.get('product.product')
+		product = product_obj.browse(cr, uid, product_id)
+		uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, uom_id)
+		result = {
+			'value': {'uom_id': uom_record.id},
+			'domain': {'uom_id': [('category_id','=', product.product_tmpl_id.uom_id.category_id.id)]}
+		}
+		result = self._update_uom_domain_custom_conversion(result)
+		return result
+	
+	def _update_uom_domain_custom_conversion(self, onchange_result):
+		if onchange_result.get('domain', False):
+			if onchange_result['domain'].get('uom_id', False):
+				onchange_result['domain']['uom_id'].append(('is_auto_create', '=', False))
+			else:
+				onchange_result['domain']['uom_id'] = [('is_auto_create', '=', False)]
+		else:
+			onchange_result.update({'domain': {'uom_id': [('is_auto_create', '=', False)]}})
+		return onchange_result

@@ -7,24 +7,29 @@
 						<style>
 						.sale_receipt {
 							text-align: left;
+							zoom: 0.8;
 							width: 300px;
 							margin: 0px;
 							padding: 0px;
+							font-size: 20px;
 							background-color: white;
-							font-size: 14px;
 							display: inline-block;
-							font-family: "Inconsolata";
+							font-family: sans-serif;
 							overflow: hidden;
+							-moz-transform: scale(0.5);
 						}
 						.sale_receipt .center-align {
 							text-align: center;
 						}
 						.sale_receipt pre{
-							font-family: "Inconsolata";
+							font-family: monospace;
 						}
 						.sale_receipt .emph{
-							font-size: 20px;
+							font-size: 26px;
 							margin:5px;
+						}
+						.sale_receipt .unde{
+							font-size: 16px;
 						}
 						.sale_receipt table {
 							width: 100%;
@@ -38,36 +43,40 @@
 
 						<div class="sale_receipt">
 							<div class="center-align">
-							<t t-esc="new Date().toString(Date.CultureInfo.formatPatterns.shortDate + ' ' +
-								Date.CultureInfo.formatPatterns.longTime)"/>
+							<t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
 							</div>
 							<br/>
 							<t t-esc="o.name"/><br/>
-							<t t-esc="o.user_id.company_id.name"/><br/>
-							Phone: <t t-esc="o.user_id.company_id.phone"/><br/>
-							User: <t t-esc="o.user_id.name"/><br/>
-							Branch: <t t-esc="o.user_id.branch_id.name"/><br/>
-							Date: <span t-field="o.date_order"/><br/>
+							<div class="unde">
+								<t t-esc="o.user_id.company_id.name"/><br/>
+								Phone: <t t-esc="o.user_id.company_id.phone"/><br/>
+								User: <t t-esc="o.user_id.name"/><br/>
+								Branch: <t t-esc="o.user_id.branch_id.name"/><br/>
+								Date: <span t-field="o.date_order"/><br/>
+							</div>
 							<br/>
 							<br/>
 
 							<table>
 								<colgroup>
-									<col width='50%'/>
-									<col width='25%'/>
-									<col width='25%'/>
+									<col width='30%'/>
+									<col width='80%'/>
 								</colgroup>
-								<tr t-foreach="o.order_line" t-as="line">
-									<td>
-										<span t-field="line.product_id"/>
-									</td>
-									<td class="text-right">
-										<span t-field="line.product_uom_qty"/>
-									</td>
-									<td class="text-right">
-										<span t-field="line.price_subtotal"/>
-									</td>
-								</tr>
+								<t t-foreach="o.order_line" t-as="line">
+									<tr>
+										<td colspan="2">
+											<span t-field="line.product_id"/>
+										</td>
+									</tr>
+									<tr>
+										<td class="text-right">
+											<span t-field="line.product_uom_qty"/>
+										</td>
+										<td class="text-right">
+											<span t-field="line.price_subtotal" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+										</td>
+									</tr>
+								</t>
 							</table>
 
 							<br/>
@@ -81,7 +90,7 @@
 										<span>Total</span>
 									</td>
 									<td class="text-right">
-										<span t-field="o.amount_total"/>
+										<span t-field="o.amount_total" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
 									</td>
 								</tr>
 							</table>
