@@ -2,6 +2,12 @@ from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime
 
+
+from mako.lookup import TemplateLookup
+import os
+# Define path to templates
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
 # ==========================================================================================================================
 
 class stock_quant(osv.osv):
@@ -399,3 +405,18 @@ class stock_inventory_line(osv.osv):
 			'sublocation': onchange_result['value']['sublocation']
 			})
 		return new_id
+
+
+# ==========================================================================================================================
+
+class stock_inventory(osv.osv):
+	_inherit = 'stock.inventory'
+	
+	# PRINTS ---------------------------------------------------------------------------------------------------------------
+	
+	def print_stock_inventory(self, cr, uid, ids, context):
+		return {
+			'type' : 'ir.actions.act_url',
+			'url': '/tbvip/print/stock.inventory/' + str(ids[0]),
+			'target': 'self',
+		}

@@ -14,6 +14,11 @@ import openerp.addons.product_custom_conversion as imported_product_custom_conve
 import openerp.addons.chjs_price_list as imported_price_list
 import openerp.addons.decimal_precision as dp
 
+
+from mako.lookup import TemplateLookup
+import os
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
 # ==========================================================================================================================
 
 class purchase_order(osv.osv):
@@ -159,6 +164,19 @@ class purchase_order(osv.osv):
 			if not payment_term_id:
 				values.pop('payment_term_id')
 		return result
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_draft_purchase_order(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].order_line:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/purchase.order/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Draft PO Error'),_('PO must have at least one line to be printed.'))
+
 
 # ==========================================================================================================================
 

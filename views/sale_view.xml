@@ -7,6 +7,9 @@
 			<field name="priority">17</field>
 			<field name="inherit_id" ref="sale.view_order_form"/>
 			<field name="arch" type="xml">
+				<button name="print_quotation" position="after">
+					<button name="print_sale_order" string="Print Dot Matrix" type="object" icon="gtk-print"/>
+				</button>
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">
 					<field name="branch_id" readonly="True"/>

@@ -6,6 +6,11 @@ import requests
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, date, timedelta
 
+
+from mako.lookup import TemplateLookup
+import os
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
 # ==========================================================================================================================
 
 class canvassing_canvas(osv.osv):
@@ -182,6 +187,19 @@ class canvassing_canvas(osv.osv):
 	def cron_recalculate_distance(self, cr, uid, context={}):
 		trip_ids = self.search(cr, uid, [('state','=','finished'),('is_recalculated','=',False)])
 		self.action_recalculate_distance(cr, uid, trip_ids, context={'cron_mode': True})
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_delivery_order(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].invoice_line_ids:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/canvassing.canvas/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Canvassing Error'),_('Canvassing must have at least one invoice to be printed.'))
+		
 
 # ==========================================================================================================================
 

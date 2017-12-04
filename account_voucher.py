@@ -1,4 +1,11 @@
 from openerp.osv import osv, fields
+from datetime import datetime, date, timedelta
+
+
+
+from mako.lookup import TemplateLookup
+import os
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 
 # ==========================================================================================================================
@@ -51,6 +58,18 @@ class account_voucher(osv.osv):
 		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 	}
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_kontra_bon(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].line_dr_ids:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/account.voucher/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Kontra Bon Error'),_('Kontra Bon must have at least one line to be printed.'))
 
 
 # ==========================================================================================================================

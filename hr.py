@@ -1,3 +1,5 @@
+import os
+from mako.lookup import TemplateLookup
 from openerp.osv import osv, fields
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
@@ -95,3 +97,14 @@ class hr_attendance(osv.osv):
 			res['arch'] = etree.tostring(doc)
 		
 		return res
+
+
+class hr_payslip(osv.osv):
+	_inherit = 'hr.payslip'
+	
+	def print_payslip_dot_matrix(self, cr, uid, ids, context):
+		return {
+			'type' : 'ir.actions.act_url',
+			'url': '/tbvip/print/hr.payslip/' + str(ids[0]),
+			'target': 'self',
+		}

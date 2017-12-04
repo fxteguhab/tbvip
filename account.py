@@ -106,6 +106,7 @@ class tbvip_day_end(osv.osv):
 			('state', 'in', ['done','progress']),
 			('date_order', '>=', day_end_date_datetime.strftime("%Y-%m-%d 00:00:00")),
 			('date_order', '<', (day_end_date_datetime + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")),
+			('user_id', '=', uid),
 		], context=context)
 		omzet_cash_total = 0
 		for sale_order in sale_order_obj.browse(cr, uid, sale_order_done_ids, context=context):
@@ -180,7 +181,7 @@ class tbvip_day_end(osv.osv):
 	}
 	
 	_defaults = {
-		'day_end_date': datetime.now(),
+		'day_end_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'branch_id': _default_branch_id,
 		'modal_cash': _default_modal_cash,
 	}

@@ -4,6 +4,7 @@ from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 import openerp.addons.decimal_precision as dp
 
+
 import openerp.addons.sale as imported_sale
 import openerp.addons.portal_sale as imported_portal_sale
 import openerp.addons.sale_stock as imported_sale_stock
@@ -11,6 +12,15 @@ import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
 import openerp.addons.sale_multiple_payment as imported_sale_multiple_payment
 import openerp.addons.product_custom_conversion as imported_product_custom_conversion
 import openerp.addons.chjs_price_list as imported_price_list
+
+
+
+
+
+from mako.lookup import TemplateLookup
+import os
+# Define path to templates
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 # ==========================================================================================================================
 
@@ -362,6 +372,19 @@ class sale_order(osv.osv):
 						'so_id' : id,
 					}
 				}
+
+
+# PRINTS -------------------------------------------------------------------------------------------------------------------
+	
+	def print_sale_order(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].order_line:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/sale.order/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print SO Error'),_('SO must have at least one line to be printed.'))
 
 # ==========================================================================================================================
 
