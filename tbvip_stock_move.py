@@ -146,60 +146,17 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
 	def print_interbranch_stock_move(self, cr, uid, ids, context):
-		tpl = tpl_lookup.get_template('interbranch_stock_move.txt')
-		tpl_line = tpl_lookup.get_template('interbranch_stock_move_line.txt')
-		
-		for ism in self.browse(cr, uid, ids, context=context):
-			company = ism.create_uid.company_id
-			company_name = company.name if company.name else ''
-			from_location = ism.from_stock_location_id.name if ism.from_stock_location_id.name else ''
-			to_location = ism.to_stock_location_id.name if ism.to_stock_location_id.name else ''
-			move_date = ism.move_date
-			input_by = ism.input_user_id.name if ism.input_user_id.name else ''
-			prepare_by = ism.prepare_employee_id.user_id.name if ism.prepare_employee_id.user_id.name else ''
-			accepted_by = ism.accepted_by_user_id.user_id.name if ism.accepted_by_user_id.user_id.name else ''
-			rejected_by = ism.rejected_by_user_id.user_id.name if ism.rejected_by_user_id.user_id.name else ''
-			
-			# add lines
-			row_number = 0
-			ism_line = []
-			for line in ism.interbranch_stock_move_line_ids:
-				row_number += 1
-				row = tpl_line.render(
-					no=str(row_number),
-					name=str(line.product_id.name),
-					qty=str(line.qty),
-					uom=str(line.uom_id.name),
-					is_changed='v' if line.is_changed else '',
-				)
-				ism_line.append(row)
-			# render account voucher
-			account_voucher = tpl.render(
-				company_name=company_name,
-				from_location=from_location,
-				to_location=to_location,
-				state=_(dict(_INTERBRANCH_STATE).get(ism.state,'-')),
-				move_date=datetime.strptime(move_date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'),
-				input_by=input_by,
-				prepare_by=prepare_by,
-				accepted_by=accepted_by,
-				rejected_by=rejected_by,
-				lines=ism_line,
-			)
-			
-			# Create temporary file
-			path_file = 'openerp/addons/tbvip/tmp/'
-			filename = path_file + 'print_kontra_bon ' + datetime.now().strftime('%Y-%m-%d %H%M%S') + '.txt'
-			# Put rendered string to file
-			f = open(filename, 'w')
-			f.write(account_voucher.replace("\r\n", "\n"))
-			f.close()
-			# Process printing
-			os.system('lpr -Pnama_printer %s' % filename)
-		# Remove printed file
-		# os.remove(filename) #TODO UNCOMMENT
-		return True
-	
+		if self.browse(cr,uid,ids)[0].interbranch_stock_move_line_ids:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/tbvip.interbranch.stock.move/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Interbranch Stock Move Error'),_('Interbranch must have at least one line to be printed.'))
+
+
+
 # ==========================================================================================================================
 
 class tbvip_interbranch_stock_move_line(osv.Model):
