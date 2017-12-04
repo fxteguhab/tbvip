@@ -376,8 +376,6 @@ class sale_order(osv.osv):
 
 # PRINTS -------------------------------------------------------------------------------------------------------------------
 	
-	# Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
-	
 	def print_sale_order(self, cr, uid, ids, context):
 		return {
 			'type' : 'ir.actions.act_url',
