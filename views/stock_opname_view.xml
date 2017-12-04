@@ -5,9 +5,6 @@
 			<field name="model">stock.opname.memory</field>
 			<field name="inherit_id" ref="stock_opname.stock_opname_memory_form"/>
 			<field name="arch" type="xml">
-				<!--<xpath expr="//field[@name='line_ids']/tree/field[@name='location_id']" position="attributes">-->
-					<!--<attribute name="invisible">1</attribute>-->
-				<!--</xpath>-->
 				<field name="location_id" position="attributes">
 					<attribute name="readonly">1</attribute>
 				</field>
@@ -19,10 +16,17 @@
 					<field name="sublocation" readonly="True"/>
 				</field>
 				<field name="employee_id" position="attributes">
-					<attribute name="on_change">onchange_location_and_employee(location_id, rule_id, employee_id)</attribute>
+					<attribute name="on_change">none</attribute>
 				</field>
 				<field name="location_id" position="attributes">
 					<attribute name="on_change">none</attribute>
+				</field>
+				<field name="create_uid" position="after">
+					<button name="action_load_inventories" type="object" string="Load Inventories" colspan="2"/>
+					<!--<button name="onchange_location_and_employee(location_id, rule_id, employee_id)" string="Load Inventories" colspan="2"/>-->
+				</field>
+				<field name="line_ids" position="attributes">
+					<attribute name="options">{'reload_on_button': True}</attribute>
 				</field>
 			</field>
 		</record>
