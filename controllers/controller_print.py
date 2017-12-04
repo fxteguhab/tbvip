@@ -38,6 +38,8 @@ class controller_print(http.Controller):
 			data_string = self.print_kontra_bon(data)
 		elif model == 'hr.payslip':
 			data_string = self.print_payslip_dot_matrix(data)
+		elif model == 'stock.inventory':
+			data_string = self.print_stock_inventory(data)
 		
 		data_string = data_string.replace("\r\n", "\n").encode('utf-8')
 		filecontent = base64.b64encode(data_string)
@@ -49,6 +51,31 @@ class controller_print(http.Controller):
 			return request.make_response(filecontent,
 				[('Content-Type', 'application/octet-stream'),
 					('Content-Disposition', content_disposition(filename))])
+	
+	def print_stock_inventory(self, inv_adj):
+		tpl = tpl_lookup.get_template('stock_opname.txt')
+		tpl_line = tpl_lookup.get_template('stock_opname_line.txt')
+		
+		# get inventory adjustment lines
+		row_number = 0
+		stock_opname_rows = []
+		for line in inv_adj.line_ids:
+			row_number += 1
+			row = tpl_line.render(
+				no=str(row_number),
+				name=line.product_id.name if line.product_id.name else '',
+				location=line.location_id.name if line.location_id.name else '',
+				qty='',
+			)
+			stock_opname_rows.append(row)
+		# render stock opname
+		stock_opname = tpl.render(
+			datetime=datetime.strptime(inv_adj.date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
+			expiration_datetime=datetime.strptime(inv_adj.expiration_date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
+			employee_name=inv_adj.employee_id.name,
+			stock_opname_line=stock_opname_rows,
+		)
+		return stock_opname
 	
 	def print_payslip_dot_matrix(self, payslip):
 		# Mendefinisikan path dari modul report terkait
