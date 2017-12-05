@@ -830,15 +830,15 @@ class tbvip_data_synchronizer(osv.osv):
 		
 # ==========================================================================================================================
 
-class tbvip_branch_working_hour(osv.osv):
-	_name = 'tbvip.branch.working.hour'
-	_description = 'Working Hour'
+class tbvip_exception_working_hour(osv.osv):
+	_name = 'tbvip.exception.working.hour'
+	_description = 'Exception Working Hour which is different from the Contract Working Hour'
 	
 	# COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'start_date': fields.date('Start Date', required=True),
+		'date': fields.date('Date', required=True),
 		'open_hour': fields.float('Open Hour', required=True),
 		'closed_hour': fields.float('Closed Hour', required=True),
 	}
@@ -846,7 +846,7 @@ class tbvip_branch_working_hour(osv.osv):
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
 	
 	_defaults = {
-		'start_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
+		'date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'branch_id': lambda self, cr, uid, *args: self.pool.get('res.users').browse(cr, uid, [uid]).branch_id,
 	}
 	
@@ -870,7 +870,7 @@ class tbvip_branch_working_hour(osv.osv):
 		for working_hour in self.browse(cr, uid, ids, context):
 			open_hour, open_minute = divmod(working_hour.open_hour * 60, 60)
 			closed_hour, closed_minute = divmod(working_hour.closed_hour * 60, 60)
-			name = "{wh.branch_id.name} | {wh.start_date} -> {0:02.0f}:{1:02.0f}-{2:02.0f}:{3:02.0f}".format(
+			name = "{wh.branch_id.name} | {wh.date} -> {0:02.0f}:{1:02.0f}-{2:02.0f}:{3:02.0f}".format(
 				open_hour, open_minute, closed_hour, closed_minute, wh=working_hour,
 			)
 			result.append((working_hour.id, name))

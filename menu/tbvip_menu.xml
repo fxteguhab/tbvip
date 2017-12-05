@@ -22,9 +22,9 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<record id="action_tbvip_branch_working_hour" model="ir.actions.act_window">
-			<field name="name">Branch Working Hours</field>
-			<field name="res_model">tbvip.branch.working.hour</field>
+		<record id="action_tbvip_exception_working_hour" model="ir.actions.act_window">
+			<field name="name">Exception Working Hours</field>
+			<field name="res_model">tbvip.exception.working.hour</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
@@ -32,7 +32,7 @@
 		<menuitem id="menu_tbvip_branch" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch"/>
 
-		<menuitem id="menu_tbvip_branch_working_hour" parent="base.menu_config"
-				sequence="1" action="action_tbvip_branch_working_hour"/>
+		<menuitem id="menu_tbvip_exception_working_hour" parent="base.menu_config"
+				sequence="1" action="action_tbvip_exception_working_hour"/>
 	</data>
 </openerp>

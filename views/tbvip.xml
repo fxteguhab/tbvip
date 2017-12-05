@@ -95,27 +95,27 @@
 			</field>
 		</record>
 
-		<record id="tbvip_branch_working_hour_form" model="ir.ui.view">
-			<field name="name">tbvip.branch.working.hour.form</field>
-			<field name="model">tbvip.branch.working.hour</field>
+		<record id="tbvip_exception_working_hour_form" model="ir.ui.view">
+			<field name="name">tbvip.exception.working.hour.form</field>
+			<field name="model">tbvip.exception.working.hour</field>
 			<field name="arch" type="xml">
 				<form>
 					<group>
 						<field name="branch_id" on_change="onchange_branch_id(branch_id)"/>
-						<field name="start_date"/>
+						<field name="date"/>
 						<field name="open_hour" widget="float_time"/>
 						<field name="closed_hour" widget="float_time"/>
 					</group>
 				</form>
 			</field>
 		</record>
-		<record id="tbvip_branch_working_hour_tree" model="ir.ui.view">
-			<field name="name">tbvip.branch.working.hour.tree</field>
-			<field name="model">tbvip.branch.working.hour</field>
+		<record id="tbvip_exception_working_hour_tree" model="ir.ui.view">
+			<field name="name">tbvip.exception.working.hour.tree</field>
+			<field name="model">tbvip.exception.working.hour</field>
 			<field name="arch" type="xml">
 				<tree>
 					<field name="branch_id"/>
-					<field name="start_date"/>
+					<field name="date"/>
 					<field name="open_hour" widget="float_time"/>
 					<field name="closed_hour" widget="float_time"/>
 				</tree>
