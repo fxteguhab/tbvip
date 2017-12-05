@@ -14,36 +14,43 @@
 			<field name="max_total_qty">100</field>
 			<field name="algorithm">
 def generate_stock_opname_products(self, cr, uid):
-	product_obj = self.pool.get('product.product')
 	today = datetime.now()
 	last_week = today - timedelta(days=7)
 	last_month = today - timedelta(days=30)
-
-	product_ids = product_obj.search(cr, uid, [
-		'&amp;', ('type', '=', 'product'),
-		'|', ('latest_inventory_adjustment_date', '=', None),
-		('latest_inventory_adjustment_date', '&lt;', last_week.strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
-	])
-
-	product_template_obj = self.pool.get('product.template')
-	filtered_products = []
-	products_browsed = product_obj.browse(cr, uid, product_ids)
-	products = []
-	for product in products_browsed:
-		result_last_sale = product_template_obj._get_last_sale(cr, uid, [product.id], False, False, None)
-		if result_last_sale:
-			product['last_sale'] = result_last_sale[product.id]
-			products.append(product)
-	products.sort(key=lambda p: p.last_sale)
-	for product in products:
-		if product.last_sale:
-			last_sale = datetime.strptime(product.last_sale, DEFAULT_SERVER_DATETIME_FORMAT)
-			if last_month &lt; last_sale and last_sale &lt; today:
-				filtered_products.append(product)
-
+	cr.execute(
+"""
+SELECT
+	product_id, last_sale_date
+FROM (
+	SELECT
+		DISTINCT ON (product_id)
+		so_line.product_id, so.date_order as last_sale_date
+	FROM
+		sale_order_line so_line LEFT JOIN sale_order so
+		ON so.id = so_line.order_id
+	WHERE
+		so_line.product_id IN (
+			SELECT
+				ptemplate.id
+			FROM
+				product_template as ptemplate JOIN product_product as pproduct
+				ON ptemplate.id = pproduct.product_tmpl_id
+			WHERE
+				type = 'product' AND
+				(latest_inventory_adjustment_date is NULL OR latest_inventory_adjustment_date &lt; \'{}\')
+		)
+	ORDER BY
+		product_id ASC, last_sale_date DESC
+) AS product_last_sale_date_ordered
+WHERE
+	last_sale_date &lt; \'{}\'
+	AND last_sale_date &gt; \'{}\'
+ORDER BY
+	last_sale_date DESC
+""".format(last_week, today, last_month))
 	stock_opname_products = []
-	for filtered_product in filtered_products:
-		stock_opname_products.append({'product_id': filtered_product.id})
+	for row in cr.dictfetchall():
+		stock_opname_products.append({'product_id': row['product_id']})
 	return stock_opname_products
 			</field>
 		</record>
