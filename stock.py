@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-from datetime import datetime
+from datetime import datetime, timedelta
+from openerp import api
 
 
 from mako.lookup import TemplateLookup
@@ -420,3 +421,28 @@ class stock_inventory(osv.osv):
 			'url': '/tbvip/print/stock.inventory/' + str(ids[0]),
 			'target': 'self',
 		}
+
+# ==========================================================================================================================
+
+class stock_picking(osv.osv):
+	
+	_inherit = 'stock.picking'
+	
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'related_sales_bon_number': fields.char("Nomor Bon", readonly=True),
+	}
+	
+	@api.model
+	def name_search(self, name, args=None, operator='ilike', limit=100):
+		"""
+		Update name_search (like in m2o search) domain to search with sale bon number:
+		"""
+		args = args or []
+		recs = self.browse()
+		if name:
+			recs = self.search([('related_sales_bon_number', '=', name)] + args, limit=limit)
+		else:
+			recs = self.search([('name', 'ilike', name)] + args, limit=limit)
+		return recs.name_get()
