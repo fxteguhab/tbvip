@@ -24,6 +24,7 @@
 				<field name="shipped_or_taken" position="before">
 					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
 					<field name="employee_id" readonly="True"/>
+					<field name="retur_id" readonly="True"/>
 				</field>
 				<field name="shipped_or_taken" position="after">
 					<field name="customer_address" attrs="{'invisible': [('shipped_or_taken','!=','shipped')]}"/>
@@ -149,6 +150,7 @@
 				</field>
 				<field name="amount_total" position="after">
 					<field name="shipped_or_taken"/>
+					<field name="retur_id"/>
 				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="string">Cashier</attribute>
