@@ -226,8 +226,8 @@ class controller_print(http.Controller):
 		move_date = ism.move_date
 		input_by = ism.input_user_id.name if ism.input_user_id.name else ''
 		prepare_by = ism.prepare_employee_id.user_id.name if ism.prepare_employee_id.user_id.name else ''
-		accepted_by = ism.accepted_by_user_id.user_id.name if ism.accepted_by_user_id.user_id.name else ''
-		rejected_by = ism.rejected_by_user_id.user_id.name if ism.rejected_by_user_id.user_id.name else ''
+		accepted_by = ism.accepted_by_user_id.name if ism.accepted_by_user_id.name else ''
+		rejected_by = ism.rejected_by_user_id.name if ism.rejected_by_user_id.name else ''
 		
 		# add lines
 		row_number = 0
