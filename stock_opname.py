@@ -32,7 +32,7 @@ class stock_opname_memory(osv.osv_memory):
 				so_memory.location_id.id, so_memory.rule_id.id, so_memory.employee_id.id, context=context)
 			for line in onchange_result['value']['line_ids']:
 				new_line_ids.append((0, False, {
-					'inject_id': line['inject_id'],
+					'inject_id': line['inject_id'] if line.get('inject_id', False) else 0,
 					'location_id': line['location_id'],
 					'product_id': line['product_id'].id,
 				}))
