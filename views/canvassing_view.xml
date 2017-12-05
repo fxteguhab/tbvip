@@ -29,7 +29,7 @@
 				<page string="Invoices" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</page>
-				<page string="Trip Expenses" position="after">
+				<page string="Trip Expenses" position="before">
 					<page string="Interbranch Lines">
 						<field name="interbranch_move_ids" attrs="{'readonly': [('state', '=', 'finished')]}">
 							<tree version="7.0" editable="bottom">
