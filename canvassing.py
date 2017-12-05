@@ -64,10 +64,10 @@ class canvassing_canvas(osv.osv):
 	# tentukan device id dari vehicle yang melakukan canvassing ini
 		vehicle_gps_id = canvas_data.fleet_vehicle_id and canvas_data.fleet_vehicle_id.gps_id or None
 		if not vehicle_gps_id:
-			if not context.get('cron_mode', False):
-				raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
-			else:
-				return 0
+			# if not context.get('cron_mode', False):
+			# 	raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# else:
+			return 0
 		request = urllib2.Request(devices_url)
 		request.add_header('Cookie', cookie)
 		response = urllib2.urlopen(request)
