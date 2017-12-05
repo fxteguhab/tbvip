@@ -4,6 +4,17 @@ from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from openerp import SUPERUSER_ID, api
 
+
+from mako.lookup import TemplateLookup
+import os
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+
+_INTERBRANCH_STATE = [
+	('draft', 'Draft'),
+	('accepted', 'Accepted'),
+	('rejected', 'Rejected')
+]
+
 # ==========================================================================================================================
 
 class tbvip_interbranch_stock_move(osv.Model):
@@ -21,11 +32,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, required=True, states={'draft': [('readonly', False)]}),
 		'checked_by_id': fields.many2one('hr.employee', 'Checked by', readonly=True, states={'draft': [('readonly', False)]}),
 		'move_date': fields.datetime('Move Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
-		'state': fields.selection([
-			('draft', 'Draft'),
-			('accepted', 'Accepted'),
-			('rejected', 'Rejected')
-		], 'State', readonly=True),
+		'state': fields.selection(_INTERBRANCH_STATE, 'State', readonly=True),
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by', readonly=True, states={'draft': [('readonly', False)]}),
 		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by', readonly=True, states={'draft': [('readonly', False)]}),
 		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)]}),
@@ -135,6 +142,20 @@ class tbvip_interbranch_stock_move(osv.Model):
 			stock_transfer_detail_id = pop_up['res_id']
 			stock_transfer_detail_obj = self.pool.get(pop_up['res_model'])
 			stock_transfer_detail_obj.do_detailed_transfer(cr, uid, stock_transfer_detail_id)
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_interbranch_stock_move(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].interbranch_stock_move_line_ids:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/tbvip.interbranch.stock.move/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Interbranch Stock Move Error'),_('Interbranch must have at least one line to be printed.'))
+
+
 
 # ==========================================================================================================================
 

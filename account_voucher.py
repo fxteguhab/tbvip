@@ -1,4 +1,11 @@
 from openerp.osv import osv, fields
+from datetime import datetime, date, timedelta
+
+
+
+from mako.lookup import TemplateLookup
+import os
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 
 # ==========================================================================================================================
@@ -9,17 +16,25 @@ class account_voucher(osv.osv):
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 	
-	def onchange_partner_id(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
+	def onchange_partner_id_tbvip(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
+		"""
+		ATTENTION!!!!
+		This method stops all future overrides that's loaded after it.
+		This method does not override onchange_partner_id (instead use _tbvip in the method name)
+		because overriding partner_id with additional 'domain' key in the result will cause an error.
+		It will trigger buggy odoo code on account_voucher/account_voucher.py:917 because
+		res['domain'] is not expected via Register Additional Payment button on Sales Order.
+		"""
 		result = super(account_voucher, self).onchange_partner_id(
 			cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context)
 		
 		partner_obj = self.pool.get('res.partner')
 		partner = partner_obj.browse(cr, uid, [partner_id])
-		# if not result.get('domain', False):
-		# 	result['domain'] = {}
-		# result['domain'].update({
-		# 	'bank_id': [('id', 'in', partner.bank_ids.ids)],
-		# })
+		if not result.get('domain', False):
+			result['domain'] = {}
+		result['domain'].update({
+			'bank_id': [('id', 'in', partner.bank_ids.ids)],
+		})
 		
 		return result
 	
@@ -51,6 +66,18 @@ class account_voucher(osv.osv):
 		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 	}
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_kontra_bon(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].line_dr_ids:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/account.voucher/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Kontra Bon Error'),_('Kontra Bon must have at least one line to be printed.'))
 
 
 # ==========================================================================================================================

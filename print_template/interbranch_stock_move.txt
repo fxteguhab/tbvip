@@ -1,0 +1,14 @@
+${'INTERBRANCH STOCK MOVE'.center(90)}
+
+${'Move Date'.ljust(15)}${(': '+move_date).ljust(30)}${'Input by'.ljust(15)}${(': '+input_by)[:30].ljust(30)}
+${'From Location'.ljust(15)}${(': '+from_location)[:30].ljust(30)}${'Prepare by'.ljust(15)}${(': '+prepare_by)[:30].ljust(30)}
+${'To Location'.ljust(15)}${(': '+to_location)[:30].ljust(30)}${'Accepted by'.ljust(15)}${(': '+accepted_by)[:30].ljust(30)}
+${'State'.ljust(15)}${(': '+state)[:30].ljust(30)}${'Rejected by'.ljust(15)}${(': '+rejected_by)[:30].ljust(30)}
+
+${'-'*90}
+| ${'No'.ljust(3)} | ${'Product Name'.ljust(43)} | ${'Qty'.ljust(9)} | ${'UoM'.ljust(9)} | ${'Is Changed'.ljust(10)} |
+${'-'*90}
+% for val in lines:
+${val}
+% endfor
+${'-'*90}

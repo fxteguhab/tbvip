@@ -1,0 +1,20 @@
+${(company_name+' - '+branch_name)[:80].ljust(80)}${(company_city+', '+date)[:40].ljust(40)}
+${(company_address+' - '+company_city)[:80].ljust(80)}${('Kepada Yth,').ljust(40)}
+${company_phone[:80].ljust(80)}${customer_name[:40].ljust(40)}
+${('Nota No. '+bon_number)[:80].ljust(80)}${customer_address[:40].ljust(40)}
+${'-'*120}
+| ${'No'.ljust(2)} | ${'Banyak'.ljust(9)} | ${'Satuan'.ljust(10)} | ${'Nama Barang'.ljust(40)} | ${'Harga Satuan'.ljust(12)} | ${'Diskon'.ljust(10)} | ${'Subtotal'.ljust(15)} |
+${'-'*120}
+% for val in order_lines:
+${val}
+% endfor
+${'-'*120}
+.${''.rjust(86)} | ${'Diskon:'.rjust(10)} | ${discount_total.rjust(15)} |
+.${''.rjust(86)} | ${'TOTAL:'.rjust(10)} | ${total.rjust(15)} |
+.${' '*87}${'-'*32}
+
+.${' Tanda terima,'.ljust(25)}${' '*10}${'-'*50}${' '*10}${'Hormat kami, '.rjust(25)}
+.${' '*34}|${'PERINGATAN!'.center(48)}|${' '*35}
+.${' '*34}|${'Barang yang sudah dibeli'.center(48)}|${' '*35}
+.${' '*34}|${'tidak dapat ditukar / dikembalikan'.center(48)}|${' '*35}
+.${' '*34}${'-'*50}${' '*35}
