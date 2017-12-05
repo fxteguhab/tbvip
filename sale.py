@@ -232,6 +232,7 @@ class sale_order(osv.osv):
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
+		picking_obj = self.pool.get('stock.picking')
 		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
 		for sale in self.browse(cr, uid, ids):
 			if sale.bon_number and sale.date_order:
@@ -240,6 +241,11 @@ class sale_order(osv.osv):
 			self.signal_workflow(cr, uid, [sale.id], 'manual_invoice', context)
 			# append bon number to invoice
 			invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
+			# append bon number to picking
+			delivery = self.action_view_delivery(cr, uid, sale.id, context=context)
+			stock_picking_id = delivery['res_id']
+			if stock_picking_id:
+				picking_obj.write(cr, uid,stock_picking_id, {'related_sales_bon_number': sale.bon_number})
 			# Make invoice open
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 			
