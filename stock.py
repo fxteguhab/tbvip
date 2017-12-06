@@ -446,3 +446,17 @@ class stock_picking(osv.osv):
 		else:
 			recs = self.search([('name', 'ilike', name)] + args, limit=limit)
 		return recs.name_get()
+	
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_delivery_order(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].move_lines:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/stock.picking/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Stock Picking Error'),_('Stock Picking must have at least one line to be printed.'))
+		
