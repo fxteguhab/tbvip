@@ -38,7 +38,7 @@ class sale_order(osv.osv):
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_complex_payment': fields.boolean('Is Complex Payment'),
 		'return_amount' : fields.float('Return Amount'),
-		'retur_id': fields.many2one('account.invoice', "Retur", readonly=True),
+		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 	}
 
 	def _default_partner_id(self, cr, uid, context={}):

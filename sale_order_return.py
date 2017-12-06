@@ -341,7 +341,7 @@ class sale_order_return(models.TransientModel):
 			if sale_order_id:
 				sale_order_obj.write(cr, uid, sale_order_id, {
 					'return_amount': return_amount,
-					'retur_id': refund_id[0]
+					'return_id': refund_id[0]
 				})
 			
 			# xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
