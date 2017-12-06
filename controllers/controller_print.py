@@ -291,26 +291,26 @@ class controller_print(http.Controller):
 		
 		vehicle_name = cvs.fleet_vehicle_id.name if cvs.fleet_vehicle_id.name else ''
 		driver_name_1 = cvs.driver1_id.name if cvs.driver1_id.name else ''
-		# print for every invoices
-		for inv in cvs.invoice_line_ids:
-			receiver_name = inv.invoice_id.partner_id.name if inv.invoice_id.partner_id.name else ''
-			receiver_address = inv.address if inv.address else ''
-			account_invoice_line = []
-			for acc_inv_line in inv.invoice_id.invoice_line:
-				row = tpl_line.render(
-					name=acc_inv_line.product_id.name,
-					qty=str(acc_inv_line.quantity),
-				)
-				account_invoice_line.append(row)
-			# render invoice
-			invoice_rendered = tpl.render(
-				date=datetime.strptime(cvs.date_created, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
-				vehicle_name=vehicle_name,
-				driver_name_1=driver_name_1,
-				receiver_name=receiver_name,
-				receiver_address=receiver_address,
-				invoice_line=account_invoice_line,
-			)
+		# print for every stock picking
+		stock_picking_line = []
+		for stock in cvs.stock_line_ids:
+			receiver_name = stock.stock_picking_id.partner_id.name if stock.stock_picking_id.partner_id.name else ''
+			receiver_address = stock.address if stock.address else ''
+			# for acc_inv_line in inv.invoice_id.invoice_line:
+			# 	row = tpl_line.render(
+			# 		name=acc_inv_line.product_id.name,
+			# 		qty=str(acc_inv_line.quantity),
+			# 	)
+			# 	account_invoice_line.append(row)
+		# render invoice
+		invoice_rendered = tpl.render(
+			date=datetime.strptime(cvs.date_created, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
+			vehicle_name=vehicle_name,
+			driver_name_1=driver_name_1,
+			receiver_name=receiver_name,
+			receiver_address=receiver_address,
+			# invoice_line=account_invoice_line,
+		)
 		return invoice_rendered
 	
 	def print_sale_order(self, so):
