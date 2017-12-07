@@ -17,7 +17,7 @@ _INTERBRANCH_STATE = [
 
 # Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
 
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+tpl_lookup = TemplateLookup(directories=['addons/tbvip/print_template'])
 
 class controller_print(http.Controller):
 	
