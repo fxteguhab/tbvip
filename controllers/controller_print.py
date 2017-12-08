@@ -17,7 +17,7 @@ _INTERBRANCH_STATE = [
 
 # Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
 
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
+tpl_lookup = TemplateLookup(directories=['/opt/odoo/addons/tbvip/print_template'])
 
 class controller_print(http.Controller):
 	
@@ -79,7 +79,6 @@ class controller_print(http.Controller):
 	
 	def print_payslip_dot_matrix(self, payslip):
 		# Mendefinisikan path dari modul report terkait
-		tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 		template = tpl_lookup.get_template('payslip.txt')
 		
 		# Prepare worked days data
