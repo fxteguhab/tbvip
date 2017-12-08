@@ -28,7 +28,7 @@ class controller_print(http.Controller):
 		
 		if model == 'sale.order':
 			data_string = self.print_sale_order(data)
-		elif model == 'canvassing.canvas':
+		elif model == 'stock.picking':
 			data_string = self.print_delivery_order(data)
 		elif model == 'purchase.order':
 			data_string = self.print_draft_purchase_order(data)
@@ -225,8 +225,8 @@ class controller_print(http.Controller):
 		move_date = ism.move_date
 		input_by = ism.input_user_id.name if ism.input_user_id.name else ''
 		prepare_by = ism.prepare_employee_id.user_id.name if ism.prepare_employee_id.user_id.name else ''
-		accepted_by = ism.accepted_by_user_id.user_id.name if ism.accepted_by_user_id.user_id.name else ''
-		rejected_by = ism.rejected_by_user_id.user_id.name if ism.rejected_by_user_id.user_id.name else ''
+		accepted_by = ism.accepted_by_user_id.name if ism.accepted_by_user_id.name else ''
+		rejected_by = ism.rejected_by_user_id.name if ism.rejected_by_user_id.name else ''
 		
 		# add lines
 		row_number = 0
@@ -283,34 +283,29 @@ class controller_print(http.Controller):
 		)
 		return draft_po
 	
-	def print_delivery_order(self, cvs):
+	def print_delivery_order(self, stock_picking):
 		# define template for printing
-		tpl = tpl_lookup.get_template('canvas.txt')
-		tpl_line = tpl_lookup.get_template('canvas_line.txt')
+		tpl = tpl_lookup.get_template('stock_picking.txt')
+		tpl_line = tpl_lookup.get_template('stock_picking_line.txt')
 		
-		vehicle_name = cvs.fleet_vehicle_id.name if cvs.fleet_vehicle_id.name else ''
-		driver_name_1 = cvs.driver1_id.name if cvs.driver1_id.name else ''
-		# print for every invoices
-		for inv in cvs.invoice_line_ids:
-			receiver_name = inv.invoice_id.partner_id.name if inv.invoice_id.partner_id.name else ''
-			receiver_address = inv.address if inv.address else ''
-			account_invoice_line = []
-			for acc_inv_line in inv.invoice_id.invoice_line:
-				row = tpl_line.render(
-					name=acc_inv_line.product_id.name,
-					qty=str(acc_inv_line.quantity),
-				)
-				account_invoice_line.append(row)
-			# render invoice
-			invoice_rendered = tpl.render(
-				date=datetime.strptime(cvs.date_created, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
-				vehicle_name=vehicle_name,
-				driver_name_1=driver_name_1,
-				receiver_name=receiver_name,
-				receiver_address=receiver_address,
-				invoice_line=account_invoice_line,
+		receiver_name = stock_picking.partner_id.name if stock_picking.partner_id.name else ''
+		receiver_address = stock_picking.partner_id.street if stock_picking.partner_id.street else ''
+		# print for every stock move
+		move_lines = []
+		for stock_move in stock_picking.move_lines:
+			row = tpl_line.render(
+				name=stock_move.product_id.name,
+				qty=str(stock_move.product_uom_qty),
 			)
-		return invoice_rendered
+			move_lines.append(row)
+		# render stock_picking
+		stock_picking_rendered = tpl.render(
+			date=datetime.today().strftime('%Y-%m-%d'),
+			receiver_name=receiver_name,
+			receiver_address=receiver_address,
+			move_lines=move_lines,
+		)
+		return stock_picking_rendered
 	
 	def print_sale_order(self, so):
 		tpl = tpl_lookup.get_template('sale_order.txt')

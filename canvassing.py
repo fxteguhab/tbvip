@@ -64,10 +64,10 @@ class canvassing_canvas(osv.osv):
 	# tentukan device id dari vehicle yang melakukan canvassing ini
 		vehicle_gps_id = canvas_data.fleet_vehicle_id and canvas_data.fleet_vehicle_id.gps_id or None
 		if not vehicle_gps_id:
-			if not context.get('cron_mode', False):
-				raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
-			else:
-				return 0
+			# if not context.get('cron_mode', False):
+			# 	raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# else:
+			return 0
 		request = urllib2.Request(devices_url)
 		request.add_header('Cookie', cookie)
 		response = urllib2.urlopen(request)
@@ -187,19 +187,6 @@ class canvassing_canvas(osv.osv):
 	def cron_recalculate_distance(self, cr, uid, context={}):
 		trip_ids = self.search(cr, uid, [('state','=','finished'),('is_recalculated','=',False)])
 		self.action_recalculate_distance(cr, uid, trip_ids, context={'cron_mode': True})
-	
-	# PRINTS ----------------------------------------------------------------------------------------------------------------
-	
-	def print_delivery_order(self, cr, uid, ids, context):
-		if self.browse(cr,uid,ids)[0].invoice_line_ids:
-			return {
-				'type' : 'ir.actions.act_url',
-				'url': '/tbvip/print/canvassing.canvas/' + str(ids[0]),
-				'target': 'self',
-			}
-		else:
-			raise osv.except_osv(_('Print Canvassing Error'),_('Canvassing must have at least one invoice to be printed.'))
-		
 
 # ==========================================================================================================================
 

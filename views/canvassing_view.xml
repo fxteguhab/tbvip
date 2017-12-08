@@ -7,9 +7,6 @@
 			<field name="model">canvassing.canvas</field>
 			<field name="inherit_id" ref="canvassing.canvassing_canvas_form"/>
 			<field name="arch" type="xml">
-				<button name="action_set_finish" position="after">
-					<button name="print_delivery_order" string="" type="object" icon="gtk-print"/>
-				</button>
 				<field name="name" position="after">
 					<field name="branch_id" attrs="{'readonly': [('state', '=', 'finished')]}"/>
 				</field>
@@ -25,7 +22,11 @@
 				<xpath expr="//button[@name='action_set_finish']" position="after">
 					<button name="action_recalculate_distance" string="Recalculate Distance" type="object" states="finished" />
 				</xpath>
-				<page string="Trip Expenses" position="after">
+				<!--Ko Teguh minta di hide, karena pusing cenah adminnya-->
+				<page string="Invoices" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</page>
+				<page string="Trip Expenses" position="before">
 					<page string="Interbranch Lines">
 						<field name="interbranch_move_ids" attrs="{'readonly': [('state', '=', 'finished')]}">
 							<tree version="7.0" editable="bottom">
