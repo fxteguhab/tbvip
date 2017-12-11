@@ -67,7 +67,7 @@ class controller_print(http.Controller):
 				no=str(row_number),
 				name=line.product_id.name if line.product_id.name else '',
 				location=line.location_id.name if line.location_id.name else '',
-				qty='',
+				qty='' if inv_adj.state == 'draft' else str(line.product_qty),
 			)
 			stock_opname_rows.append(row)
 		# render stock opname
