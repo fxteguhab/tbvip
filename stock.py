@@ -4,10 +4,6 @@ from datetime import datetime, timedelta
 from openerp import api
 
 
-from mako.lookup import TemplateLookup
-import os
-# Define path to templates
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 # ==========================================================================================================================
 

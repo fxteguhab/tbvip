@@ -15,9 +15,6 @@ import openerp.addons.chjs_price_list as imported_price_list
 import openerp.addons.decimal_precision as dp
 
 
-from mako.lookup import TemplateLookup
-import os
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 # ==========================================================================================================================
 

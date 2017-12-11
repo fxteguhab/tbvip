@@ -3,9 +3,6 @@ from datetime import datetime, date, timedelta
 
 
 
-from mako.lookup import TemplateLookup
-import os
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 
 # ==========================================================================================================================
