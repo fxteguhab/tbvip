@@ -1,8 +1,6 @@
-import json
 
 from openerp import http
 from openerp.tools.translate import _
-from openerp.osv import osv, fields
 from openerp.http import request
 from datetime import datetime, date, timedelta
 from mako.lookup import TemplateLookup
@@ -17,7 +15,8 @@ _INTERBRANCH_STATE = [
 
 # Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
 
-tpl_lookup = TemplateLookup(directories=['/opt/odoo/addons/tbvip/print_template'])
+# tpl_lookup = TemplateLookup(directories=['/opt/odoo/addons/tbvip/print_template'])
+tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 class controller_print(http.Controller):
 	
@@ -54,6 +53,9 @@ class controller_print(http.Controller):
 				[('Content-Type', 'application/octet-stream'),
 					('Content-Disposition', content_disposition(filename))])
 	
+	def thousand_separator(self, int_or_float):
+		return "{0:,.0f}".format(int_or_float).replace(',', '.')
+	
 	def print_stock_inventory(self, inv_adj):
 		tpl = tpl_lookup.get_template('stock_opname.txt')
 		tpl_line = tpl_lookup.get_template('stock_opname_line.txt')
@@ -67,7 +69,7 @@ class controller_print(http.Controller):
 				no=str(row_number),
 				name=line.product_id.name if line.product_id.name else '',
 				location=line.location_id.name if line.location_id.name else '',
-				qty='' if inv_adj.state == 'draft' else str(line.product_qty),
+				qty='' if inv_adj.state == 'draft' else self.thousand_separator(line.product_qty),
 			)
 			stock_opname_rows.append(row)
 		# render stock opname
@@ -123,61 +125,61 @@ class controller_print(http.Controller):
 			print_date=str(datetime.now()),
 			from_date=str(payslip.date_from),
 			name=str(payslip.employee_id.name),
-			masuk=str(worked_days.get('masuk', 0)),
-			pokok=str(bonus.get('MASUK_BONUS_BASIC', 0)),
-			full=str(worked_days.get('full', 0)),
-			makan=str(bonus.get('FULL_BONUS_BASIC', 0)),
-			full_minggu=str(worked_days.get('full_minggu', 0)),
-			mingguan=str(bonus.get('FULL_MINGGU_BONUS_BASIC', 0)),
-			total_pokok=str(line.get('BASIC', 0)),
+			masuk=self.thousand_separator(worked_days.get('masuk', 0)),
+			pokok=self.thousand_separator(bonus.get('MASUK_BONUS_BASIC', 0)),
+			full=self.thousand_separator(worked_days.get('full', 0)),
+			makan=self.thousand_separator(bonus.get('FULL_BONUS_BASIC', 0)),
+			full_minggu=self.thousand_separator(worked_days.get('full_minggu', 0)),
+			mingguan=self.thousand_separator(bonus.get('FULL_MINGGU_BONUS_BASIC', 0)),
+			total_pokok=self.thousand_separator(line.get('BASIC', 0)),
 			
 			to_date=str(payslip.date_to),
 			
-			total_minggu=str(total_bonus_value + line.get('BASIC', 0)),
+			total_minggu=self.thousand_separator(total_bonus_value + line.get('BASIC', 0)),
 			
-			potongan=str(0),
+			potongan=self.thousand_separator(0),
 			
-			point_mobil=str(bonus.get('POIN_MOBIL_POINT', 0)),
-			lvl_mobil=str(bonus.get('POIN_MOBIL_LEVEL', 0)),
-			bonus_mobil=str(bonus.get('POIN_MOBIL_BONUS', 0)),
-			nabung=str(0),
+			point_mobil=self.thousand_separator(bonus.get('POIN_MOBIL_POINT', 0)),
+			lvl_mobil=self.thousand_separator(bonus.get('POIN_MOBIL_LEVEL', 0)),
+			bonus_mobil=self.thousand_separator(bonus.get('POIN_MOBIL_BONUS', 0)),
+			nabung=self.thousand_separator(0),
 			
-			point_motor=str(bonus.get('POIN_MOTOR_POINT', 0)),
-			lvl_motor=str(bonus.get('POIN_MOTOR_LEVEL', 0)),
-			bonus_motor=str(bonus.get('POIN_MOTOR_BONUS', 0)),
+			point_motor=self.thousand_separator(bonus.get('POIN_MOTOR_POINT', 0)),
+			lvl_motor=self.thousand_separator(bonus.get('POIN_MOTOR_LEVEL', 0)),
+			bonus_motor=self.thousand_separator(bonus.get('POIN_MOTOR_BONUS', 0)),
 			
-			point_so=str(bonus.get('POIN_SO_POINT', 0)),
-			lvl_so=str(bonus.get('POIN_SO_LEVEL', 0)),
-			bonus_so=str(bonus.get('POIN_SO_BONUS', 0)),
-			gaji=str(line.get('NET', 0)),
+			point_so=self.thousand_separator(bonus.get('POIN_SO_POINT', 0)),
+			lvl_so=self.thousand_separator(bonus.get('POIN_SO_LEVEL', 0)),
+			bonus_so=self.thousand_separator(bonus.get('POIN_SO_BONUS', 0)),
+			gaji=self.thousand_separator(line.get('NET', 0)),
 			
-			point_sales=str(bonus.get('POIN_SALES_POINT', 0)),
-			lvl_sales=str(bonus.get('POIN_SALES_LEVEL', 0)),
-			bonus_sales=str(bonus.get('POIN_SALES_BONUS', 0)),
+			point_sales=self.thousand_separator(bonus.get('POIN_SALES_POINT', 0)),
+			lvl_sales=self.thousand_separator(bonus.get('POIN_SALES_LEVEL', 0)),
+			bonus_sales=self.thousand_separator(bonus.get('POIN_SALES_BONUS', 0)),
 			
-			point_adm=str(bonus.get('POIN_ADM_POINT', 0)),
-			lvl_adm=str(bonus.get('POIN_ADM_LEVEL', 0)),
-			bonus_adm=str(bonus.get('POIN_ADM_BONUS', 0)),
-			tabungan=str(0),
+			point_adm=self.thousand_separator(bonus.get('POIN_ADM_POINT', 0)),
+			lvl_adm=self.thousand_separator(bonus.get('POIN_ADM_LEVEL', 0)),
+			bonus_adm=self.thousand_separator(bonus.get('POIN_ADM_BONUS', 0)),
+			tabungan=self.thousand_separator(0),
 			
-			point_xtra=str(bonus.get('POIN_XTRA_POINT', 0)),
-			lvl_xtra=str(bonus.get('POIN_XTRA_LEVEL', 0)),
-			bonus_xtra=str(bonus.get('POIN_XTRA_BONUS', 0)),
-			pinjaman=str(0),
+			point_xtra=self.thousand_separator(bonus.get('POIN_XTRA_POINT', 0)),
+			lvl_xtra=self.thousand_separator(bonus.get('POIN_XTRA_LEVEL', 0)),
+			bonus_xtra=self.thousand_separator(bonus.get('POIN_XTRA_BONUS', 0)),
+			pinjaman=self.thousand_separator(0),
 			
-			point_penalti=str(bonus.get('POIN_PENALTY_POINT', 0)),
-			lvl_penalti=str(bonus.get('POIN_PENALTY_LEVEL', 0)),
-			bonus_penalti=str(bonus.get('POIN_PENALTY_BONUS', 0)),
-			level=str(bonus.get('CURRENT_LEVEL_BASIC', 0)),
+			point_penalti=self.thousand_separator(bonus.get('POIN_PENALTY_POINT', 0)),
+			lvl_penalti=self.thousand_separator(bonus.get('POIN_PENALTY_LEVEL', 0)),
+			bonus_penalti=self.thousand_separator(bonus.get('POIN_PENALTY_BONUS', 0)),
+			level=self.thousand_separator(bonus.get('CURRENT_LEVEL_BASIC', 0)),
 			
-			point_top=str(bonus.get('POIN_TOP_POINT', 0)),
-			lvl_top=str(bonus.get('POIN_TOP_LEVEL', 0)),
-			bonus_top=str(bonus.get('POIN_TOP_BONUS', 0)),
-			total_poin=str(bonus.get('TOTAL_POINT_BASIC', 0)),
+			point_top=self.thousand_separator(bonus.get('POIN_TOP_POINT', 0)),
+			lvl_top=self.thousand_separator(bonus.get('POIN_TOP_LEVEL', 0)),
+			bonus_top=self.thousand_separator(bonus.get('POIN_TOP_BONUS', 0)),
+			total_poin=self.thousand_separator(bonus.get('TOTAL_POINT_BASIC', 0)),
 			
-			total_bonus_point=str(total_bonus_point),
-			total_bonus_value=str(total_bonus_value),
-			target_poin=str(bonus.get('NEXT_LEVEL_POINT_BASIC', 0)),
+			total_bonus_point=self.thousand_separator(total_bonus_point),
+			total_bonus_value=self.thousand_separator(total_bonus_value),
+			target_poin=self.thousand_separator(bonus.get('NEXT_LEVEL_POINT_BASIC', 0)),
 		)
 		return payslip_print
 	
@@ -199,7 +201,7 @@ class controller_print(http.Controller):
 				no=str(row_number),
 				reference_number=line.move_line_id.invoice.name if line.move_line_id and line.move_line_id.invoice else '-',
 				delivery_date=datetime.strptime(line.date_original, '%Y-%m-%d').strftime('%Y-%m-%d'),
-				total=str(line.amount),
+				total=self.thousand_separator(line.amount),
 			)
 			account_voucher_line.append(row)
 		# render account voucher
@@ -209,9 +211,9 @@ class controller_print(http.Controller):
 			supplier_name=supplier_name,
 			payment_date=datetime.strptime(acc_vou.date, '%Y-%m-%d').strftime('%Y-%m-%d'),
 			lines=account_voucher_line,
-			subtotal=str(acc_vou.amount),
-			discount=str(0),
-			total=str(acc_vou.amount),
+			subtotal=self.thousand_separator(acc_vou.amount),
+			discount=self.thousand_separator(0),
+			total=self.thousand_separator(acc_vou.amount),
 		)
 		return account_voucher
 	
@@ -237,9 +239,9 @@ class controller_print(http.Controller):
 			row_number += 1
 			row = tpl_line.render(
 				no=str(row_number),
-				name=str(line.product_id.name),
-				qty=str(line.qty),
-				uom=str(line.uom_id.name),
+				name=str(line.product_id.name) if line.product_id.name else '',
+				qty=self.thousand_separator(line.qty),
+				uom=str(line.uom_id.name) if line.uom_id.name else '',
 				is_changed='v' if line.is_changed else '',
 			)
 			ism_line.append(row)
@@ -271,7 +273,7 @@ class controller_print(http.Controller):
 		order_line_rows = []
 		for line in dpo.order_line:
 			row = tpl_line.render(
-				qty=str(line.product_qty),
+				qty=self.thousand_separator(line.product_qty),
 				name=line.product_id.name,
 			)
 			order_line_rows.append(row)
@@ -296,7 +298,7 @@ class controller_print(http.Controller):
 		purchase_needs_draft_rows = []
 		for line in purchase_needs.draft_needs_ids:
 			ordered_needs_rows.append({
-				'qty': str(line.product_qty),
+				'qty': self.thousand_separator(line.product_qty),
 				'name': line.product_id.name,
 				'branch_name': line.branch_id.name if line.branch_id.name else '',
 			})
@@ -328,7 +330,7 @@ class controller_print(http.Controller):
 		for stock_move in stock_picking.move_lines:
 			row = tpl_line.render(
 				name=stock_move.product_id.name,
-				qty=str(stock_move.product_uom_qty),
+				qty=self.thousand_separator(stock_move.product_uom_qty),
 			)
 			move_lines.append(row)
 		# render stock_picking
@@ -360,12 +362,12 @@ class controller_print(http.Controller):
 			row_number += 1
 			row = tpl_line.render(
 				no=str(row_number),
-				qty=str(line.product_uom_qty),
+				qty=self.thousand_separator(line.product_uom_qty),
 				uom=line.product_uom.name,
 				name=line.product_id.name,
-				unit_price=str(line.price_unit),
+				unit_price=self.thousand_separator(line.price_unit),
 				discount=line.discount_string if line.discount_string else "",
-				subtotal=str(line.price_subtotal),
+				subtotal=self.thousand_separator(line.price_subtotal),
 			)
 			order_line_rows.append(row)
 		# add blank rows
@@ -395,7 +397,7 @@ class controller_print(http.Controller):
 			customer_address=customer_address,
 			
 			order_lines=order_line_rows,
-			discount_total=str(so.total_discount_amount),
-			total=str(so.amount_total),
+			discount_total=self.thousand_separator(so.total_discount_amount),
+			total=self.thousand_separator(so.amount_total),
 		)
 		return sale_order
