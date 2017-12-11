@@ -7,10 +7,6 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FO
 from datetime import datetime, date, timedelta
 
 
-from mako.lookup import TemplateLookup
-import os
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
-
 # ==========================================================================================================================
 
 class canvassing_canvas(osv.osv):

@@ -5,9 +5,6 @@ from openerp.tools.translate import _
 from openerp import SUPERUSER_ID, api
 
 
-from mako.lookup import TemplateLookup
-import os
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 _INTERBRANCH_STATE = [
 	('draft', 'Draft'),

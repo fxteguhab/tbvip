@@ -17,10 +17,6 @@ import openerp.addons.chjs_price_list as imported_price_list
 
 
 
-from mako.lookup import TemplateLookup
-import os
-# Define path to templates
-tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 # ==========================================================================================================================
 
