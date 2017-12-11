@@ -340,6 +340,8 @@ class sale_order_return(models.TransientModel):
 					
 			if sale_order_id:
 				sale_order_obj.write(cr, uid, sale_order_id, {
+					'name': 'Retur '+ sale_order_obj.browse(cr, uid, sale_order_id).name,
+					'display_name': 'Retur '+ sale_order_obj.browse(cr, uid, sale_order_id).display_name,
 					'return_amount': return_amount,
 					'return_id': refund_id[0]
 				})
