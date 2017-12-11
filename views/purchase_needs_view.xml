@@ -103,5 +103,16 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="purchase_needs_form_inherit">
+			<field name="name">purchase.needs.form.inherit</field>
+			<field name="model">purchase.needs</field>
+			<field name="inherit_id" ref="purchase_needs.purchase_needs_form"/>
+			<field name="arch" type="xml">
+				<header position="inside">
+					<button name="print_purchase_needs" string="" type="object" icon="gtk-print"/>
+				</header>
+			</field>
+		</record>
+
 	</data>
 </openerp>

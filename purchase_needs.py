@@ -386,7 +386,16 @@ class purchase_needs(osv.Model):
 				}, context=context))
 		result['value']['purchase_needs_line_ids'] = purchase_needs_line_ids
 		return result
-
+	
+	def print_purchase_needs(self, cr, uid, ids, context):
+		if len(ids) > 0 and self.browse(cr, uid, ids)[0].draft_needs_ids:
+			return {
+				'type': 'ir.actions.act_url',
+				'url': '/tbvip/print/purchase.needs/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Purchase Needs Error'), _('Purchase needs must have at least one line to be printed.'))
 
 
 
