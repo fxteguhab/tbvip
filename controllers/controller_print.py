@@ -254,8 +254,9 @@ class controller_print(http.Controller):
 			move_date=datetime.strptime(move_date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'),
 			input_by=input_by,
 			prepare_by=prepare_by,
-			accepted_by=accepted_by,
-			rejected_by=rejected_by,
+			is_draft=ism.state == 'draft',
+			accepted_or_rejected=_(dict(_INTERBRANCH_STATE).get(ism.state,'')) + ' by' if ism.state != 'draft' else '',
+			accepted_or_rejected_by=accepted_by if ism.state == 'accepted' else rejected_by,
 			lines=ism_line,
 		)
 		return account_voucher
