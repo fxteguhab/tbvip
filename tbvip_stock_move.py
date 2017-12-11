@@ -51,9 +51,15 @@ class tbvip_interbranch_stock_move(osv.Model):
 	def name_get(self, cr, uid, ids, context=None):
 		result = []
 		for interbranch_move in self.browse(cr, uid, ids, context):
+			localized_date = fields.datetime.context_timestamp(cr, uid, datetime.strptime(interbranch_move.move_date,
+				DEFAULT_SERVER_DATETIME_FORMAT), context)
 			result.append((
 				interbranch_move.id,
-				interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name
+				'{} | {} -> {}'.format(
+					localized_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+					interbranch_move.from_stock_location_id.name,
+					interbranch_move.to_stock_location_id.name
+				)
 			))
 		return result
 	
