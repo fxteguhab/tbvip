@@ -23,8 +23,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'from_stock_location_id': fields.many2one('stock.location', 'Incoming Location', domain=[('usage', '=', 'internal')], readonly=True, required=True, states={'draft': [('readonly', False)]}),
-		'to_stock_location_id': fields.many2one('stock.location', 'Outgoing Location', domain=[('usage', '=', 'internal')], readonly=True,required=True, states={'draft': [('readonly', False)]}),
+		'from_stock_location_id': fields.many2one('stock.location', 'From Location', domain=[('usage', '=', 'internal')], readonly=True, required=True, states={'draft': [('readonly', False)]}),
+		'to_stock_location_id': fields.many2one('stock.location', 'To Location', domain=[('usage', '=', 'internal')], readonly=True,required=True, states={'draft': [('readonly', False)]}),
 		'input_user_id': fields.many2one('res.users', 'Input by', required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, required=True, states={'draft': [('readonly', False)]}),
 		'checked_by_id': fields.many2one('hr.employee', 'Checked by', readonly=True, states={'draft': [('readonly', False)]}),

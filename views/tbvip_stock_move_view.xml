@@ -18,15 +18,21 @@
 						<button name="print_interbranch_stock_move" string="" type="object" icon="gtk-print"/>
 						<field name="state" widget="statusbar" readonly="1"/>
 					</header>
+					<group col="4">
+						<group>
+							<field name="move_date"/>
+							<field name="from_stock_location_id"/>
+							<field name="to_stock_location_id"/>
+							<field name="input_user_id"/>
+						</group>
+						<group>
+							<field name="prepare_employee_id"/>
+							<field name="checked_by_id"/>
+							<field name="accepted_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'rejected'])]}"/>
+							<field name="rejected_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'accepted'])]}"/>
+						</group>
+					</group>
 					<group>
-						<field name="move_date"/>
-						<field name="from_stock_location_id"/>
-						<field name="to_stock_location_id"/>
-						<field name="input_user_id"/>
-						<field name="prepare_employee_id"/>
-						<field name="checked_by_id"/>
-						<field name="accepted_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'rejected'])]}"/>
-						<field name="rejected_by_user_id" readonly="1" attrs="{'invisible': [('state', 'in', ['draft', 'accepted'])]}"/>
 						<field name="interbranch_stock_move_line_ids">
 							<tree editable="bottom">
 								<field name="product_id" on_change="onchange_product_id(product_id)" options="{'no_create': 1}"/>
