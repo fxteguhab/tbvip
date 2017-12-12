@@ -247,13 +247,13 @@ class sale_order(osv.osv):
 			
 			order = sale
 			if order.payment_transfer_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, order.invoice_ids[0].id, 'transfer', context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
 			if order.payment_cash_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
 			if order.payment_receivable_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, order.invoice_ids[0].id, 'receivable', context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
 			if order.payment_giro_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, order.invoice_ids[0].id, 'giro', context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, context=None)
 			
 		return result
 	
