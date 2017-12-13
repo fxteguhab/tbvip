@@ -68,8 +68,9 @@ class stock_opname_memory_line(osv.osv_memory):
 		result = ''
 		for product in product_obj.browse(cr, uid, [product_id], context):
 			for product_sublocation_id in product.product_sublocation_ids:
-				sublocation = product_sublocation_id.sublocation_id
-				result += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
+				branch_name = product_sublocation_id.branch_id.name if product_sublocation_id.branch_id.name else ''
+				sublocation_full_name = product_sublocation_id.sublocation_id.full_name if product_sublocation_id.sublocation_id.full_name else ''
+				result += branch_name + ' / ' + sublocation_full_name + '\r\n'
 		return {'value': {'sublocation': result}}
 
 class stock_opname_inject(osv.osv_memory):
