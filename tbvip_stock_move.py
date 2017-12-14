@@ -129,7 +129,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 					'sequence': max_sequence + 1,
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
-					'picking_id' : picking_id
+					'picking_id' : picking_id,
+					'product_uom_qty' : line.qty
 				}, context=context)
 				
 			#call workflow to make picking transferred
