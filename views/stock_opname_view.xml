@@ -40,18 +40,6 @@
 				</field>
 			</field>
 		</record>
-
-		<record id="stock_opname_inject_tree_inherit_inherit" model="ir.ui.view">
-			<field name="name">stock.opname.inject.tree.inherit.inherit</field>
-			<field name="model">stock.opname.inject</field>
-			<field name="inherit_id" ref="tbvip.stock_opname_inject_tree_inherit"/>
-			<field name="groups_id" eval="[(5, False), (4, ref('group_management_administrator'))]"/>
-			<field name="arch" type="xml">
-				<field name="location_id" position="attributes">
-					<attribute name="readonly">0</attribute>
-				</field>
-			</field>
-		</record>
 	</data>
 </openerp>
 
