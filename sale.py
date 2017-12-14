@@ -27,7 +27,7 @@ class sale_order(osv.osv):
 	
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
-		'bon_number': fields.char('Bon Number', required=True),
+		'bon_number': fields.char('Bon Number', required=True, readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
 		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
