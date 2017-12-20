@@ -309,16 +309,12 @@ class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	
 	def create(self, cr, uid, vals, context={}):
-		user_obj = self.pool.get('res.users')
-		stock_location_obj = self.pool.get('stock.location')
 		new_id = super(stock_move, self).create(cr, uid, vals, context=context)
-		if vals.get('location_dest_id', False):
-			stock_location_data = stock_location_obj.browse(cr, uid, vals['location_dest_id']);
-			if stock_location_data.usage == 'customer':
-				location_id = user_obj.browse(cr, uid, uid, context).branch_id.default_outgoing_location_id.id
-				self.write(cr, uid, [new_id], {
-					'location_id': location_id,
-				})
+		location_id_sale_override = context.get('sale_location_id')
+		if location_id_sale_override:
+			self.write(cr, uid, [new_id], {
+				'location_id': location_id_sale_override,
+			})
 		return new_id
 	
 	def unlink(self, cr, uid, ids, context=None):

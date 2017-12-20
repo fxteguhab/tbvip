@@ -61,6 +61,19 @@ class sale_order(osv.osv):
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
+	def action_ship_create(self, cr, uid, ids, context=None):
+		"""
+		Add source location_id to context
+		"""
+		if context is None:
+			context = {}
+		unfrozen_context = dict(context)
+		unfrozen_context.update({
+			'sale_location_id': self.browse(cr, uid, ids)[0].stock_location_id.id
+		})
+		result = super(sale_order, self).action_ship_create(cr, uid, ids, unfrozen_context)
+		return result
+	
 	def create(self, cr, uid, vals, context={}):
 		if vals.get('bon_number', False) and vals.get('date_order', False):
 			bon_number = vals['bon_number']
