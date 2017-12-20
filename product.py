@@ -96,11 +96,10 @@ class product_template(osv.osv):
 		current_pricelist_obj = self.pool.get('product.current.price')
 		result = {}
 		for product in self.browse(cr, uid, ids):
-			price = 0
 			variants = product.product_variant_ids
 			if len(variants) > 0:
 				variant = variants[0]
-				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id)], limit=1)
+				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id)])
 		return result
 	
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
