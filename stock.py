@@ -387,7 +387,8 @@ class stock_inventory_line(osv.osv):
 		for product in product_obj.browse(cr, uid, [product_id], context):
 			for product_sublocation_id in product.product_sublocation_ids:
 				sublocation = product_sublocation_id.sublocation_id
-				sublocation_name += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
+				if sublocation:
+					sublocation_name += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
 		result['value'].update({'sublocation': sublocation_name})
 		return result
 
