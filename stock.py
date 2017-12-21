@@ -440,6 +440,20 @@ class stock_picking(osv.osv):
 			recs = self.search([('name', 'ilike', name)] + args, limit=limit)
 		return recs.name_get()
 	
+	@api.multi
+	def name_get(self):
+		"""
+		Shows nomor bon as name if this picking has related_sales_bon_number
+		"""
+		result = []
+		for picking in self:
+			result.append((
+					picking.id,
+					"Sales Order / " + picking.related_sales_bon_number if picking.related_sales_bon_number else picking.name
+				)
+			)
+		return result
+	
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
