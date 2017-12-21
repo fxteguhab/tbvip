@@ -74,9 +74,9 @@ class canvassing_canvas(osv.osv):
 				device_id = i['id'] 
 				break
 		if not device_id:
-			if not context.get('cron_mode', False):
-				raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
-			else:
+			# if not context.get('cron_mode', False):
+			# 	raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# else:
 				return 0
 	# ambil jarak antara waktu mulai dan selesai
 	# dikasih teloransi 10 menit sebelum dan sesudah, as per request 20170929
