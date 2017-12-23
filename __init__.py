@@ -1,4 +1,4 @@
-# -u tbvip,sale_multiple_payment,account_receivable_limit,stock_opname,purchase_needs,purchase_sale_discount,canvassing,hr_employee_point,product_custom_conversion,product_production,chjs_price_list -d tbvip
+# -u tbvip,sale_multiple_payment,account_receivable_limit,stock_opname,purchase_needs,purchase_sale_discount,canvassing,tbvip_point_payroll,hr_point_payroll,product_custom_conversion,product_production,chjs_price_list -d tbvip
 import product
 import res_partner
 import stock
@@ -7,7 +7,6 @@ import hr
 import purchase
 import tbvip
 import controllers
-import purchase_needs
 import account_voucher
 import website_handlers
 import sale
@@ -25,3 +24,6 @@ import commission
 import stock_return_picking
 import sale_order_return
 import koreksi_bon
+import purchase_needs
+import res_config
+import tbvip_stock_move

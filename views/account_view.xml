@@ -24,5 +24,90 @@
 			</field>
 		</record>
 
+		<record id="tbvip_day_end_tree" model="ir.ui.view">
+			<field name="name">tbvip.day.end.tree</field>
+			<field name="model">tbvip.day.end</field>
+			<field name="arch" type="xml">
+				<tree edit="false" delete="false">
+					<field name="day_end_date"/>
+					<field name="branch_id"/>
+					<field name="total_cash"/>
+					<field name="omzet_cash"/>
+					<field name="modal_cash"/>
+					<field name="balance"/>
+					<field name="create_uid"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="tbvip_day_end_form" model="ir.ui.view">
+			<field name="name">tbvip.day.end.form</field>
+			<field name="model">tbvip.day.end</field>
+			<field name="arch" type="xml">
+				<form edit="false" delete="false">
+					<group>
+						<field name="day_end_date" on_change="onchange_day_end_date(day_end_date, branch_id)"/>
+						<field name="branch_id" readonly="1"/>
+						<field name="create_uid" readonly="1"/>
+						<field name="amend_number" readonly="1"/>
+					</group>
+					<group col="6">
+						<group col="3">
+							<field name="qty_100"
+								on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_100" nolabel="1" readonly="1"/>
+							<field name="qty_200"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_200" nolabel="1" readonly="1"/>
+							<field name="qty_500"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_500" nolabel="1" readonly="1"/>
+							<field name="qty_1000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_1000" nolabel="1" readonly="1"/>
+							<field name="qty_2000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_2000" nolabel="1" readonly="1"/>
+							<field name="qty_5000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_5000" nolabel="1" readonly="1"/>
+						</group>
+						<group col="3">
+							<field name="qty_10000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_10000" nolabel="1" readonly="1"/>
+							<field name="qty_20000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_20000" nolabel="1" readonly="1"/>
+							<field name="qty_50000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_50000" nolabel="1" readonly="1"/>
+							<field name="qty_100000"
+									on_change="onchange_qty(qty_100,qty_200,qty_500,qty_1000,qty_2000,qty_5000,qty_10000,qty_20000,qty_50000,qty_100000)"/>
+							<field name="amount_100000" nolabel="1" readonly="1"/>
+						</group>
+					</group>
+					<group>
+						<field name="subtotal_cash" readonly="1" on_change="onchange_cash(subtotal_cash, extra_amount_1, extra_amount_2, extra_amount_3)"/>
+					</group>
+					<group string="Extra">
+						<field name="extra_desc_1" nolabel="1" attrs="{'required': [('extra_amount_1','!=',0)]}"/>
+						<field name="extra_amount_1" nolabel="1" on_change="onchange_cash(subtotal_cash, extra_amount_1, extra_amount_2, extra_amount_3)"/>
+						<field name="extra_desc_2" nolabel="1" attrs="{'required': [('extra_amount_2','!=',0)]}"/>
+						<field name="extra_amount_2" nolabel="1" on_change="onchange_cash(subtotal_cash, extra_amount_1, extra_amount_2, extra_amount_3)"/>
+						<field name="extra_desc_3" nolabel="1" attrs="{'required': [('extra_amount_3','!=',0)]}"/>
+						<field name="extra_amount_3" nolabel="1" on_change="onchange_cash(subtotal_cash, extra_amount_1, extra_amount_2, extra_amount_3)"/>
+					</group>
+					<group>
+						<field name="total_cash" readonly="1" on_change="onchange_balance_cash(total_cash, omzet_cash, modal_cash)"/>
+						<field name="omzet_cash" readonly="1" on_change="onchange_balance_cash(total_cash, omzet_cash, modal_cash)"/>
+						<field name="modal_cash" on_change="onchange_balance_cash(total_cash, omzet_cash, modal_cash)"/>
+						<field name="balance" readonly="1"/>
+						<field name="desc"/>
+					</group>
+				</form>
+			</field>
+		</record>
+
 	</data>
 </openerp>

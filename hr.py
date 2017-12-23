@@ -1,7 +1,9 @@
+
 from openerp.osv import osv, fields
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
+from lxml import etree
 
 # ==========================================================================================================================
 
@@ -13,9 +15,10 @@ class hr_employee(osv.osv):
 	_columns = {
 		'mysql_employee_id': fields.integer('MySQL Employee ID'),
 		'address': fields.text('Address'),
-		'type': fields.selection([('is_spg', "SPG"), ('is_non_spg', "Non-SPG")], 'Type'),
+		'is_spg': fields.boolean('Is SPG?'),
 		'employee_no': fields.char('Employee No.'),
 		'fingerprint_id': fields.char('Fingerprint ID'),
+		'default_modal_cash': fields.float('Default Modal Cash', help='Only needed when the employee is an administrator.')
 	}
 
 class hr_attendance(osv.osv):
@@ -76,3 +79,31 @@ class hr_attendance(osv.osv):
 			'name': attendance_time,
 			'action': action,
 			})
+	
+	def fields_view_get(self, cr, uid, view_id=None, view_type='tree', context=None, toolbar=False, submenu=False):
+		if context is None:context = {}
+		res = super(hr_attendance, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=False)
+		group_id_admin = self.pool.get('res.users').has_group(cr, uid, 'tbvip.group_management_administrator')
+		group_id_central = self.pool.get('res.users').has_group(cr, uid, 'tbvip.group_management_central')
+		doc = etree.XML(res['arch'])
+		if not group_id_admin and not group_id_central:
+			nodes_tree = doc.xpath("//tree[@string='Employee attendances']")
+			nodes_form = doc.xpath("//form[@string='Employee attendances']")
+			for node in nodes_tree:
+				node.set('create', '0')
+			for node in nodes_form:
+				node.set('create', '0')
+			res['arch'] = etree.tostring(doc)
+		
+		return res
+
+
+class hr_payslip(osv.osv):
+	_inherit = 'hr.payslip'
+	
+	def print_payslip_dot_matrix(self, cr, uid, ids, context):
+		return {
+			'type' : 'ir.actions.act_url',
+			'url': '/tbvip/print/hr.payslip/' + str(ids[0]),
+			'target': 'self',
+		}

@@ -4,6 +4,7 @@ from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 import openerp.addons.decimal_precision as dp
 
+
 import openerp.addons.sale as imported_sale
 import openerp.addons.portal_sale as imported_portal_sale
 import openerp.addons.sale_stock as imported_sale_stock
@@ -11,6 +12,11 @@ import openerp.addons.purchase_sale_discount as imported_purchase_sale_discount
 import openerp.addons.sale_multiple_payment as imported_sale_multiple_payment
 import openerp.addons.product_custom_conversion as imported_product_custom_conversion
 import openerp.addons.chjs_price_list as imported_price_list
+
+
+
+
+
 
 # ==========================================================================================================================
 
@@ -21,12 +27,14 @@ class sale_order(osv.osv):
 	
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
-		'bon_number': fields.char('Bon Number', required=True),
+		'bon_number': fields.char('Bon Number', required=True, readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
 		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_complex_payment': fields.boolean('Is Complex Payment'),
+		'return_amount' : fields.float('Return Amount'),
+		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 	}
 
 	def _default_partner_id(self, cr, uid, context={}):
@@ -52,6 +60,19 @@ class sale_order(osv.osv):
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
+	
+	def action_ship_create(self, cr, uid, ids, context=None):
+		"""
+		Add source location_id to context
+		"""
+		if context is None:
+			context = {}
+		unfrozen_context = dict(context)
+		unfrozen_context.update({
+			'sale_location_id': self.browse(cr, uid, ids)[0].stock_location_id.id
+		})
+		result = super(sale_order, self).action_ship_create(cr, uid, ids, unfrozen_context)
+		return result
 	
 	def create(self, cr, uid, vals, context={}):
 		if vals.get('bon_number', False) and vals.get('date_order', False):
@@ -113,6 +134,34 @@ class sale_order(osv.osv):
 		
 		return result
 	
+	def create_or_update_sale_history_from_sale_done(self, cr, uid, sale_ids, context={}):
+		sale_history_obj = self.pool.get('sale.history')
+		month_now = datetime.now().month
+		year_now = datetime.now().year
+		dict_product_sale = {}
+		for sale in self.browse(cr, uid, sale_ids):
+			month_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').month
+			year_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').year
+			if month_sale!=month_now or year_now != year_sale:
+				dict_product_sale = sale_history_obj.create_dict_for_sale_history(cr, uid, sale_ids, context)
+			for product_id, dict_branch_id in dict_product_sale.iteritems():
+				for branch_id, value in dict_branch_id.iteritems():
+					# cari dahulu apakah sudah terdapat sale_history yang lama, jika ada maka write, jika tidak maka create
+					history_id =  sale_history_obj.search(cr, uid, [('month', '=', month_sale),
+						('year', '=', year_sale),
+						('product_id', '=', product_id),
+						('branch_id', '=', branch_id)], limit = 1)
+					if history_id:
+						sale_history = sale_history_obj.browse(cr, uid, history_id)
+						sale_history_obj.write(cr, uid, history_id,  {'number_of_sales': sale_history.number_of_sales + value['qty']})
+					else:
+						sale_history_obj.create(cr, uid, {
+							'product_id': product_id,
+							'number_of_sales': value['qty'],
+							'year' : year_sale,
+							'month': month_sale,
+							'branch_id': branch_id})
+	
 	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, context=None):
 		"""
 		Register payment. Return
@@ -123,6 +172,7 @@ class sale_order(osv.osv):
 		voucher_obj = self.pool.get('account.voucher')
 		journal_obj = self.pool.get('account.journal')
 		account_move_line_obj = self.pool.get('account.move.line')
+		invoice_obj = self.pool.get('account.invoice')
 		
 		account_move_id = account_move_line_obj.search(cr, uid, [('invoice', '=', invoice_id)])[0]
 		account_move = account_move_line_obj.browse(cr, uid, [account_move_id])
@@ -182,9 +232,16 @@ class sale_order(osv.osv):
 		# Create payment
 		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
 		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
+		
+		# if residual==0, paid
+		for invoice in invoice_obj.browse(cr, uid, invoice_id):
+			if invoice.residual == 0:
+				invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
+				pass
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
+		picking_obj = self.pool.get('stock.picking')
 		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
 		for sale in self.browse(cr, uid, ids):
 			if sale.bon_number and sale.date_order:
@@ -193,18 +250,24 @@ class sale_order(osv.osv):
 			self.signal_workflow(cr, uid, [sale.id], 'manual_invoice', context)
 			# append bon number to invoice
 			invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
+			# append bon number to picking
+			delivery = self.action_view_delivery(cr, uid, sale.id, context=context)
+			stock_picking_id = delivery['res_id']
+			if stock_picking_id:
+				picking_obj.write(cr, uid,stock_picking_id, {'related_sales_bon_number': sale.bon_number})
 			# Make invoice open
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 			
 			order = sale
 			if order.payment_transfer_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, order.invoice_ids[0].id, 'transfer', context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
 			if order.payment_cash_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
 			if order.payment_receivable_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, order.invoice_ids[0].id, 'receivable', context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
 			if order.payment_giro_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, order.invoice_ids[0].id, 'giro', context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, context=None)
+			
 		return result
 	
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
@@ -322,8 +385,22 @@ class sale_order(osv.osv):
 						'stock_picking_ids': [stock_picking_id],
 						'invoice_id' : invoice_id,
 						'invoice_ids' : [invoice_id],
+						'so_id' : id,
 					}
 				}
+
+
+# PRINTS -------------------------------------------------------------------------------------------------------------------
+	
+	def print_sale_order(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].order_line:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/sale.order/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print SO Error'),_('SO must have at least one line to be printed.'))
 
 # ==========================================================================================================================
 

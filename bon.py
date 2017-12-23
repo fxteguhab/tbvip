@@ -60,7 +60,7 @@ class tbvip_bon_book(osv.osv):
 	def create(self, cr, uid, vals, context={}):
 		id = super(tbvip_bon_book, self).create(cr, uid, vals, context)
 		# Cek apakah ada bon yang saling bersilangan untuk issue date yang sama
-		branch_id = self._default_branch_id(cr, uid, context)
+		branch_id = vals['branch_id']
 		self._cek_crossing_bon_number(cr, uid, id, vals.get('issue_date', False), vals.get('start_from', False), vals.get('end_at', False), branch_id)
 		return id
 	
@@ -81,8 +81,8 @@ class tbvip_bon_book(osv.osv):
 				end_at = vals.get('end_at', False)
 			if vals.get('issue_date', False):
 				issue_date = vals.get('issue_date', False)
-			if branch_id_temp:
-				branch_id = branch_id_temp
+			if vals.get('branch_id', False):
+				branch_id = vals.get('branch_id', False)
 				
 			self._cek_crossing_bon_number(cr, uid, bon.id, issue_date, start_from, end_at, branch_id)
 		

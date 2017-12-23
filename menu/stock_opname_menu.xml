@@ -1,0 +1,13 @@
+<openerp>
+	<data>
+
+
+		<menuitem sequence="13" id="stock_opname.stock_opname_menu_stock_opname_memory"
+				parent="stock_opname.stock_opname_menu_stock_opname" action="stock_opname.stock_opname_action_stock_opname_memory"
+				groups="tbvip.group_management_central"/>
+
+		<menuitem sequence="1" id="stock_opname.stock_opname_menu_stock_opname_rule" name="Stock Opname Rules" groups="tbvip.group_management_central"
+				parent="stock.menu_stock_configuration" action="stock_opname.stock_opname_action_stock_opname_rule"/>
+
+	</data>
+</openerp>

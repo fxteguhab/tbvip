@@ -8,7 +8,8 @@
 			<field name="inherit_id" ref="hr.view_employee_form"/>
 			<field name="arch" type="xml">
 				<field name="department_id" position="before">
-					<field name="type"/>
+					<field name="is_spg"/>
+					<field name="default_modal_cash"/>
 				</field>
 			</field>
 		</record>
@@ -49,6 +50,19 @@
 				</xpath>
 			</field>
 		</record>
-		
+
+
+		<record model="ir.ui.view" id="hr_payslip_form_inherit">
+			<field name="name">hr.payslip.form.inherit</field>
+			<field name="model">hr.payslip</field>
+			<field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+			<field name="arch" type="xml">
+				<button name="compute_sheet" position="after">
+					<button name="print_payslip_dot_matrix" string="" type="object" icon="gtk-print"/>
+				</button>
+			</field>
+		</record>
+
+
 	</data>
 </openerp>

@@ -7,11 +7,16 @@
 			<field name="priority">17</field>
 			<field name="inherit_id" ref="sale.view_order_form"/>
 			<field name="arch" type="xml">
+				<button name="print_quotation" position="after">
+					<button name="print_sale_order" string="" type="object" icon="gtk-print"/>
+				</button>
+				<button name="action_customer_pay" position="attributes">
+					<attribute name="string">Add Payment</attribute>
+				</button>
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">
 					<field name="branch_id" readonly="True"/>
-					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"
-							attrs="{'readonly': [('state','in',['manual','shipping_except','invoice_except','done'])]}"/>
+					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"/>
 				</field>
 				<field name="partner_id" position="attributes">
 					<attribute name="options">{'no_create': True}</attribute>
@@ -21,6 +26,7 @@
 				<field name="shipped_or_taken" position="before">
 					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
 					<field name="employee_id" readonly="True"/>
+					<field name="return_id" readonly="True"/>
 				</field>
 				<field name="shipped_or_taken" position="after">
 					<!--<field name="customer_address" attrs="{'invisible': [('shipped_or_taken','!=','shipped')]}"/>-->
@@ -92,8 +98,9 @@
 				<xpath expr="/form/header/button[@name='action_quotation_send'][2]" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</xpath>
-				<xpath expr="/form/header/button[@name='cancel']" posistion="after">
-					<button name="action_return" states="manual,progress,done" string="Return Order" type="object" groups="base.group_user"/>
+				<xpath expr="/form/header/button[@name='cancel']" position="after">
+					<button name="action_return" string="Return Order" type="object" groups="base.group_user"
+							attrs="{'invisible': ['|', ('state', 'not in', ['manual', 'progress', 'done']), ('return_id', '!=', False)]}"/>
 				</xpath>
 				<field name="amount_untaxed" position="attributes">
 					<attribute name="invisible">True</attribute>
@@ -148,7 +155,7 @@
 				</field>
 				<field name="amount_total" position="after">
 					<field name="shipped_or_taken"/>
-					<field name="is_complex_payment"/>
+					<field name="return_id"/>
 				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="string">Cashier</attribute>

@@ -1,0 +1,1 @@
+| ${qty.rjust(6)} | ${uom[:7].ljust(7)} | ${name[:30].ljust(30)} | ${unit_price[:12].rjust(12)} | ${discount[:6].ljust(6)} | ${subtotal.rjust(10)} |

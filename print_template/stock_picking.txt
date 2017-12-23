@@ -1,0 +1,18 @@
+${'SURAT JALAN'.center(70)}
+
+${'Tanggal'.ljust(10)}${(': '+date).ljust(60)}
+${'Tujuan'.ljust(10)}${(': '+receiver_name+', '+receiver_address)[:60].ljust(60)}
+
+${'-'*70}
+| ${'Nama Barang'.ljust(54)} | ${'Qty'.ljust(9)} |
+${'-'*70}
+% for val in move_lines:
+${val}
+% endfor
+${'-'*70}
+
+${' '*60}${'Penerima:'.center(10)}
+
+
+
+${' '*59}${'_'*11}

@@ -40,6 +40,19 @@
 		  <field eval="" name="args" />
 		</record>
 
+		<record forcecreate="True" id="ir_cron_update_product_rank" model="ir.cron">
+			<field name="name">Update Product Rank</field>
+			<field eval="True" name="active" />
+			<field name="user_id" ref="base.user_root" />
+			<field name="interval_number">1</field>
+			<field name="interval_type">days</field>
+			<field name="numbercall">-1</field>
+			<field name="active">1</field>
+			<field eval="'product.product'" name="model" />
+			<field eval="'cron_product_rank'" name="function" />
+			<field eval="" name="args" />
+		</record>
+
 		<!--
 		<record forcecreate="True" id="cron_sync_product_category" model="ir.cron">
 		  <field name="name">Sync products and categories from old database</field>

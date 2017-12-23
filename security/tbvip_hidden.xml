@@ -1,0 +1,17 @@
+<openerp>
+	<data>
+		<!-- OverWRITE menu etc. to make it hidden for tbvip-->
+
+		<record id="tbvip_invisible" model="res.groups">
+			<field name="name">Invisible</field>
+		</record>
+
+		<!--Hide messaging top menu-->
+		<record id="mail.mail_feeds_main" model="ir.ui.menu">
+			<field name="groups_id" eval="[(5, False), (4, ref('tbvip_invisible'))]"/>
+
+		</record>
+		<!--base.menu_reporting-->
+
+	</data>
+</openerp>

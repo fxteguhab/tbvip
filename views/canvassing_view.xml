@@ -22,6 +22,24 @@
 				<xpath expr="//button[@name='action_set_finish']" position="after">
 					<button name="action_recalculate_distance" string="Recalculate Distance" type="object" states="finished" />
 				</xpath>
+				<!--Ko Teguh minta di hide, karena pusing cenah adminnya-->
+				<page string="Invoices" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</page>
+				<page string="Trip Expenses" position="before">
+					<page string="Interbranch Lines">
+						<field name="interbranch_move_ids" attrs="{'readonly': [('state', '=', 'finished')]}">
+							<tree version="7.0" editable="bottom">
+								<field name="interbranch_move_id" domain="[('state', '=', 'draft')]"/>
+								<!-- not needed, can see from interbranch_move_id.name -->
+								<!--<field name="from_stock_location_id"/>-->
+								<!--<field name="to_stock_location_id"/>-->
+								<field name="is_executed"/>
+								<field name="notes"/>
+							</tree>
+						</field>
+					</page>
+				</page>
 			</field>
 		</record>
 

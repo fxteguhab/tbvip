@@ -12,7 +12,7 @@ from openerp.osv import osv, fields
 import openerp.addons.decimal_precision as dp
 import time
 from openerp import models, api, _
-from openerp import fields as hole
+from openerp import fields as fields10
 
 TYPE2REFUND = {
 	'out_invoice': 'out_refund',        # Customer Invoice
@@ -48,14 +48,14 @@ class sale_order_return(models.TransientModel):
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	#return stock
-	product_return_moves = hole.One2many('sale.order.return.line', 'sale_order_return_id', 'Moves')
-	move_dest_exists= hole.Boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed")
+	product_return_moves = fields10.One2many('sale.order.return.line', 'sale_order_return_id', 'Moves')
+	move_dest_exists= fields10.Boolean('Chained Move Exists', readonly=True, help="Technical field used to hide help tooltip if not needed")
 	
 	#refund invoice
-	date = hole.Date('Date')
-	period = hole.Many2one('account.period', 'Force period')
-	journal_id = hole.Many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.')
-	description = hole.Char('Reason', required=True)
+	date = fields10.Date('Date')
+	period = fields10.Many2one('account.period', 'Force period')
+	journal_id = fields10.Many2one('account.journal', 'Refund Journal', help='You can select here the journal to use for the credit note that will be created. If you leave that field empty, it will use the same journal as the current invoice.')
+	description = fields10.Char('Reason', required=True)
 	
 	def _get_journal(self, cr, uid, context=None):
 		"""
@@ -237,8 +237,12 @@ class sale_order_return(models.TransientModel):
 		mod_obj = self.pool.get('ir.model.data')
 		act_obj = self.pool.get('ir.actions.act_window')
 		res_users_obj = self.pool.get('res.users')
+		sale_order_obj = self.pool.get('sale.order')
 		if context is None:
 			context = {}
+
+		sale_order_id = context.get('so_id', 0)
+		return_amount = 0
 		
 		for form in self.browse(cr, uid, ids, context=context):
 			created_inv = []
@@ -290,10 +294,14 @@ class sale_order_return(models.TransientModel):
 				
 				dict_line = {}
 			# bikin dictionary retur_line untuk fungsi _refund_cleanup_lines
+				
+				inv_obj.write(cr, uid, [inv.id], {'number': inv.number + " <Retur>"})
+				
 				for return_line in form.product_return_moves:
 					dict_line[return_line.product_id.id] = {'quantity' : return_line.quantity,
 															'price_subtotal': return_line.amount_price,
 															'price_unit': return_line.amount_price/return_line.quantity}
+					return_amount += return_line.amount_price
 								
 			#  Bikin Invoice refund
 				refund_id = self._create_invoice_refund(cr, uid, ids, date, period, description, journal_id, [inv.id], dict_line,context=context)
@@ -306,13 +314,14 @@ class sale_order_return(models.TransientModel):
 				movelines = inv.move_id.line_id
 				to_reconcile_ids = {}
 				
-			# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal
+			# Invoice yang direfund jangan di reconcile(dilunasin), biarkan dia tetap state asal. Karena bisa aja kasusnya balikin duit doang, belum lunasin
 			# Invoice refund baru di reooncile
 				# for line in movelines:
-				# 	if line.account_id.id == inv.account_id.id:
-				# 		to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
-				# 	if line.reconcile_id:
-				# 		line.reconcile_id.unlink()
+				#     if line.account_id.id == inv.account_id.id:
+				#         to_reconcile_ids.setdefault(line.account_id.id, []).append(line.id)
+				#     if line.reconcile_id:
+				#         line.reconcile_id.unlink()
+	
 				refund.signal_workflow('invoice_open')
 				refund = inv_obj.browse(cr, uid, refund_id[0], context=context)
 				
@@ -328,6 +337,14 @@ class sale_order_return(models.TransientModel):
 						writeoff_journal_id = inv.journal_id.id,
 						writeoff_acc_id=inv.account_id.id
 					)
+					
+			if sale_order_id:
+				sale_order_obj.write(cr, uid, sale_order_id, {
+					'name': 'Return '+ sale_order_obj.browse(cr, uid, sale_order_id).name,
+					'display_name': 'Return '+ sale_order_obj.browse(cr, uid, sale_order_id).display_name,
+					'return_amount': return_amount,
+					'return_id': refund_id[0]
+				})
 			
 			# xml_id = (inv.type == 'out_refund') and 'action_invoice_tree1' or \
 			# 		 (inv.type == 'in_refund') and 'action_invoice_tree2' or \

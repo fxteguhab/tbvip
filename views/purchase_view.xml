@@ -6,6 +6,9 @@
 			<field name="priority">17</field>
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
+				<button name="print_quotation" position="after">
+					<button name="print_draft_purchase_order" string="" states="draft" type="object" icon="gtk-print"/>
+				</button>
 				<field name="partner_id" position="before">
 					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
 				</field>
@@ -116,10 +119,19 @@
 			<field name="model">purchase.order</field>
 			<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
 			<field name="arch" type="xml">
+				<xpath expr="//filter[@string='Order Month']" position="replace" />
 				<xpath expr="//filter[@string='Expected Month']" position="after">
-					<filter string="Delivered Month" icon="terp-go-month" domain="[]" context="{'group_by':'delivered_date'}"/>
-					<filter name="groupby_day" string="Day" context="{'group_by':'date_order:day'}"/>
 					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+				</xpath>
+				<xpath expr="//group[@string='Group By']" position="after">
+					<group string="Order">
+						<filter name="group_by_order_day" string="Order Day" context="{'group_by':'date_order:day'}"/>
+						<filter name="group_by_order_month" string="Order Month" context="{'group_by':'date_order'}"/>
+					</group>
+					<group string="Delivery">
+						<filter name="group_by_delivery_day" string="Delivered Day" context="{'group_by':'delivered_date:day'}"/>
+						<filter name="group_by_delivery_month" string="Delivered Month" context="{'group_by':'delivered_date'}"/>
+					</group>
 				</xpath>
 			</field>
 		</record>

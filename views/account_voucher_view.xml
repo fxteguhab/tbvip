@@ -5,9 +5,16 @@
             <field name="model">account.voucher</field>
             <field name="inherit_id" ref="account_voucher.view_vendor_payment_form"/>
             <field name="arch" type="xml">
+                <button name="cancel_voucher" position="after">
+                    <button name="print_kontra_bon" string="" type="object" icon="gtk-print"/>
+                </button>
+                <field name="partner_id" position="attributes">
+                    <attribute name="on_change">onchange_partner_id_tbvip(partner_id, journal_id, amount, currency_id, type, date, context)</attribute>
+                </field>
                 <field name="journal_id" position="after">
                     <field name="check_maturity_date" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
                     <field name="bank_id" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
+                    <field name="is_ready" readonly="1"/>
                 </field>
                 <label for="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
@@ -15,6 +22,25 @@
                 <field name="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </field>
+                <xpath expr="//field[@name='line_dr_ids']/tree/field[@name='amount']" position="after">
+                    <field name="purchase_order_id" readonly="1"/>
+                </xpath>
+            </field>
+        </record>
+
+
+
+        <record id="view_voucher_filter_inherit" model="ir.ui.view">
+            <field name="name">account.voucher.select.inherit</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor_pay"/>
+            <field name="arch" type="xml">
+                <search string="Search Vouchers" position="inside">
+                    <filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>
+                    <!--<group expand="0" string="Readiness">-->
+                        <!--<filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>-->
+                    <!--</group>-->
+                </search>
             </field>
         </record>
     </data>

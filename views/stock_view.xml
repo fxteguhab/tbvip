@@ -46,6 +46,18 @@
 				</tree>
 			</field>
 		</record>
+
+		<record model="ir.ui.view" id="stock_picking_form_inherit">
+			<field name="name">stock.picking.form.inherit</field>
+			<field name="model">stock.picking</field>
+			<field name="inherit_id" ref="stock.view_picking_form"/>
+			<field name="arch" type="xml">
+				<button name="action_cancel" position="after">
+					<button name="print_delivery_order" string="" type="object" icon="gtk-print"/>
+				</button>
+			</field>
+		</record>
+
 		<record model="ir.ui.view" id="stock_location_form_inherit">
 			<field name="name">stock.location.form.inherit</field>
 			<field name="model">stock.location</field>
@@ -63,19 +75,11 @@
 			<field name="model">stock.inventory</field>
 			<field name="inherit_id" ref="stock.view_inventory_form" />
 			<field name="arch" type="xml">
+				<button name="action_cancel_draft" position="after">
+					<button name="print_stock_inventory" string="" type="object" icon="gtk-print"/>
+				</button>
 				<field name="theoretical_qty" position="after">
 					<field name="sublocation" readonly="True"/>
-				</field>
-			</field>
-		</record>
-
-		<record model="ir.ui.view" id="stock_opname_memory_form_inherit">
-			<field name="name">stock.opname.memory.form.inherit</field>
-			<field name="model">stock.opname.memory</field>
-			<field name="inherit_id" ref="stock_opname.stock_opname_memory_form"/>
-			<field name="arch" type="xml">
-				<field name="location_id" position="replace">
-					<field name="location_id" domain="[('is_branch', '=', True)]" on_change="onchange_location_id(location_id, rule_id)"/>
 				</field>
 			</field>
 		</record>
@@ -88,6 +92,18 @@
 				<field name="location_id" position="replace">
 					<field name="location_id" domain="[('is_branch', '=', True)]"/>
 				</field>
+			</field>
+		</record>
+
+		<record id="view_inventory_filter_inherit" model="ir.ui.view">
+			<field name="name">stock.inventory.filter.inherit</field>
+			<field name="model">stock.inventory</field>
+			<field name="inherit_id" ref="stock.view_inventory_filter"/>
+			<field name="arch" type="xml">
+				<group string="Group By" position="inside">
+					<filter string="Month" name="filter_month_inventory_adjustment" context="{'group_by':'date:month'}"/>
+					<filter string="Day"  name="filter_day_inventory_adjustment" context="{'group_by':'date:day'}"/>
+				</group>
 			</field>
 		</record>
 

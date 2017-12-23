@@ -1,6 +1,9 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
-from datetime import datetime
+from datetime import datetime, timedelta
+from openerp import api
+
+
 
 # ==========================================================================================================================
 
@@ -306,19 +309,23 @@ class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	
 	def create(self, cr, uid, vals, context={}):
-		user_obj = self.pool.get('res.users')
-		stock_location_obj = self.pool.get('stock.location')
 		new_id = super(stock_move, self).create(cr, uid, vals, context=context)
-		if vals.get('location_dest_id', False):
-			stock_location_data = stock_location_obj.browse(cr, uid, vals['location_dest_id']);
-			if stock_location_data.usage == 'customer':
-				location_id = user_obj.browse(cr, uid, uid, context).branch_id.default_outgoing_location_id.id
-				self.write(cr, uid, [new_id], {
-					'location_id': location_id,
-				})
+		location_id_sale_override = context.get('sale_location_id')
+		if location_id_sale_override:
+			self.write(cr, uid, [new_id], {
+				'location_id': location_id_sale_override,
+			})
 		return new_id
 	
-	def unlink(self, cr, uid, ids, context=None):
+	def unlink(self, cr, uid, ids, context={}):
+	# kalau dia punya stock picking dan stock picking itu nyambung sama interbranch transfer,
+	# dan transfernya sudah accepted, maka jangan hapus
+		for data in self.browse(cr, uid, ids, context=context):
+			if not data.picking_id: continue
+			if not data.picking_id.interbranch_move_id: continue
+			if data.picking_id.interbranch_move_id.state in ['accepted']:
+				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
+	# kalau move terkait demand, "batalkan" demandnya menjadi requested
 		result = super(stock_move, self).unlink(cr, uid, ids, context)
 		demand_line_obj = self.pool.get('tbvip.demand.line')
 		demand_line_ids = demand_line_obj.search(cr, uid, [('stock_move_id','in',ids)])
@@ -388,7 +395,8 @@ class stock_inventory_line(osv.osv):
 		for product in product_obj.browse(cr, uid, [product_id], context):
 			for product_sublocation_id in product.product_sublocation_ids:
 				sublocation = product_sublocation_id.sublocation_id
-				sublocation_name += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
+				if sublocation:
+					sublocation_name += product_sublocation_id.branch_id.name + ' / ' + sublocation.full_name + '\r\n'
 		result['value'].update({'sublocation': sublocation_name})
 		return result
 
@@ -399,3 +407,81 @@ class stock_inventory_line(osv.osv):
 			'sublocation': onchange_result['value']['sublocation']
 			})
 		return new_id
+
+
+# ==========================================================================================================================
+
+class stock_inventory(osv.osv):
+	_inherit = 'stock.inventory'
+	
+	# PRINTS ---------------------------------------------------------------------------------------------------------------
+	
+	def print_stock_inventory(self, cr, uid, ids, context):
+		return {
+			'type' : 'ir.actions.act_url',
+			'url': '/tbvip/print/stock.inventory/' + str(ids[0]),
+			'target': 'self',
+		}
+
+# ==========================================================================================================================
+
+class stock_picking(osv.osv):
+	
+	_inherit = 'stock.picking'
+	
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'related_sales_bon_number': fields.char("Nomor Bon", readonly=True),
+		'interbranch_move_id': fields.many2one('tbvip.interbranch.stock.move', 'Related Interbranch Transfer', search=False, ondelete="cascade"),
+	}
+	
+	@api.model
+	def name_search(self, name, args=None, operator='ilike', limit=100):
+		"""
+		Update name_search (like in m2o search) domain to search with sale bon number:
+		"""
+		args = args or []
+		recs = self.browse()
+		if name:
+			recs = self.search([('related_sales_bon_number', '=', name)] + args, limit=limit)
+		else:
+			recs = self.search([('name', 'ilike', name)] + args, limit=limit)
+		return recs.name_get()
+	
+	@api.multi
+	def name_get(self):
+		"""
+		Shows nomor bon as name if this picking has related_sales_bon_number
+		"""
+		result = []
+		for picking in self:
+			result.append((
+					picking.id,
+					"Sales Order / " + picking.related_sales_bon_number if picking.related_sales_bon_number else picking.name
+				)
+			)
+		return result
+
+	def unlink(self, cr, uid, ids, context={}):
+	# kalau picking ini ngelink sama interbranch transfer, dan transfernya udah accepted,
+	# maka ngga boleh dihapus
+		for data in self.browse(cr, uid, ids, context):
+			if not data.interbranch_move_id: continue
+			if data.interbranch_move_id.state in ['accepted']:
+				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
+		return super(stock_picking, self).unlink(cr, uid, ids, context=context)
+
+	
+	# PRINTS ----------------------------------------------------------------------------------------------------------------
+	
+	def print_delivery_order(self, cr, uid, ids, context):
+		if self.browse(cr,uid,ids)[0].move_lines:
+			return {
+				'type' : 'ir.actions.act_url',
+				'url': '/tbvip/print/stock.picking/' + str(ids[0]),
+				'target': 'self',
+			}
+		else:
+			raise osv.except_osv(_('Print Stock Picking Error'),_('Stock Picking must have at least one line to be printed.'))
+		

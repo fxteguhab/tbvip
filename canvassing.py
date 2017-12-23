@@ -6,6 +6,7 @@ import requests
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, date, timedelta
 
+
 # ==========================================================================================================================
 
 class canvassing_canvas(osv.osv):
@@ -16,7 +17,8 @@ class canvassing_canvas(osv.osv):
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'total_distance': fields.float('Total Distance', readonly=True),
-		'is_recalculated': fields.boolean('Is Recalculated?', search=False)
+		'is_recalculated': fields.boolean('Is Recalculated?', search=False),
+		'interbranch_move_ids': fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
 	}
 
 	_defaults = {
@@ -25,7 +27,7 @@ class canvassing_canvas(osv.osv):
 	
 	# OVERRIDES --------------------------------------------------------------------------------------------------------------
 		
-	def calculate_distance(self, cr, uid, canvas_data):
+	def calculate_distance(self, cr, uid, canvas_data, context={}):
 	# ambil parameter2 sistem
 		param_obj = self.pool.get('ir.config_parameter')
 		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_positions_url','gps_devices_url','gps_username','gps_password'])])
@@ -58,7 +60,10 @@ class canvassing_canvas(osv.osv):
 	# tentukan device id dari vehicle yang melakukan canvassing ini
 		vehicle_gps_id = canvas_data.fleet_vehicle_id and canvas_data.fleet_vehicle_id.gps_id or None
 		if not vehicle_gps_id:
-			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# if not context.get('cron_mode', False):
+			# 	raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# else:
+			return 0
 		request = urllib2.Request(devices_url)
 		request.add_header('Cookie', cookie)
 		response = urllib2.urlopen(request)
@@ -69,7 +74,10 @@ class canvassing_canvas(osv.osv):
 				device_id = i['id'] 
 				break
 		if not device_id:
-			raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# if not context.get('cron_mode', False):
+			# 	raise osv.except_osv(_('Canvassing Error'),_('This canvassing trip does not have a vehicle or its GPS ID is invalid.'))
+			# else:
+				return 0
 	# ambil jarak antara waktu mulai dan selesai
 	# dikasih teloransi 10 menit sebelum dan sesudah, as per request 20170929
 		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
@@ -102,7 +110,7 @@ class canvassing_canvas(osv.osv):
 
 	def action_recalculate_distance(self, cr, uid, ids, context={}):
 		for canvas_data in self.browse(cr, uid, ids, context=context):
-			distance = self.calculate_distance(cr, uid, canvas_data)
+			distance = self.calculate_distance(cr, uid, canvas_data, context=context)
 			distance = round(distance / 1000, 2) # dalam km
 			self.write(cr, uid, [canvas_data.id], {
 				'total_distance': distance,
@@ -113,7 +121,13 @@ class canvassing_canvas(osv.osv):
 
 	def action_set_finish(self, cr, uid, ids, context={}):
 		super(canvassing_canvas, self).action_set_finish(cr, uid, ids, context=context)
-		return self.action_recalculate_distance(cr, uid, ids)
+		# set interbranch stock move to accepted if is_executed
+		interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+		for canvas in self.browse(cr, uid, ids, context=context):
+			for interbranch_canvas_line in canvas.interbranch_move_ids:
+				if interbranch_canvas_line.is_executed:
+					interbranch_stock_move_obj.action_accept(cr, uid, [interbranch_canvas_line.interbranch_move_id.id], context=context)
+		return self.action_recalculate_distance(cr, uid, ids, context=context)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------
 	
@@ -168,7 +182,7 @@ class canvassing_canvas(osv.osv):
 
 	def cron_recalculate_distance(self, cr, uid, context={}):
 		trip_ids = self.search(cr, uid, [('state','=','finished'),('is_recalculated','=',False)])
-		self.action_recalculate_distance(cr, uid, trip_ids)
+		self.action_recalculate_distance(cr, uid, trip_ids, context={'cron_mode': True})
 
 # ==========================================================================================================================
 
@@ -202,3 +216,52 @@ class canvasssing_canvas_stock_line(osv.Model):
 					'distance': google_map.distance(obj.address,obj.canvas_id.branch_id.address,'driving',api='masukkan_google_api_key_yang_benar'),
 				})
 """
+
+
+
+
+# ==========================================================================================================================
+
+class canvassing_canvas_interbranch_line(osv.Model):
+	_name = 'canvassing.canvas.interbranch.line'
+	_description = 'Interbranch Line for Canvassing'
+	
+	# COLUMNS --------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'canvas_id': fields.many2one('canvassing.canvas', 'Canvas'),
+		'interbranch_move_id': fields.many2one('tbvip.interbranch.stock.move', 'Interbranch Stock Move', required=True),
+		'is_executed': fields.boolean('Is Executed'),
+		'notes': fields.text('Notes'),
+		'canvas_state': fields.related('canvas_id', 'state', type="char", string="Canvas State"),
+		# not needed, can see from interbranch_move_id.name
+		# 'from_stock_location_id': fields.related('interbranch_move_id', 'from_stock_location_id',
+		# 	type="many2one", relation="stock.location", string="Incoming Location"),
+		# 'to_stock_location_id': fields.related('interbranch_move_id', 'to_stock_location_id',
+		# 	type="many2one", relation="stock.location", string="Outgoing Location"),
+	}
+	
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(canvassing_canvas_interbranch_line, self).create(cr, uid, vals, context=context)
+		# check if interbranch stock move already rejected, cannot be executed
+		if vals.get('is_executed', False):
+			interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+			interbranch_move_id = vals['interbranch_move_id']
+			interbranch_move = interbranch_stock_move_obj.browse(cr, uid, interbranch_move_id, context=context)
+			if interbranch_move.state == 'rejected':
+				raise osv.except_osv(_('Warning!'), _("Interbranch Stock Move \"%s\" had already been rejected!") %
+					(interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name,))
+		return new_id
+	
+	def write(self, cr, uid, ids, vals, context=None):
+		result = super(canvassing_canvas_interbranch_line, self).write(cr, uid, ids, vals, context=context)
+		# check if interbranch stock move already rejected, cannot be executed
+		if vals.get('is_executed', False):
+			for line in self.browse(cr, uid, ids, context=context):
+				interbranch_move_id = vals['interbranch_move_id'] if vals.get('interbranch_move_id', False) else line.interbranch_move_id.id
+				interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+				interbranch_move = interbranch_stock_move_obj.browse(cr, uid, interbranch_move_id, context=context)
+				if interbranch_move.state == 'rejected':
+					raise osv.except_osv(_('Warning!'), _("Interbranch Stock Move \"%s\" had already been rejected!") %
+						(interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name,))
+		return result

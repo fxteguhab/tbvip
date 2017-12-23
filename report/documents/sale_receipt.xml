@@ -1,0 +1,104 @@
+<openerp>
+	<data>
+		<template id="sale_receipt">
+			<t t-call="report.html_container">
+				<t t-foreach="docs" t-as="o">
+					<div class="page">
+						<style>
+						.sale_receipt {
+							text-align: left;
+							zoom: 0.8;
+							width: 300px;
+							margin: 0px;
+							padding: 0px;
+							font-size: 20px;
+							background-color: white;
+							display: inline-block;
+							font-family: sans-serif;
+							overflow: hidden;
+							-moz-transform: scale(0.5);
+						}
+						.sale_receipt .center-align {
+							text-align: center;
+						}
+						.sale_receipt pre{
+							font-family: monospace;
+						}
+						.sale_receipt .emph{
+							font-size: 26px;
+							margin:5px;
+						}
+						.sale_receipt .unde{
+							font-size: 16px;
+						}
+						.sale_receipt table {
+							width: 100%;
+							border: 0;
+							table-layout: fixed;
+						}
+						.sale_receipt table td {
+							border: 0;
+							word-wrap: break-word;
+						</style>
+
+						<div class="sale_receipt">
+							<div class="center-align">
+							<t t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
+							</div>
+							<br/>
+							<t t-esc="o.name"/><br/>
+							<div class="unde">
+								<t t-esc="o.user_id.company_id.name"/><br/>
+								Phone: <t t-esc="o.user_id.company_id.phone"/><br/>
+								User: <t t-esc="o.user_id.name"/><br/>
+								Branch: <t t-esc="o.user_id.branch_id.name"/><br/>
+								Date: <span t-field="o.date_order"/><br/>
+							</div>
+							<br/>
+							<br/>
+
+							<table>
+								<colgroup>
+									<col width='30%'/>
+									<col width='80%'/>
+								</colgroup>
+								<t t-foreach="o.order_line" t-as="line">
+									<tr>
+										<td colspan="2">
+											<span t-field="line.product_id"/>
+										</td>
+									</tr>
+									<tr>
+										<td class="text-right">
+											<span t-field="line.product_uom_qty"/>
+										</td>
+										<td class="text-right">
+											<span t-field="line.price_subtotal" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+										</td>
+									</tr>
+								</t>
+							</table>
+
+							<br/>
+							<table>
+								<colgroup>
+									<col width='30%'/>
+									<col width='70%'/>
+								</colgroup>
+								<tr class="emph">
+									<td>
+										<span>Total</span>
+									</td>
+									<td class="text-right">
+										<span t-field="o.amount_total" t-field-options='{"widget": "monetary", "display_currency": "o.currency_id"}'/>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</t>
+			</t>
+		</template>
+
+	</data>
+</openerp>

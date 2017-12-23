@@ -18,5 +18,19 @@
 			<field name="context">{'default_type': 'in_refund', 'type': 'in_refund', 'journal_type': 'purchase_refund', 'search_default_group_by_journal_id': True}</field>
 		</record>
 
+
+		<!-- DAY END -->
+		<record id="tbvip_action_stock_day_end" model="ir.actions.act_window">
+			<field name="name">Day End</field>
+			<field name="res_model">tbvip.day.end</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="3" id="tbvip_menu_day_end" name="Day End" parent="account.menu_finance"/>
+		<menuitem sequence="31" id="tbvip_menu_item_day_end"
+				parent="tbvip_menu_day_end" action="tbvip_action_stock_day_end"/>
+
+
 	</data>
 </openerp>

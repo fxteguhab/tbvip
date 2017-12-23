@@ -1,0 +1,31 @@
+<openerp>
+	<data>
+
+		<record id="action_tbvip_interbranch_stock_move" model="ir.actions.act_window">
+			<field name="name">Interbranch Transfers</field>
+			<field name="res_model">tbvip.interbranch.stock.move</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<record id="action_tbvip_interbranch_stock_move_line_changed" model="ir.actions.act_window">
+			<field name="name">Modified Interbranch Transfers</field>
+			<field name="res_model">tbvip.interbranch.stock.move.line</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="domain">[('is_changed', '=', True)]</field>
+		</record>
+
+		<!--<record id="action_tbvip_interbranch_stock_move_line" model="ir.actions.act_window">-->
+			<!--<field name="name">Interbranch Stock Move Line</field>-->
+			<!--<field name="res_model">tbvip.interbranch.stock.move.line</field>-->
+			<!--<field name="view_type">form</field>-->
+			<!--<field name="view_mode">tree,form</field>-->
+		<!--</record>-->
+
+		<menuitem id="menu_tbvip_interbranch_stock_move" parent="stock.menu_stock_warehouse_mgmt"
+				sequence="10" action="action_tbvip_interbranch_stock_move"/>
+		<menuitem id="menu_tbvip_interbranch_stock_move_line_changed" parent="stock.menu_stock_warehouse_mgmt"
+				sequence="15" action="action_tbvip_interbranch_stock_move_line_changed"/>
+	</data>
+</openerp>
