@@ -7,14 +7,14 @@
 
 		<record id="purchase.purchase_rfq" model="ir.actions.act_window">
 			<field name="context" eval="{
-				'search_default_groupby_day':1,
+				'search_default_filter_date_order_today':1,
+				'search_default_group_by_order_day':1,
 			}"/>
 		</record>
 
 		<record model="ir.actions.act_window" id="purchase.purchase_form_action">
 			<field name="context" eval="{
-				'search_default_filter_date_order_today':1,
-				'search_default_groupby_day':1,
+				'search_default_group_by_delivery_day':1,
 			}"/>
 		</record>
 	</data>

@@ -60,6 +60,13 @@ class tbvip_interbranch_stock_move(osv.Model):
 			))
 		return result
 	
+	def unlink(self, cr, uid, ids, context={}):
+	# kalau sudah accepted ga boleh dihapus
+		for data in self.browse(cr, uid, ids):
+			if data.state in ['accepted']:
+				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
+		return super(tbvip_interbranch_stock_move, self).unlink(cr, uid, ids, context=context)
+	
 	# METHODS --------------------------------------------------------------------------------------------------------------
 	
 	def action_accept(self, cr, uid, ids, context=None):
@@ -117,7 +124,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 				'note': 'Interbranch Stock Move ' + location_src.name + '/' + location_dest.name,
 				'location_id': location_src.id,
 				'location_dest_id': location_dest.id,
-				'origin' : 'Interbranch Stock Move ' + str(interbranch_stock_move.id)
+				'origin' : 'Interbranch Stock Move ' + str(interbranch_stock_move.id),
+				'interbranch_move_id': interbranch_stock_move.id,
 			}, context=context)
 			#untuk setiap product, bikin stock movenya
 			for line in interbranch_stock_move.interbranch_stock_move_line_ids:
@@ -170,7 +178,7 @@ class tbvip_interbranch_stock_move_line(osv.Model):
 	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'header_id': fields.many2one('tbvip.interbranch.stock.move', 'Interbranch Stock Move'),
+		'header_id': fields.many2one('tbvip.interbranch.stock.move', 'Interbranch Stock Move', ondelete="cascade"),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Quantity', required=True),
 		'uom_id': fields.many2one('product.uom', 'Product UoM', required=True),

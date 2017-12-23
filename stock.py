@@ -317,7 +317,15 @@ class stock_move(osv.osv):
 			})
 		return new_id
 	
-	def unlink(self, cr, uid, ids, context=None):
+	def unlink(self, cr, uid, ids, context={}):
+	# kalau dia punya stock picking dan stock picking itu nyambung sama interbranch transfer,
+	# dan transfernya sudah accepted, maka jangan hapus
+		for data in self.browse(cr, uid, ids, context=context):
+			if not data.picking_id: continue
+			if not data.picking_id.interbranch_move_id: continue
+			if data.picking_id.interbranch_move_id.state in ['accepted']:
+				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
+	# kalau move terkait demand, "batalkan" demandnya menjadi requested
 		result = super(stock_move, self).unlink(cr, uid, ids, context)
 		demand_line_obj = self.pool.get('tbvip.demand.line')
 		demand_line_ids = demand_line_obj.search(cr, uid, [('stock_move_id','in',ids)])
@@ -425,6 +433,7 @@ class stock_picking(osv.osv):
 	
 	_columns = {
 		'related_sales_bon_number': fields.char("Nomor Bon", readonly=True),
+		'interbranch_move_id': fields.many2one('tbvip.interbranch.stock.move', 'Related Interbranch Transfer', search=False, ondelete="cascade"),
 	}
 	
 	@api.model
