@@ -463,7 +463,16 @@ class stock_picking(osv.osv):
 				)
 			)
 		return result
-	
+
+	def unlink(self, cr, uid, ids, context={}):
+	# kalau picking ini ngelink sama interbranch transfer, dan transfernya udah accepted,
+	# maka ngga boleh dihapus
+		for data in self.browse(cr, uid, ids, context):
+			if not data.interbranch_move_id: continue
+			if data.interbranch_move_id.state in ['accepted']:
+				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
+		return super(stock_picking, self).unlink(cr, uid, ids, context=context)
+
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
