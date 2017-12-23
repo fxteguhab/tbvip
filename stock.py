@@ -309,6 +309,7 @@ class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	
 	def create(self, cr, uid, vals, context={}):
+		context = {} if context is None else context
 		new_id = super(stock_move, self).create(cr, uid, vals, context=context)
 		location_id_sale_override = context.get('sale_location_id')
 		if location_id_sale_override:
