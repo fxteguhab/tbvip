@@ -67,6 +67,32 @@
 				</tree>
 			</field>
 		</record>
+		<record id="tbvip_interbranch_stock_move_search" model="ir.ui.view">
+			<field name="name">tbvip.interbranch.stock.move.search</field>
+			<field name="model">tbvip.interbranch.stock.move</field>
+			<field name="arch" type="xml">
+				<search>
+					<group string="Group by Location">
+						<filter string="From" name="from_location" domain="[]"
+								context="{'group_by': 'from_stock_location_id'}"/>
+						<filter string="To" name="to_location" domain="[]"
+								context="{'group_by': 'from_stock_location_id'}"/>
+					</group>
+					<group string="Group by Move Date">
+						<filter string="Year" name="move_date_year" domain="[]"
+								context="{'group_by': 'move_date:year'}"/>
+						<filter string="Month" name="move_date_month" domain="[]"
+								context="{'group_by': 'move_date:month'}"/>
+						<filter string="Day" name="move_date_day" domain="[]"
+								context="{'group_by': 'move_date:Day'}"/>
+					</group>
+					<group string="Group by">
+						<filter string="Prepared by" name="prepare_employee_id" domain="[]"
+								context="{'group_by': 'prepare_employee_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
 
 
 
