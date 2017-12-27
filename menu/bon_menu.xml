@@ -13,6 +13,6 @@
 				}</field>
 		</record>
 
-		<menuitem sequence="1" id="tbvip_menu_tbvip_bon_book" parent="base.menu_sales" action="tbvip_action_tbvip_bon_book"/>
+		<menuitem sequence="3" id="tbvip_menu_tbvip_bon_book" parent="base.menu_sales" action="tbvip_action_tbvip_bon_book"/>
 	</data>
 </openerp>

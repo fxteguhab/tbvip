@@ -14,5 +14,11 @@
 		<record model="ir.ui.menu" id="sale.menu_sale_quotations">
 			<field name="name">Draft Sales Orders</field>
 		</record>
+
+		<menuitem sequence="2" id="tbvip_menu_sales_check_stock" parent="base.menu_product" action="stock_action_check_stock"/>
+
+		<record model="ir.ui.menu" id="product.menu_products_category">
+			<field name="sequence">8</field>
+		</record>
 	</data>
 </openerp>

@@ -18,7 +18,7 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<menuitem id="menu_koreksi_bon" name="Koreksi Bon" parent="base.menu_base_partner" sequence="9"/>
+		<menuitem id="menu_koreksi_bon" name="Koreksi Bon" parent="base.menu_base_partner" sequence="5"/>
 
 		<menuitem sequence="8" id="menu_koreksi_bon_koreksi_bon" parent="menu_koreksi_bon"
 				action="action_koreksi_bon"/>
