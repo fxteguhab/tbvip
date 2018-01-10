@@ -72,6 +72,7 @@
 		'views/koreksi_bon_view.xml',
 		'views/res_config_view.xml',
 		'views/tbvip_stock_move_view.xml',
+		'views/account_simplified_journal.xml',
 		'workflows/purchase_workflow.xml',
 		'menu/accounting_menu.xml',
 		# 'menu/account_receivable_limit.xml',

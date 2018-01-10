@@ -1,0 +1,71 @@
+<openerp>
+	<data>
+		<record id="account_simplified_journal.simplified_journal_action_entry" model="ir.actions.act_window">
+			<field name="name">Cash Transactions</field>
+		</record>
+
+		<record id="account_simplified_journal.simplified_journal_menu_entry" model="ir.ui.menu">
+			<field name="parent_id" eval="ref('account.menu_finance_bank_and_cash')"/>
+			<field name="name">Cash Transactions</field>
+			<field name="sequence">5</field>
+		</record>
+
+
+		<record id="account_simplified_journal.simplified_journal_action_preset" model="ir.actions.act_window">
+			<field name="name">Cash Transaction Presets</field>
+		</record>
+
+		<record id="account_simplified_journal.simplified_journal_menu_preset" model="ir.ui.menu">
+			<field name="name">Cash Transaction Presets</field>
+		</record>
+
+		<!-- SIMPLIFIED JOURNAL ============================================================================= -->
+
+		<record id="account_journal_simplified_form_inherit" model="ir.ui.view">
+			<field name="name">account.journal.simplified.form.inherit</field>
+			<field name="model">account.journal.simplified</field>
+			<field name="inherit_id" ref="account_simplified_journal.account_journal_simplified_form"/>
+			<field name="arch" type="xml">
+				<field name="journal_date" position="before">
+					<field name="branch_id" readonly="True" required="True"/>
+				</field>
+			</field>
+		</record>
+
+		<record id="account_journal_simplified_list_inherit" model="ir.ui.view">
+			<field name="name">account.journal.simplified.list.inherit</field>
+			<field name="model">account.journal.simplified</field>
+			<field name="inherit_id" ref="account_simplified_journal.account_journal_simplified_list"/>
+			<field name="arch" type="xml">
+				<field name="journal_date" position="before">
+					<field name="branch_id" readonly="True" required="True"/>
+				</field>
+			</field>
+		</record>
+
+		<!-- MASTER PRESET ============================================================================= -->
+
+		<record id="account_journal_preset_form_inherit" model="ir.ui.view">
+			<field name="name">account.journal.preset.form</field>
+			<field name="model">account.journal.preset</field>
+			<field name="inherit_id" ref="account_simplified_journal.account_journal_preset_form"/>
+			<field name="arch" type="xml">
+				<field name="name" position="before">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+
+		<record id="account_journal_preset_list_inherit" model="ir.ui.view">
+			<field name="name">account.journal.preset.list.inherit</field>
+			<field name="model">account.journal.preset</field>
+			<field name="inherit_id" ref="account_simplified_journal.account_journal_preset_list"/>
+			<field name="arch" type="xml">
+				<field name="name" position="before">
+					<field name="branch_id"/>
+				</field>
+			</field>
+		</record>
+
+	</data>
+</openerp>
