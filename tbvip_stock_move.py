@@ -76,7 +76,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	# METHODS --------------------------------------------------------------------------------------------------------------
 	
-	def action_accept(self, cr, uid, ids, context=None):
+	def action_accept(self, cr, uid, ids, context={}):
 		for interbranch_stock_move in self.browse(cr, uid, ids):
 			if not interbranch_stock_move.checked_by_id:
 				raise osv.except_osv(_('Warning!'), _("Please Fill field Checked By"))
