@@ -337,10 +337,23 @@ class stock_move(osv.osv):
 	
 	def get_price_unit(self, cr, uid, move, context=None):
 		""" Returns the unit price to store on the quant """
+		data_obj = self.pool.get('ir.model.data')
+	# Jika dari Purchase, maka price untuk quants didapat dari unit price nett
 		if move.purchase_line_id:
 			return move.purchase_line_id.price_unit_nett
 		
-		return super(stock_move, self).get_price_unit(cr, uid, move, context=context)
+		result = super(stock_move, self).get_price_unit(cr, uid, move, context=context)
+		
+	# Jika price yang didapat 0, maka dapatkan dari price list buy harga default
+		if not result:
+			price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+			unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
+			product_current_price_obj = self.pool.get('product.current.price')
+		
+			product = move.product_id
+			current_price = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, unit_id)
+			
+			return current_price
 
 # ==========================================================================================================================
 
