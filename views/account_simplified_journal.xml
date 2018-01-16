@@ -28,6 +28,19 @@
 			<field name="arch" type="xml">
 				<field name="journal_date" position="before">
 					<field name="branch_id" readonly="True" required="True"/>
+					<field name="employee_id"/>
+				</field>
+				<form position="attributes">
+					<attribute name="edit">false</attribute>
+				</form>
+				<field name="name" position="after">
+					<field name="product_line_ids">
+						<tree editable="bottom">
+							<field name="product_id"/>
+							<field name="qty"/>
+							<field name="amount"/>
+						</tree>
+					</field>
 				</field>
 			</field>
 		</record>
@@ -39,7 +52,11 @@
 			<field name="arch" type="xml">
 				<field name="journal_date" position="before">
 					<field name="branch_id" readonly="True" required="True"/>
+					<field name="employee_id"/>
 				</field>
+				<tree position="attributes">
+					<attribute name="edit">false</attribute>
+				</tree>
 			</field>
 		</record>
 
