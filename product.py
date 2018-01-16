@@ -99,7 +99,7 @@ class product_template(osv.osv):
 			variants = product.product_variant_ids
 			if len(variants) > 0:
 				variant = variants[0]
-				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id)])
+				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id), ('price_type_id.type','=', 'sell')])
 		return result
 	
 # COLUMNS ---------------------------------------------------------------------------------------------------------------

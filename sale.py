@@ -299,7 +299,7 @@ class sale_order(osv.osv):
 		if len(bon_book_same_number_ids) > 1:
 			raise osv.except_orm(_('Bon book number error'),
 				_('There is sale order with the same bon book number in your branch for that date.'))
-		bon_book = self._get_bon_book(cr, uid, bon_number, context = None)
+		bon_book = self._get_bon_book(cr, uid, bon_number, context = {})
 		if bon_book.total_used >= bon_book.total_sheets:
 			raise osv.except_orm(_('Bon book is full'), _('All sheets in bon book have already been used.'))
 		else:
@@ -310,7 +310,7 @@ class sale_order(osv.osv):
 						raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
 			return bon_book
 	
-	def _get_bon_book(self, cr, uid, bon_number, context = None):
+	def _get_bon_book(self, cr, uid, bon_number, context = {}):
 		bon_book_obj = self.pool.get('tbvip.bon.book')
 		user_data = self.pool.get('res.users').browse(cr, uid, uid)
 		branch_id = user_data.branch_id.id or None
