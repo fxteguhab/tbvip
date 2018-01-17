@@ -34,9 +34,10 @@
 					<attribute name="edit">false</attribute>
 				</form>
 				<field name="name" position="after">
-					<field name="product_line_ids">
+					<field name="line_ids">
 						<tree editable="bottom">
 							<field name="product_id"/>
+							<field name="invoice_id"/>
 							<field name="qty"/>
 							<field name="amount"/>
 						</tree>
