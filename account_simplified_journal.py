@@ -51,7 +51,6 @@ class account_journal_simplified(osv.osv):
 			elif code.startswith("RETUR"):
 				# retur barang, harus plus list barang yang diretur. Ketika save transaksi, buat stock picking baru dengan
 				# barang2 ini move dari customer location ke cabang di mana retur terjadi.
-				# contoh create dapet dari point_of_sale, create_picking, baris 843
 				if not created_simplified_journal.branch_id:
 					raise osv.except_osv(_('Retur Error'),_('Please input branch for Retur transaction.'))
 				picking_obj = self.pool.get('stock.picking')
@@ -60,8 +59,8 @@ class account_journal_simplified(osv.osv):
 				stock_move_obj = self.pool.get('stock.move')
 				warehouse_obj = self.pool.get('stock.warehouse')
 				
-				location_src = location_obj.browse(cr, uid, model_obj.get_object_reference(cr, uid, 'stock', 'stock_location_customers')[1]),
-				location_dest = created_simplified_journal.branch_id.default_incoming_location_id.id
+				location_src = location_obj.browse(cr, uid, model_obj.get_object_reference(cr, uid, 'stock', 'stock_location_customers')[1])
+				location_dest = created_simplified_journal.branch_id.default_incoming_location_id
 				warehouse_id = warehouse_obj.search(cr, uid, [('lot_stock_id', '=', location_src.id)], limit=1)
 				warehouse = warehouse_obj.browse(cr, uid, warehouse_id, context)
 				max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
@@ -77,18 +76,19 @@ class account_journal_simplified(osv.osv):
 				}, context=context)
 				#untuk setiap product, bikin stock movenya
 				for line in created_simplified_journal.retur_line_ids:
-					picking_type_id = stock_move_obj.create(cr, uid, vals={
+					stock_move = stock_move_obj.create(cr, uid, vals={
 						'name': _('Stock_move') + ' ' + location_src.name + '/' + location_dest.name,
 						'warehouse_id': warehouse.id,
 						'location_id': location_src.id,
 						'location_dest_id': location_dest.id,
 						'sequence': max_sequence + 1,
 						'product_id': line.product_id.id,
-						'product_uom': line.uom_id.id,
-						'picking_id' : picking_id,
-						'product_uom_qty' : line.qty
+						'product_uom': line.product_id.uom_id.id,
+						'picking_id': picking_id,
+						'product_uom_qty': line.qty
 					}, context=context)
-				pass
+				# Transfer created picking
+				picking_obj.do_transfer(cr, uid, picking_id, context)
 			elif code.startswith("PAYSUPP"):
 				# "bayar supplier. Harus plus list invoice yang mau dibayar beserta amount pembayarannya (onchange invoice,
 				# autofill amount nya idem amount terhutang invoice itu). account_journal_simplified.amount diisi otomatis
@@ -150,6 +150,10 @@ class account_journal_simplified_line_retur(osv.osv):
 		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Qty', required=True),
+	}
+	
+	_defaults = {
+		'qty': lambda self, cr, uid, context: 1,
 	}
 
 
