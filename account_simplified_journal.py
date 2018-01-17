@@ -38,7 +38,7 @@ class account_journal_simplified(osv.osv):
 					'date': created_simplified_journal.journal_date,
 					'name': created_simplified_journal.name,
 				})
-				for line in created_simplified_journal.line_ids:
+				for line in created_simplified_journal.expense_line_ids:
 					expense_line_obj.create(cr, uid, {
 						'expense_id': new_expense_id,
 						'product_id': line.product_id.id,
@@ -49,82 +49,54 @@ class account_journal_simplified(osv.osv):
 						'unit_quantity': line.qty,
 					})
 			elif code.startswith("RETUR"):
+				# retur barang, harus plus list barang yang diretur. Ketika save transaksi, buat stock picking baru dengan
+				# barang2 ini move dari customer location ke cabang di mana retur terjadi.
+				# contoh create dapet dari point_of_sale, create_picking, baris 843
+				if not created_simplified_journal.branch_id:
+					raise osv.except_osv(_('Retur Error'),_('Please input branch for Retur transaction.'))
+				picking_obj = self.pool.get('stock.picking')
+				model_obj = self.pool.get('ir.model.data')
+				location_obj = self.pool.get('stock.location')
+				stock_move_obj = self.pool.get('stock.move')
+				warehouse_obj = self.pool.get('stock.warehouse')
+				
+				location_src = location_obj.browse(cr, uid, model_obj.get_object_reference(cr, uid, 'stock', 'stock_location_customers')[1]),
+				location_dest = created_simplified_journal.branch_id.default_incoming_location_id.id
+				warehouse_id = warehouse_obj.search(cr, uid, [('lot_stock_id', '=', location_src.id)], limit=1)
+				warehouse = warehouse_obj.browse(cr, uid, warehouse_id, context)
+				max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
+				max_sequence = max_sequence and max_sequence[0]['sequence'] or 0
+				
+				picking_id = picking_obj.create(cr, uid, {
+					'picking_type_id': model_obj.get_object_reference(cr, uid, 'stock', 'picking_type_internal')[1],
+					'move_type': 'direct',
+					'note': 'Cash Transaction ' + location_src.name + '/' + location_dest.name,
+					'location_id': location_src.id,
+					'location_dest_id': location_dest.id,
+					'origin': 'Cash Transaction - ' + str(created_simplified_journal.name),
+				}, context=context)
+				#untuk setiap product, bikin stock movenya
+				for line in created_simplified_journal.retur_line_ids:
+					picking_type_id = stock_move_obj.create(cr, uid, vals={
+						'name': _('Stock_move') + ' ' + location_src.name + '/' + location_dest.name,
+						'warehouse_id': warehouse.id,
+						'location_id': location_src.id,
+						'location_dest_id': location_dest.id,
+						'sequence': max_sequence + 1,
+						'product_id': line.product_id.id,
+						'product_uom': line.uom_id.id,
+						'picking_id' : picking_id,
+						'product_uom_qty' : line.qty
+					}, context=context)
 				pass
 			elif code.startswith("PAYSUPP"):
 				# "bayar supplier. Harus plus list invoice yang mau dibayar beserta amount pembayarannya (onchange invoice,
 				# autofill amount nya idem amount terhutang invoice itu). account_journal_simplified.amount diisi otomatis
 				# sebagai jumlah dari amount seluruh invoice yang dipilih."
-				# for line in created_simplified_journal.line_ids:
-				# 	self.pool.get('account.invoice').pay_and_reconcile(cr, uid, [line.invoice_id.id], line.amount,
-				# 		line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id,
-				# 		line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id, context)
-				# for line in created_simplified_journal.line_ids:
-					# voucher_obj = self.pool.get('account.voucher')
-					# inv = line.invoice_id
-					# move_line_id = 0
-					# for move_line in inv.move_id.line_id:
-					# 	if inv.type == 'in_invoice':
-					# 		move_line_id = move_line.id if move_line.debit == 0 else move_line_id
-					# 	else:
-					# 		move_line_id = move_line.id if move_line.credit == 0 else move_line_id
-					# new_voucher_id = voucher_obj.create(cr, uid, {
-					# 	'partner_id': inv.partner_id.id,
-					# 	'amount': inv.type in ('out_refund', 'in_refund') and -inv.residual or inv.residual,
-					# 	'account_id': inv.account_id.id,
-					# 	'journal_id': inv.journal_id.id,
-					# 	'type': 'receipt' if inv.type == 'out_invoice' else 'payment',
-					# 	'reference': created_simplified_journal.name,
-					# 	'date': created_simplified_journal.journal_date,
-					# 	'pay_now': 'pay_now',
-					# 	'date_due': created_simplified_journal.journal_date,
-					# 	'line_dr_ids': [(0, False, {
-					# 		'type': 'dr' if inv.type == 'in_invoice' else 'cr',
-					# 		'account_id': inv.account_id.id,
-					# 		'partner_id': inv.partner_id.id,
-					# 		'amount': inv.type in ('out_refund', 'in_refund') and -inv.residual or inv.residual,
-					# 		'move_line_id': move_line_id,
-					# 		'reconcile': True,
-					# 	})]
-					# })
-					# voucher_obj.proforma_voucher(cr, uid, [new_voucher_id])
-					# if self.type in ('in_invoice', 'in_refund'):
-					# 	ref = self.reference
-					# 	else:
-					# 	ref = self.number
-					# partner = self.partner_id._find_accounting_partner(self.partner_id)
-					# name = name or self.invoice_line[0].name or self.number
-					# # Pay attention to the sign for both debit/credit AND amount_currency
-					# l1 = {
-					# 	'name': name,
-					# 	'debit': direction * pay_amount > 0 and direction * pay_amount,
-					# 	'credit': direction * pay_amount < 0 and -direction * pay_amount,
-					# 	'account_id': self.account_id.id,
-					# 	'partner_id': partner.id,
-					# 	'ref': ref,
-					# 	'date': date,
-					# 	'currency_id': currency_id,
-					# 	'amount_currency': direction * (amount_currency or 0.0),
-					# 	'company_id': self.company_id.id,
-					# }
-					# l2 = {
-					# 	'name': name,
-					# 	'debit': direction * pay_amount < 0 and -direction * pay_amount,
-					# 	'credit': direction * pay_amount > 0 and direction * pay_amount,
-					# 	'account_id': pay_account_id,
-					# 	'partner_id': partner.id,
-					# 	'ref': ref,
-					# 	'date': date,
-					# 	'currency_id': currency_id,
-					# 	'amount_currency': -direction * (amount_currency or 0.0),
-					# 	'company_id': self.company_id.id,
-					# }
-					# move = self.env['account.move'].create({
-					# 	'ref': ref,
-					# 	'line_id': [(0, 0, l1), (0, 0, l2)],
-					# 	'journal_id': pay_journal_id,
-					# 	'period_id': period_id,
-					# 	'date': date,
-					# })
+				for line in created_simplified_journal.line_ids:
+					self.pool.get('account.invoice').pay_and_reconcile(cr, uid, [line.invoice_id.id], line.amount,
+						line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id,
+						line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id, context)
 				pass
 			elif code.startswith("DAYEND"):
 				pass
@@ -178,10 +150,6 @@ class account_journal_simplified_line_retur(osv.osv):
 		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Qty', required=True),
-	}
-	
-	_defaults = {
-		'qty': lambda self, cr, uid, context: 1,
 	}
 
 

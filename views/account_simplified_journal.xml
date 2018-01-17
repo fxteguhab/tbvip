@@ -27,7 +27,7 @@
 			<field name="inherit_id" ref="account_simplified_journal.account_journal_simplified_form"/>
 			<field name="arch" type="xml">
 				<field name="journal_date" position="before">
-					<field name="branch_id" readonly="True" required="True"/>
+					<field name="branch_id" required="True"/>
 				</field>
 				<field name="preset_id" position="attributes">
 					<attribute name="on_change">onchange_preset_id(preset_id)</attribute>
