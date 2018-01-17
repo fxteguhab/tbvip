@@ -48,7 +48,7 @@
 					</field>
 					<field name="retur_line_ids" attrs="{'invisible': [('preset_code','!=','RETUR')]}">
 						<tree editable="bottom">
-							<field name="invoice_id"/>
+							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)"/>
 							<field name="amount"/>
 						</tree>
 					</field>
