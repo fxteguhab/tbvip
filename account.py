@@ -98,25 +98,14 @@ class tbvip_day_end(osv.osv):
 	_name = 'tbvip.day.end'
 	_description = 'Ending Day'
 	
-	def calculate_omzet_cash(self, cr, uid, day_end_date, context={}):
-		# day_end_date's sale orders
-		sale_order_obj = self.pool.get('sale.order')
-		day_end_date_datetime = datetime.strptime(day_end_date, '%Y-%m-%d %H:%M:%S')
-		sale_order_done_ids = sale_order_obj.search(cr, uid, [
-			('state', 'in', ['done','progress']),
-			('date_order', '>=', day_end_date_datetime.strftime("%Y-%m-%d 00:00:00")),
-			('date_order', '<', (day_end_date_datetime + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")),
-			('user_id', '=', uid),
-		], context=context)
-		omzet_cash_total = 0
-		for sale_order in sale_order_obj.browse(cr, uid, sale_order_done_ids, context=context):
-			omzet_cash_total += (sale_order.payment_cash_amount - sale_order.return_amount)
-		return omzet_cash_total
+	def calculate_omzet_cash(self, cr, uid, kas_id, context={}):
+		# kas balance
+		return self.pool.get('account.account').browse(cr, uid, kas_id, context).balance
 	
-	def calculate_amend_number(self, cr, uid, branch_id, day_end_date, context={}):
+	def calculate_amend_number(self, cr, uid, kas_id, day_end_date, context={}):
 		day_end_date_datetime = datetime.strptime(day_end_date, '%Y-%m-%d %H:%M:%S')
 		day_end_ids = self.search(cr, uid, [
-			('branch_id', '=', branch_id),
+			('kas_id', '=', kas_id),
 			('day_end_date', '>=', day_end_date_datetime.strftime("%Y-%m-%d 00:00:00")),
 			('day_end_date', '<', (day_end_date_datetime + timedelta(days=1)).strftime("%Y-%m-%d 00:00:00")),
 		], context=context)
@@ -142,6 +131,7 @@ class tbvip_day_end(osv.osv):
 		'day_end_date': fields.datetime('Day End Date', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'amend_number': fields.integer('Amend Number'),
+		'kas_id': fields.many2one('account.account', 'Kas', required=True, domain=[('is_tbvip_kas', '=', True)]),
 
 		'qty_100': fields.integer('100', help='A Hundred Quantity'),
 		'qty_200': fields.integer('200', help='Two Hundred Quantity'),
@@ -188,10 +178,10 @@ class tbvip_day_end(osv.osv):
 	
 	def create(self, cr, uid, vals, context=None):
 		vals['branch_id'] = self._default_branch_id(cr, uid, context=context)
-		day_end_date = vals['day_end_date']
+		kas_id = vals['kas_id']
 		
 		vals.update({
-			'amend_number': self.calculate_amend_number(cr, uid, vals['branch_id'], day_end_date, context=context),
+			'amend_number': self.calculate_amend_number(cr, uid, kas_id, vals['day_end_date'], context=context),
 			'amount_100': vals['qty_100'] * 100,
 			'amount_200': vals['qty_200'] * 200,
 			'amount_500': vals['qty_500'] * 500,
@@ -207,17 +197,17 @@ class tbvip_day_end(osv.osv):
 			vals['amount_100'] + vals['amount_200'] + vals['amount_500'] + \
 			vals['amount_1000'] + vals['amount_2000'] + vals['amount_5000'] + \
 			vals['amount_10000'] + vals['amount_20000'] + vals['amount_50000'] + vals['amount_100000']
-		vals['omzet_cash'] = self.calculate_omzet_cash(cr, uid, day_end_date, context=context)
+		vals['omzet_cash'] = self.calculate_omzet_cash(cr, uid, kas_id, context=context)
 		vals['modal_cash'] = self._default_modal_cash(cr, uid, context=context)
 		vals['total_cash'] = vals['subtotal_cash'] + vals['extra_amount_1'] + vals['extra_amount_2'] + vals['extra_amount_3']
 		vals['balance'] = vals['total_cash'] - vals['omzet_cash'] - vals['modal_cash']
 		return super(tbvip_day_end, self).create(cr, uid, vals, context)
 	
-	def onchange_day_end_date(self, cr, uid, ids, day_end_date, branch_id, context=None):
+	def onchange_day_end_kas_date(self, cr, uid, ids, kas_id, day_end_date, context=None):
 		return {
 			'value': {
-				'omzet_cash': self.calculate_omzet_cash(cr, uid, day_end_date, context=context),
-				'amend_number': self.calculate_amend_number(cr, uid, branch_id, day_end_date, context=context)
+				'omzet_cash': self.calculate_omzet_cash(cr, uid, kas_id, context=context),
+				'amend_number': self.calculate_amend_number(cr, uid, kas_id, day_end_date, context=context)
 			}
 		}
 	
@@ -260,7 +250,7 @@ class account_account(osv.osv):
 	_inherit = 'account.account'
 	
 	_columns = {
-		'is_tbvip_kas': fields.boolean(),
+		'is_tbvip_kas': fields.boolean('Kas'),
 	}
 	
 
