@@ -28,18 +28,34 @@
 			<field name="arch" type="xml">
 				<field name="journal_date" position="before">
 					<field name="branch_id" readonly="True" required="True"/>
-					<field name="employee_id"/>
+				</field>
+				<field name="preset_id" position="attributes">
+					<attribute name="on_change">onchange_preset_id(preset_id)</attribute>
+				</field>
+				<field name="preset_id" position="after">
+					<field name="preset_code" invisible="1"/>
+					<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}"/>
 				</field>
 				<form position="attributes">
 					<attribute name="edit">false</attribute>
 				</form>
 				<field name="name" position="after">
-					<field name="line_ids">
+					<field name="expense_line_ids" attrs="{'invisible': [('preset_code','!=','EXPENSE')]}">
 						<tree editable="bottom">
 							<field name="product_id"/>
-							<field name="invoice_id"/>
-							<field name="qty"/>
 							<field name="amount"/>
+						</tree>
+					</field>
+					<field name="retur_line_ids" attrs="{'invisible': [('preset_code','!=','RETUR')]}">
+						<tree editable="bottom">
+							<field name="invoice_id"/>
+							<field name="amount"/>
+						</tree>
+					</field>
+					<field name="paysupp_line_ids" attrs="{'invisible': [('preset_code','!=','PAYSUPP')]}">
+						<tree editable="bottom">
+							<field name="product_id"/>
+							<field name="qty"/>
 						</tree>
 					</field>
 				</field>
@@ -70,6 +86,9 @@
 			<field name="arch" type="xml">
 				<field name="name" position="before">
 					<field name="branch_id"/>
+				</field>
+				<field name="code" position="attributes">
+					<attribute name="required">1</attribute>
 				</field>
 			</field>
 		</record>
