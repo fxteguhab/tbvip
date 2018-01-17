@@ -167,10 +167,6 @@ class account_journal_simplified_line_expense(osv.osv):
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'amount': fields.float('Amount', required=True),
 	}
-	
-	_defaults = {
-		'qty': lambda self, cr, uid, context: 1,
-	}
 
 
 # ===========================================================================================================================
@@ -180,8 +176,8 @@ class account_journal_simplified_line_retur(osv.osv):
 	
 	_columns = {
 		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
-		'invoice_id': fields.many2one('account.invoice', 'Invoice', required=True),
-		'amount': fields.float('Amount', required=True),
+		'product_id': fields.many2one('product.product', 'Product', required=True),
+		'qty': fields.float('Qty', required=True),
 	}
 	
 	_defaults = {
@@ -196,14 +192,12 @@ class account_journal_simplified_line_paysupp(osv.osv):
 	
 	_columns = {
 		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
-		'product_id': fields.many2one('product.product', 'Product', required=True),
-		'qty': fields.float('Qty', required=True),
+		'invoice_id': fields.many2one('account.invoice', 'Invoice', required=True),
+		'amount': fields.float('Amount', required=True),
 	}
 	
-	_defaults = {
-		'qty': lambda self, cr, uid, context: 1,
-	}
-
+	def onchange_invoice_id(self, cr, uid, ids, invoice_id, context=None):
+		pass
 
 # ===========================================================================================================================
 
