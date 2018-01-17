@@ -169,7 +169,16 @@ class account_journal_simplified_line_paysupp(osv.osv):
 	}
 	
 	def onchange_invoice_id(self, cr, uid, ids, invoice_id, context=None):
-		pass
+		result = {
+			'value': {
+				'amount': '',
+			}
+		}
+		if invoice_id:
+			account_invoice_obj = self.pool.get('account.invoice')
+			acc_inv = account_invoice_obj.browse(cr, uid, invoice_id, context=context)
+			result['value']['amount'] = acc_inv.residual
+		return result
 
 # ===========================================================================================================================
 
