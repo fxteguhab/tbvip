@@ -31,6 +31,9 @@
 		<menuitem sequence="31" id="tbvip_menu_item_day_end"
 				parent="tbvip_menu_day_end" action="tbvip_action_stock_day_end"/>
 
+		<!-- Customer Refunds -->
+		<menuitem action="account.action_invoice_tree3" id="account.menu_action_invoice_tree3" parent="account.menu_finance_receivables"
+				groups="tbvip.group_management_central"/>
 
 	</data>
 </openerp>
