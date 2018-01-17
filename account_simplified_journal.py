@@ -51,7 +51,7 @@ class account_journal_simplified(osv.osv):
 				# 	self.pool.get('account.invoice').pay_and_reconcile(cr, uid, [line.invoice_id.id], line.amount,
 				# 		line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id,
 				# 		line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id, context)
-				for line in created_simplified_journal.line_ids:
+				# for line in created_simplified_journal.line_ids:
 					# voucher_obj = self.pool.get('account.voucher')
 					# inv = line.invoice_id
 					# move_line_id = 0
@@ -80,44 +80,44 @@ class account_journal_simplified(osv.osv):
 					# 	})]
 					# })
 					# voucher_obj.proforma_voucher(cr, uid, [new_voucher_id])
-					if self.type in ('in_invoice', 'in_refund'):
-						ref = self.reference
-						else:
-						ref = self.number
-					partner = self.partner_id._find_accounting_partner(self.partner_id)
-					name = name or self.invoice_line[0].name or self.number
-					# Pay attention to the sign for both debit/credit AND amount_currency
-					l1 = {
-						'name': name,
-						'debit': direction * pay_amount > 0 and direction * pay_amount,
-						'credit': direction * pay_amount < 0 and -direction * pay_amount,
-						'account_id': self.account_id.id,
-						'partner_id': partner.id,
-						'ref': ref,
-						'date': date,
-						'currency_id': currency_id,
-						'amount_currency': direction * (amount_currency or 0.0),
-						'company_id': self.company_id.id,
-					}
-					l2 = {
-						'name': name,
-						'debit': direction * pay_amount < 0 and -direction * pay_amount,
-						'credit': direction * pay_amount > 0 and direction * pay_amount,
-						'account_id': pay_account_id,
-						'partner_id': partner.id,
-						'ref': ref,
-						'date': date,
-						'currency_id': currency_id,
-						'amount_currency': -direction * (amount_currency or 0.0),
-						'company_id': self.company_id.id,
-					}
-					move = self.env['account.move'].create({
-						'ref': ref,
-						'line_id': [(0, 0, l1), (0, 0, l2)],
-						'journal_id': pay_journal_id,
-						'period_id': period_id,
-						'date': date,
-					})
+					# if self.type in ('in_invoice', 'in_refund'):
+					# 	ref = self.reference
+					# 	else:
+					# 	ref = self.number
+					# partner = self.partner_id._find_accounting_partner(self.partner_id)
+					# name = name or self.invoice_line[0].name or self.number
+					# # Pay attention to the sign for both debit/credit AND amount_currency
+					# l1 = {
+					# 	'name': name,
+					# 	'debit': direction * pay_amount > 0 and direction * pay_amount,
+					# 	'credit': direction * pay_amount < 0 and -direction * pay_amount,
+					# 	'account_id': self.account_id.id,
+					# 	'partner_id': partner.id,
+					# 	'ref': ref,
+					# 	'date': date,
+					# 	'currency_id': currency_id,
+					# 	'amount_currency': direction * (amount_currency or 0.0),
+					# 	'company_id': self.company_id.id,
+					# }
+					# l2 = {
+					# 	'name': name,
+					# 	'debit': direction * pay_amount < 0 and -direction * pay_amount,
+					# 	'credit': direction * pay_amount > 0 and direction * pay_amount,
+					# 	'account_id': pay_account_id,
+					# 	'partner_id': partner.id,
+					# 	'ref': ref,
+					# 	'date': date,
+					# 	'currency_id': currency_id,
+					# 	'amount_currency': -direction * (amount_currency or 0.0),
+					# 	'company_id': self.company_id.id,
+					# }
+					# move = self.env['account.move'].create({
+					# 	'ref': ref,
+					# 	'line_id': [(0, 0, l1), (0, 0, l2)],
+					# 	'journal_id': pay_journal_id,
+					# 	'period_id': period_id,
+					# 	'date': date,
+					# })
 				pass
 			elif code.startswith("DAYEND"):
 				pass

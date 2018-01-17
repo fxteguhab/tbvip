@@ -71,6 +71,9 @@
 				<field name="name" position="before">
 					<field name="branch_id"/>
 				</field>
+				<field name="code" position="attributes">
+					<attribute name="required">1</attribute>
+				</field>
 			</field>
 		</record>
 
