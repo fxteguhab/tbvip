@@ -42,7 +42,7 @@
 				<field name="name" position="after">
 					<field name="expense_line_ids" attrs="{'invisible': [('preset_code','!=','EXPENSE')]}">
 						<tree editable="bottom">
-							<field name="product_id"/>
+							<field name="product_id" domain="[('hr_expense_ok','=',True)]"/>
 							<field name="amount"/>
 						</tree>
 					</field>
