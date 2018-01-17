@@ -47,77 +47,10 @@ class account_journal_simplified(osv.osv):
 				# "bayar supplier. Harus plus list invoice yang mau dibayar beserta amount pembayarannya (onchange invoice,
 				# autofill amount nya idem amount terhutang invoice itu). account_journal_simplified.amount diisi otomatis
 				# sebagai jumlah dari amount seluruh invoice yang dipilih."
-				# for line in created_simplified_journal.line_ids:
-				# 	self.pool.get('account.invoice').pay_and_reconcile(cr, uid, [line.invoice_id.id], line.amount,
-				# 		line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id,
-				# 		line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id, context)
 				for line in created_simplified_journal.line_ids:
-					# voucher_obj = self.pool.get('account.voucher')
-					# inv = line.invoice_id
-					# move_line_id = 0
-					# for move_line in inv.move_id.line_id:
-					# 	if inv.type == 'in_invoice':
-					# 		move_line_id = move_line.id if move_line.debit == 0 else move_line_id
-					# 	else:
-					# 		move_line_id = move_line.id if move_line.credit == 0 else move_line_id
-					# new_voucher_id = voucher_obj.create(cr, uid, {
-					# 	'partner_id': inv.partner_id.id,
-					# 	'amount': inv.type in ('out_refund', 'in_refund') and -inv.residual or inv.residual,
-					# 	'account_id': inv.account_id.id,
-					# 	'journal_id': inv.journal_id.id,
-					# 	'type': 'receipt' if inv.type == 'out_invoice' else 'payment',
-					# 	'reference': created_simplified_journal.name,
-					# 	'date': created_simplified_journal.journal_date,
-					# 	'pay_now': 'pay_now',
-					# 	'date_due': created_simplified_journal.journal_date,
-					# 	'line_dr_ids': [(0, False, {
-					# 		'type': 'dr' if inv.type == 'in_invoice' else 'cr',
-					# 		'account_id': inv.account_id.id,
-					# 		'partner_id': inv.partner_id.id,
-					# 		'amount': inv.type in ('out_refund', 'in_refund') and -inv.residual or inv.residual,
-					# 		'move_line_id': move_line_id,
-					# 		'reconcile': True,
-					# 	})]
-					# })
-					# voucher_obj.proforma_voucher(cr, uid, [new_voucher_id])
-					if self.type in ('in_invoice', 'in_refund'):
-						ref = self.reference
-						else:
-						ref = self.number
-					partner = self.partner_id._find_accounting_partner(self.partner_id)
-					name = name or self.invoice_line[0].name or self.number
-					# Pay attention to the sign for both debit/credit AND amount_currency
-					l1 = {
-						'name': name,
-						'debit': direction * pay_amount > 0 and direction * pay_amount,
-						'credit': direction * pay_amount < 0 and -direction * pay_amount,
-						'account_id': self.account_id.id,
-						'partner_id': partner.id,
-						'ref': ref,
-						'date': date,
-						'currency_id': currency_id,
-						'amount_currency': direction * (amount_currency or 0.0),
-						'company_id': self.company_id.id,
-					}
-					l2 = {
-						'name': name,
-						'debit': direction * pay_amount < 0 and -direction * pay_amount,
-						'credit': direction * pay_amount > 0 and direction * pay_amount,
-						'account_id': pay_account_id,
-						'partner_id': partner.id,
-						'ref': ref,
-						'date': date,
-						'currency_id': currency_id,
-						'amount_currency': -direction * (amount_currency or 0.0),
-						'company_id': self.company_id.id,
-					}
-					move = self.env['account.move'].create({
-						'ref': ref,
-						'line_id': [(0, 0, l1), (0, 0, l2)],
-						'journal_id': pay_journal_id,
-						'period_id': period_id,
-						'date': date,
-					})
+					self.pool.get('account.invoice').pay_and_reconcile(cr, uid, [line.invoice_id.id], line.amount,
+						line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id,
+						line.invoice_id.account_id.id, line.invoice_id.period_id.id, line.invoice_id.journal_id.id, context)
 				pass
 			elif code.startswith("DAYEND"):
 				pass
