@@ -28,7 +28,7 @@
 			<field name="arch" type="xml">
 				<field name="journal_date" position="before">
 					<field name="branch_id" readonly="True" required="True"/>
-					<field name="employee_id"/>
+					<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}"/>
 				</field>
 				<field name="preset_id" position="attributes">
 					<attribute name="on_change">onchange_preset_id(preset_id)</attribute>

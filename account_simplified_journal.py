@@ -27,6 +27,8 @@ class account_journal_simplified(osv.osv):
 		def _execute_tbvip_scenarios(created_simplified_journal):
 			code = created_simplified_journal.preset_id.code
 			if code.startswith('EXPENSE'):
+				if not vals.get('employee_id', False):
+					raise osv.except_osv(_('Error Expense Preset!'), _("Please specify the Employee."))
 				# "catat expense non-canvassing. Harus ada list product expense nya (misal pungli, iuran warga, dsb) yang
 				# ketika save transaksi ada create hr.expense.expense."
 				expense_obj = self.pool.get('hr.expense.expense')
