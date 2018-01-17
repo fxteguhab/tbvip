@@ -55,7 +55,8 @@
 					</field>
 					<field name="paysupp_line_ids" attrs="{'invisible': [('preset_code','!=','PAYSUPP')]}">
 						<tree editable="bottom">
-							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)" options="{'no_create': 1}"/>
+							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)" options="{'no_create': 1}"
+									domain="[('type','=','in_invoice')]"/>
 							<field name="amount"/>
 						</tree>
 					</field>
