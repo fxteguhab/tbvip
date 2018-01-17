@@ -4,6 +4,8 @@ from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 
 
+# ===========================================================================================================================
+
 class account_journal_simplified(osv.osv):
 	_inherit = 'account.journal.simplified'
 	
@@ -11,7 +13,10 @@ class account_journal_simplified(osv.osv):
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 		'employee_id': fields.many2one('hr.employee', 'Employee'),
 		'preset_id': fields.many2one('account.journal.preset', 'Transaction Type', required=True, domain="['|', ('branch_id', '=', branch_id), ('branch_id', '=', False)]"),
-		'line_ids': fields.one2many('account.journal.simplified.line', 'account_journal_simplified_id', 'Lines'),
+		'preset_code': fields.char('Preset Code'),
+		'expense_line_ids': fields.one2many('account.journal.simplified.line.expense', 'account_journal_simplified_id', 'Lines'),
+		'retur_line_ids': fields.one2many('account.journal.simplified.line.retur', 'account_journal_simplified_id', 'Lines'),
+		'paysupp_line_ids': fields.one2many('account.journal.simplified.line.paysupp', 'account_journal_simplified_id', 'Lines'),
 	}
 	
 	_defaults = {
@@ -129,22 +134,76 @@ class account_journal_simplified(osv.osv):
 		_execute_tbvip_scenarios(self.browse(cr, uid, new_id, context))
 		return new_id
 	
+	def onchange_preset_id(self, cr, uid, ids, preset_id, context=None):
+		result = {
+			'value': {
+				'preset_code': '',
+			}
+		}
+		if preset_id:
+			account_journal_preset_obj = self.pool.get('account.journal.preset')
+			acc_journal_preset = account_journal_preset_obj.browse(cr, uid, preset_id, context=context)
+			code = acc_journal_preset.code
+			if code:
+				if code.startswith('EXPENSE'):
+					result['value']['preset_code'] = 'EXPENSE'
+				elif code.startswith("RETUR"):
+					result['value']['preset_code'] = 'RETUR'
+				elif code.startswith("PAYSUPP"):
+					result['value']['preset_code'] = 'PAYSUPP'
+				elif code.startswith("DAYEND"):
+					result['value']['preset_code'] = 'DAYEND'
+		return result
 	
-class account_journal_simplified_line(osv.osv):
-	_name = 'account.journal.simplified.line'
+# ===========================================================================================================================
+
+class account_journal_simplified_line_expense(osv.osv):
+	_name = 'account.journal.simplified.line.expense'
 	
 	_columns = {
 		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
-		'product_id': fields.many2one('product.product', 'Product'),
-		'invoice_id': fields.many2one('account.invoice', 'Invoice'),
-		'qty': fields.float('Qty'),
-		'amount': fields.float('Amount'),
+		'product_id': fields.many2one('product.product', 'Product', required=True),
+		'amount': fields.float('Amount', required=True),
 	}
 	
 	_defaults = {
 		'qty': lambda self, cr, uid, context: 1,
 	}
+
+
+# ===========================================================================================================================
+
+class account_journal_simplified_line_retur(osv.osv):
+	_name = 'account.journal.simplified.line.retur'
 	
+	_columns = {
+		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
+		'invoice_id': fields.many2one('account.invoice', 'Invoice', required=True),
+		'amount': fields.float('Amount', required=True),
+	}
+	
+	_defaults = {
+		'qty': lambda self, cr, uid, context: 1,
+	}
+
+
+# ===========================================================================================================================
+
+class account_journal_simplified_line_paysupp(osv.osv):
+	_name = 'account.journal.simplified.line.paysupp'
+	
+	_columns = {
+		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
+		'product_id': fields.many2one('product.product', 'Product', required=True),
+		'qty': fields.float('Qty', required=True),
+	}
+	
+	_defaults = {
+		'qty': lambda self, cr, uid, context: 1,
+	}
+
+
+# ===========================================================================================================================
 
 class account_journal_preset(osv.osv):
 	_inherit = 'account.journal.preset'
