@@ -27,14 +27,15 @@
 			<field name="inherit_id" ref="account_simplified_journal.account_journal_simplified_form"/>
 			<field name="arch" type="xml">
 				<field name="journal_date" position="before">
-					<field name="branch_id" readonly="True" required="True"/>
+					<field name="branch_id" readonly="True" required="True" options="{'no_create': 1}"/>
 				</field>
 				<field name="preset_id" position="attributes">
 					<attribute name="on_change">onchange_preset_id(preset_id)</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="preset_id" position="after">
 					<field name="preset_code" invisible="1"/>
-					<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}"/>
+					<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}" options="{'no_create': 1}"/>
 				</field>
 				<form position="attributes">
 					<attribute name="edit">false</attribute>
@@ -42,19 +43,19 @@
 				<field name="name" position="after">
 					<field name="expense_line_ids" attrs="{'invisible': [('preset_code','!=','EXPENSE')]}">
 						<tree editable="bottom">
-							<field name="product_id" domain="[('hr_expense_ok','=',True)]"/>
+							<field name="product_id" domain="[('hr_expense_ok','=',True)]" options="{'no_create': 1}"/>
 							<field name="amount"/>
 						</tree>
 					</field>
 					<field name="retur_line_ids" attrs="{'invisible': [('preset_code','!=','RETUR')]}">
 						<tree editable="bottom">
-							<field name="product_id"/>
+							<field name="product_id" options="{'no_create': 1}"/>
 							<field name="qty"/>
 						</tree>
 					</field>
 					<field name="paysupp_line_ids" attrs="{'invisible': [('preset_code','!=','PAYSUPP')]}">
 						<tree editable="bottom">
-							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)"/>
+							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)" options="{'no_create': 1}"/>
 							<field name="amount"/>
 						</tree>
 					</field>
