@@ -195,7 +195,9 @@ class account_journal_simplified_line_paysupp(osv.osv):
 		'invoice_id': fields.many2one('account.invoice', 'Invoice', required=True),
 		'amount': fields.float('Amount', required=True),
 	}
-
+	
+	def onchange_invoice_id(self, cr, uid, ids, invoice_id, context=None):
+		pass
 
 # ===========================================================================================================================
 

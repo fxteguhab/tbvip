@@ -48,14 +48,14 @@
 					</field>
 					<field name="retur_line_ids" attrs="{'invisible': [('preset_code','!=','RETUR')]}">
 						<tree editable="bottom">
-							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)"/>
-							<field name="amount"/>
+							<field name="product_id"/>
+							<field name="qty"/>
 						</tree>
 					</field>
 					<field name="paysupp_line_ids" attrs="{'invisible': [('preset_code','!=','PAYSUPP')]}">
 						<tree editable="bottom">
-							<field name="product_id"/>
-							<field name="qty"/>
+							<field name="invoice_id" on_change="onchange_invoice_id(invoice_id)"/>
+							<field name="amount"/>
 						</tree>
 					</field>
 				</field>
