@@ -1,0 +1,7 @@
+<openerp>
+	<data>
+		<!--<record id="wallet.wallet_menu" model="ir.ui.menu">-->
+			<!--<field name="parent_id" ref="website.main_menu"/>-->
+		<!--</record>-->
+	</data>
+</openerp>
