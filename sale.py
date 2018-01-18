@@ -224,11 +224,19 @@ class sale_order(osv.osv):
 			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
 			pass
 		
+	# Get Default account on branch and change acount_id with it
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		default_account_sales = user_data.branch_id.default_account_sales
 		journal = journal_obj.browse(cr, uid, journal_id, context)
-		voucher_vals.update({
-			'account_id': journal.default_debit_account_id.id or journal.default_credit_account_id.id}
-		)
-		
+		if default_account_sales:
+			voucher_vals.update({
+				'account_id': default_account_sales.id}
+			)
+		else:
+			voucher_vals.update({
+				'account_id': journal.default_debit_account_id.id or journal.default_credit_account_id.id}
+			)
+
 		# Create payment
 		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
 		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)

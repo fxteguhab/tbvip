@@ -34,6 +34,22 @@ class account_voucher(osv.osv):
 		})
 		
 		return result
+    
+	def basic_onchange_partner(self, cr, uid, ids, partner_id, journal_id, ttype, context=None):
+		res = super(account_voucher,self).basic_onchange_partner(cr, uid, ids, partner_id, journal_id, ttype, context = context)
+	# Get Default account on branch and change acount_id with it
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		default_account_purchase = user_data.branch_id.default_account_purchase
+		default_account_sales = user_data.branch_id.default_account_sales
+		if ttype in ('sale', 'receipt') and default_account_sales:
+			res['value']['account_id'] = default_account_sales.id
+		elif ttype in ('purchase', 'payment'):
+			res['value']['account_id'] = default_account_purchase.id
+			
+		return res
+		
+		
+		
 	
 	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
 	

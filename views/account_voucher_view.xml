@@ -43,5 +43,16 @@
                 </search>
             </field>
         </record>
+
+        <record id="view_vendor_receipt_dialog_form_inherit" model="ir.ui.view">
+            <field name="name">view.vendor.receipt.dialog.form.inherit</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_vendor_receipt_dialog_form"/>
+            <field name="arch" type="xml">
+                <field name="account_id" position="attributes">
+                    <attribute name="invisible">0</attribute>
+                </field>
+            </field>
+        </record>
     </data>
 </openerp>
