@@ -60,6 +60,22 @@
 				<button name="compute_sheet" position="after">
 					<button name="print_payslip_dot_matrix" string="" type="object" icon="gtk-print"/>
 				</button>
+				<page string="Salary Computation" position="before">
+					<page string="Saving and Loan">
+						<group col="4">
+							<group>
+								<field name="current_saving" readonly="True"/>
+								<field name="saving_action"/>
+								<field name="saving_amount"/>
+							</group>
+							<group>
+								<field name="current_loan" readonly="True"/>
+								<field name="loan_action"/>
+								<field name="loan_amount"/>
+							</group>
+						</group>
+					</page>
+				</page>
 			</field>
 		</record>
 

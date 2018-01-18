@@ -1,0 +1,88 @@
+<openerp>
+	<data>
+
+		<!--Wallet Owner Group-->
+
+		<record id="wallet_owner_group_emp_sav" model="wallet.owner.group">
+			<field name="name">Employee Savings</field>
+			<field name="is_deposit">True</field>
+			<field name="balance_min">0</field>
+			<field name="balance_overdraft">0</field>
+		</record>
+		<record id="wallet_owner_group_emp_loan" model="wallet.owner.group">
+			<field name="name">Employee Loans</field>
+			<field name="is_deposit">False</field>
+		</record>
+
+		<!--Account Journal-->
+
+		<record id="account_journal_emp_sav" model="account.journal">
+			<field name="name">Employee Savings</field>
+			<field name="code">EMPSAV</field>
+			<field name="type">general</field>
+		</record>
+		<record id="account_journal_emp_loan" model="account.journal">
+			<field name="name">Employee Loans</field>
+			<field name="code">EMPLOA</field>
+			<field name="type">general</field>
+		</record>
+
+		<!--Wallet Master Trx-->
+
+		<record id="wallet_master_trx_sav_inc" model="wallet.master.trx">
+			<field name="name">Put Savings</field>
+			<field name="mnemonic">SAVING_INC</field>
+			<field name="inc_dec">increase</field>
+			<field name="journal_id" ref="tbvip.account_journal_emp_sav"/>
+		</record>
+		<record id="wallet_master_trx_sav_dec" model="wallet.master.trx">
+			<field name="name">Collect Savings</field>
+			<field name="mnemonic">SAVING_DEC</field>
+			<field name="inc_dec">decrease</field>
+			<field name="journal_id" ref="tbvip.account_journal_emp_sav"/>
+		</record>
+		<record id="wallet_master_trx_loan_inc" model="wallet.master.trx">
+			<field name="name">Pay Loan</field>
+			<field name="mnemonic">LOAN_INC</field>
+			<field name="inc_dec">increase</field>
+			<field name="journal_id" ref="tbvip.account_journal_emp_loan"/>
+		</record>
+		<record id="wallet_master_trx_loan_dec" model="wallet.master.trx">
+			<field name="name">Take Loan</field>
+			<field name="mnemonic">LOAN_DEC</field>
+			<field name="inc_dec">decrease</field>
+			<field name="journal_id" ref="tbvip.account_journal_emp_loan"/>
+		</record>
+
+		<record id="hr_payroll.hr_rule_net" model="hr.salary.rule">
+			<field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED + categories.POINT + categories.SAVLOAN</field>
+		</record>
+		<record id="tbvip_hr_rule_category_saving_loan" model="hr.salary.rule.category">
+			<field name="name">Savings and Loans</field>
+			<field name="code">SAVLOAN</field>
+		</record>
+		<record id="tbvip_hr_rule_category_saving" model="hr.salary.rule">
+			<field name="name">Savings</field>
+			<field name="code">SAVING</field>
+			<field name="category_id" ref="tbvip_hr_rule_category_saving_loan"/>
+			<field name="amount_select">code</field>
+			<field name="amount_python_compute">result = 0
+if payslip.saving_action == 'inc':
+	result = -payslip.saving_amount
+elif payslip.saving_action == 'dec':
+	result = payslip.saving_amount</field>
+		</record>
+		<record id="tbvip_hr_rule_category_loan" model="hr.salary.rule">
+			<field name="name">Loans</field>
+			<field name="code">LOAN</field>
+			<field name="category_id" ref="tbvip_hr_rule_category_saving_loan"/>
+			<field name="amount_select">code</field>
+			<field name="amount_python_compute">result = 0
+if payslip.loan_action == 'inc':
+	result = payslip.loan_amount
+elif payslip.loan_action == 'dec':
+	result = -payslip.loan_amount</field>
+		</record>
+
+	</data>
+</openerp>

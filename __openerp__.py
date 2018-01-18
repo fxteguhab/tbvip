@@ -14,7 +14,7 @@
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr", "hr_attendance", "hr_expense",
 		"purchase_sale_discount", "stock_opname", "account_receivable_limit",
 		"sale_multiple_payment", "canvassing", "hr_point_payroll", "product_custom_conversion", "product_production",
-		"account_simplified_journal"
+		"account_simplified_journal", "wallet",
 	],
 	'sequence': 150,
 	'data': [
@@ -33,6 +33,7 @@
 		'data/fleet_data.xml',
 		'data/tbvip_data.xml',
 		'data/stock_data.xml',
+		'data/wallet_data.xml',
 		'menu/bon_menu.xml',
 		'menu/commission_menu.xml',
 		'menu/demand_menu.xml',
