@@ -214,20 +214,28 @@ class tbvip_day_end(osv.osv):
 		
 		# update to kas if not balanced
 		if vals['balance'] != 0:
-			account_move_obj = self.pool.get('account.move')
+			kas_id = vals['kas_id']
+			journal_entry_obj = self.pool.get('account.move')
 			now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-			move_line_create_params = {
-				'name': 'DAY END ' + datetime.strptime(now, '%Y-%m-%d %H:%M:%S.%f'),
-				'account_id': kas_id,
-			}
-			if vals['balance'] > 0:
-				move_line_create_params['debit'] = vals['balance']
-			elif vals['balance'] < 0:
-				move_line_create_params['credit'] = vals['balance']
-			account_move_obj.create(cr, uid, {
-				'journal_id': 6,
-				'line_ids': [(0, False, move_line_create_params)],
-			}, context=context)
+			name = 'DAY END ' + now,
+			acount_from = self.pool.get('account.account').search(cr, uid, [('code', '=', '122000')], limit=1)[0]
+			entry_data = journal_entry_obj.account_move_prepare(cr, uid, self.pool.get('account.journal').search(cr, uid, [('type', 'in', ['cash'])], limit=1)[0], date=vals.get('journal_date'), ref=name)
+			entry_data['line_id'] = [
+				[0, False, {
+					'name': name,
+					'account_id': vals['kas_id'],
+					'debit': vals['balance'] if vals['balance'] > 0 else 0,
+					'credit': vals['balance'] if vals['balance'] < 0 else 0,
+				}],
+				[0, False, {
+					'name': name,
+					'account_id': acount_from,
+					'debit': vals['balance'] if vals['balance'] < 0 else 0,
+					'credit': vals['balance'] if vals['balance'] > 0 else 0,
+				}],
+			]
+			new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+			journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
 		
 		return super(tbvip_day_end, self).create(cr, uid, vals, context)
 	
