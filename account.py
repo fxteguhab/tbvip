@@ -100,7 +100,14 @@ class tbvip_day_end(osv.osv):
 	
 	def calculate_omzet_cash(self, cr, uid, kas_id, context={}):
 		# kas balance
-		return self.pool.get('account.account').browse(cr, uid, kas_id, context).balance
+		if kas_id:
+			account_account_obj = self.pool.get('account.account')
+			if isinstance(kas_id, int):
+				return account_account_obj.browse(cr, uid, kas_id, context).balance
+			else:
+				return kas_id.balance
+		else:
+			return 0
 	
 	def calculate_amend_number(self, cr, uid, kas_id, day_end_date, context={}):
 		day_end_date_datetime = datetime.strptime(day_end_date, '%Y-%m-%d %H:%M:%S')
@@ -178,7 +185,10 @@ class tbvip_day_end(osv.osv):
 	
 	def create(self, cr, uid, vals, context=None):
 		vals['branch_id'] = self._default_branch_id(cr, uid, context=context)
+		
+		account_account_obj = self.pool.get('account.account')
 		kas_id = vals['kas_id']
+		kas = account_account_obj.browse(cr, uid, kas_id, context=context)
 		
 		vals.update({
 			'amend_number': self.calculate_amend_number(cr, uid, kas_id, vals['day_end_date'], context=context),
@@ -197,10 +207,28 @@ class tbvip_day_end(osv.osv):
 			vals['amount_100'] + vals['amount_200'] + vals['amount_500'] + \
 			vals['amount_1000'] + vals['amount_2000'] + vals['amount_5000'] + \
 			vals['amount_10000'] + vals['amount_20000'] + vals['amount_50000'] + vals['amount_100000']
-		vals['omzet_cash'] = self.calculate_omzet_cash(cr, uid, kas_id, context=context)
+		vals['omzet_cash'] = self.calculate_omzet_cash(cr, uid, kas, context=context)
 		vals['modal_cash'] = self._default_modal_cash(cr, uid, context=context)
 		vals['total_cash'] = vals['subtotal_cash'] + vals['extra_amount_1'] + vals['extra_amount_2'] + vals['extra_amount_3']
 		vals['balance'] = vals['total_cash'] - vals['omzet_cash'] - vals['modal_cash']
+		
+		# update to kas if not balanced
+		if vals['balance'] != 0:
+			account_move_obj = self.pool.get('account.move')
+			now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
+			move_line_create_params = {
+				'name': 'DAY END ' + datetime.strptime(now, '%Y-%m-%d %H:%M:%S.%f'),
+				'account_id': kas_id,
+			}
+			if vals['balance'] > 0:
+				move_line_create_params['debit'] = vals['balance']
+			elif vals['balance'] < 0:
+				move_line_create_params['credit'] = vals['balance']
+			account_move_obj.create(cr, uid, {
+				'journal_id': 6,
+				'line_ids': [(0, False, move_line_create_params)],
+			}, context=context)
+		
 		return super(tbvip_day_end, self).create(cr, uid, vals, context)
 	
 	def onchange_day_end_kas_date(self, cr, uid, ids, kas_id, day_end_date, context=None):
