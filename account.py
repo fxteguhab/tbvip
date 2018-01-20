@@ -225,12 +225,12 @@ class tbvip_day_end(osv.osv):
 					'name': name,
 					'account_id': vals['kas_id'],
 					'debit': vals['balance'] if vals['balance'] > 0 else 0,
-					'credit': vals['balance'] if vals['balance'] < 0 else 0,
+					'credit': -vals['balance'] if vals['balance'] < 0 else 0,
 				}],
 				[0, False, {
 					'name': name,
 					'account_id': acount_from,
-					'debit': vals['balance'] if vals['balance'] < 0 else 0,
+					'debit': -vals['balance'] if vals['balance'] < 0 else 0,
 					'credit': vals['balance'] if vals['balance'] > 0 else 0,
 				}],
 			]
