@@ -3,7 +3,7 @@ ${print_date.ljust(12)}
 |${from_date[:11].ljust(11)}|${name[:8].ljust(8)}|${masuk[:5].ljust(5)}|${pokok[:12].ljust(12)}|${full[:4].ljust(4)}|${makan[:8].ljust(8)}|${full_minggu[:8].ljust(8)}|${mingguan[:12].ljust(12)}|${total_pokok[:12].ljust(12)}|
 |${to_date[:11].ljust(11)}|${''[:8].ljust(8)}|${''[:5].ljust(5)}|${''[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${''[:8].ljust(8)}|${''[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${''[:11].ljust(11)}|${''[:8].ljust(8)}|${''[:5].ljust(5)}|${''[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'Total Mg'[:8].ljust(8)}|${total_minggu[:12].ljust(12)}|${''[:12].ljust(12)}|
-|${'Jenis'[:11].ljust(11)}|${'Poin'[:8].ljust(8)}|${'LV'[:5].ljust(5)}|${'Bonus'[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'Potongan'[:8].ljust(8)}|${potongan[:12].ljust(12)}|${''[:12].ljust(12)}|
+|${'Jenis'[:11].ljust(11)}|${'Poin'[:8].ljust(8)}|${'LV'[:5].ljust(5)}|${'Bonus'[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'Minjam'[:8].ljust(8)}|${minjam[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'Mobil'[:11].ljust(11)}|${point_mobil[:8].ljust(8)}|${lvl_mobil[:5].ljust(5)}|${bonus_mobil[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'Nabung'[:8].ljust(8)}|${nabung[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'Motor'[:11].ljust(11)}|${point_motor[:8].ljust(8)}|${lvl_motor[:5].ljust(5)}|${bonus_motor[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${''[:8].ljust(8)}|${''[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'S.O.'[:11].ljust(11)}|${point_so[:8].ljust(8)}|${lvl_so[:5].ljust(5)}|${bonus_so[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'GAJI'[:8].ljust(8)}|${gaji[:12].ljust(12)}|${''[:12].ljust(12)}|
