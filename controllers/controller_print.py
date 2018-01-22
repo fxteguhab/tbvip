@@ -140,9 +140,9 @@ class controller_print(http.Controller):
 			masuk=self.thousand_separator(worked_days.get('masuk', 0)),
 			pokok=self.thousand_separator(bonus.get('MASUK_BONUS_BASIC', 0)),
 			full=self.thousand_separator(worked_days.get('full', 0)),
-			makan=self.thousand_separator(bonus.get('FULL_MINGGU_BONUS_BASIC', 0)),
+			makan=self.thousand_separator(bonus.get('FULL_BONUS_BASIC', 0)),
 			full_minggu=self.thousand_separator(worked_days.get('full_minggu', 0)),
-			mingguan=self.thousand_separator(bonus.get('FULL_BONUS_BASIC', 0)),
+			mingguan=self.thousand_separator(bonus.get('FULL_MINGGU_BONUS_BASIC', 0)),
 			total_pokok=self.thousand_separator(line.get('BASIC', 0)),
 			
 			to_date=str(payslip.date_to),
