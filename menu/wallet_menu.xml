@@ -1,0 +1,8 @@
+<openerp>
+	<data>
+		<record id="wallet.wallet_menu" model="ir.ui.menu">
+			<field name="parent_id" ref="account.menu_finance"/>
+			<field name="sequence">7</field>
+		</record>
+	</data>
+</openerp>
