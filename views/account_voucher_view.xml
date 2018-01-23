@@ -22,8 +22,9 @@
                 <field name="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
                 </field>
-                <field name="account_id" position="attributes">
-                    <attribute name="invisible">False</attribute>
+                <field name="account_id" position="replace"/>
+                <field name="journal_id" position="after">
+                    <field name="account_id"/>
                 </field>
                 <xpath expr="//field[@name='line_dr_ids']/tree/field[@name='amount']" position="after">
                     <field name="purchase_order_id" readonly="1"/>

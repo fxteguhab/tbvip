@@ -1,4 +1,5 @@
 from openerp.osv import osv, fields
+from openerp import _
 from datetime import datetime, date, timedelta
 
 
@@ -32,20 +33,38 @@ class account_voucher(osv.osv):
 		result['domain'].update({
 			'bank_id': [('id', 'in', partner.bank_ids.ids)],
 		})
-		
+		if not result.get('value', False):
+			result['value'] = {}
+		cash_account_id, bank_account_id = self._get_account_id(cr, uid, ttype, uid, context)
+		account_id = False
+		acc_journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
+		if acc_journal.type == 'cash':
+			account_id = cash_account_id
+		elif acc_journal.type == 'bank':
+			account_id = bank_account_id
+		result['value']['account_id'] = account_id
 		return result
-    
-	def basic_onchange_partner(self, cr, uid, ids, partner_id, journal_id, ttype, context=None):
-		res = super(account_voucher,self).basic_onchange_partner(cr, uid, ids, partner_id, journal_id, ttype, context = context)
-	# Get Default account on branch and change acount_id with it
-		user_data = self.pool['res.users'].browse(cr, uid, uid)
+	
+	def _get_account_id(self, cr, uid, ttype, user_id, context=None):
+		# Get Default account on branch and change account_id with it
+		user_data = self.pool['res.users'].browse(cr, uid, user_id)
 		default_account_purchase = user_data.branch_id.default_account_purchase
 		default_account_sales = user_data.branch_id.default_account_sales
+		cash_account_id = False
 		if ttype in ('sale', 'receipt') and default_account_sales:
-			res['value']['account_id'] = default_account_sales.id
+			cash_account_id = default_account_sales.id
 		elif ttype in ('purchase', 'payment'):
-			res['value']['account_id'] = default_account_purchase.id
-			
+			cash_account_id = default_account_purchase.id
+		
+		bank_account_id = False
+		bank_account_ids = self.pool.get('account.account').search(cr, uid, [('type', 'not in', ['view']), ('user_type.code', '=', 'bank')], context=context, limit=1)
+		if len(bank_account_ids) > 0:
+			bank_account_id = bank_account_ids[0]
+		return cash_account_id, bank_account_id
+	
+	def basic_onchange_partner(self, cr, uid, ids, partner_id, journal_id, ttype, context=None):
+		res = super(account_voucher,self).basic_onchange_partner(cr, uid, ids, partner_id, journal_id, ttype, context=context)
+		res['value']['account_id'] = self._get_account_id(cr, uid, ttype, uid, context)[0]
 		return res
 	
 	def onchange_journal(self, cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context=None):
@@ -53,22 +72,22 @@ class account_voucher(osv.osv):
 			cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context)
 		
 		if journal_id:
-			account_journal_obj = self.pool.get('account.journal')
-			account_id = 0
-			acc_journal = account_journal_obj.browse(cr, uid, journal_id, context=context)
+			cash_account_id, bank_account_id = self._get_account_id(cr, uid, ttype, uid, context)
+			account_id = False
+			acc_journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
 			if acc_journal.type == 'cash':
-				account_id = 234234  # TODO onchange_journal
+				account_id = cash_account_id
 			elif acc_journal.type == 'bank':
-				account_id = 123123  # TODO onchange_journal
+				account_id = bank_account_id
+				
 			if result:
 				if 'value' in result:
 					result['value']['account_id'] = account_id
 				else:
-					result['value'] = {'account_id': account_id,}
+					result['value'] = {'account_id': account_id}
 			else:
-				result = {'value': {'account_id': account_id,},}
+				result = {'value': {'account_id': account_id}}
 				
-		
 		return result
 		
 	
