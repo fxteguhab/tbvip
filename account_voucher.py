@@ -47,8 +47,29 @@ class account_voucher(osv.osv):
 			res['value']['account_id'] = default_account_purchase.id
 			
 		return res
+	
+	def onchange_journal(self, cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context=None):
+		result = super(account_voucher, self).onchange_journal(
+			cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context)
 		
+		if journal_id:
+			account_journal_obj = self.pool.get('account.journal')
+			account_id = 0
+			acc_journal = account_journal_obj.browse(cr, uid, journal_id, context=context)
+			if acc_journal.type == 'cash':
+				account_id = 234234  # TODO onchange_journal
+			elif acc_journal.type == 'bank':
+				account_id = 123123  # TODO onchange_journal
+			if result:
+				if 'value' in result:
+					result['value']['account_id'] = account_id
+				else:
+					result['value'] = {'account_id': account_id,}
+			else:
+				result = {'value': {'account_id': account_id,},}
+				
 		
+		return result
 		
 	
 	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
