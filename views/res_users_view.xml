@@ -7,6 +7,8 @@
 			<field name="arch" type="xml">
 				<field name="partner_id" position="after">
 					<field name="branch_id"/>
+					<field name="default_account_purchase_override"/>
+					<field name="default_account_sales_override"/>
 				</field>
 			</field>
 		</record>

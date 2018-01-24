@@ -48,8 +48,8 @@ class account_voucher(osv.osv):
 	def _get_account_id(self, cr, uid, ttype, user_id, context=None):
 		# Get Default account on branch and change account_id with it
 		user_data = self.pool['res.users'].browse(cr, uid, user_id)
-		default_account_purchase = user_data.branch_id.default_account_purchase
-		default_account_sales = user_data.branch_id.default_account_sales
+		default_account_purchase = user_data.default_account_purchase_override or user_data.branch_id.default_account_purchase
+		default_account_sales = user_data.default_account_sales_override or user_data.branch_id.default_account_sales
 		cash_account_id = False
 		if ttype in ('sale', 'receipt') and default_account_sales:
 			cash_account_id = default_account_sales.id

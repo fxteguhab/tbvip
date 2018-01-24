@@ -226,7 +226,7 @@ class sale_order(osv.osv):
 		
 	# Get Default account on branch and change acount_id with it
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
-		default_account_sales = user_data.branch_id.default_account_sales
+		default_account_sales = user_data.default_account_sales_override or user_data.branch_id.default_account_sales
 		journal = journal_obj.browse(cr, uid, journal_id, context)
 		if default_account_sales:
 			voucher_vals.update({
