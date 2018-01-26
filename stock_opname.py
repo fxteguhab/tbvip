@@ -30,15 +30,16 @@ class stock_opname_memory(osv.osv_memory):
 			new_line_ids = []
 			onchange_result = self.onchange_location_and_employee(cr, uid, ids,
 				so_memory.location_id.id, so_memory.rule_id.id, so_memory.employee_id.id, context=context)
-			for line in onchange_result['value']['line_ids']:
-				new_line_ids.append((0, False, {
-					'inject_id': line['inject_id'] if line.get('inject_id', False) else 0,
-					'location_id': line['location_id'],
-					'product_id': line['product_id'].id,
-				}))
-			self.write(cr, uid, so_memory.id, {
-				'line_ids': new_line_ids,
-			})
+			if onchange_result['value']['line_ids']:
+				for line in onchange_result['value']['line_ids']:
+					new_line_ids.append((0, False, {
+						'inject_id': line['inject_id'] if line.get('inject_id', False) else 0,
+						'location_id': line['location_id'],
+						'product_id': line['product_id'].id,
+					}))
+				self.write(cr, uid, so_memory.id, {
+					'line_ids': new_line_ids,
+				})
 		# return {
 		# 	'type': 'ir.actions.client',
 		# 	'tag': 'reload',
