@@ -78,6 +78,7 @@
 		'workflows/purchase_workflow.xml',
 		'menu/accounting_menu.xml',
 		# 'menu/account_receivable_limit.xml',
+		'menu/account_simplified_journal_menu.xml',
 		'security/ir.model.access.csv',
 		'security/tbvip_hidden.xml',
 	],

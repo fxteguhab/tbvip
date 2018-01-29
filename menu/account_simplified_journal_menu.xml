@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<menuitem id="menu_tbvip_cash_transaction_root" parent="account.menu_finance"
+				sequence="10" name="Cash Transactions"/>
+		<menuitem id="menu_tbvip_cash_transaction" parent="menu_tbvip_cash_transaction_root"
+				sequence="10" action="account_simplified_journal.simplified_journal_action_entry"/>
+
+
+	</data>
+</openerp>
