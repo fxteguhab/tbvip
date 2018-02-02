@@ -131,6 +131,11 @@ class account_voucher(osv.osv):
 			}
 		else:
 			raise osv.except_osv(_('Print Kontra Bon Error'),_('Kontra Bon must have at least one line to be printed.'))
+		
+	def action_refresh(self, cr, uid, ids, context=None):
+		for voucher in self.browse(cr, uid, ids):
+			self.onchange_amount(voucher.amount, voucher.payment_rate, voucher.partner_id, voucher.journal_id, voucher.currency_id,
+				voucher.type, voucher.date, voucher.payment_rate_currency_id, voucher.company_id, context)
 
 
 # ==========================================================================================================================
