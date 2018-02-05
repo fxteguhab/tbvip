@@ -135,10 +135,22 @@ class account_voucher(osv.osv):
 	# REFRESH ----------------------------------------------------------------------------------------------------------------
 
 	def action_refresh(self, cr, uid, ids, context=None):
+		voucher_line_obj = self.pool.get('account.voucher.line')
 		for voucher in self.browse(cr, uid, ids):
-			res = self.onchange_amount(cr, uid, [voucher.id], voucher.amount, voucher.payment_rate, voucher.partner_id, voucher.journal_id, voucher.currency_id,
-									   voucher.type, voucher.date, voucher.payment_rate_currency_id, voucher.company_id, context)
-			print res
+			res = self.onchange_amount(cr, uid, [voucher.id], voucher.amount, voucher.payment_rate, voucher.partner_id.id, voucher.journal_id.id, voucher.currency_id.id,
+									   voucher.type, voucher.date, voucher.payment_rate_currency_id.id, voucher.company_id.id, context)
+			if res['value'].get('line_cr_ids', False):
+				for line_cr in res['value']['line_cr_ids']:
+					if isinstance(line_cr, tuple):
+						self.write(cr, uid, voucher.id, {'line_cr_ids': [line_cr]})
+					elif isinstance(line_cr, dict):
+						self.write(cr, uid, voucher.id, {'line_cr_ids': [(0, False, line_cr)]})
+			if res['value'].get('line_dr_ids', False):
+				for line_dr in res['value']['line_dr_ids']:
+					if isinstance(line_dr, tuple):
+						self.write(cr, uid, voucher.id, {'line_dr_ids': [line_dr]})
+					elif isinstance(line_dr, dict):
+						self.write(cr, uid, voucher.id, {'line_dr_ids': [(0, False, line_dr)]})
 
 # ==========================================================================================================================
 
