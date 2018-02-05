@@ -6,6 +6,7 @@ from datetime import datetime, date, timedelta
 from mako.lookup import TemplateLookup
 from openerp.addons.web.controllers.main import serialize_exception,content_disposition
 import base64
+import os
 
 _INTERBRANCH_STATE = [
 	('draft', 'Draft'),
@@ -15,7 +16,13 @@ _INTERBRANCH_STATE = [
 
 # Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
 
-tpl_lookup = TemplateLookup(directories=['/opt/odoo/addons/tbvip/print_template'])
+
+basepath = ''
+sep = os.sep
+temp = os.path.abspath(os.path.dirname(__file__)).split(sep)
+for v_slice in temp[:-1]: basepath = basepath + v_slice + sep	
+tpl_lookup = TemplateLookup(directories=[basepath + 'print_template'])
+# tpl_lookup = TemplateLookup(directories=['/opt/odoo/addons/tbvip/print_template'])
 # tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 class controller_print(http.Controller):
@@ -134,7 +141,7 @@ class controller_print(http.Controller):
 		total_minggu = total_bonus_value + line.get('BASIC', 0)
 		
 		payslip_print = template.render(
-			print_date=str(datetime.now()),
+			print_date=(datetime.now() + timedelta(hours=7)).strftime("%d/%m/%Y %H:%M"),
 			from_date=str(payslip.date_from),
 			name=str(payslip.employee_id.name),
 			masuk=self.thousand_separator(worked_days.get('masuk', 0)),

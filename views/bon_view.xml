@@ -48,10 +48,25 @@
 			<field name="type">search</field>
 			<field name="arch" type="xml">
 				<search string="Bon">
-					<field string = "Nomor Bon" name="start_from" filter_domain="['&amp;',('start_from','&lt;=',self),('end_at','&gt;=',self)]"/>
-					<filter string="Total_Used" name="filter_bon_total_used"
-							domain="['|',('total_used','&lt;=',50), ('total_used','=', False)]"/>
-					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+					<field string="Nomor Bon" name="start_from" filter_domain="['&amp;',('start_from','&lt;=',self),('end_at','&gt;=',self)]"/>
+					<field name="employee_id" />
+					<field name="branch_id" />
+					<group string="Filter">
+						<filter string="Less/Not Used" name="filter_bon_total_used"
+								domain="['|',('total_used','&lt;=',50), ('total_used','=', False)]"/>
+					</group>
+					<group string="Group By">
+						<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+						<filter name="groupby_employee" string="Employee" context="{'group_by':'employee_id'}"/>
+					</group>
+					<group string="Issue Date">
+						<filter string="Month" name="issue_date_month" domain="[]"
+							context="{'group_by': 'issue_date:month'}"/>
+						<filter string="Week" name="issue_date_week" domain="[]"
+							context="{'group_by': 'issue_date:week'}"/>
+						<filter string="Day" name="issue_date_day" domain="[]"
+							context="{'group_by': 'issue_date:day'}"/>
+					</group>
 				</search>
 
 			</field>

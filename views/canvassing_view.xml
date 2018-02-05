@@ -43,5 +43,21 @@
 			</field>
 		</record>
 
+		<record id="canvassing_canvas_search_inherit" model="ir.ui.view">
+			<field name="name">canvassing.canvas.search.inherit</field>
+			<field name="model">canvassing.canvas</field>
+			<field name="type">search</field>
+			<field name="inherit_id" ref="canvassing.canvassing_canvas_search"/>
+			<field name="arch" type="xml">
+				<field name="name" position="after">
+					<field name="branch_id" />
+				</field>
+				<xpath expr="//group[@name='group_by']" position="inside">
+					<filter string="Branch" name="branch" domain="[]"
+						context="{'group_by': 'branch_id'}"/>
+				</xpath>
+			</field>
+		</record>
+
 	</data>
 </openerp>

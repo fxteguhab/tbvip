@@ -42,13 +42,13 @@
 			<field name="journal_id" ref="tbvip.account_journal_emp_sav"/>
 		</record>
 		<record id="wallet_master_trx_loan_inc" model="wallet.master.trx">
-			<field name="name">Pay Loan</field>
+			<field name="name">Take Loan</field>
 			<field name="mnemonic">LOAN_INC</field>
 			<field name="inc_dec">increase</field>
 			<field name="journal_id" ref="tbvip.account_journal_emp_loan"/>
 		</record>
 		<record id="wallet_master_trx_loan_dec" model="wallet.master.trx">
-			<field name="name">Take Loan</field>
+			<field name="name">Pay Loan</field>
 			<field name="mnemonic">LOAN_DEC</field>
 			<field name="inc_dec">decrease</field>
 			<field name="journal_id" ref="tbvip.account_journal_emp_loan"/>

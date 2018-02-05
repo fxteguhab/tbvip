@@ -119,6 +119,10 @@ class account_voucher(osv.osv):
 		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 	}
+
+	_defaults = {
+		'check_maturity_date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
+	}
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	

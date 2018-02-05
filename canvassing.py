@@ -186,6 +186,13 @@ class canvassing_canvas(osv.osv):
 
 # ==========================================================================================================================
 
+class canvasssing_canvas_stock_line(osv.Model):
+	_inherit = 'canvassing.canvas.stock.line'
+
+	_defaults = {
+		'is_executed': True,
+	}
+
 """
 20170924 JUNED: ditutup karena perhitungan jarak dikondisikan untuk satu perjalanan secara 
 keseluruhan, menggunakan API dari service GPS yang dipakai
@@ -239,6 +246,10 @@ class canvassing_canvas_interbranch_line(osv.Model):
 		# 	type="many2one", relation="stock.location", string="Incoming Location"),
 		# 'to_stock_location_id': fields.related('interbranch_move_id', 'to_stock_location_id',
 		# 	type="many2one", relation="stock.location", string="Outgoing Location"),
+	}
+
+	_defaults = {
+		'is_executed': True,
 	}
 	
 	def create(self, cr, uid, vals, context={}):
