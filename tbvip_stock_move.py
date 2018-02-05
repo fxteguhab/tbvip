@@ -78,8 +78,11 @@ class tbvip_interbranch_stock_move(osv.Model):
 	
 	def action_accept(self, cr, uid, ids, context={}):
 		for interbranch_stock_move in self.browse(cr, uid, ids):
+		# JUNED@20180205: ditutup as per request dari Teguh
+			"""
 			if not interbranch_stock_move.checked_by_id:
 				raise osv.except_osv(_('Warning!'), _("Please Fill field Checked By"))
+			"""
 			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
 		
 		# tandai semua canvassing untuk interbranch ini is_executed = True

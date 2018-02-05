@@ -44,6 +44,14 @@
 				<filter name="group_by_partner_id" position="after">
 					<filter name="group_by_journal_id" string="Journal" domain="[]" context="{'group_by':'journal_id'}"/>
 				</filter>
+				<xpath expr="//filter[@string='Due Month']" position="replace" />
+				<xpath expr="//group[@string='Group By']" position="after">
+					<group string="Due Date">
+						<filter string="Month" context="{'group_by':'date_due:month'}" />
+						<filter string="Week" context="{'group_by':'date_due:week'}" />
+						<filter string="Day" context="{'group_by':'date_due:day'}" />
+					</group>
+				</xpath>
 			</field>
 		</record>
 	</data>

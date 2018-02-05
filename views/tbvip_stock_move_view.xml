@@ -76,7 +76,7 @@
 						<filter string="From" name="from_location" domain="[]"
 								context="{'group_by': 'from_stock_location_id'}"/>
 						<filter string="To" name="to_location" domain="[]"
-								context="{'group_by': 'from_stock_location_id'}"/>
+								context="{'group_by': 'to_stock_location_id'}"/>
 					</group>
 					<group string="Group by Move Date">
 						<filter string="Year" name="move_date_year" domain="[]"
@@ -84,7 +84,7 @@
 						<filter string="Month" name="move_date_month" domain="[]"
 								context="{'group_by': 'move_date:month'}"/>
 						<filter string="Day" name="move_date_day" domain="[]"
-								context="{'group_by': 'move_date:Day'}"/>
+								context="{'group_by': 'move_date:day'}"/>
 					</group>
 					<group string="Group by">
 						<filter string="Prepared by" name="prepare_employee_id" domain="[]"

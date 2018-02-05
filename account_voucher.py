@@ -118,6 +118,8 @@ class account_voucher(osv.osv):
 		# 'bank_id': fields.function(_bank_ids, string="Bank Account", type='many2one', relation="res.partner.bank", readonly=False),
 		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
+		'reference': fields.char('Ref #', readonly=False, states={},
+			help="Transaction reference number.", copy=False),
 	}
 
 	_defaults = {

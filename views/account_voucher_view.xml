@@ -40,7 +40,7 @@
             <field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor_pay"/>
             <field name="arch" type="xml">
                 <search string="Search Vouchers" position="inside">
-                    <filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>
+                    <filter name="groupby_ready" string="Ready" domain="[('state','=','draft'),('is_ready','=',True)]" />
                     <!--<group expand="0" string="Readiness">-->
                         <!--<filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>-->
                     <!--</group>-->
