@@ -134,7 +134,7 @@
 						<filter string="Month" name="day_end_date_month" domain="[]"
 							context="{'group_by': 'day_end_date:month'}"/>
 						<filter string="Day" name="day_end_date_day" domain="[]"
-							context="{'group_by': 'day_end_date:Day'}"/>
+							context="{'group_by': 'day_end_date:day'}"/>
 					</group>
 					<group string="Group By">
 						<filter string="Inputter" name="create_uid" domain="[]"

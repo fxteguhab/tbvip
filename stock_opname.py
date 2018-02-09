@@ -24,7 +24,7 @@ class stock_opname_memory(osv.osv_memory):
 		return super(stock_opname_memory, self).action_generate_stock_opname(cr, uid, ids, context=context)
 	
 	def _generate_stock_opname_products(self, cr, uid, context={}):
-		return algoritma_generate_so_products1(self, cr, uid, context={})
+		return self.algoritma_generate_so_products1(cr, uid, context=context)
 
 	def algoritma_generate_so_products1(self, cr, uid, context={}):
 		today = datetime.now()
