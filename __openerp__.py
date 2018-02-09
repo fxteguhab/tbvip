@@ -15,6 +15,7 @@
 		"purchase_sale_discount", "stock_opname", "account_receivable_limit",
 		"sale_multiple_payment", "canvassing", "hr_point_payroll", "product_custom_conversion", "product_production",
 		"account_simplified_journal", "wallet",
+		#tbvip_point_payroll
 	],
 	'sequence': 150,
 	'data': [

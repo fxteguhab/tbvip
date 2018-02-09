@@ -81,7 +81,7 @@ class controller_print(http.Controller):
 			stock_opname_rows.append(row)
 		# render stock opname
 		stock_opname = tpl.render(
-			datetime=datetime.strptime(inv_adj.date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
+			datetime=(datetime.strptime(inv_adj.date, '%Y-%m-%d %H:%M:%S') + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S'),
 			expiration_datetime=datetime.strptime(inv_adj.expiration_date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
 			employee_name=inv_adj.employee_id.name,
 			stock_opname_line=stock_opname_rows,
@@ -270,7 +270,7 @@ class controller_print(http.Controller):
 			from_location=from_location,
 			to_location=to_location,
 			state=_(dict(_INTERBRANCH_STATE).get(ism.state,'-')),
-			move_date=datetime.strptime(move_date, '%Y-%m-%d %H:%M:%S').strftime('%Y-%m-%d'),
+			move_date=(datetime.strptime(move_date, '%Y-%m-%d %H:%M:%S') + timedelta(hours=7)).strftime('%Y-%m-%d'),
 			input_by=input_by,
 			prepare_by=prepare_by,
 			is_draft=ism.state == 'draft',
@@ -299,7 +299,7 @@ class controller_print(http.Controller):
 			order_line_rows.append(row)
 		# render purchase order
 		draft_po = tpl.render(
-			date=datetime.strptime(dpo.date_order, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
+			date=(datetime.strptime(dpo.date_order, '%Y-%m-%d %H:%M:%S') + timedelta(hours=7)).strftime('%d/%m/%Y'),
 			branch_name=branch_name,
 			branch_address=branch_address,
 			supplier_name=supplier_name,
@@ -332,7 +332,7 @@ class controller_print(http.Controller):
 			purchase_needs_draft_rows.append(row)
 		# render purchase order
 		draft_po = tpl.render(
-			date=datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+			date=(datetime.now() + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S'),
 			supplier_name=supplier_name,
 			lines=purchase_needs_draft_rows,
 		)
@@ -412,7 +412,7 @@ class controller_print(http.Controller):
 			company_phone=company_phone,
 			bon_number=so.bon_number,
 			
-			date=datetime.strptime(so.date_order, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y'),
+			date=(datetime.strptime(so.date_order, '%Y-%m-%d %H:%M:%S') + timedelta(hours=7)).strftime('%d/%m/%Y'),
 			customer_name=customer_name,
 			customer_address=customer_address,
 			
