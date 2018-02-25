@@ -16,7 +16,7 @@
 		"sale_multiple_payment", "canvassing", "hr_point_payroll", "product_custom_conversion", "product_production",
 		"account_simplified_journal", "wallet",
 		#tbvip_point_payroll
-	],
+	],	
 	'sequence': 150,
 	'data': [
 		'report/account_report.xml',

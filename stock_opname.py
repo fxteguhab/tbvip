@@ -120,7 +120,7 @@ class stock_opname_memory_line(osv.osv_memory):
 				result += branch_name + ' / ' + sublocation_full_name + '\r\n'
 		return {'value': {'sublocation': result}}
 
-class stock_opname_inject(osv.osv_memory):
+class stock_opname_inject(osv.osv):
 	_inherit = 'stock.opname.inject'
 	
 	_defaults = {

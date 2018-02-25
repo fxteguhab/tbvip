@@ -62,6 +62,7 @@ class hr_employee(osv.osv):
 					'owner_group_id': model_data_obj.get_object_reference(cr, uid, 'tbvip', 'wallet_owner_group_emp_loan')[1],
 				}, context)
 
+# ==========================================================================================================================
 
 class hr_attendance(osv.osv):
 	_inherit = 'hr.attendance'
@@ -139,6 +140,7 @@ class hr_attendance(osv.osv):
 		
 		return res
 
+# ==========================================================================================================================
 
 class hr_payslip(osv.osv):
 	_inherit = 'hr.payslip'
