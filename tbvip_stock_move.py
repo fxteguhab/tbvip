@@ -67,13 +67,6 @@ class tbvip_interbranch_stock_move(osv.Model):
 				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
 		return super(tbvip_interbranch_stock_move, self).unlink(cr, uid, ids, context=context)
 	
-	def unlink(self, cr, uid, ids, context={}):
-	# kalau sudah accepted ga boleh dihapus
-		for data in self.browse(cr, uid, ids):
-			if data.state in ['accepted']:
-				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
-		return super(tbvip_interbranch_stock_move, self).unlink(cr, uid, ids, context=context)
-	
 	# METHODS --------------------------------------------------------------------------------------------------------------
 	
 	def action_accept(self, cr, uid, ids, context={}):
