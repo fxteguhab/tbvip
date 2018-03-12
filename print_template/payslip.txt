@@ -5,7 +5,7 @@ ${print_date.ljust(12)}
 |${''[:11].ljust(11)}|${''[:8].ljust(8)}|${''[:5].ljust(5)}|${''[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'Total Mg'[:8].ljust(8)}|${total_minggu[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'Jenis'[:11].ljust(11)}|${'Poin'[:8].ljust(8)}|${'LV'[:5].ljust(5)}|${'Bonus'[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${loan_label[:8].ljust(8)}|${minjam[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'Mobil'[:11].ljust(11)}|${point_mobil[:8].ljust(8)}|${lvl_mobil[:5].ljust(5)}|${bonus_mobil[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${saving_label[:8].ljust(8)}|${nabung[:12].ljust(12)}|${''[:12].ljust(12)}|
-|${'Motor'[:11].ljust(11)}|${point_motor[:8].ljust(8)}|${lvl_motor[:5].ljust(5)}|${bonus_motor[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${''[:8].ljust(8)}|${''[:12].ljust(12)}|${''[:12].ljust(12)}|
+|${'Motor'[:11].ljust(11)}|${point_motor[:8].ljust(8)}|${lvl_motor[:5].ljust(5)}|${bonus_motor[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'-'*8}|${'-'*12}|${''[:12].ljust(12)}|
 |${'S.O.'[:11].ljust(11)}|${point_so[:8].ljust(8)}|${lvl_so[:5].ljust(5)}|${bonus_so[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${'GAJI'[:8].ljust(8)}|${gaji[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'Sales'[:11].ljust(11)}|${point_sales[:8].ljust(8)}|${lvl_sales[:5].ljust(5)}|${bonus_sales[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${''[:8].ljust(8)}|${''[:12].ljust(12)}|${''[:12].ljust(12)}|
 |${'ADM'[:11].ljust(11)}|${point_adm[:8].ljust(8)}|${lvl_adm[:5].ljust(5)}|${bonus_adm[:12].ljust(12)}|${''[:4].ljust(4)}|${''[:8].ljust(8)}|${''[:8].ljust(8)}|${'Tabungan'[:12].ljust(12)}|${tabungan[:12].ljust(12)}|
