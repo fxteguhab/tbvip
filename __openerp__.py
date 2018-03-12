@@ -10,12 +10,12 @@
 	'website': 'http://www.chjs.biz',
 	'depends': [
 		"base", "board", "web", "website",
-		"purchase_needs", "chjs_custom_view", "chjs_price_list",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr", "hr_attendance", "hr_expense",
+		"purchase_needs", "chjs_custom_view", "chjs_price_list",
 		"purchase_sale_discount", "stock_opname", "account_receivable_limit",
 		"sale_multiple_payment", "canvassing", "hr_point_payroll", "product_custom_conversion", "product_production",
 		"account_simplified_journal", "wallet",
-		#tbvip_point_payroll
+		#tbvip_point_payroll sekalian dicek update
 	],	
 	'sequence': 150,
 	'data': [

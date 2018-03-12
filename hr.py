@@ -145,17 +145,6 @@ class hr_attendance(osv.osv):
 class hr_payslip(osv.osv):
 	_inherit = 'hr.payslip'
 	
-	def onchange_employee_id(self, cr, uid, ids, date_from, date_to, employee_id=False, contract_id=False, context=None):
-		result = super(hr_payslip, self).onchange_employee_id(cr, uid, ids, date_from, date_to, employee_id, contract_id, context)
-		if employee_id:
-			if result.get('value'):
-				employee = self.pool.get('hr.employee').browse(cr, uid, employee_id, context)
-				result['value'].update({
-					'current_saving': employee.wallet_owner_saving_id.balance_amount,
-					'current_loan': employee.wallet_owner_loan_id.balance_amount
-				})
-		return result
-	
 	_columns = {
 		'current_saving': fields.float('Current Saving', help="Saving of this employee in the moment this payslip is generated"),
 		'current_loan': fields.float('Current Loan', help="Loan of this employee in the moment this payslip is generated"),
@@ -171,6 +160,19 @@ class hr_payslip(osv.osv):
 			'url': '/tbvip/print/hr.payslip/' + str(ids[0]),
 			'target': 'self',
 		}
+
+	def compute_sheet(self, cr, uid, ids, context=None):
+		result = super(hr_payslip, self).compute_sheet(cr, uid, ids, context=context)
+	# simpan current balance saving dan loan pada saat payslip di-compute
+		for payslip in self.browse(cr, uid, ids, context=context):
+			saving_wallet = payslip.employee_id.wallet_owner_saving_id
+			loan_wallet = payslip.employee_id.wallet_owner_loan_id
+			self.write(cr, uid, [payslip.id], {
+				'current_saving': saving_wallet and saving_wallet.balance_amount or 0,
+				'current_loan': loan_wallet and loan_wallet.balance_amount or 0,
+				})
+		return result
+
 	
 	def hr_verify_sheet(self, cr, uid, ids, context=None):
 		"""

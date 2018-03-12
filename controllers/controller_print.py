@@ -16,14 +16,11 @@ _INTERBRANCH_STATE = [
 
 # Credits to https://tutorialopenerp.wordpress.com/2014/03/08/print-text-dot-matrix/
 
-
 basepath = ''
 sep = os.sep
 temp = os.path.abspath(os.path.dirname(__file__)).split(sep)
 for v_slice in temp[:-1]: basepath = basepath + v_slice + sep	
 tpl_lookup = TemplateLookup(directories=[basepath + 'print_template'])
-# tpl_lookup = TemplateLookup(directories=['/opt/odoo/addons/tbvip/print_template'])
-# tpl_lookup = TemplateLookup(directories=['openerp/addons/tbvip/print_template'])
 
 class controller_print(http.Controller):
 	
@@ -112,33 +109,43 @@ class controller_print(http.Controller):
 		
 		total_bonus_point = bonus.get('POIN_XTRA_POINT', 0) \
 							- bonus.get('POIN_PENALTY_POINT', 0) \
-							+ bonus.get('POIN_TOP_POINT', 0) \
 							+ bonus.get('POIN_MOBIL_POINT', 0) \
 							+ bonus.get('POIN_MOTOR_POINT', 0) \
 							+ bonus.get('POIN_SO_POINT', 0) \
 							+ bonus.get('POIN_SALES_POINT', 0) \
 							+ bonus.get('POIN_ADM_POINT', 0)
 		
-		total_bonus_value = bonus.get('POIN_XTRA_BONUS', 0) \
-							- bonus.get('POIN_PENALTY_BONUS', 0) \
-							+ bonus.get('POIN_TOP_BONUS', 0) \
-							+ bonus.get('POIN_MOBIL_BONUS', 0) \
-							+ bonus.get('POIN_MOTOR_BONUS', 0) \
-							+ bonus.get('POIN_SO_BONUS', 0) \
-							+ bonus.get('POIN_SALES_BONUS', 0) \
-							+ bonus.get('POIN_ADM_BONUS', 0)
+	# bonus value hanya muncul (tidak 0) kalau point SO mencapai minimal tertentu
+	# minimal ini disimpan di System Parameter hr_point.minimum_so_point 
+		minimum_so_point = request.env['ir.config_parameter'].get_param('hr_point.minimum_so_point')
+		minimum_so_point = float(minimum_so_point)
+		if bonus.get('POIN_SO_POINT', 0) >= minimum_so_point:
+			total_bonus_value = bonus.get('POIN_XTRA_BONUS', 0) \
+								- bonus.get('POIN_PENALTY_BONUS', 0) \
+								+ bonus.get('POIN_MOBIL_BONUS', 0) \
+								+ bonus.get('POIN_MOTOR_BONUS', 0) \
+								+ bonus.get('POIN_SO_BONUS', 0) \
+								+ bonus.get('POIN_SALES_BONUS', 0) \
+								+ bonus.get('POIN_ADM_BONUS', 0)
+		else:
+			total_bonus_value = 0
 		
 		loan = 0
 		saving = 0
+		loan_label = ""
+		saving_label = ""
 		if payslip.saving_action == 'inc':
+			saving_label = "Tabung"
 			saving = payslip.saving_amount
 		elif payslip.saving_action == 'dec':
+			saving_label = "Tarik"
 			saving = -payslip.saving_amount
 		if payslip.loan_action == 'inc':
+			loan_label = "Pinjam"
 			loan = payslip.loan_amount
 		elif payslip.loan_action == 'dec':
+			loan_label = "Cicil"
 			loan = -payslip.loan_amount
-		total_minggu = total_bonus_value + line.get('BASIC', 0)
 		
 		payslip_print = template.render(
 			print_date=(datetime.now() + timedelta(hours=7)).strftime("%d/%m/%Y %H:%M"),
@@ -154,14 +161,15 @@ class controller_print(http.Controller):
 			
 			to_date=str(payslip.date_to),
 			
-			total_minggu=self.thousand_separator(total_minggu),
-			
-			minjam=self.thousand_separator(loan),
+			total_minggu=self.thousand_separator(line.get('BASIC', 0) + total_bonus_value),
+			loan_label=loan_label,
+			minjam=self.thousand_separator(abs(loan)),
 			
 			point_mobil=self.thousand_separator(bonus.get('POIN_MOBIL_POINT', 0)),
 			lvl_mobil=self.thousand_separator(bonus.get('POIN_MOBIL_LEVEL', 0)),
 			bonus_mobil=self.thousand_separator(bonus.get('POIN_MOBIL_BONUS', 0)),
-			nabung=self.thousand_separator(saving),
+			saving_label=saving_label,
+			nabung=self.thousand_separator(abs(saving)),
 			
 			point_motor=self.thousand_separator(bonus.get('POIN_MOTOR_POINT', 0)),
 			lvl_motor=self.thousand_separator(bonus.get('POIN_MOTOR_LEVEL', 0)),
@@ -170,7 +178,7 @@ class controller_print(http.Controller):
 			point_so=self.thousand_separator(bonus.get('POIN_SO_POINT', 0)),
 			lvl_so=self.thousand_separator(bonus.get('POIN_SO_LEVEL', 0)),
 			bonus_so=self.thousand_separator(bonus.get('POIN_SO_BONUS', 0)),
-			gaji=self.thousand_separator(total_minggu-saving+loan),
+			gaji=self.thousand_separator(line.get('BASIC', 0) + total_bonus_value - saving + loan),
 			
 			point_sales=self.thousand_separator(bonus.get('POIN_SALES_POINT', 0)),
 			lvl_sales=self.thousand_separator(bonus.get('POIN_SALES_LEVEL', 0)),
@@ -179,21 +187,18 @@ class controller_print(http.Controller):
 			point_adm=self.thousand_separator(bonus.get('POIN_ADM_POINT', 0)),
 			lvl_adm=self.thousand_separator(bonus.get('POIN_ADM_LEVEL', 0)),
 			bonus_adm=self.thousand_separator(bonus.get('POIN_ADM_BONUS', 0)),
-			tabungan=self.thousand_separator(payslip.current_saving+saving),
+			tabungan=self.thousand_separator(payslip.current_saving + saving),
 			
 			point_xtra=self.thousand_separator(bonus.get('POIN_XTRA_POINT', 0)),
 			lvl_xtra=self.thousand_separator(bonus.get('POIN_XTRA_LEVEL', 0)),
 			bonus_xtra=self.thousand_separator(bonus.get('POIN_XTRA_BONUS', 0)),
-			pinjaman=self.thousand_separator(payslip.current_loan+loan),
+			pinjaman=self.thousand_separator(payslip.current_loan + loan),
 			
 			point_penalti=self.thousand_separator(bonus.get('POIN_PENALTY_POINT', 0)),
 			lvl_penalti=self.thousand_separator(bonus.get('POIN_PENALTY_LEVEL', 0)),
 			bonus_penalti=self.thousand_separator(bonus.get('POIN_PENALTY_BONUS', 0)),
 			level=self.thousand_separator(bonus.get('CURRENT_LEVEL_BASIC', 0)),
 			
-			point_top=self.thousand_separator(bonus.get('POIN_TOP_POINT', 0)),
-			lvl_top=self.thousand_separator(bonus.get('POIN_TOP_LEVEL', 0)),
-			bonus_top=self.thousand_separator(bonus.get('POIN_TOP_BONUS', 0)),
 			total_poin=self.thousand_separator(bonus.get('TOTAL_POINT_BASIC', 0)),
 			
 			total_bonus_point=self.thousand_separator(total_bonus_point),

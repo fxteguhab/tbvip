@@ -55,7 +55,7 @@
 		</record>
 
 		<record id="hr_payroll.hr_rule_net" model="hr.salary.rule">
-			<field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED + categories.POINT + categories.SAVLOAN</field>
+			<field name="amount_python_compute">result = categories.BASIC + categories.ALW - categories.DED + categories.POINT + categories.SAVLOAN</field>
 		</record>
 		<record id="tbvip_hr_rule_category_saving_loan" model="hr.salary.rule.category">
 			<field name="name">Savings and Loans</field>
