@@ -1,7 +1,8 @@
 <openerp>
     <data>
+        <!-- TEGUH@20180405 : ganti name -->
         <record model="ir.ui.view" id="view_voucher_form_inherit">
-            <field name="name">account.voucher.form.inherit</field>
+            <field name="name">account.voucher.payment.form.inherit</field>
             <field name="model">account.voucher</field>
             <field name="inherit_id" ref="account_voucher.view_vendor_payment_form"/>
             <field name="arch" type="xml">
@@ -9,7 +10,7 @@
                     <button name="action_refresh" string="Refresh" type="object"/>
                 </button>
                 <button name="cancel_voucher" position="after">
-                    <button name="print_kontra_bon" string="" type="object" icon="gtk-print"/>
+                    <button name="print_kontra_bon" string="Print" type="object" icon="gtk-print"/>
                 </button>
                 <field name="partner_id" position="attributes">
                     <attribute name="on_change">onchange_partner_id_tbvip(partner_id, journal_id, amount, currency_id, type, date, context)</attribute>
@@ -17,7 +18,7 @@
                 <field name="journal_id" position="after">
                     <field name="check_maturity_date" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
                     <field name="bank_id" modifiers="{'readonly':[('state', 'not in', 'draft')]}"/>
-                    <field name="is_ready" readonly="1"/>
+                    <field name="is_ready" readonly="1" invisible="1"/>
                 </field>
                 <label for="line_cr_ids" position="attributes">
                     <attribute name="invisible">True</attribute>
@@ -35,15 +36,45 @@
             </field>
         </record>
 
+        <!--TEGUH@20180405:tambah sort di tree -->
+        <!--
+        <record id="view_voucher_tree_inherit" model="ir.ui.view">
+            <field name="name">account.voucher.tree.inherit</field>
+            <field name="model">account.voucher</field>
+            <field name="inherit_id" ref="account_voucher.view_voucher_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree[1]" position="attributes">
+                    <attribute name = "default_order">"check_maturity_date asc"</attribute>
+                </xpath>
 
-
-        <record id="view_voucher_filter_inherit" model="ir.ui.view">
-            <field name="name">account.voucher.select.inherit</field>
+            </field>
+        </record>
+        -->
+        <!-- TEGUH@20180405 : ganti id,name  -->
+        <record id="view_voucher_filter_vendor_pay_inherit" model="ir.ui.view">
+            <field name="name">account.voucher.purchase.pay.select.inherit</field> 
             <field name="model">account.voucher</field>
             <field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor_pay"/>
             <field name="arch" type="xml">
                 <search string="Search Vouchers" position="inside">
                     <filter name="groupby_ready" string="Ready" domain="[('state','=','draft'),('is_ready','=',True)]" />
+
+                    <!--TEGUH@20180405 : tambah filter kontra -->
+                    <filter name="groupby_kontra" string="Kontra" domain="[('state','=','draft'),('is_ready','=',False)]" />
+                    <group expand="0" string="Group By Date">
+                        <filter name="group_by_order_year" string="Order Year" context="{'group_by':'create_date:year'}"/>
+                        <filter name="group_by_order_month" string="Order Month" context="{'group_by':'create_date:month'}"/>
+                        <filter name="group_by_order_week" string="Order Week" context="{'group_by':'create_date:week'}"/>
+                        <filter name="group_by_order_day" string="Order Day" context="{'group_by':'create_date:day'}"/>
+                        <filter string="Today" domain="[('create_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('create_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+                    </group>
+                    <group expand="0" string="Group By Check Maturity Date">
+                        <filter name="group_by_order_year" string="CMD Year" context="{'group_by':'check_maturity_date:year'}"/>
+                        <filter name="group_by_order_month" string="CMD Month" context="{'group_by':'check_maturity_date:month'}"/>
+                        <filter name="group_by_order_week" string="CMD Week" context="{'group_by':'check_maturity_date:week'}"/>
+                        <filter name="group_by_order_day" string="CMD Day" context="{'group_by':'check_maturity_date:day'}"/>
+                        <filter string="CMD Today" domain="[('check_maturity_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('check_maturity_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+                    </group>
                     <!--<group expand="0" string="Readiness">-->
                         <!--<filter name="groupby_ready" string="Ready" context="{'group_by': 'is_ready'}"/>-->
                     <!--</group>-->

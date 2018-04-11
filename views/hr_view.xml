@@ -58,7 +58,7 @@
 			<field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
 			<field name="arch" type="xml">
 				<button name="compute_sheet" position="after">
-					<button name="print_payslip_dot_matrix" string="" type="object" icon="gtk-print"/>
+					<button name="print_payslip_dot_matrix" string="Print" type="object" icon="gtk-print"/>
 				</button>
 				<page string="Salary Computation" position="before">
 					<page string="Saving and Loan">

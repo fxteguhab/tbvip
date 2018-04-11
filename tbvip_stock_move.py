@@ -5,9 +5,12 @@ from openerp.tools.translate import _
 from openerp import SUPERUSER_ID, api
 
 
-
+# TEGUH@20180329 : Tambah state otw,delivered
 _INTERBRANCH_STATE = [
 	('draft', 'Draft'),
+	('request', 'Request'),
+	('otw', 'OnTheWay'),
+	('delivered', 'Delivered'),
 	('accepted', 'Accepted'),
 	('rejected', 'Rejected')
 ]
@@ -26,13 +29,18 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'from_stock_location_id': fields.many2one('stock.location', 'From Location', domain=[('usage', '=', 'internal')], readonly=True, required=True, states={'draft': [('readonly', False)]}),
 		'to_stock_location_id': fields.many2one('stock.location', 'To Location', domain=[('usage', '=', 'internal')], readonly=True,required=True, states={'draft': [('readonly', False)]}),
 		'input_user_id': fields.many2one('res.users', 'Input by', required=True, readonly=True, states={'draft': [('readonly', False)]}),
-		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, required=True, states={'draft': [('readonly', False)]}),
-		'checked_by_id': fields.many2one('hr.employee', 'Checked by', readonly=True, states={'draft': [('readonly', False)]}),
+		#TEGUH @20180331 : field prepared by jadi tidak required
+		'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, states={'draft': [('readonly', False)],'request': [('readonly', False)]}),
+		#'prepare_employee_id':  fields.many2one('hr.employee', 'Prepared by', readonly=True, required=True, states={'draft': [('readonly', False)]}),
+		#TEGUH @20180331 : field prepared by & check by readonly di state2 tertentu
+		'checked_by_id': fields.many2one('hr.employee', 'Checked by', readonly=False, states={'accepted': [('readonly', True)],'rejected': [('readonly', True)]}),
 		'move_date': fields.datetime('Move Date', required=True, readonly=True, states={'draft': [('readonly', False)]}),
 		'state': fields.selection(_INTERBRANCH_STATE, 'State', readonly=True),
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by', readonly=True, states={'draft': [('readonly', False)]}),
 		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by', readonly=True, states={'draft': [('readonly', False)]}),
-		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)]}),
+		#TEGUH@20180331 : field interbranch bisa diedit saat draft & request
+		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)],'request': [('readonly', False)]}),
+		#'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)]}),
 	}
 	
 	_defaults = {
@@ -68,7 +76,32 @@ class tbvip_interbranch_stock_move(osv.Model):
 		return super(tbvip_interbranch_stock_move, self).unlink(cr, uid, ids, context=context)
 	
 	# METHODS --------------------------------------------------------------------------------------------------------------
-	
+
+	# TEGUH@20180329 : tambah fungsi untuk ubah state jadi otw & delivered
+	def action_otw(self, cr, uid, ids, context=None):
+	# state otw melalui canvassing on the way
+		self.write(cr, uid, ids, {
+		'state': 'otw'
+		}, context=context)
+		
+		return True
+
+	def action_delivered(self, cr, uid, ids, context=None):
+	# state delivered melalui canvassing delivered
+		self.write(cr, uid, ids, {
+		'state': 'delivered'
+		}, context=context)
+		
+		return True
+
+	def action_request(self, cr, uid, ids, context=None):
+	# state request dr button
+		self.write(cr, uid, ids, {
+		'state': 'request'
+		}, context=context)
+		
+		return True
+
 	def action_accept(self, cr, uid, ids, context={}):
 		for interbranch_stock_move in self.browse(cr, uid, ids):
 		# JUNED@20180205: ditutup as per request dari Teguh

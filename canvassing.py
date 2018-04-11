@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 import urllib2
+import urllib
 import json
 import requests
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
@@ -26,7 +27,75 @@ class canvassing_canvas(osv.osv):
 	}
 	
 	# OVERRIDES --------------------------------------------------------------------------------------------------------------
+	
+	def calculate_distance(self, cr, uid, canvas_data, context={}):
+	# TEGUH@20180328 : fungsi calculate distance yg baru : 
+	# ambil parameter2 sistem	
+		param_obj = self.pool.get('ir.config_parameter')
+		param_ids = param_obj.search(cr, uid, [('key','in',['gps_base_url','gps_login_path','gps_devices_url','gps_positions_url','gps_username','gps_password'])])
+		baseUrl = ""
+		login_url = ""
+		devices_url = ""
+		position_url = ""
+		gps_username = ""
+		gps_password = ""
+				
+		for param_data in param_obj.browse(cr, uid, param_ids):
+			if param_data.key == 'gps_base_url':
+				baseUrl = param_data.value
+			elif param_data.key == 'gps_login_path':
+				login_url = baseUrl + param_data.value 
+			elif param_data.key == 'gps_devices_url':
+				devices_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_positions_url':
+				position_url = baseUrl + param_data.value
+			elif param_data.key == 'gps_username':
+				gps_username = param_data.value
+			elif param_data.key == 'gps_password':
+				gps_password = param_data.value	
+
+		# coba login ke sistem GPS		
+		try:
+			request = urllib2.Request(login_url)
+			response = urllib2.urlopen(request, urllib.urlencode({'email':gps_username,'password':gps_password}))
+			cookie = response.headers.get('Set-Cookie')
+		except:
+			return -1 # -1 artinya error
 		
+		# tentukan device id dari vehicle yang melakukan canvassing ini
+		vehicle_gps_id = canvas_data.fleet_vehicle_id and canvas_data.fleet_vehicle_id.gps_id or None
+
+		#get all device
+		request = urllib2.Request(devices_url)
+		request.add_header('Cookie', cookie)
+		response = urllib2.urlopen(request)
+		devices = json.load(response)
+		
+		device_id = None
+		for device in devices:
+			if vehicle_gps_id == device['uniqueId']:
+				device_id = device['id']
+				break
+		
+		# ambil jarak antara waktu mulai dan selesai
+		# dikasih teloransi 10 menit sebelum dan sesudah, as per request 20170929
+		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
+		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) + timedelta(minutes=10)
+
+		date_depart = date_depart.isoformat()
+		date_delivered = date_delivered.isoformat()
+
+		payload = {'deviceId' : device_id, 'from' :date_depart,'to':date_delivered }
+		header =  {'cookie':cookie, 'Accept':'application/json'}
+		results = requests.get(position_url,headers= header,params=payload)
+
+		summary =  results.json()
+		if not summary: return 0
+		distance = summary[0]['distance']
+
+		return float(distance)
+
+	"""	
 	def calculate_distance(self, cr, uid, canvas_data, context={}):
 	# ambil parameter2 sistem
 		param_obj = self.pool.get('ir.config_parameter')
@@ -107,6 +176,8 @@ class canvassing_canvas(osv.osv):
 		last_distance = substr[pos1+1:pos2]
 	# inilah jaraknya!
 		return float(last_distance) - float(start_distance)
+	"""
+
 
 	def action_recalculate_distance(self, cr, uid, ids, context={}):
 		for canvas_data in self.browse(cr, uid, ids, context=context):
@@ -121,12 +192,23 @@ class canvassing_canvas(osv.osv):
 
 	def action_set_finish(self, cr, uid, ids, context={}):
 		super(canvassing_canvas, self).action_set_finish(cr, uid, ids, context=context)
+		
+		# TEGUH@20180329 : set finish canvas mengubah state interbranch jadi delivered
+		# set interbranch stock move to deliverred if is_executed
+		interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+		for canvas in self.browse(cr, uid, ids, context=context):
+			for interbranch_canvas_line in canvas.interbranch_move_ids:
+				if interbranch_canvas_line.is_executed:
+					interbranch_stock_move_obj.action_delivered(cr, uid, [interbranch_canvas_line.interbranch_move_id.id], context=context)
+
+		"""
 		# set interbranch stock move to accepted if is_executed
 		interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
 		for canvas in self.browse(cr, uid, ids, context=context):
 			for interbranch_canvas_line in canvas.interbranch_move_ids:
 				if interbranch_canvas_line.is_executed:
 					interbranch_stock_move_obj.action_accept(cr, uid, [interbranch_canvas_line.interbranch_move_id.id], context=context)
+		"""
 		return self.action_recalculate_distance(cr, uid, ids, context=context)
 	
 	# ONCHANGE ---------------------------------------------------------------------------------------------------------------

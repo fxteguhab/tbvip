@@ -22,6 +22,14 @@
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
+
+				<!-- TEGUH@20180405: delete UOM 4 & 5-->
+				<field name="uom_id_4" position="replace"></field>
+				<field name="uom_id_5" position="replace"></field>
+				<field name="price_4" position="replace"></field>
+				<field name="price_5" position="replace"></field>
+
+				<!-- TEGUH@20180405 : cukup 5 UoM
 				<field name="uom_id_4" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
@@ -30,6 +38,7 @@
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
+				-->
 			</field>
 		</record>
 
@@ -53,6 +62,14 @@
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
+
+				<!-- TEGUH@20180405: delete UOM 4 & 5-->
+				<field name="uom_id_4" position="replace"></field>
+				<field name="uom_id_5" position="replace"></field>
+				<field name="price_4" position="replace"></field>
+				<field name="price_5" position="replace"></field>
+
+				<!-- TEGUH@20180405 : 
 				<field name="uom_id_4" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
@@ -61,6 +78,7 @@
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
+				-->
 			</field>
 		</record>
 
@@ -87,6 +105,18 @@
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
+
+				<!-- TEGUH@20180405: delete 5 UOM -->
+				<field name="uom_id_4" position="replace"></field>
+				<field name="uom_id_5" position="replace"></field>
+				<field name="price_4" position="replace">
+					<field name="write_date"/>
+				</field>
+				<field name="price_5" position="replace">
+					<field name="write_uid"/>
+				</field>
+
+				<!-- TEGUH@20180405
 				<field name="uom_id_4" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
@@ -95,6 +125,24 @@
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
+				-->
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="product_current_price_tree_inherit">
+			<field name="name">price.list.product.current.price.tree</field>
+			<field name="model">product.current.price</field>
+			<field name="inherit_id" ref="chjs_price_list.product_current_price_tree"/>
+			<field name="arch" type="xml">
+			<!-- TEGUH@20180405 :replace field Uom4 & 5 degn  field Last Updated on * & Last Updated by-->
+				<field name="price_4" position="replace"></field>
+				<field name="price_5" position="replace"></field>
+				<field name="uom_id_4" position="replace">
+					<field name="write_date"/>
+				</field>	
+				<field name="uom_id_5" position="replace">
+                   	<field name="write_uid"/>
+                </field>
 			</field>
 		</record>
 

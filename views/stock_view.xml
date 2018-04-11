@@ -102,7 +102,17 @@
 			<field name="arch" type="xml">
 				<group string="Group By" position="inside">
 					<filter string="Month" name="filter_month_inventory_adjustment" context="{'group_by':'date:month'}"/>
+					<!-- TEGUH@20180405: add group by week & today -->
+					<filter string="Week" name="filter_week_inventory_adjustment" context="{'group_by':'date:week'}"/>
 					<filter string="Day"  name="filter_day_inventory_adjustment" context="{'group_by':'date:day'}"/>
+					<filter string="Today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+				</group>
+				<!-- TEGUH@20180405: add group by created by & employee -->
+				<group string="Group By" position="after">
+					<group string="Group By HR">
+						<filter string="Created By" name="create_uid" domain="[]" context="{'group_by': 'create_uid'}"/>
+                        <filter string="Employee" name="employee_id" domain="[]" context="{'group_by': 'employee_id'}"/>
+					</group>
 				</group>
 			</field>
 		</record>
@@ -155,5 +165,23 @@
 			</field>
 		</record>
 
+
+		<!-- TEGUH@20180405 : bikin inherit stok.view_inventory_tree -->
+		<record id="view_inventory_tree_inherit" model="ir.ui.view">
+			<field name="name">stock.inventory.tree.inherit</field>
+			<field name="model">stock.inventory</field>
+			<field name="inherit_id" ref="stock.view_inventory_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//tree[1]" position="attributes">
+                    <attribute name = "color">"red:total_qty &gt;= 100;blue:total_qty &gt;= 50”</attribute>
+                </xpath>
+				<field name="location_id" position="after">
+					<field name="line_ids" string = "Line(s)"/>
+					<field name="total_qty" string = "Total Qty"/>
+					<field name = "employee_id"/>
+                    <field name = "create_uid"/>
+				</field>
+			</field>
+		</record>
 	</data>
 </openerp>

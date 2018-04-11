@@ -45,3 +45,8 @@
 	font-weight:bold;
 }
 
+.openerp .oe_form .oe_form_required input:not([disabled]):not([readonly]), .openerp .oe_form .oe_form_required select:not([disabled]):not([readonly]), .openerp .oe_form .oe_form_required textarea:not([disabled]):not([readonly]),
+.openerp .oe_form_editable .oe_list_editable .oe_list_content td.oe_required {
+	background-color: #176cc9 !important;
+	box-shadow: 0 0 2px #e77213 inset;
+}

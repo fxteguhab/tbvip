@@ -280,6 +280,7 @@ class product_current_commission(osv.osv):
 		}, context=context)
 	
 	def _create_product_current_commission(self, cr, uid, product_ids, commission_line, context=None):
+		product_obj = self.pool.get('product.template')
 		new_ids = []
 		for product_id in product_ids:
 			new_product_current_commission_id = self.create(cr, uid, {
@@ -287,6 +288,9 @@ class product_current_commission(osv.osv):
 				'commission': commission_line.commission,
 			}, context=context)
 			new_ids.append(new_product_current_commission_id)
+
+			#TEGUH@20180331 : copy commision value ke product.commison
+			product_obj.set_commission(cr,uid,product_id,commission_line.commission)
 		return new_ids
 	
 	def cron_product_current_commission(self, cr, uid, context={}):

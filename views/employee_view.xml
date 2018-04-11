@@ -21,8 +21,12 @@
 			<field name="inherit_id" ref="hr.view_employee_tree"/>
 			<field name="arch" type="xml">
 				<xpath expr="//field[@name='work_phone']" position="replace">
-					<field name="mobile_phone"/>
+					<!-- ganti mobile_phone jadi fingerprint id-->
+					<field name="fingerprint_id"/>
+					<!-- <field name="mobile_phone"/> -->
 				</xpath>
+
+
 			</field>
 		</record>
 
