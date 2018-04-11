@@ -24,7 +24,7 @@ import commission
 import stock_return_picking
 import sale_order_return
 import koreksi_bon
-import purchase_needs
+#import purchase_needs
 import res_config
 import tbvip_stock_move
 import account_simplified_journal

@@ -11,7 +11,7 @@
 	'depends': [
 		"base", "board", "web", "website",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr", "hr_attendance", "hr_expense",
-		"purchase_needs", "chjs_custom_view", "chjs_price_list",
+		"chjs_custom_view", "chjs_price_list",
 		"purchase_sale_discount", "stock_opname", "account_receivable_limit",
 		"sale_multiple_payment", "canvassing", "hr_point_payroll", "product_custom_conversion", "product_production",
 		"account_simplified_journal", "wallet",
@@ -60,7 +60,7 @@
 		'views/hr_view.xml',
 		'views/product_view.xml',
 		'views/product_production_view.xml',
-		'views/purchase_needs_view.xml',
+		#'views/purchase_needs_view.xml',
 		'views/purchase_view.xml',
 		'views/sale_view.xml',
 		'views/stock_view.xml',

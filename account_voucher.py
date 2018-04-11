@@ -79,7 +79,6 @@ class account_voucher(osv.osv):
 				account_id = cash_account_id
 			elif acc_journal.type == 'bank':
 				account_id = bank_account_id
-				
 			if result:
 				if 'value' in result:
 					result['value']['account_id'] = account_id

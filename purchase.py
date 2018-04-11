@@ -72,7 +72,6 @@ class purchase_order(osv.osv):
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
 		'delivered_date': fields.datetime('Delivered Date', required=True),
-		'purchase_needs_id': fields.boolean('TO BE DELETED'),
 	}
 	
 	_defaults = {
@@ -154,6 +153,11 @@ class purchase_order(osv.osv):
 		return result
 	
 	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
+	# supaya kalau sudah set partner lalu set payment term, bila lalu ganti partner lagi
+	# payment term supaya tetap (jangan diganti)
+	# ini karena default payment term bukan sesuai supplier tapi fixed (see bagian _defaults
+	# di atas)
+		if not partner_id: return {}
 		result = super(purchase_order, self).onchange_partner_id(cr, uid, ids, partner_id, context)
 		values = result.get('value', False)
 		if values:
@@ -183,27 +187,6 @@ class purchase_order_line(osv.osv):
 	WATCHED_FIELDS_FROM_PO = ['product_id', 'product_qty', 'price_unit', 'discount_string']
 	SOURCE = [('needs', 'Needs'), ('manual', 'Manual'), ('owner', 'Owner')]
 	
-	# METHODS ---------------------------------------------------------------------------------------------------------------
-	
-	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
-		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
-			purchase_order_obj = self.pool.get('purchase.order')
-			purchase_order = purchase_order_obj.browse(cr, uid, order_id)
-			# message post to SUPERUSER and all users in group Purchases Manager
-			group_obj = self.pool.get('res.groups')
-			purchase_manager_group_ids = group_obj.search(cr, uid,
-				[('category_id.name', '=', 'Purchases'),
-					('name', '=', 'Manager')])
-			partner_ids = [SUPERUSER_ID]
-			for user in group_obj.browse(cr, uid, purchase_manager_group_ids).users:
-				partner_ids += [user.partner_id.id]
-			partner_ids = list(set(partner_ids))
-			purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
-				body=_(
-					"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
-					 % (product.name, purchase_order.name, product.standard_price,
-				data['price_unit']))
-	
 	def _purchase_hour(self, cr, uid, ids, field_name, arg, context={}):
 		result = {}
 		lines = self.browse(cr, uid, ids)
@@ -216,7 +199,6 @@ class purchase_order_line(osv.osv):
 	
 	_columns = {
 		'source': fields.selection(SOURCE, 'Source'),
-		# 'price_subtotal': fields.function(_amount_line_discount, string='Subtotal', digits_compute= dp.get_precision('Account')),
 		'mysql_purchase_det_id': fields.integer('MySQL Purchase Detail ID'),
 		'purchase_hour': fields.function(_purchase_hour, method=True, string='Purchase Hour', type='float'),
 		'alert': fields.integer('Alert'),
@@ -226,9 +208,9 @@ class purchase_order_line(osv.osv):
 	}
 	
 	_sql_constraints = [
-		('po_quantity_less_than_zero', 'CHECK(product_qty > 0)', 'Quantity should be more than zero.'),
-		('po_price_unit_less_than_zero', 'CHECK(price_unit >= 0)', 'Price should be more than zero.'),
-		('po_price_subtotal_less_than_zero', 'CHECK(price_subtotal >= 0)', 'Price subtotal should be more than zero.'),
+		('po_quantity_less_than_zero', 'CHECK(product_qty > 0)', 'Quantity must be more than zero.'),
+		('po_price_unit_less_than_zero', 'CHECK(price_unit >= 0)', 'Price must be more than zero.'),
+		('po_price_subtotal_less_than_zero', 'CHECK(price_subtotal >= 0)', 'Price subtotal must be more than zero.'),
 	]
 	
 	# DEFAULTS --------------------------------------------------------------------------------------------------------------
@@ -237,24 +219,28 @@ class purchase_order_line(osv.osv):
 		'source': 'manual',
 	}
 	
-	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	# METHODS ---------------------------------------------------------------------------------------------------------------
 	
-	def create(self, cr, uid, vals, context=None):
-		new_order_line = super(purchase_order_line, self).create(cr, uid, vals, context)
-		if vals.get('product_id', False) and vals.get('price_unit', False):
-			product_obj = self.pool.get('product.product')
-			product = product_obj.browse(cr, uid, vals['product_id'])
-			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
-			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
-			if vals.get('price_type_id', False) and vals.get('product_uom', False):
-				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
-		if not vals.get('location_id', False):
-			users_obj = self.pool.get('res.users')
-			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location_id
-			if incoming_location != False:
-				vals['location_id'] = incoming_location
-		return new_order_line
+	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
+	# message post to SUPERUSER and all users in group Purchases Manager
+	# kalau harga yang diinput tidak sama dengan standard price product
+		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+			purchase_order_obj = self.pool.get('purchase.order')
+			purchase_order = purchase_order_obj.browse(cr, uid, order_id)
+			group_obj = self.pool.get('res.groups')
+			purchase_manager_group_ids = group_obj.search(cr, uid, [
+				('category_id.name', '=', 'Purchases'),
+				('name', '=', 'Manager')
+				])
+			partner_ids = [SUPERUSER_ID]
+			for user in group_obj.browse(cr, uid, purchase_manager_group_ids).users:
+				partner_ids += [user.partner_id.id]
+			partner_ids = list(set(partner_ids))
+			purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
+				body=_(
+					"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
+					 % (product.name, purchase_order.name, product.standard_price,
+				data['price_unit']))
 	
 	def _message_line_changes(self, cr, uid, vals, line_id, create=False, context=None):
 		purchase_order_obj = self.pool.get('purchase.order')
@@ -281,16 +267,40 @@ class purchase_order_line(osv.osv):
 					if not create else \
 					"\n<li><b>%s</b>: %s</li>" % (self._columns[key].string, value_to)
 		purchase_order_obj.message_post(cr, uid, line.order_id.id, body=message)
-		pass
+	
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	
+	def create(self, cr, uid, vals, context=None):
+		new_order_line = super(purchase_order_line, self).create(cr, uid, vals, context)
+		if vals.get('product_id', False) and vals.get('price_unit', False):
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, vals['product_id'])
+			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
+			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
+		# otomatis create current price kalo belum ada
+			if vals.get('price_type_id', False) and vals.get('product_uom', False):
+				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
+	# otomatis isi incoming location dengan default stock location cabang di mana user ini login
+	# artinya, secara default barang akan dikirim ke cabang user pembuat PO ini
+	# hanya bila tidak diset di vals nya
+		if not vals.get('location_id', False):
+			users_obj = self.pool.get('res.users')
+			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location_id
+			if incoming_location != False:
+				vals['location_id'] = incoming_location
+		return new_order_line
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for id in ids:
 			self._message_line_changes(cr, uid, vals, id, context=None)
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
+	# kirim message kalau ada perubahan harga
 		if vals.get('price_unit', False):
 			for purchase_line in self.browse(cr, uid, ids):
 				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
 		for po_line in self.browse(cr, uid, ids):
+		# bikin product current price baru bila belum ada
 			product_id = po_line.product_id.id
 			price_type_id = po_line.price_type_id.id
 			product_uom = po_line.product_uom.id
@@ -304,6 +314,9 @@ class purchase_order_line(osv.osv):
 		return edited_order_line
 	
 	def unlink(self, cr, uid, ids, context=None):
+	# kalau line ini batal, maka demand yang menyebabkan adanya purchase order (di mana 
+	# purchase order line ini berada) ini berubah status kembali menjadi requested
+	# artinya demand tersebut dianggap belum fulfilled
 		result = super(purchase_order_line, self).unlink(cr, uid, ids, context)
 		demand_line_obj = self.pool.get('tbvip.demand.line')
 		demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',ids)])
@@ -311,27 +324,6 @@ class purchase_order_line(osv.osv):
 			'state': 'requested'
 		})
 		return result
-	
-	# def onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-	# 		partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
-	# 		name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False, context=None):
-	# 	product_conversion_obj = self.pool.get('product.conversion')
-	# 	uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
-	# 	result = cpl.purchase.purchase_order_line.onchange_product_id(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-	# 		partner_id, date_order, fiscal_position_id, date_planned,
-	# 		name, price_unit, state, parent_price_type_id, price_type_id, context)
-	# 	temp = super(purchase_order_line, self).onchange_product_uom(
-	# 		cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
-	# 		date_planned, name, price_unit, state, context={})
-	# 	if result.get('domain', False) and temp.get('domain', False):
-	# 		result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
-	# 	product_obj = self.pool.get('product.product')
-	# 	product = product_obj.browse(cr, uid, product_id)
-	# 	result['value'].update({
-	# 		'product_uom': uom_id if uom_id else product.uom_id.id,
-	# 		'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
-	# 	})
-	# 	return result
 	
 	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
@@ -359,7 +351,7 @@ class purchase_order_line(osv.osv):
 		price_unit_current = result_price_list['value']['price_unit'] \
 			if result_price_list['value'].get('price_unit', False) else price_unit
 			
-		# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
+	# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
 		result_price_list['warning'] = {}
 		
 		result = result_price_list

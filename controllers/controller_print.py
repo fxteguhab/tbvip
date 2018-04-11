@@ -132,7 +132,7 @@ class controller_print(http.Controller):
 		
 		loan = 0
 		saving = 0
-		loan_label = "Pinjam"
+		loan_label = "Cicil"
 		saving_label = "Tabung"
 		if payslip.saving_action == 'inc':
 			saving_label = "Tabung"
