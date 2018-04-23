@@ -133,18 +133,28 @@
 			<field name="model">purchase.order</field>
 			<field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
 			<field name="arch" type="xml">
+				<!-- TEGUH@20180405 : edit hapus New Mail Exception -->
 				<xpath expr="//filter[@string='Order Month']" position="replace" />
+				<xpath expr="//filter[@string='New Mail']" position="replace" />
+				<xpath expr="//filter[@string='Exception']" position="replace" />
+
 				<xpath expr="//filter[@string='Expected Month']" position="after">
 					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
 				</xpath>
 				<xpath expr="//group[@string='Group By']" position="after">
 					<group string="Order">
-						<filter name="group_by_order_day" string="Order Day" context="{'group_by':'date_order:day'}"/>
+						<!-- TEGUH@20180405 : edit urutan & tambah order by Year & Today -->
+						<filter name="group_by_order_year" string="Order Year" context="{'group_by':'date_order:year'}"/>
 						<filter name="group_by_order_month" string="Order Month" context="{'group_by':'date_order'}"/>
+						<filter name="group_by_order_day" string="Order Day" context="{'group_by':'date_order:day'}"/>
+						<filter string="Order Today" domain="[('date_order', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date_order', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
 					</group>
 					<group string="Delivery">
-						<filter name="group_by_delivery_day" string="Delivered Day" context="{'group_by':'delivered_date:day'}"/>
+						<!-- TEGUH@20180405 : edit urutan & tambah order by Year & Today -->
+						<filter name="group_by_delivery_year" string="Delivered Day" context="{'group_by':'delivered_date:year'}"/>
 						<filter name="group_by_delivery_month" string="Delivered Month" context="{'group_by':'delivered_date'}"/>
+						<filter name="group_by_delivery_day" string="Delivered Day" context="{'group_by':'delivered_date:day'}"/>
+						<filter string="Delivered Today" domain="[('delivered_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('delivered_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
 					</group>
 				</xpath>
 			</field>

@@ -1,8 +1,8 @@
-# coding=utf-8
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
+from openerp.osv.orm import browse_record_list, browse_record, browse_null
 
 import openerp.addons.purchase_sale_discount as psd
 import openerp.addons.sale as imported_sale
@@ -105,9 +105,13 @@ class purchase_order(osv.osv):
 			for po in self.browse(cr, uid, ids):
 				demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
 				demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
+		# 20180411: confirm PO tidak lagi otomatis mendeliver barang; bisa ada jeda waktu
+		# antara confirm dan barang datang
+			"""
 			self.write(cr, uid, ids, {
 				'delivered_date': datetime.today().strftime('%Y-%m-%d %H:%M:%S')
 			})
+			"""
 		return result
 
 	def onchange_picking_type_id(self, cr, uid, ids, picking_type_id, context=None):
@@ -132,12 +136,18 @@ class purchase_order(osv.osv):
 		"""
 		Overrides picking_done to also mark the picking as transfered
 		"""
+		# 20180411: di-comment supaya incoming shipment jangan diasumsikan langsung Transferred
+		# sebelumnya, confirm PO diasumsikan ketika barang datang dan sudah dihitung semua, dan
+		# draft PO sudah diedit untuk menyesuaikan dengan barang yang diterima. per April 2018
+		# confirm PO terjadi sebelum barang diterima.
+		"""
 		picking_ids = []
 		for po in self.browse(cr, uid, ids, context=context):
 			if po.shipped_or_taken == 'shipped':
 				picking_ids += [picking.id for picking in po.picking_ids]
 		picking_obj = self.pool.get('stock.picking')
 		picking_obj.do_transfer(cr, uid, picking_ids)
+		"""
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
 	
 	def action_invoice_create(self, cr, uid, ids, context=None):
@@ -147,9 +157,14 @@ class purchase_order(osv.osv):
 		:rtype: int
 		"""
 		result = super(purchase_order, self).action_invoice_create(cr, uid, ids, context)
+		# 20180411: ditutup karena per April 2018 invoice digenerate bukan ketika PO di-confirm
+		# tapi ketika barang datang. Ditambah lagi, juga ada request supaya ketika PO 
+		# sudah jadi invoice pun masih bisa diedit sebelum benar2 menjadi hutang
+		"""
 		invoice_obj = self.pool.get('account.invoice')
 		for invoice in invoice_obj.browse(cr, uid, [result]):
 			invoice.signal_workflow('invoice_open')
+		"""
 		return result
 	
 	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
@@ -166,6 +181,94 @@ class purchase_order(osv.osv):
 				values.pop('payment_term_id')
 		return result
 	
+	#TEGUH20180409 : override merge method, 
+	def do_merge(self, cr, uid, ids, context=None):
+		def make_key(br, fields):
+			list_key = []
+			for field in fields:
+				field_val = getattr(br, field)
+				if field in ('product_id', 'account_analytic_id'):
+					if not field_val:
+						field_val = False
+				if isinstance(field_val, browse_record):
+					field_val = field_val.id
+				elif isinstance(field_val, browse_null):
+					field_val = False
+				elif isinstance(field_val, browse_record_list):
+					field_val = ((6, 0, tuple([v.id for v in field_val])),)
+				list_key.append((field, field_val))
+			list_key.sort()
+			return tuple(list_key)
+
+		context = dict(context or {})
+
+		# Compute what the new orders should contain
+		new_orders = {}
+
+		order_lines_to_move = {}
+		for porder in [order for order in self.browse(cr, uid, ids, context=context) if order.state == 'draft']:
+			order_key = make_key(porder, ('partner_id', 'location_id', 'pricelist_id', 'currency_id'))
+			new_order = new_orders.setdefault(order_key, ({}, []))
+			new_order[1].append(porder.id)
+			order_infos = new_order[0]
+			order_lines_to_move.setdefault(order_key, [])
+
+			if not order_infos:
+				order_infos.update({
+					'origin': porder.origin,
+					'date_order': porder.date_order,
+					'partner_id': porder.partner_id.id,
+					'dest_address_id': porder.dest_address_id.id,
+					'picking_type_id': porder.picking_type_id.id,
+					'location_id': porder.location_id.id,
+					'pricelist_id': porder.pricelist_id.id,
+					'currency_id': porder.currency_id.id,
+					#TEGUH201809 : add this line
+					'price_type_id':porder.price_type_id.id,
+					'state': 'draft',
+					'order_line': {},
+					'notes': '%s' % (porder.notes or '',),
+					'fiscal_position': porder.fiscal_position and porder.fiscal_position.id or False,
+				})
+			else:
+				if porder.date_order < order_infos['date_order']:
+					order_infos['date_order'] = porder.date_order
+				if porder.notes:
+					order_infos['notes'] = (order_infos['notes'] or '') + ('\n%s' % (porder.notes,))
+				if porder.origin:
+					order_infos['origin'] = (order_infos['origin'] or '') + ' ' + porder.origin
+
+			order_lines_to_move[order_key] += [order_line.id for order_line in porder.order_line
+											   if order_line.state != 'cancel']
+
+		allorders = []
+		orders_info = {}
+		for order_key, (order_data, old_ids) in new_orders.iteritems():
+			# skip merges with only one order
+			if len(old_ids) < 2:
+				allorders += (old_ids or [])
+				continue
+
+			# cleanup order line data
+			for key, value in order_data['order_line'].iteritems():
+				del value['uom_factor']
+				value.update(dict(key))
+			order_data['order_line'] = [(6, 0, order_lines_to_move[order_key])]
+
+			# create the new order
+			context.update({'mail_create_nolog': True})
+			neworder_id = self.create(cr, uid, order_data)
+			self.message_post(cr, uid, [neworder_id], body=_("RFQ created"), context=context)
+			orders_info.update({neworder_id: old_ids})
+			allorders.append(neworder_id)
+
+			# make triggers pointing to the old orders point to the new order
+			for old_id in old_ids:
+				self.redirect_workflow(cr, uid, [(old_id, neworder_id)])
+				self.signal_workflow(cr, uid, [old_id], 'purchase_cancel')
+
+		return orders_info
+
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
 	def print_draft_purchase_order(self, cr, uid, ids, context):

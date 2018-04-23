@@ -64,6 +64,7 @@
 		'views/purchase_view.xml',
 		'views/sale_view.xml',
 		'views/stock_view.xml',
+		'views/stock_invoice_onshipping_view.xml',
 		'views/tbvip.xml',
 		'views/res_users_view.xml',
 		'views/res_partner_view.xml',

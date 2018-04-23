@@ -1,38 +1,24 @@
 from openerp.osv import osv, fields
 from openerp import _
+from openerp.tools import float_compare
 from datetime import datetime, date, timedelta
-
-
-
-
+import openerp.addons.decimal_precision as dp
 
 # ==========================================================================================================================
 
-
 class account_voucher(osv.osv):
 	_inherit = 'account.voucher'
-	
+
+	def _default_writeoff_acc_id(self, cr, uid, context={}):
+		model, account_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'account_counterpart_payable_rounding')
+		return account_id or None
+
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 
-	def onchange_partner_id_tbvip(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
-		"""
-		ATTENTION!!!!
-		This method stops all future overrides that's loaded after it.
-		This method does not override onchange_partner_id (instead use _tbvip in the method name)
-		because overriding partner_id with additional 'domain' key in the result will cause an error.
-		It will trigger buggy odoo code on account_voucher/account_voucher.py:917 because
-		res['domain'] is not expected via Register Additional Payment button on Sales Order.
-		"""
+	def onchange_partner_id(self, cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context=None):
 		result = super(account_voucher, self).onchange_partner_id(
 			cr, uid, ids, partner_id, journal_id, amount, currency_id, ttype, date, context)
-		
-		partner_obj = self.pool.get('res.partner')
-		partner = partner_obj.browse(cr, uid, [partner_id])
-		if not result.get('domain', False):
-			result['domain'] = {}
-		result['domain'].update({
-			'bank_id': [('id', 'in', partner.bank_ids.ids)],
-		})
+	# ambil default account buat payment. default sesuai yang diset di user atau cabang
 		if not result.get('value', False):
 			result['value'] = {}
 		cash_account_id, bank_account_id = self._get_account_id(cr, uid, ttype, uid, context)
@@ -64,6 +50,7 @@ class account_voucher(osv.osv):
 	
 	def basic_onchange_partner(self, cr, uid, ids, partner_id, journal_id, ttype, context=None):
 		res = super(account_voucher,self).basic_onchange_partner(cr, uid, ids, partner_id, journal_id, ttype, context=context)
+	# ambil default account buat payment. default sesuai yang diset di user atau cabang
 		res['value']['account_id'] = self._get_account_id(cr, uid, ttype, uid, context)[0]
 		return res
 	
@@ -72,6 +59,7 @@ class account_voucher(osv.osv):
 			cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context)
 		
 		if journal_id:
+		# ambil default account buat payment. default sesuai yang diset di user atau cabang
 			cash_account_id, bank_account_id = self._get_account_id(cr, uid, ttype, uid, context)
 			account_id = False
 			acc_journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
@@ -88,8 +76,31 @@ class account_voucher(osv.osv):
 				result = {'value': {'account_id': account_id}}
 				
 		return result
-		
 	
+	def recompute_voucher_lines(self, cr, uid, ids, partner_id, journal_id, price, currency_id, ttype, date, context=None):
+	# cegah dari otomatis mencentang line-line invoice bila ada perubahan paid amount
+	# dengan ini, pemilihan invoice yang mau dibayar harus totally manual
+	# hanya jalankan ketika mode create, sehingga list voucher ter-load untuk user centang
+	# bila sudah edit maka jangan set ulang list dr/cr
+		if not ids:
+			price = 0
+			return super(account_voucher, self).recompute_voucher_lines(cr, uid, ids, partner_id, journal_id, price, currency_id, ttype, date, context=context)
+		else:
+			return {'value': {}}
+
+	def voucher_move_line_create(self, cr, uid, voucher_id, line_total, move_id, company_currency, current_currency, context=None):
+		result = super(account_voucher, self).voucher_move_line_create(cr, uid, voucher_id, line_total, move_id, company_currency, current_currency, context=context)
+	# hapus voucher line yang amount paid nya 0, supaya ngga ngebingungin pas liat 
+	# detail voucher
+		voucher = self.pool.get('account.voucher').browse(cr, uid, voucher_id, context=context)
+		prec = self.pool.get('decimal.precision').precision_get(cr, uid, 'Account')
+		line_ids_to_delete = []
+		for line in voucher.line_ids:
+			if not line.amount and not (line.move_line_id and not float_compare(line.move_line_id.debit, line.move_line_id.credit, precision_digits=prec) and not float_compare(line.move_line_id.debit, 0.0, precision_digits=prec)):
+				line_ids_to_delete.append(line.id)
+		self.pool.get('account.voucher.line').unlink(cr, uid, line_ids_to_delete)
+		return result
+
 	# FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
 	
 	def _bank_ids(self, cr, uid, ids, field_name, arg, context=None):
@@ -108,21 +119,38 @@ class account_voucher(osv.osv):
 		for account_voucher_data in self.browse(cr, uid, ids, context=context):
 			result[account_voucher_data.id] = True if account_voucher_data.reference and account_voucher_data.reference != '' else False
 		return result
-				
+
+	def _selected_amount(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for account_voucher_data in self.browse(cr, uid, ids, context=context):
+			total = 0
+			for line in account_voucher_data.line_dr_ids:
+				if account_voucher_data.type == 'payment':
+					total += line.amount
+				# if lainnya menyusul
+			for line in account_voucher_data.line_cr_ids:
+				if account_voucher_data.type == 'payment':
+					total -= line.amount
+			result[account_voucher_data.id] = total
+		return result
+
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'check_maturity_date': fields.date(string='Check Maturity Date',
 			readonly=True, states={'draft': [('readonly', False)]}),
-		# 'bank_id': fields.function(_bank_ids, string="Bank Account", type='many2one', relation="res.partner.bank", readonly=False),
-		'bank_id': fields.many2one('res.partner.bank', 'Bank Account'),
+		'bank_id': fields.many2one('res.partner.bank', 'Supplier Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 		'reference': fields.char('Ref #', readonly=False, states={},
 			help="Transaction reference number.", copy=False),
+		'amount': fields.float('Total Paid', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'selected_amount': fields.function(_selected_amount, type="float", string="Total Amount"),
 	}
 
 	_defaults = {
 		'check_maturity_date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
+		'writeoff_acc_id': _default_writeoff_acc_id,
+		'comment': _('Rounding'),
 	}
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
@@ -137,7 +165,7 @@ class account_voucher(osv.osv):
 		else:
 			raise osv.except_osv(_('Print Kontra Bon Error'),_('Kontra Bon must have at least one line to be printed.'))
 
-	# REFRESH ----------------------------------------------------------------------------------------------------------------
+	# ACTIONS ----------------------------------------------------------------------------------------------------------------
 
 	def action_refresh(self, cr, uid, ids, context=None):
 		voucher_line_obj = self.pool.get('account.voucher.line')
@@ -162,23 +190,33 @@ class account_voucher(osv.osv):
 
 class account_voucher_line(osv.osv):
 	_inherit = 'account.voucher.line'
+	_order = 'voucher_id, id'
 	
-	def _purchase_order_id(self, cr, uid, ids, field_name, arg, context=None):
+	def _invoice_id(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		for line in self.browse(cr, uid, ids, context=context):
-			invoice_id = line.move_line_id.invoice.id
-			if invoice_id:
-				cr.execute("""
-					SELECT purchase_id
-					FROM purchase_invoice_rel
-					WHERE invoice_id = {}
-				""".format(invoice_id))
-				res = cr.fetchone()
-				if res and len(res) > 0:
-					result[line.id] = res[0]
+			result[line.id] = line.move_line_id.invoice.id
 		return result
 
 	_columns = {
-		'purchase_order_id': fields.function(_purchase_order_id, type='many2one', relation='purchase.order',
-			store=True, string='Purchase Order'),
+		'invoice_id': fields.function(_invoice_id, type='many2one', relation='account.invoice',
+			string='Invoice'),
 	}
+
+	def action_open_invoice(self, cr, uid, ids, context={}):
+		model_obj = self.pool.get('ir.model.data')
+		model, view_id = model_obj.get_object_reference(cr, uid, 'account', 'invoice_supplier_form')
+		line_data = self.browse(cr, uid, ids[0], context=context)
+		return {
+			'type': 'ir.actions.act_window',
+			'name': 'Invoice Detail',
+			'view_mode': 'form',
+			'view_type': 'form',
+			'view_id': view_id,
+			'res_id': line_data.invoice_id.id,
+			'res_model': 'account.invoice',
+			'nodestroy': True,
+			'flags': {'form': {'options': {'mode': 'view'} } },
+			'context': {'simple_view': 1},
+			'target': 'new',
+		}

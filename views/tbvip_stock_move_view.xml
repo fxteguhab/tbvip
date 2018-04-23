@@ -11,11 +11,22 @@
 			<field name="arch" type="xml">
 				<form>
 					<header>
+
+						<!-- edit button accept, reject & tambah button request -->
+						<button name="action_accept" string="Accept" type="object" attrs="{'invisible':['|',('state','=','accepted'),('state','=','rejected')]}" class="oe_highlight" confirm="Are you sure to accept this interbranch stock move?" />
+
+						<button name="action_reject" string="Reject" type="object" attrs="{'invisible':['|',('state','=','accepted'),('state','=','rejected')]}" confirm="Are you sure to reject this interbranch stock move?"/>
+
+						<button name="action_request" string="Request" type="object" states = "draft" confirm="Are you sure to request this interbranch stock move?"/>
+
+						<!--
 						<button name="action_accept" class="oe_highlight" string="Accept" type="object"
 								states="draft" confirm="Are you sure to accept this interbranch stock move?"/>
 						<button name="action_reject" string="Reject" type="object"
 								states="draft" confirm="Are you sure to reject this interbranch stock move?" />
-						<button name="print_interbranch_stock_move" string="" type="object" icon="gtk-print"/>
+						-->
+
+						<button name="print_interbranch_stock_move" string="Print" type="object" icon="gtk-print"/>
 						<field name="state" widget="statusbar" readonly="1"/>
 					</header>
 					<group col="4">
@@ -57,12 +68,15 @@
 			<field name="name">tbvip.interbranch.stock.move.tree</field>
 			<field name="model">tbvip.interbranch.stock.move</field>
 			<field name="arch" type="xml">
-				<tree>
+				<!-- TEGUH@20180405 : tambah atribut color -->
+				<tree colors="blue:state == 'request';red:state in ('otw','delivered');green:state == 'draft'">
 					<field name="move_date"/>
 					<field name="from_stock_location_id"/>
 					<field name="to_stock_location_id"/>
 					<field name="input_user_id"/>
 					<field name="prepare_employee_id"/>
+					<!-- TEGUH@20180405 : Tambah column stock line-->
+					<field name = "interbranch_stock_move_line_ids"/>
 					<field name="state" readonly="1"/>
 				</tree>
 			</field>
@@ -73,9 +87,9 @@
 			<field name="arch" type="xml">
 				<search>
 					<group string="Group by Location">
-						<filter string="From" name="from_location" domain="[]"
+						<filter string="From Loc." name="from_location" domain="[]"
 								context="{'group_by': 'from_stock_location_id'}"/>
-						<filter string="To" name="to_location" domain="[]"
+						<filter string="To Loc." name="to_location" domain="[]"
 								context="{'group_by': 'to_stock_location_id'}"/>
 					</group>
 					<group string="Group by Move Date">
@@ -83,8 +97,14 @@
 								context="{'group_by': 'move_date:year'}"/>
 						<filter string="Month" name="move_date_month" domain="[]"
 								context="{'group_by': 'move_date:month'}"/>
+						<!-- TEGUH @20180405 : Add filter Week -->	
+						<filter string="Week" name="move_date_week" domain="[]"
+								context="{'group_by': 'move_date:week'}"/>
 						<filter string="Day" name="move_date_day" domain="[]"
 								context="{'group_by': 'move_date:day'}"/>
+						<!-- TEGUH @20180405 : Add filter Today -->			
+						<filter string="Today" domain="[('move_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('move_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+		
 					</group>
 					<group string="Group by">
 						<filter string="Prepared by" name="prepare_employee_id" domain="[]"

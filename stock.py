@@ -275,6 +275,7 @@ class stock_check_memory_line(osv.osv_memory):
 	_columns = {
 		'header_id': fields.many2one('stock.check.memory', 'Stock Check'),
 		'product_id': fields.many2one('product.product', 'Product', domain="[('sale_ok', '=', True)]"),
+		'price_info':fields.text('Price Info'),
 		'stock_info': fields.text('Stock Info')
 	}
 
@@ -302,7 +303,9 @@ class stock_check_memory_line(osv.osv_memory):
 			result += key + ': ' + str(map[key]) + ' ' + default_uom + '\r\n'
 		return result
 
-
+	def get_price_info(self, cr, uid, ids, product_id):
+		result = {}
+		return result
 # ==========================================================================================================================
 	
 class stock_move(osv.osv):

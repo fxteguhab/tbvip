@@ -483,10 +483,6 @@ class tbvip_data_synchronizer(osv.osv):
 				'categ_id': category_cache.get(categ_id, None)
 			}
 			product_obj.create(cr, uid, data)
-			print data
-
-		#raise osv.except_osv('test','sudah sampai')
-
 
 # EMPLOYEE -----------------------------------------------------------------------------------------------------------------
 	

@@ -25,6 +25,32 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="view_invoice_supplier_form_inherit">
+			<field name="name">account.invoice.supplier.form.inherit</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_supplier_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//header" position="attributes">
+					<attribute name="invisible">context.get('simple_view', False)</attribute>
+				</xpath>
+				<xpath expr="//div[@class='oe_title']" position="attributes">
+					<attribute name="invisible">context.get('simple_view', False)</attribute>
+				</xpath>
+				<xpath expr="//div[@class='oe_chatter']" position="attributes">
+					<attribute name="invisible">context.get('simple_view', False)</attribute>
+				</xpath>
+				<xpath expr="//form/sheet/group[1]" position="attributes">
+					<attribute name="invisible">context.get('simple_view', False)</attribute>
+				</xpath>
+				<xpath expr="//page[@string='Other Info']" position="attributes">
+					<attribute name="invisible">context.get('simple_view', False)</attribute>
+				</xpath>
+				<xpath expr="//page[@string='Payments']" position="attributes">
+					<attribute name="invisible">context.get('simple_view', False)</attribute>
+				</xpath>
+			</field>
+		</record>
+
 		<record model="ir.ui.view" id="invoice_tree_inherit">
 			<field name="name">account.invoice.tree.inherit</field>
 			<field name="model">account.invoice</field>
@@ -54,5 +80,7 @@
 				</xpath>
 			</field>
 		</record>
+
+
 	</data>
 </openerp>
