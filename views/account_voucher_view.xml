@@ -31,8 +31,12 @@
 				<field name="amount" position="after">
 					<field name="writeoff_amount" widget="monetary" options="{'currency_field': 'currency_id'}" attrs="{'invisible': ['|',('id','=',False),('id','=',None)]}" />
 				</field>
-				<field name="amount" position="attributes">
-					<attribute name="attrs">{'invisible': ['|',('id','=',False),('id','=',None)]}</attribute>
+				<field name="amount" position="replace">
+					<label for="amount"/>
+					<div>
+						<field name="amount" invisible="context.get('line_type', False)" on_change="onchange_amount(amount, payment_rate, partner_id, journal_id, currency_id, type, date, payment_rate_currency_id, company_id, context)" class="oe_inline" widget='monetary' options='{"currency_field": "currency_id"}'/>
+						<button name="action_dummy" states="draft" string="(update)" type="object" class="oe_edit_only oe_link"/>
+					</div>
 				</field>
 			<!-- ganti label supayaa ngga bingung -->
 				<label for="line_dr_ids" position="attributes">

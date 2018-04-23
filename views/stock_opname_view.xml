@@ -17,9 +17,6 @@
 				<field name="employee_id" position="attributes">
 					<attribute name="on_change">none</attribute>
 				</field>
-				<field name ="employee_id" position="before">
-					<field name = "name"/>
-				</field>
 				<field name="location_id" position="attributes">
 					<attribute name="on_change">none</attribute>
 				</field>

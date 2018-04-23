@@ -185,6 +185,9 @@ class account_voucher(osv.osv):
 					elif isinstance(line_dr, dict):
 						self.write(cr, uid, voucher.id, {'line_dr_ids': [(0, False, line_dr)]})
 
+	def action_dummy(self, cr, uid, ids, context={}):
+		return True
+
 # ==========================================================================================================================
 
 
