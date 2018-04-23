@@ -1,8 +1,7 @@
 from openerp.osv import osv, fields
 from datetime import datetime, timedelta
 
-# ==========================================================================================================================
-
+# ==========================================================================================================================    
 class product_category(osv.osv):
 	_inherit = 'product.category'
 	
@@ -81,13 +80,14 @@ class product_template(osv.osv):
 				quant_ids = quant_obj.search(cr, uid, [('product_id', '=', variant.id), ('location_id.usage', '=', 'internal')])
 				for quant in quant_obj.browse(cr, uid, quant_ids):
 					default_uom = quant.product_id.uom_id.name
-					map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
+					map[quant.location_id.name] = map.get(quant.location_id.name, 0) + quant.qty
+					#map[quant.location_id.display_name] = map.get(quant.location_id.display_name, 0) + quant.qty
 				# stocks += variant.name + '\n'
 				stock = ''
 				for key in sorted(map.iterkeys()):
 					stock += key + ': ' + str(map[key]) + ' ' + default_uom + '\n'
 				if len(stock) == 0:
-					stock = 'None'
+					stock = 'Stock : 0'
 				stocks += stock + '\n'
 			result[product.id] = stocks
 		return result
@@ -119,25 +119,45 @@ class product_template(osv.osv):
 					price += key + ': ' + str("{:,.0f}".format(map[key])) + '\n'
 					#price += key + ': ' + str(map[key]) + '\n'
 				if len(price) == 0:
-					stock = '0'
+					price = '-'
 				prices += price + '\n'
 			result[product.id] = prices
 
 		return result
 
 
-	def set_commission(self,cr,uid,ids, value):
-		"""
-		product_obj = self.pool.get('product.template')
-		product_id = product_obj.search(cr, uid, [('id', '=', ids)])
-		for product in product_obj.browse(cr, uid, product_id):
-			product.commission = value
-		"""
-		vals = {}
-		metel_id = self.pool.get('product.template').search(cr, uid, [('id', '=', ids)])
-		if metel_id:
-			vals.update({'commission':value})  
-		return 0
+	#TEGUH@20180414 : _product_commission output text
+	def _product_commission(self, cr, uid, ids, field_name, arg, context={}):
+		result = {}
+		current_commission_obj = self.pool.get('product.current.commission')
+		for product in self.browse(cr, uid, ids):
+			commissions = ''
+			for variant in product.product_variant_ids:
+				commission = current_commission_obj.get_current_commission(cr, uid, variant.id,context)
+				#if len(commission) == 0:
+				#	commission = '0'
+				commissions += str(commission)
+			result[product.id] = commissions
+
+		'''
+		for product in self.browse(cr, uid, ids):
+			commissions = ''
+			for variant in product.product_variant_ids:
+				map = {}
+				commission_ids = current_commission_obj.search(cr, uid, [('product_id', '=', variant.id)])
+				for commission_id in current_commission_obj.browse(cr, uid, commission_ids):
+					map[commission_id.product_id] = map.get(commission_id.product_id, 0) + commission_id.commission
+				
+				commission = ''
+				for key in sorted(map.iterkeys()):
+					commission += key + ': ' + str("{:,.0f}".format(map[key])) + '\n'
+					#price += key + ': ' + str(map[key]) + '\n'
+				if len(commission) == 0:
+					commission = '0'
+				commissions += commission + '\n'
+			result[product.id] = commissions
+		'''
+		return result
 		
 
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
@@ -147,7 +167,9 @@ class product_template(osv.osv):
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
 			string="Last Purchase", relation="purchase.order.line"),
 		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
-		'commission': fields.char('Commission'),
+		#TEGUH@20180414 : ganti jenis field commision
+		'commission': fields.function(_product_commission, string="Commission", type='text', store=False),
+		#'commission': fields.char('Commission'),
 		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
 		'product_current_stock': fields.function(_product_current_stock, string="Current Stock", type='text', store=False),
 		'current_price_ids': fields.function(_current_price_ids, string="Current Prices", type='one2many', relation='product.current.price'),
@@ -162,7 +184,7 @@ class product_template(osv.osv):
 	_defaults = {
 		'is_sup_bonus': False,
 		'type': 'product',
-		'commission' : '0',
+		#'commission' : '0',
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------

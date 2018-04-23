@@ -27,10 +27,17 @@ class sale_order(osv.osv):
 	
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
-		'bon_number': fields.char('Bon Number', required=True, readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
-		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
+		
+		#TEGUH@20180412 : bon book not required
+		'bon_number': fields.char('Bon Number', readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
+		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number'),
+		
+		#'bon_number': fields.char('Bon Number', required=True, readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
+		#'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
+		#TEGUH@20180412 : employee id  not required
+		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
+		#'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_complex_payment': fields.boolean('Is Complex Payment'),
 		'return_amount' : fields.float('Return Amount'),
@@ -57,6 +64,7 @@ class sale_order(osv.osv):
 		'shipped_or_taken': 'taken',
 		'stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
 		'is_complex_payment': False
+		#,'bon_number' : '0'
 	}
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
