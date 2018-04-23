@@ -163,6 +163,34 @@
 			</field>
 		</record>
 
+		<!-- TEGUH@20180414 : ganti urutan & nambah group by employee -->
+		<record id="view_sales_order_filter_inherit" model="ir.ui.view">
+			<field name="name">sale.order.list.select.inherit</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_sales_order_filter"/>
+			<field name="arch" type="xml">			
+				
+				<filter string="New Mail" position="replace"></filter>
+				<filter string="To Invoice" position="replace"></filter>	
+
+				<filter string="Order Month" position="before">
+					<filter name="groupby_employee" string="Employee" context="{'group_by':'employee_id'}"/>
+					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
+				</filter>
+				<filter string="Order Month" position="after">
+					<filter string="Order Date" name="Date" context="{'group_by':'date_order:day'}" help="Ordered date of the sales order"/>
+					<filter string="Today" name="filter_date_order_today" domain="[('date_order','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),('date_order','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>	
+				</filter>
+				<filter string="Salesperson" position="attributes">
+					<attribute name="string">Cashier</attribute>
+				</filter>
+				<filter string="Quotations" position="attributes">
+					<attribute name="string">Draft</attribute>
+				</filter>
+			</field>
+		</record>
+		
+		<!--
 		<record id="view_sales_order_search_inherit" model="ir.ui.view">
 			<field name="name">sale.order.search.inherit</field>
 			<field name="model">sale.order</field>
@@ -193,5 +221,6 @@
 				</group>
 			</field>
 		</record>
+		-->
 	</data>
 </openerp>

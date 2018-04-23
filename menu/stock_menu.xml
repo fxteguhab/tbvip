@@ -49,11 +49,15 @@
 			<field name="name">stock.inventory.line.list.stock.opname</field>
 			<field name="model">stock.inventory.line</field>
 			<field name="arch" type="xml">
-				<tree create="false" delete="false">
+				<tree create="false" delete="false" default_order="create_date desc">
 					<field name="product_id"/>
 					<field name="product_qty"/>
+					<field name="theoretical_qty" string="Old Qty"/>
 					<field name="location_id"/>
 					<field name="inventory_id" string = "Inventory Adjustment"/>
+					<field name="create_uid"/>
+					<field name="create_date"/>
+					<field name="state"/>
 				</tree>
 			</field>
 		</record>
@@ -64,7 +68,33 @@
 			<field name="view_type">form</field>
 			<field name="view_mode">tree</field>
 			<field name="view_id" ref="stock_inventory_line_list_stock_opname"/>
-			<field name="domain">[('inventory_id.state', '=', 'confirm')]</field>
+			<!--<field name="domain">[('inventory_id.state', '=', 'confirm')]</field>-->
+		</record>
+		
+		<!-- TEGUH@20180415 bikin search baru -->
+		<record id="stock_inventory_line_list_stock_opname_search" model="ir.ui.view">
+			<field name="name">stock.inventory.line.list.stock.opname.search</field>
+			<field name="model">stock.inventory.line</field>
+			<field name="arch" type="xml">
+				<search>
+					<group string="Group by Timeline">
+						<filter string="Year" name="journal_date_year" domain="[]" context="{'group_by': 'create_date:year'}"/>
+						<filter string="Month" name="journal_date_month" domain="[]" context="{'group_by': 'create_date:month'}"/>
+						<filter string="Week" name="journal_date_month" domain="[]" context="{'group_by': 'create_date:week'}"/>
+						<filter string="Day" name="journal_date_day" domain="[]" context="{'group_by': 'create_date:day'}"/>	
+						<filter string="Today" domain="[('create_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('create_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+					</group>
+					<group string="Group by">
+						<filter string="Branch" name="location_id" domain="[]" context="{'group_by': 'location_id'}"/>
+						<filter string="Inventory Adjustment" name="inventory_id" domain="[]" context="{'group_by': 'inventory_id'}"/>
+					</group>
+					<group string="Group by">
+						<filter string="Inputer" name="create_uid" domain="[]" context="{'group_by': 'create_uid'}"/>
+						<filter string="Product" name="product_id" domain="[]" context="{'group_by': 'product_id'}"/>
+						<!--<filter string="State" name="state" domain="[]" context="{'group_by': 'state'}"/>-->
+					</group>
+				</search>
+			</field>
 		</record>
 
 		<menuitem sequence="5" id="stock_menu_check_stock" parent="stock.menu_stock_inventory_control" action="stock_action_check_stock"/>

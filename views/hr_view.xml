@@ -45,6 +45,7 @@
 					<attribute name="domain">[('name','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),('name','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]</attribute>
 				</xpath>
 				<xpath expr="//filter[@name='groupby_name']" position="after">
+					<filter name="groupby_week" string="Week" context="{'group_by':'name:week'}"/>
 					<filter name="groupby_day" string="Day" context="{'group_by':'name:day'}"/>
 					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
 				</xpath>

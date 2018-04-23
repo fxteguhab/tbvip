@@ -7,7 +7,6 @@ from openerp.tools.translate import _
 
 
 # ==========================================================================================================================
-
 class tbvip_branch(osv.osv):
 	_name = 'tbvip.branch'
 	_description = 'Store branches'
@@ -672,7 +671,6 @@ class tbvip_data_synchronizer(osv.osv):
 	# ambil kontra bon yang sudah ada
 		
 		print "selesai sync purchase: %s" % datetime.now()
-
 
 	# def load_kontra_bon(self, env, domain, context={}):
 	# 	uid = env.uid
