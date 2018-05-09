@@ -29,6 +29,11 @@ class account_voucher(osv.osv):
 		elif acc_journal.type == 'bank':
 			account_id = bank_account_id
 		result['value']['account_id'] = account_id
+	# ambil default rekening partner, yaitu rekening pertama punya si partner
+		if partner_id:
+			partner = self.pool.get('res.partner').browse(cr, uid, partner_id)
+			if len(partner.bank_ids) > 0:
+				result['value']['bank_id'] = partner.bank_ids[0].id
 		return result
 	
 	def _get_account_id(self, cr, uid, ttype, user_id, context=None):

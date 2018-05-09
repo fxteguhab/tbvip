@@ -54,9 +54,7 @@ class purchase_order(osv.osv):
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
-		'partner_ref': fields.char('Supplier Reference', states={'confirmed': [('readonly', True)],
-			'approved': [('readonly', True)],
-			'done': [('readonly', True)]},
+		'partner_ref': fields.char('Supplier Reference', states={},
 			copy=False, track_visibility='always',
 			help="Reference of the sales order or bid sent by your supplier. "
 				 "It's mainly used to do the matching when you receive the "

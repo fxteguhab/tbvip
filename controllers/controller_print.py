@@ -220,6 +220,7 @@ class controller_print(http.Controller):
 		row_number = 0
 		account_voucher_line = []
 		for line in acc_vou.line_dr_ids:
+			if line.amount <= 0: continue
 			row_number += 1
 			row = tpl_line.render(
 				no=str(row_number),
@@ -233,7 +234,7 @@ class controller_print(http.Controller):
 			branch_name=branch_name,
 			company_name=company_name,
 			supplier_name=supplier_name,
-			payment_date=datetime.strptime(acc_vou.date, '%Y-%m-%d').strftime('%Y-%m-%d'),
+			payment_date=datetime.strptime(acc_vou.check_maturity_date, '%Y-%m-%d').strftime('%Y-%m-%d'),
 			lines=account_voucher_line,
 			subtotal=self.thousand_separator(acc_vou.amount),
 			discount=self.thousand_separator(0),
