@@ -16,8 +16,12 @@
 					<attribute name="confirm">Are you sure to confirm this payment? This action cannot be undone.</attribute>
 				</button>
 				<field name="reference" position="after">
+					<field name="check_maturity_date" attrs="{'readonly': [('state', 'not in', 'draft')], 'invisible': [('journal_id','=','cash')]}" />
+					<field name="bank_id" domain="[('partner_id','=',partner_id)]" attrs="{'readonly':[('state', 'not in', 'draft')], 'invisible': [('journal_id','=','cash')]}"/>
+					<!--
 					<field name="check_maturity_date" attrs="{'readonly': [('state', 'not in', 'draft')], 'invisible': ['|',('id','=',False),('id','=',None)]}" />
 					<field name="bank_id" domain="[('partner_id','=',partner_id)]" attrs="{'readonly':[('state', 'not in', 'draft')], 'invisible': ['|',('id','=',False),('id','=',None)]}"/>
+					-->
 					<field name="is_ready" readonly="1" invisible="1" />
 					<field name="id" invisible="1" />
 				</field>

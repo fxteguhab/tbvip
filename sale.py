@@ -445,10 +445,12 @@ class sale_order_line(osv.osv):
 		current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
 		vals['commission'] = current_commission
 		vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
+		#TEGUH@20180502 : tambah field disc
+		disc = ''
 		if vals.get('product_id', False) and vals.get('price_unit', False) and \
 			vals.get('price_type_id', False) and vals.get('product_uom', False):
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-				vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
+				vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'],disc)
 		return super(sale_order_line, self).create(cr, uid, vals, context)
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -459,12 +461,14 @@ class sale_order_line(osv.osv):
 			price_type_id = so_line.price_type_id.id
 			product_uom = so_line.product_uom.id
 			price_unit = so_line.price_unit
+			#TEGUH@20180502 : tambah field disc
+			disc = ''
 			if vals.get('product_id', False): product_id = vals['product_id']
 			if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
 			if vals.get('product_uom', False): product_uom = vals['product_uom']
 			if vals.get('price_unit', False): price_unit = vals['price_unit']
 			self.pool.get('price.list')._create_product_current_price_if_none(
-				cr, uid, price_type_id, product_id, product_uom, price_unit)
+				cr, uid, price_type_id, product_id, product_uom, price_unit,disc)
 		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):

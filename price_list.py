@@ -18,7 +18,7 @@ class product_current_price(osv.osv):
 class price_list(osv.osv):
 	_inherit = 'price.list'
 # METHOD --------------------------------------------------------------------------------------------------------------------
-	def _create_product_current_price_if_none(self, cr, uid, price_type_id, product_id, uom_id, price):
+	def _create_product_current_price_if_none(self, cr, uid, price_type_id, product_id, uom_id, price,disc): #TEGUH@20180501 : tambah parameter diskon
 		product_current_price_obj = self.pool.get('product.current.price')
 		product_current_price_ids = product_current_price_obj.search(cr, uid, [
 			('price_type_id', '=', price_type_id),
@@ -30,6 +30,8 @@ class price_list(osv.osv):
 				'product_id': product_id,
 				'uom_id_1': uom_id,
 				'price_1': price,
+				#TEGUH@20180501 : tambah field diskon
+				'disc_1' : disc,
 			})
 		else:
 			add = True
@@ -44,24 +46,30 @@ class price_list(osv.osv):
 				if not product_current_price['uom_id_1']:
 					field_uom = 'uom_id_1'
 					field_price = 'price_1'
+					field_disc = 'disc_1'
 				elif not product_current_price['uom_id_2']:
 					field_uom = 'uom_id_2'
 					field_price = 'price_2'
+					field_disc = 'disc_2'
 				elif not product_current_price['uom_id_3']:
 					field_uom = 'uom_id_3'
 					field_price = 'price_3'
+					field_disc = 'disc_3'
 				elif not product_current_price['uom_id_4']:
 					field_uom = 'uom_id_4'
 					field_price = 'price_4'
+					field_disc = 'disc_4'
 				elif not product_current_price['uom_id_5']:
 					field_uom = 'uom_id_5'
 					field_price = 'price_5'
+					field_disc = 'disc_5'
 				if field_uom and field_price:
 					product_current_price_obj.write(cr, uid, [product_current_price.id], {
 						'price_type_id': price_type_id,
 						'product_id': product_id,
 						field_uom: uom_id,
 						field_price: price,
+						field_disc : disc, #TEGUH@20180501 : tambah field disc
 					})
 				else:
 					pass  # penuh field uomnya

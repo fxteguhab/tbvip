@@ -3,6 +3,8 @@ from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime, date, timedelta
 from openerp.osv.orm import browse_record_list, browse_record, browse_null
+from openerp.tools.float_utils import float_compare, float_is_zero
+from openerp import tools
 
 import openerp.addons.purchase_sale_discount as psd
 import openerp.addons.sale as imported_sale
@@ -54,14 +56,17 @@ class purchase_order(osv.osv):
 		'adm_point': fields.float('Adm. Point'),
 		'pickup_vehicle_id': fields.many2one('fleet.vehicle', 'Pickup Vehicle'),
 		'driver_id': fields.many2one('hr.employee', 'Pickup Driver'),
-		'partner_ref': fields.char('Supplier Reference', states={'confirmed': [('readonly', True)],
-			'approved': [('readonly', True)],
-			'done': [('readonly', True)]},
-			copy=False, track_visibility='always',
-			help="Reference of the sales order or bid sent by your supplier. "
-				 "It's mainly used to do the matching when you receive the "
-				 "products as this reference is usually written on the "
-				 "delivery order sent by your supplier.", ),
+		'partner_ref':fields.char('Supplier Reference',readonly=False,states={}),
+		
+		#'partner_ref': fields.char('Supplier Reference', states={'confirmed': [('readonly', False)],
+		#	'approved': [('readonly', True)],
+		#	'done': [('readonly', True)]},
+		#	copy=False, track_visibility='always',
+		#	help="Reference of the sales order or bid sent by your supplier. "
+		#		 "It's mainly used to do the matching when you receive the "
+		#		 "products as this reference is usually written on the "
+		#		 "delivery order sent by your supplier.", ),
+		
 		'date_order': fields.datetime('Order Date', required=True, states={'confirmed': [('readonly', True)],
 			'approved': [('readonly', True)]},
 			select=True, copy=False, track_visibility='always',
@@ -182,6 +187,7 @@ class purchase_order(osv.osv):
 		return result
 	
 	#TEGUH20180409 : override merge method, 
+	#sebelumnya error 'nyangkut' di price list type id
 	def do_merge(self, cr, uid, ids, context=None):
 		def make_key(br, fields):
 			list_key = []
@@ -268,6 +274,75 @@ class purchase_order(osv.osv):
 				self.signal_workflow(cr, uid, [old_id], 'purchase_cancel')
 
 		return orders_info
+
+
+	#TEGUH@20180425 : overide fungsi ini, bagian partner_id di move_template	
+	def _prepare_order_line_move(self, cr, uid, order, order_line, picking_id, group_id, context=None):	
+		product_uom = self.pool.get('product.uom')
+		price_unit = order_line.price_unit
+		if order_line.taxes_id:
+			taxes = self.pool['account.tax'].compute_all(cr, uid, order_line.taxes_id, price_unit, 1.0,order_line.product_id, order.partner_id)
+			price_unit = taxes['total']
+		if order_line.product_uom.id != order_line.product_id.uom_id.id:
+			price_unit *= order_line.product_uom.factor / order_line.product_id.uom_id.factor
+		if order.currency_id.id != order.company_id.currency_id.id:
+			#we don't round the price_unit, as we may want to store the standard price with more digits than allowed by the currency
+			price_unit = self.pool.get('res.currency').compute(cr, uid, order.currency_id.id, order.company_id.currency_id.id, price_unit, round=False, context=context)
+		res = []
+		if order.location_id.usage == 'customer':
+			name = order_line.product_id.with_context(dict(context or {}, lang=order.dest_address_id.lang)).display_name
+		else:
+			name = order_line.name or ''
+		move_template = {
+			'name': name,
+			'product_id': order_line.product_id.id,
+			'product_uom': order_line.product_uom.id,
+			'product_uos': order_line.product_uom.id,
+			'date': order.date_order,
+			'date_expected': fields.date.date_to_datetime(self, cr, uid, order_line.date_planned, context),
+			'location_id': order.partner_id.property_stock_supplier.id,
+			'location_dest_id': order.location_id.id,
+			'picking_id': picking_id,
+			#TEGUH@20180425 : overide line ini, diganti jadi order.partner_id.id,
+			'partner_id': order.partner_id.id,
+			'move_dest_id': False,
+			'state': 'draft',
+			'purchase_line_id': order_line.id,
+			'company_id': order.company_id.id,
+			'price_unit': price_unit,
+			'picking_type_id': order.picking_type_id.id,
+			'group_id': group_id,
+			'procurement_id': False,
+			'origin': order.name,
+			'route_ids': order.picking_type_id.warehouse_id and [(6, 0, [x.id for x in order.picking_type_id.warehouse_id.route_ids])] or [],
+			'warehouse_id':order.picking_type_id.warehouse_id.id,
+			'invoice_state': order.invoice_method == 'picking' and '2binvoiced' or 'none',
+		}
+
+		diff_quantity = order_line.product_qty
+		for procurement in order_line.procurement_ids:
+			procurement_qty = product_uom._compute_qty(cr, uid, procurement.product_uom.id, procurement.product_qty, to_uom_id=order_line.product_uom.id)
+			tmp = move_template.copy()
+			tmp.update({
+				'product_uom_qty': min(procurement_qty, diff_quantity),
+				'product_uos_qty': min(procurement_qty, diff_quantity),
+				'move_dest_id': procurement.move_dest_id.id,  #move destination is same as procurement destination
+				'group_id': procurement.group_id.id or group_id,  #move group is same as group of procurements if it exists, otherwise take another group
+				'procurement_id': procurement.id,
+				'invoice_state': procurement.rule_id.invoice_state or (procurement.location_id and procurement.location_id.usage == 'customer' and procurement.invoice_state=='2binvoiced' and '2binvoiced') or (order.invoice_method == 'picking' and '2binvoiced') or 'none', #dropship case takes from sale
+				'propagate': procurement.rule_id.propagate,
+			})
+			diff_quantity -= min(procurement_qty, diff_quantity)
+			if not float_is_zero(tmp['product_uom_qty'], precision_rounding=order_line.product_uom.rounding):
+				res.append(tmp)
+		#if the order line has a bigger quantity than the procurement it was for (manually changed or minimal quantity), then
+		#split the future stock move in two because the route followed may be different.
+		if float_compare(diff_quantity, 0.0, precision_rounding=order_line.product_uom.rounding) > 0:
+			move_template['product_uom_qty'] = diff_quantity
+			move_template['product_uos_qty'] = diff_quantity
+			res.append(move_template)
+		return res
+
 
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
@@ -382,7 +457,7 @@ class purchase_order_line(osv.osv):
 		# otomatis create current price kalo belum ada
 			if vals.get('price_type_id', False) and vals.get('product_uom', False):
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
+					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'],vals['discount_string'])
 	# otomatis isi incoming location dengan default stock location cabang di mana user ini login
 	# artinya, secara default barang akan dikirim ke cabang user pembuat PO ini
 	# hanya bila tidak diset di vals nya
@@ -397,22 +472,31 @@ class purchase_order_line(osv.osv):
 		for id in ids:
 			self._message_line_changes(cr, uid, vals, id, context=None)
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
-	# kirim message kalau ada perubahan harga
-		if vals.get('price_unit', False):
-			for purchase_line in self.browse(cr, uid, ids):
-				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
+		
+		#TEGUH@20180501 : 
+		#ini buat apa ya ? ditutup dulu sementara deh .....
+		# kirim message kalau ada perubahan harga
+		#if vals.get('price_unit', False):
+		#	for purchase_line in self.browse(cr, uid, ids):
+		#		self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
+		
+
 		for po_line in self.browse(cr, uid, ids):
 		# bikin product current price baru bila belum ada
 			product_id = po_line.product_id.id
 			price_type_id = po_line.price_type_id.id
 			product_uom = po_line.product_uom.id
 			price_unit = po_line.price_unit
+			#TEGUH@20180501 : tambah field discount_string
+			discount_string = po_line.discount_string
 			if vals.get('product_id', False): product_id = vals['product_id']
 			if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
 			if vals.get('product_uom', False): product_uom = vals['product_uom']
 			if vals.get('price_unit', False): price_unit = vals['price_unit']
+			#TEGUH@20180501 : tambah field discount string
+			if vals.get('discount_string', False): discount_string = vals['discount_string']
 			self.pool.get('price.list')._create_product_current_price_if_none(
-				cr, uid, price_type_id, product_id, product_uom, price_unit)
+				cr, uid, price_type_id, product_id, product_uom, price_unit,discount_string) #TEGUH@20180501 : tambah parameter discount_string
 		return edited_order_line
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -497,3 +581,83 @@ class purchase_order_line(osv.osv):
 		})
 		
 		return result
+
+class purchase_report(osv.osv):
+	_inherit = "purchase.report"
+# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	#TEGUH20180425 : hapus semua tulisan cr.rate
+	def init(self, cr):
+		tools.sql.drop_view_if_exists(cr, 'purchase_report')
+		cr.execute("""
+			create or replace view purchase_report as (
+				WITH currency_rate (currency_id, rate, date_start, date_end) AS (
+					SELECT r.currency_id, r.rate, r.name AS date_start,
+						(SELECT name FROM res_currency_rate r2
+						WHERE r2.name > r.name AND
+							r2.currency_id = r.currency_id
+						 ORDER BY r2.name ASC
+						 LIMIT 1) AS date_end
+					FROM res_currency_rate r
+				)
+				select
+					min(l.id) as id,
+					s.date_order as date,
+					l.state,
+					s.date_approve,
+					s.minimum_planned_date as expected_date,
+					s.dest_address_id,
+					s.pricelist_id,
+					s.validator,
+					spt.warehouse_id as picking_type_id,
+					s.partner_id as partner_id,
+					s.create_uid as user_id,
+					s.company_id as company_id,
+					l.product_id,
+					t.categ_id as category_id,
+					t.uom_id as product_uom,
+					s.location_id as location_id,
+					sum(l.product_qty/u.factor*u2.factor) as quantity,
+					extract(epoch from age(s.date_approve,s.date_order))/(24*60*60)::decimal(16,2) as delay,
+					extract(epoch from age(l.date_planned,s.date_order))/(24*60*60)::decimal(16,2) as delay_pass,
+					count(*) as nbr,
+					sum(l.price_unit*l.product_qty)::decimal(16,2) as price_total,
+					avg(100.0 * (l.price_unit*l.product_qty) / NULLIF(ip.value_float*l.product_qty/u.factor*u2.factor, 0.0))::decimal(16,2) as negociation,
+					sum(ip.value_float*l.product_qty/u.factor*u2.factor)::decimal(16,2) as price_standard,
+					(sum(l.product_qty*l.price_unit)/NULLIF(sum(l.product_qty/u.factor*u2.factor),0.0))::decimal(16,2) as price_average
+				from purchase_order_line l
+					join purchase_order s on (l.order_id=s.id)
+						left join product_product p on (l.product_id=p.id)
+							left join product_template t on (p.product_tmpl_id=t.id)
+							LEFT JOIN ir_property ip ON (ip.name='standard_price' AND ip.res_id=CONCAT('product.template,',t.id) AND ip.company_id=s.company_id)
+					left join product_uom u on (u.id=l.product_uom)
+					left join product_uom u2 on (u2.id=t.uom_id)
+					left join stock_picking_type spt on (spt.id=s.picking_type_id)
+					join currency_rate cr on (cr.currency_id = s.currency_id and
+						cr.date_start <= coalesce(s.date_order, now()) and
+						(cr.date_end is null or cr.date_end > coalesce(s.date_order, now())))
+				group by
+					s.company_id,
+					s.create_uid,
+					s.partner_id,
+					u.factor,
+					s.location_id,
+					l.price_unit,
+					s.date_approve,
+					l.date_planned,
+					l.product_uom,
+					s.minimum_planned_date,
+					s.pricelist_id,
+					s.validator,
+					s.dest_address_id,
+					l.product_id,
+					t.categ_id,
+					s.date_order,
+					l.state,
+					spt.warehouse_id,
+					u.uom_type,
+					u.category_id,
+					t.uom_id,
+					u.id,
+					u2.factor
+			)
+		""")

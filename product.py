@@ -217,8 +217,8 @@ class product_product(osv.osv):
 		config_param_obj = self.pool.get('ir.config_parameter')
 		
 		# date
-		today = datetime.now()
-		purchase_needs_latest_sale_days = int(config_param_obj.get_param(cr, uid, 'purchase_needs_latest_sale', '0'))
+		today = datetime.now() + timedelta(hours = 7)
+		purchase_needs_latest_sale_days = int(config_param_obj.get_param(cr, uid, 'product_rank_days', '30'))
 		last_sale_date = today + timedelta(days=-purchase_needs_latest_sale_days)
 		
 		# product sales
