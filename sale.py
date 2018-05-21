@@ -441,6 +441,8 @@ class sale_order_line(osv.osv):
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
 	def create(self, cr, uid, vals, context={}):
+		new_id = super(sale_order_line, self).create(cr, uid, vals, context)
+		new_data = self.browse(cr, uid, new_id)
 		product_obj = self.pool.get('product.current.commission')
 		current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
 		vals['commission'] = current_commission
@@ -450,8 +452,9 @@ class sale_order_line(osv.osv):
 		if vals.get('product_id', False) and vals.get('price_unit', False) and \
 			vals.get('price_type_id', False) and vals.get('product_uom', False):
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-				vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'],disc)
-		return super(sale_order_line, self).create(cr, uid, vals, context)
+				vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'], disc,
+				partner_id=new_data.order_id.id)
+		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
 		for id in ids:
@@ -468,7 +471,8 @@ class sale_order_line(osv.osv):
 			if vals.get('product_uom', False): product_uom = vals['product_uom']
 			if vals.get('price_unit', False): price_unit = vals['price_unit']
 			self.pool.get('price.list')._create_product_current_price_if_none(
-				cr, uid, price_type_id, product_id, product_uom, price_unit,disc)
+				cr, uid, price_type_id, product_id, product_uom, price_unit, disc,
+				partner_id=so_line.order_id.partner_id.id)
 		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -518,10 +522,10 @@ class sale_order_line(osv.osv):
 		ir_model_data = self.pool.get('ir.model.data')
 		uom_unit_id = ir_model_data.get_object(cr, uid, 'product', 'product_uom_unit').id
 		product_current_price_obj = self.pool.get('product.current.price')
-		price_unit_commission = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, uom_unit_id)
-		
-		if not price_unit_commission:
-			price_unit_commission = price_unit / qty * product_uom_qty
+		#price_unit_commission = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, uom_unit_id)
+		#if not price_unit_commission:
+		#	price_unit_commission = price_unit / qty * product_uom_qty
+		price_unit_commission = price_unit / qty * product_uom_qty
 		try:
 			valid_commission_string = commission_utility.validate_commission_string(commission)
 			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit_commission, qty)
@@ -619,7 +623,7 @@ class sale_order_line(osv.osv):
 			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product, custom_product_uom)
 			if uom_record:
 				product_current_price_obj = self.pool.get('product.current.price')
-				current_price = product_current_price_obj.get_current_price(cr, uid, product, price_type_id, uom_record.id)
+				current_price = product_current_price_obj.get_current_price(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
 				if current_price:
 					result['value'].update({
 						'price_unit': current_price

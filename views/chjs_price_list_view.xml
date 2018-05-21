@@ -110,10 +110,10 @@
 				<field name="uom_id_4" position="replace"></field>
 				<field name="uom_id_5" position="replace"></field>
 				<field name="price_4" position="replace">
-					<field name="write_date"/>
+					<field name="write_date" readonly="1" />
 				</field>
 				<field name="price_5" position="replace">
-					<field name="write_uid"/>
+					<field name="write_uid" readonly="1" />
 				</field>
 
 				<!-- TEGUH@20180405
