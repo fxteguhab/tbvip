@@ -147,6 +147,14 @@ class purchase_order(osv.osv):
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		"""
 		return super(purchase_order, self).picking_done(cr, uid, ids, context)
+
+	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
+	# kondisikan supaya price_type_id di po line ikut dicopy ke invoice
+		result = super(purchase_order, self)._prepare_inv_line(cr, uid, account_id, order_line, context=context)
+		result.update({
+			'price_type_id': order_line.price_type_id.id,
+			})
+		return result
 	
 	def action_invoice_create(self, cr, uid, ids, context=None):
 		"""Overrides so that on creating invoice from confirming a PO, the invoice is set as open
@@ -372,6 +380,7 @@ class purchase_order_line(osv.osv):
 	
 	def create(self, cr, uid, vals, context=None):
 		new_order_line = super(purchase_order_line, self).create(cr, uid, vals, context)
+		new_data = self.browse(cr, uid, new_order_line)
 		if vals.get('product_id', False) and vals.get('price_unit', False):
 			product_obj = self.pool.get('product.product')
 			product = product_obj.browse(cr, uid, vals['product_id'])
@@ -380,7 +389,8 @@ class purchase_order_line(osv.osv):
 		# otomatis create current price kalo belum ada
 			if vals.get('price_type_id', False) and vals.get('product_uom', False):
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-					vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'])
+					vals['price_type_id'], vals['product_id'], vals['product_uom'], 
+					vals['price_unit'], partner_id=new_data.order_id.partner_id.id)
 	# otomatis isi incoming location dengan default stock location cabang di mana user ini login
 	# artinya, secara default barang akan dikirim ke cabang user pembuat PO ini
 	# hanya bila tidak diset di vals nya
@@ -410,7 +420,8 @@ class purchase_order_line(osv.osv):
 			if vals.get('product_uom', False): product_uom = vals['product_uom']
 			if vals.get('price_unit', False): price_unit = vals['price_unit']
 			self.pool.get('price.list')._create_product_current_price_if_none(
-				cr, uid, price_type_id, product_id, product_uom, price_unit)
+				cr, uid, price_type_id, product_id, product_uom, price_unit, 
+				partner_id=po_line.order_id.partner_id.id)
 		return edited_order_line
 	
 	def unlink(self, cr, uid, ids, context=None):
@@ -481,7 +492,7 @@ class purchase_order_line(osv.osv):
 			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, custom_product_uom)
 			if uom_record:
 				product_current_price_obj = self.pool.get('product.current.price')
-				current_price = product_current_price_obj.get_current_price(cr, uid, product_id, price_type_id, uom_record.id)
+				current_price = product_current_price_obj.get_current_price(cr, uid, product_id, price_type_id, uom_record.id, partner_id=partner_id)
 				if current_price:
 					result['value'].update({
 						'price_unit': current_price

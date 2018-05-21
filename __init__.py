@@ -28,4 +28,4 @@ import koreksi_bon
 import res_config
 import tbvip_stock_move
 import account_simplified_journal
-import notification
+#import notification

@@ -74,6 +74,46 @@ class account_invoice(osv.osv):
 
 # ==========================================================================================================================
 
+class account_invoice_line(osv.osv):
+	_inherit = 'account.invoice.line'
+
+	_columns = {
+		'price_type_id': fields.many2one('price.type', 'Price Type', ondelete='restrict'),
+	}
+
+	def create(self, cr, uid, vals, context={}):
+		new_id = super(account_invoice_line, self).create(cr, uid, vals, context=context)
+		new_data = self.browse(cr, uid, new_id)
+	# otomatis create current price kalo belum ada
+		if vals.get('price_type_id', False) and vals.get('uos_id', False):
+			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+				vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
+				partner_id=new_data.invoice_id.partner_id.id)
+		return new_id
+
+	def write(self, cr, uid, ids, vals, context={}):
+		result = super(account_invoice_line, self).write(cr, uid, ids, vals, context=context)
+	# bila user mengubah salah satu dari empat field di bawah ini, cek dan update
+	# current price bila perlu
+		if any(field in vals.keys() for field in ['product_id','price_type_id','uos_id','price_unit']):
+			for invoice_line in self.browse(cr, uid, ids):
+			# bikin product current price baru bila belum ada
+				product_id = invoice_line.product_id.id
+				price_type_id = invoice_line.price_type_id.id
+				product_uom = invoice_line.uos_id.id
+				price_unit = invoice_line.price_unit
+				if vals.get('product_id', False): product_id = vals['product_id']
+				if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
+				if vals.get('uos_id', False): product_uom = vals['product_uom']
+				if vals.get('price_unit', False): price_unit = vals['price_unit']
+				self.pool.get('price.list')._create_product_current_price_if_none(
+					cr, uid, price_type_id, product_id, product_uom, price_unit,
+					partner_id=invoice_line.invoice_id.partner_id.id)
+		return result
+
+	
+# ==========================================================================================================================
+
 class account_move_line(osv.osv):
 	_inherit = 'account.move.line'
 	_description = 'Modifikasi untuk menambah amount di SO'

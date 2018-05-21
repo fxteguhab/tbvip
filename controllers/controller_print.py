@@ -301,6 +301,7 @@ class controller_print(http.Controller):
 			row = tpl_line.render(
 				qty=self.thousand_separator(line.product_qty),
 				name=line.product_id.name,
+				uom=line.product_uom.name,
 			)
 			order_line_rows.append(row)
 		# render purchase order
