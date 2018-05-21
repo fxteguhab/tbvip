@@ -29,6 +29,11 @@ class account_voucher(osv.osv):
 		elif acc_journal.type == 'bank':
 			account_id = bank_account_id
 		result['value']['account_id'] = account_id
+	# ambil default rekening partner, yaitu rekening pertama punya si partner
+		if partner_id:
+			partner = self.pool.get('res.partner').browse(cr, uid, partner_id)
+			if len(partner.bank_ids) > 0:
+				result['value']['bank_id'] = partner.bank_ids[0].id
 		return result
 	
 	def _get_account_id(self, cr, uid, ttype, user_id, context=None):
@@ -137,7 +142,7 @@ class account_voucher(osv.osv):
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'check_maturity_date': fields.date(string='Check Maturity Date',
+		'check_maturity_date': fields.date(string='Giro Maturity Date',
 			readonly=True, states={'draft': [('readonly', False)]}),
 		'bank_id': fields.many2one('res.partner.bank', 'Supplier Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),

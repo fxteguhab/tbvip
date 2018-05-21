@@ -1,4 +1,3 @@
-# -u tbvip,account_simplified_journal,sale_multiple_payment,account_receivable_limit,stock_opname,purchase_needs,purchase_sale_discount,canvassing,tbvip_point_payroll,hr_point_payroll,product_custom_conversion,product_production,chjs_price_list -d tbvip
 import product
 import res_partner
 import stock
