@@ -7,19 +7,9 @@ import utility
 
 # ==========================================================================================================================
 
-class product_current_price(osv.osv):
-	_inherit = 'product.current.price'
-	
-# OVERRIDE ------------------------------------------------------------------------------------------------------------------
-	def onchange_product_id(self, cr, uid, ids, product_category_id, context=None):
-		res = super(product_current_price, self).onchange_product_id(cr, uid, ids, product_category_id, context)
-		res = utility.update_uom_domain_price_list(res)
-		return res
-
-# ==========================================================================================================================
-
 class price_list(osv.osv):
 	_inherit = 'price.list'
+
 # METHOD --------------------------------------------------------------------------------------------------------------------
 	def _create_product_current_price_if_none(self, cr, uid, price_type_id, product_id, uom_id, price, disc, partner_id=None, start_date=None):
 		product_current_price_obj = self.pool.get('product.current.price')
@@ -106,3 +96,61 @@ class price_list(osv.osv):
 						product_current_price_obj.write(cr, uid, [product_current_price.id], {
 							field_price: price,
 						})
+
+	def _prepare_product_price_line(self, price_list_line):
+		result = super(price_list, self)._prepare_product_price_line(price_list_line)
+		result.update({
+			'disc_1': price_list_line.disc_1,
+			'disc_2': price_list_line.disc_2,
+			'disc_3': price_list_line.disc_3,
+			'disc_4': price_list_line.disc_4,
+			'disc_5': price_list_line.disc_5,
+			})
+		return result
+
+# ==========================================================================================================================
+
+class price_list_line_product(osv.osv):
+	_inherit = 'price.list.line.product'
+	
+	_columns = {
+		'disc_1':fields.char('Discount 1'),
+		'disc_2':fields.char('Discount 2'),
+		'disc_3':fields.char('Discount 3'),
+		'disc_4':fields.char('Discount 4'),
+		'disc_5':fields.char('Discount 5'),
+	}
+
+# ==========================================================================================================================
+
+class price_list_line_category(osv.osv):
+	_inherit = 'price.list.line.category'
+	
+	_columns = {
+		'disc_1':fields.char('Discount 1'),
+		'disc_2':fields.char('Discount 2'),
+		'disc_3':fields.char('Discount 3'),
+		'disc_4':fields.char('Discount 4'),
+		'disc_5':fields.char('Discount 5'),
+	}
+
+# ==========================================================================================================================
+
+class product_current_price(osv.osv):
+	_inherit = 'product.current.price'
+
+	_columns = {
+		'disc_1':fields.char('Discount 1'),
+		'disc_2':fields.char('Discount 2'),
+		'disc_3':fields.char('Discount 3'),
+		'disc_4':fields.char('Discount 4'),
+		'disc_5':fields.char('Discount 5'),
+	}
+	
+# OVERRIDE ------------------------------------------------------------------------------------------------------------------
+
+	def onchange_product_id(self, cr, uid, ids, product_category_id, context=None):
+		res = super(product_current_price, self).onchange_product_id(cr, uid, ids, product_category_id, context)
+		res = utility.update_uom_domain_price_list(res)
+		return res
+

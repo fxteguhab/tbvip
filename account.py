@@ -88,7 +88,7 @@ class account_invoice_line(osv.osv):
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 				vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
-				partner_id=new_data.invoice_id.partner_id.id)
+				vals['discount_string'], partner_id=new_data.invoice_id.partner_id.id)
 		return new_id
 
 	def write(self, cr, uid, ids, vals, context={}):
@@ -102,12 +102,14 @@ class account_invoice_line(osv.osv):
 				price_type_id = invoice_line.price_type_id.id
 				product_uom = invoice_line.uos_id.id
 				price_unit = invoice_line.price_unit
+				discount_string = invoice_line.discount_string
 				if vals.get('product_id', False): product_id = vals['product_id']
 				if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
 				if vals.get('uos_id', False): product_uom = vals['product_uom']
 				if vals.get('price_unit', False): price_unit = vals['price_unit']
+				if vals.get('discount_string', False): discount_string = vals['discount_string']
 				self.pool.get('price.list')._create_product_current_price_if_none(
-					cr, uid, price_type_id, product_id, product_uom, price_unit,
+					cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
 					partner_id=invoice_line.invoice_id.partner_id.id)
 		return result
 

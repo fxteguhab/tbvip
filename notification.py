@@ -3,11 +3,14 @@ from openerp.osv import osv, fields
 from datetime import datetime
 from datetime import timedelta
 
-from pyfcm import FCMNotification
-
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+try:
+	from pyfcm import FCMNotification
+	import firebase_admin
+	from firebase_admin import credentials
+	from firebase_admin import firestore
+	has_notification_lib = True
+except:
+	has_notification_lib = False
 
 # ==========================================================================================================================
 SALES_SOUND_IDX = 0
@@ -32,12 +35,14 @@ class tbvip_fcm_notif(osv.osv):
 	'''
 
 	#init Firestore DB			
-	cred = credentials.ApplicationDefault()
-	firebase_admin.initialize_app(cred, {'projectId': 'awesome-beaker-150403',})
+	if has_notification_lib:
+		cred = credentials.ApplicationDefault()
+		firebase_admin.initialize_app(cred, {'projectId': 'awesome-beaker-150403',})
+	else:
+		cred = None
 
 	def send_notification(self,cr,uid,message_title,message_body,context={}): #context : is_stored,branch,category,sound_idx,lines
-		#FCM Notification Server cred
-		
+		if not has_notification_lib: return
 		#Get Param Value
 		param_obj = self.pool.get('ir.config_parameter')
 		param_ids = param_obj.search(cr, uid, [('key','in',['notification_topic'])])

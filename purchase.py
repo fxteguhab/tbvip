@@ -531,58 +531,66 @@ class purchase_order_line(osv.osv):
 		return result
 	
 	def onchange_product_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
-			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
-			discount_from_subtotal=False, context=None):
+		partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+		name=False, price_unit=False, state='draft', parent_price_type_id=False, 
+		price_type_id=False, discount_from_subtotal=False, context=None):
+	# karena tbvip inherit dari berbagai modul yang sebagian punya onchange product id,
+	# maka dibuatlah method onchange ini. pada dasarnya ini memanggil onchange2 module
+	# general-purpose yang terlibat di tbvip (contoh chjs_price_list, purchase_sale_discount)
+	# dan menggabungkan hasilnya (baik warning, value, domain) ke dalam satu return
+	# hati2, urutan pemanggilan sangatlah penting karena efek yang satu bisa ditiadakan/
+	# dianulir setelah memanggil onchange yang lain.
+		
+		result = {'value': {}, 'domain': {}}
+
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
 		
-		result_price_list = imported_price_list.purchase.purchase_order_line.onchange_product_id(
+	# jalankan onchange dari modul price list
+		oc_price_list = \
+			imported_price_list.purchase.purchase_order_line.onchange_product_id(
 			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
 			date_planned, name, price_unit, state, parent_price_type_id, price_type_id, context)
-		price_unit_current = result_price_list['value']['price_unit'] \
-			if result_price_list['value'].get('price_unit', False) else price_unit
-			
 	# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
-		result_price_list['warning'] = {}
-		
-		result = result_price_list
-		
-		result_purchase_sale_discount = \
+		oc_price_list['warning'] = {}
+		result['value'].update(oc_price_list.get('value', {}))
+
+	# default diskon diambil dari current price
+		current_price_unit = oc_price_list['value'].get('price_unit', price_unit)		
+		current_discount = self.pool.get('product.current.price').get_current(
+			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)			
+	# jalankan onchange diskon. price unit dan discount string, as per logic di dalam 
+	# onchange_product_id_purchase_sale_discount, akan tetap memakai yang dari current price
+	# di atas
+		oc_purchase_sale_discount = \
 			imported_purchase_sale_discount.purchase_discount.purchase_order_line.onchange_product_id_purchase_sale_discount(
-			self, cr, uid, product_id, partner_id, uom_id, qty, discount_from_subtotal)
-		if result_purchase_sale_discount:
-			result['value'].update({
-				'price_unit': result_purchase_sale_discount['value']['price_unit'] if price_unit_current == False else price_unit_current,
-				'discount_string': result_purchase_sale_discount['value']['discount_string'],
-				'price_unit_nett': result_purchase_sale_discount['value']['price_unit_nett'],
-				'price_subtotal': result_purchase_sale_discount['value']['price_subtotal'],
-			})
+			self, cr, uid, ids, product_id, partner_id, uom_id, qty, current_price_unit, current_discount, discount_from_subtotal)
+		if oc_purchase_sale_discount:
+			result['value'].update(oc_purchase_sale_discount.get('value', {}))
 		
-		result_custom_conversion = imported_product_custom_conversion.purchase.purchase_order_line.onchange_product_uom(
-			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
-			date_planned, name, price_unit_current, state, context={})
-		if result.get('domain', False) and result_custom_conversion.get('domain', False):
-			result['domain']['product_uom'] = result['domain']['product_uom'] + result_custom_conversion['domain']['product_uom']
-		
-		custom_product_uom = False
-		if result_custom_conversion['value'].get('product_uom', False):
-			custom_product_uom = result_custom_conversion['value']['product_uom']
-			# cari current price untuk product uom ini
-			product_conversion_obj = self.pool.get('product.conversion')
-			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product_id, custom_product_uom)
-			if uom_record:
-				product_current_price_obj = self.pool.get('product.current.price')
-				current_price = product_current_price_obj.get_current_price(cr, uid, product_id, price_type_id, uom_record.id, partner_id=partner_id)
-				if current_price:
-					result['value'].update({
-						'price_unit': current_price
-					})
+		final_product_uom = uom_id
+		if not final_product_uom:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, product_id)
+			final_product_uom = product.uom_id.id
+
+	# jalankan onchange custom conversion
+		"""
+		oc_custom_conversion = \
+			imported_product_custom_conversion.purchase.purchase_order_line.onchange_product_uom(
+			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, 
+			fiscal_position_id, date_planned, name, current_price_unit, state, context=context)
+		if result.get('domain', False) and oc_custom_conversion.get('domain', False):
+			result['domain']['product_uom'] = result['domain']['product_uom'] + oc_custom_conversion['domain']['product_uom']		
+		custom_product_uom = oc_custom_conversion['value'].get('product_uom', False)
+		if custom_product_uom:
+			final_product_uom = custom_product_uom
+		"""
 		
 		product_obj = self.pool.get('product.product')
 		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
-			'product_uom': custom_product_uom if custom_product_uom else uom_id if uom_id else product.uom_id.id,
+			'product_uom': final_product_uom,
 			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
 		})
 		

@@ -7,20 +7,14 @@
 			<field name="model">price.list.line.product</field>
 			<field name="inherit_id" ref="chjs_price_list.price_list_line_product_tree"/>
 			<field name="arch" type="xml">
-				<field name="product_template_id" position="attributes">
-					<attribute name="options">{'no_create': 1}</attribute>
-				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_2" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_3" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 
 				<!-- TEGUH@20180405: delete UOM 4 & 5-->
@@ -29,16 +23,17 @@
 				<field name="price_4" position="replace"></field>
 				<field name="price_5" position="replace"></field>
 
-				<!-- TEGUH@20180405 : cukup 5 UoM
-				<field name="uom_id_4" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
+				<!-- JUNED@20180523: tambah kolom diskon, untuk sementara cukup 3 -->
+				<field name="price_1" position="after">
+					<field name="disc_1" />
 				</field>
-				<field name="uom_id_5" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
+				<field name="price_2" position="after">
+					<field name="disc_2" />
 				</field>
-				-->
+				<field name="price_3" position="after">
+					<field name="disc_3" />
+				</field>
+
 			</field>
 		</record>
 
@@ -47,20 +42,14 @@
 			<field name="model">price.list.line.category</field>
 			<field name="inherit_id" ref="chjs_price_list.price_list_line_category_tree"/>
 			<field name="arch" type="xml">
-				<field name="product_category_id" position="attributes">
-					<attribute name="options">{'no_create': 1}</attribute>
-				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_2" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_3" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 
 				<!-- TEGUH@20180405: delete UOM 4 & 5-->
@@ -69,16 +58,17 @@
 				<field name="price_4" position="replace"></field>
 				<field name="price_5" position="replace"></field>
 
-				<!-- TEGUH@20180405 : 
-				<field name="uom_id_4" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
+				<!-- JUNED@20180523: tambah kolom diskon, untuk sementara cukup 3 -->
+				<field name="price_1" position="after">
+					<field name="disc_1" />
 				</field>
-				<field name="uom_id_5" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
+				<field name="price_2" position="after">
+					<field name="disc_2" />
 				</field>
-				-->
+				<field name="price_3" position="after">
+					<field name="disc_3" />
+				</field>
+
 			</field>
 		</record>
 
@@ -87,23 +77,14 @@
 			<field name="model">product.current.price</field>
 			<field name="inherit_id" ref="chjs_price_list.product_current_price_form"/>
 			<field name="arch" type="xml">
-				<field name="price_type_id" position="attributes">
-					<attribute name="options">{'no_create': 1}</attribute>
-				</field>
-				<field name="product_id" position="attributes">
-					<attribute name="options">{'no_create': 1}</attribute>
-				</field>
 				<field name="uom_id_1" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_2" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 				<field name="uom_id_3" position="attributes">
 					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
 				</field>
 
 				<!-- TEGUH@20180405: delete 5 UOM -->
@@ -116,16 +97,17 @@
 					<field name="write_uid" readonly="1" />
 				</field>
 
-				<!-- TEGUH@20180405
-				<field name="uom_id_4" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
+				<!-- JUNED@20180523: tambah kolom diskon, untuk sementara cukup 3 -->
+				<field name="price_1" position="after">
+					<field name="disc_1" />
 				</field>
-				<field name="uom_id_5" position="attributes">
-					<attribute name="domain">[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]</attribute>
-					<attribute name="options">{'no_create': 1}</attribute>
+				<field name="price_2" position="after">
+					<field name="disc_2" />
 				</field>
-				-->
+				<field name="price_3" position="after">
+					<field name="disc_3" />
+				</field>
+
 			</field>
 		</record>
 
@@ -134,15 +116,23 @@
 			<field name="model">product.current.price</field>
 			<field name="inherit_id" ref="chjs_price_list.product_current_price_tree"/>
 			<field name="arch" type="xml">
-			<!-- TEGUH@20180405 :replace field Uom4 & 5 degn  field Last Updated on * & Last Updated by-->
-				<field name="price_4" position="replace"></field>
-				<field name="price_5" position="replace"></field>
-				<field name="uom_id_4" position="replace">
+				<!-- TEGUH@20180405 :replace field Uom4 & 5 degn  field Last Updated on * & Last Updated by-->
+				<field name="price_4" position="replace" />
+				<field name="price_5" position="replace" />
+				<field name="uom_id_4" position="replace" />
+				<field name="uom_id_5" position="replace" />
+				<!-- JUNED@20180523: tambah field discount -->
+				<field name="price_1" position="after">
+					<field name="disc_1" />
+				</field>
+				<field name="price_2" position="after">
+					<field name="disc_2" />
+				</field>
+				<field name="price_3" position="after">
+					<field name="disc_3" />
 					<field name="write_date"/>
-				</field>	
-				<field name="uom_id_5" position="replace">
-                   	<field name="write_uid"/>
-                </field>
+					<field name="write_uid"/>
+				</field>
 			</field>
 		</record>
 
