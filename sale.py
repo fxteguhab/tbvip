@@ -453,7 +453,7 @@ class sale_order_line(osv.osv):
 			vals.get('price_type_id', False) and vals.get('product_uom', False):
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 				vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'], disc,
-				partner_id=new_data.order_id.id)
+				partner_id=new_data.order_id.partner_id.id)
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
