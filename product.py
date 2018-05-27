@@ -92,40 +92,6 @@ class product_template(osv.osv):
 			result[product.id] = stocks
 		return result
 		
-	def _current_price_ids(self, cr, uid, ids, field_name, arg, context={}):
-		current_pricelist_obj = self.pool.get('product.current.price')
-		result = {}
-		for product in self.browse(cr, uid, ids):
-			variants = product.product_variant_ids
-			if len(variants) > 0:
-				variant = variants[0]
-				result[product.id] = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id), ('price_type_id.type','=', 'sell')])
-		return result
-	
-	#TEGUH@20180411 : _product_current_price output text
-	def _product_current_price(self, cr, uid, ids, field_name, arg, context={}):
-		result = {}
-		current_pricelist_obj = self.pool.get('product.current.price')
-		for product in self.browse(cr, uid, ids):
-			prices = ''
-			for variant in product.product_variant_ids:
-				map = {}
-				price_ids = current_pricelist_obj.search(cr, uid, [('product_id', '=', variant.id), ('price_type_id.type','=', 'sell')])
-				for price_id in current_pricelist_obj.browse(cr, uid, price_ids):
-					map[price_id.price_type_id.name] = map.get(price_id.price_type_id.name, 0) + price_id.price_1
-				
-				price = ''
-				for key in sorted(map.iterkeys()):
-					price += key + ': ' + str("{:,.0f}".format(map[key])) + '\n'
-					#price += key + ': ' + str(map[key]) + '\n'
-				if len(price) == 0:
-					price = '-'
-				prices += price + '\n'
-			result[product.id] = prices
-
-		return result
-
-
 	#TEGUH@20180414 : _product_commission output text
 	def _product_commission(self, cr, uid, ids, field_name, arg, context={}):
 		result = {}
@@ -172,9 +138,7 @@ class product_template(osv.osv):
 		#'commission': fields.char('Commission'),
 		'product_sublocation_ids': fields.one2many('product.product.branch.sublocation', 'product_id', 'Sublocations'),
 		'product_current_stock': fields.function(_product_current_stock, string="Current Stock", type='text', store=False),
-		'current_price_ids': fields.function(_current_price_ids, string="Current Prices", type='one2many', relation='product.current.price'),
 		#TEGUH@20180411 : current_price_ids_text output
-		'product_current_price': fields.function(_product_current_price, string="Current Price", type='text', store=False),
 		'brand_id': fields.many2one('product.brand', 'Brand'),
 		'tonnage': fields.float('Tonnage/Weight (kg)'),
 		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
