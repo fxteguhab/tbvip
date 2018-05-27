@@ -623,7 +623,7 @@ class sale_order_line(osv.osv):
 			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product, custom_product_uom)
 			if uom_record:
 				product_current_price_obj = self.pool.get('product.current.price')
-				current_price = product_current_price_obj.get_current_price(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
+				current_price = product_current_price_obj.get_current(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
 				if current_price:
 					result['value'].update({
 						'price_unit': current_price
