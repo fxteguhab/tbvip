@@ -522,7 +522,7 @@ class sale_order_line(osv.osv):
 		ir_model_data = self.pool.get('ir.model.data')
 		uom_unit_id = ir_model_data.get_object(cr, uid, 'product', 'product_uom_unit').id
 		product_current_price_obj = self.pool.get('product.current.price')
-		#price_unit_commission = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, uom_unit_id)
+		#price_unit_commission = product_current_price_obj.get_current(cr, uid, product.id, price_type_id, uom_unit_id)
 		#if not price_unit_commission:
 		#	price_unit_commission = price_unit / qty * product_uom_qty
 		price_unit_commission = price_unit / qty * product_uom_qty
@@ -623,7 +623,7 @@ class sale_order_line(osv.osv):
 			uom_record = product_conversion_obj.get_conversion_auto_uom(cr, uid, product, custom_product_uom)
 			if uom_record:
 				product_current_price_obj = self.pool.get('product.current.price')
-				current_price = product_current_price_obj.get_current_price(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
+				current_price = product_current_price_obj.get_current(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
 				if current_price:
 					result['value'].update({
 						'price_unit': current_price

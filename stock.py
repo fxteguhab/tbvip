@@ -354,7 +354,7 @@ class stock_move(osv.osv):
 			product_current_price_obj = self.pool.get('product.current.price')
 		
 			product = move.product_id
-			current_price = product_current_price_obj.get_current_price(cr, uid, product.id, price_type_id, unit_id)
+			current_price = product_current_price_obj.get_current(cr, uid, product.id, price_type_id, unit_id)
 			
 			return current_price
 

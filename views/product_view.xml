@@ -1,24 +1,11 @@
 <openerp>
 	<data>
+
 		<record model="ir.ui.view" id="product_template_form_inherit">
 			<field name="name">product.template.common.form.inherit</field>
 			<field name="model">product.template</field>
-			<field name="inherit_id" ref="product.product_template_form_view"/>
+			<field name="inherit_id" ref="chjs_price_list.product_template_form_inherit"/>
 			<field name="arch" type="xml">
-				<notebook position="inside">
-					<!--<page string="Last Purchase">-->
-						<!--<field name="purchase_order_line_ids">-->
-							<!--<tree>-->
-								<!--<field name="partner_id" string="Supplier"/>-->
-								<!--<field name="date_order"/>-->
-								<!--<field name="price_unit"/>-->
-								<!--<field name="discount_string"/>-->
-								<!--<field name="product_qty"/>-->
-								<!--<field name="price_unit_nett"/>-->
-							<!--</tree>-->
-						<!--</field>-->
-					<!--</page>-->
-				</notebook>
 				<field name="type" position="before">
 					<field name="brand_id" />
 					<field name="tonnage"/>
@@ -26,46 +13,40 @@
 					<field name="categ_id" />
 				</field>
 				<field name="description" position="before">
-					<group>
-						<label for="product_current_stock"/>
-						<div>
-							<field name="product_current_stock" class="oe_inline" readonly="1"/>
-							<button name="332" string="⇒ Update" type="action" class="oe_link"/>
-						</div>
-					</group>
-					<group col="1">
-						<field name="current_price_ids">
-							<tree>
-								<!-- TEGUH20180411 : ganti urutan uom & price -->
-								<field name="price_type_id"/>
-								<field name="price_1"/>
-								<field name="uom_id_1"/>
-								<field name="price_2"/>
-								<field name="uom_id_2"/>
-								<field name="price_3"/>
-								<field name="uom_id_3"/>
-
-								<!--
-								<field name="price_type_id"/>
-								<field name="uom_id_1"/>
-								<field name="price_1"/>
-								<field name="uom_id_2"/>
-								<field name="price_2"/>
-								<field name="uom_id_3"/>
-								<field name="price_3"/>
-
-								<field name="uom_id_4"/>
-								<field name="price_4"/>
-								<field name="uom_id_5"/>
-								<field name="price_5"/>
-								-->
-							</tree>
-						</field>
-					</group>
+					<label for="product_current_stock"/>
+					<div>
+						<field name="product_current_stock" class="oe_inline" readonly="1"/>
+						<button name="332" string="⇒ Update" type="action" class="oe_link"/>
+					</div>
 				</field>
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_4']" position="replace" />
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_4']" position="replace" />
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_5']" position="replace" />
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_5']" position="replace" />
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_1']" position="after">
+					<field name="disc_1" />
+				</xpath>
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_2']" position="after">
+					<field name="disc_2" />
+				</xpath>
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_3']" position="after">
+					<field name="disc_3" />
+				</xpath>
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='price_4']" position="replace" />
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_4']" position="replace" />
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='price_5']" position="replace" />
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_5']" position="replace" />
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_1']" position="after">
+					<field name="disc_1" />
+				</xpath>
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_2']" position="after">
+					<field name="disc_2" />
+				</xpath>
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_3']" position="after">
+					<field name="disc_3" />
+				</xpath>
 			</field>
 		</record>
-
 
 		<!-- TEGUH@20180411 : inherit Product Tree View -->
 		<record model="ir.ui.view" id="product_template_tree_inherit">
@@ -73,8 +54,7 @@
 			<field name="model">product.template</field>
 			<field name="inherit_id" ref="product.product_template_tree_view"/>
 			<field name="arch" type="xml">
-				<field name = "name" position = "after">
-					<field name="product_current_price"/>
+				<field name="name" position="after">
 					<field name="product_current_stock"/>
 				</field>
 			</field>

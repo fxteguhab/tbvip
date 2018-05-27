@@ -97,14 +97,30 @@ class account_invoice_line(osv.osv):
 	# current price bila perlu
 		if any(field in vals.keys() for field in ['product_id','price_type_id','uos_id','price_unit']):
 			for invoice_line in self.browse(cr, uid, ids):
+			# gunakan price_type_id yang di line
+				price_type_id = invoice_line.price_type_id.id
+			# kalau ngga ada, pakai yang di vals
+				if not price_type_id:
+					price_type_id = vals.get('price_type_id', None)
+			# kalau price_type_id masih kosong, pakai default sesuai type invoice ybs
+				if not price_type_id:
+					if invoice_line.invoice_id.type in ['in_invoice']:
+						price_type = 'buy'
+					else:
+						price_type = 'sell'
+					price_type_ids = self.pool.get('price.type').search(cr, uid, [
+						('type','=',price_type),
+						('is_default','=',True),
+						])
+				# give up, next record please!
+					if len(price_type_ids) == 0: continue
+					price_type_id = price_type_ids[0]
 			# bikin product current price baru bila belum ada
 				product_id = invoice_line.product_id.id
-				price_type_id = invoice_line.price_type_id.id
 				product_uom = invoice_line.uos_id.id
 				price_unit = invoice_line.price_unit
 				discount_string = invoice_line.discount_string
 				if vals.get('product_id', False): product_id = vals['product_id']
-				if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
 				if vals.get('uos_id', False): product_uom = vals['product_uom']
 				if vals.get('price_unit', False): price_unit = vals['price_unit']
 				if vals.get('discount_string', False): discount_string = vals['discount_string']
@@ -133,6 +149,20 @@ class account_move_line(osv.osv):
 						'is_complex_payment': True
 					})
 		return new_id
+
+	def name_get(self, cr, uid, ids, context=None):
+		if not ids: return []
+		result = []
+	# name invoice line mengacu ke supplier invoice number (disimpan di name)
+	# note: supplier invoice number harus diisi sebelum invoice divalidate, kalau tidak 
+	# maka yang terismpan di name ini adalah nomor invoice (EXJ/....)
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.ref:
+				result.append((line.id, line.name or line.move_id.name))
+			else:
+				result.append((line.id, line.move_id.name))
+		return result
+
 
 # ==========================================================================================================================
 
