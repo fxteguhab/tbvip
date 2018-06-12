@@ -80,17 +80,21 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# TEGUH@20180329 : tambah fungsi untuk ubah state jadi otw & delivered
 	def action_otw(self, cr, uid, ids, context=None):
 	# state otw melalui canvassing on the way
-		self.write(cr, uid, ids, {
-		'state': 'otw'
-		}, context=context)
+		for data in self.browse(cr, uid, ids):
+			if data.state not in ['accepted','rejected']:
+				self.write(cr, uid, ids, {
+				'state': 'otw'
+				}, context=context)
 		
 		return True
 
 	def action_delivered(self, cr, uid, ids, context=None):
 	# state delivered melalui canvassing delivered
-		self.write(cr, uid, ids, {
-		'state': 'delivered'
-		}, context=context)
+		for data in self.browse(cr, uid, ids):
+			if data.state not in ['accepted','rejected']:
+				self.write(cr, uid, ids, {
+				'state': 'delivered'
+				}, context=context)
 		
 		return True
 
