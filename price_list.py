@@ -11,7 +11,6 @@ class price_list(osv.osv):
 	_inherit = 'price.list'
 
 	def _default_partner_id(self, cr, uid, context=None):
-		print "masuk default"
 		if context.get('price_list_mode', False) == 'sell':
 			model, general_customer_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
 			return general_customer_id
