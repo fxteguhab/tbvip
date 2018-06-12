@@ -10,7 +10,19 @@ import utility
 class price_list(osv.osv):
 	_inherit = 'price.list'
 
+	def _default_partner_id(self, cr, uid, context=None):
+		if context.get('price_list_mode', False) == 'sell':
+			model, general_customer_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
+			return general_customer_id
+		else:
+			return None
+
+	_defaults = {
+		'partner_id': _default_partner_id,
+	}
+
 # METHOD --------------------------------------------------------------------------------------------------------------------
+	
 	def _create_product_current_price_if_none(self, cr, uid, price_type_id, product_id, uom_id, price, disc, partner_id=None, start_date=None):
 		product_current_price_obj = self.pool.get('product.current.price')
 		if not start_date:
