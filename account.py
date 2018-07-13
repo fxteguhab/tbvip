@@ -108,6 +108,7 @@ class account_invoice_line(osv.osv):
 						price_type = 'buy'
 					else:
 						price_type = 'sell'
+					
 					price_type_ids = self.pool.get('price.type').search(cr, uid, [
 						('type','=',price_type),
 						('is_default','=',True),
