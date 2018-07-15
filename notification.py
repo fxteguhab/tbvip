@@ -36,8 +36,14 @@ class tbvip_fcm_notif(osv.osv):
 
 	#init Firestore DB			
 	if has_notification_lib:
-		cred = credentials.ApplicationDefault()
-		firebase_admin.initialize_app(cred, {'projectId': 'awesome-beaker-150403',})
+		cred = None
+		cred = credentials.Certificate('tokobesiVIP-ade097b8b6e5.json')
+		
+		if cred:
+			firebase_admin.initialize_app(cred)
+		else:
+			cred = credentials.ApplicationDefault()
+			firebase_admin.initialize_app(cred, {'projectId': 'awesome-beaker-150403',})
 	else:
 		cred = None
 
