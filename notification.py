@@ -2,6 +2,7 @@ from openerp.osv import osv, fields
 
 from datetime import datetime
 from datetime import timedelta
+import os.path
 
 try:
 	from pyfcm import FCMNotification
@@ -16,6 +17,7 @@ except:
 SALES_SOUND_IDX = 0
 PURCHASE_SOUND_IDX = 2
 PRODUCT_SOUND_IDX = 1
+LOCAL_CRED = 'tokobesiVIP-ade097b8b6e5.json'
 
 class tbvip_fcm_notif(osv.osv):
 	_name = 'tbvip.fcm_notif'
@@ -34,12 +36,11 @@ class tbvip_fcm_notif(osv.osv):
 		self.push_service = FCMNotification(api_key="AAAAl1iYTeo:APA91bHp-WiAzZxjiKa93znVKsD1N2AgtgwB1azuEYyvpWHyFR2WfZRj3UPXMov9PzbCBpOCScz8YN_Ki2kEVf_5V43bgUDjJmHSh78NOK0KLWOU2cgYUe9KClTkTTwpTzUcaBB2hVqT")
 	'''
 
-	#init Firestore DB			
+	#init Firestore DB	
+
 	if has_notification_lib:
-		cred = None
-		cred = credentials.Certificate('tokobesiVIP-ade097b8b6e5.json')
-		
-		if cred:
+		if  os.path.isfile(LOCAL_CRED):
+			cred = credentials.Certificate(LOCAL_CRED)
 			firebase_admin.initialize_app(cred)
 		else:
 			cred = credentials.ApplicationDefault()
