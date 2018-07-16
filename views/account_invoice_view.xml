@@ -30,9 +30,13 @@
 			<field name="model">account.invoice</field>
 			<field name="inherit_id" ref="account.invoice_supplier_form"/>
 			<field name="arch" type="xml">
-				<xpath expr="//field[@name='invoice_line']/tree/field[@name='name']" position="after">
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='product_id']" position="after">
 					<field name="price_type_id" />
 				</xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='account_id']" position="replace"></xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='invoice_line_tax_id']" position="replace"></xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='name']" position="replace"></xpath>
+				<xpath expr="//field[@name='tax_line']" position="replace"></xpath>
 				<xpath expr="//header" position="attributes">
 					<attribute name="invisible">context.get('simple_view', False)</attribute>
 				</xpath>

@@ -153,6 +153,10 @@ class purchase_order(osv.osv):
 	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
 	# kondisikan supaya price_type_id di po line ikut dicopy ke invoice
 		result = super(purchase_order, self)._prepare_inv_line(cr, uid, account_id, order_line, context=context)
+			
+		print "tbvip/purchase.py: order_line.price_type_id : %s" % (order_line.price_type_id.id)
+		raise osv.except_osv('test','test')
+
 		result.update({
 			'price_type_id': order_line.price_type_id.id,
 			})
