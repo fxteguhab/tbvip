@@ -12,7 +12,7 @@
 					<field name="stock_unit_id"/>
 					<field name="categ_id" />
 				</field>
-				<field name="description" position="before">
+				<field name="uom_id" position="after">
 					<label for="product_current_stock"/>
 					<div>
 						<field name="product_current_stock" class="oe_inline" readonly="1"/>
@@ -25,12 +25,18 @@
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_5']" position="replace" />
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_1']" position="after">
 					<field name="disc_1" />
+					<!-- TEGUH@20180717 : tambah field nett 1-->
+					<field name="nett_1" />
 				</xpath>
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_2']" position="after">
 					<field name="disc_2" />
+					<!-- TEGUH@20180717 : tambah field nett 2-->
+					<field name="nett_2" />
 				</xpath>
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_3']" position="after">
 					<field name="disc_3" />
+					<!-- TEGUH@20180717 : tambah field nett 3-->
+					<field name="nett_3" />
 				</xpath>
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='price_4']" position="replace" />
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_4']" position="replace" />
@@ -38,12 +44,18 @@
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_5']" position="replace" />
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_1']" position="after">
 					<field name="disc_1" />
+					<!-- TEGUH@20180717 : tambah field nett 1-->
+					<field name="nett_1" />
 				</xpath>
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_2']" position="after">
 					<field name="disc_2" />
+					<!-- TEGUH@20180717 : tambah field nett 2-->
+					<field name="nett_2" />
 				</xpath>
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_3']" position="after">
 					<field name="disc_3" />
+					<!-- TEGUH@20180717 : tambah field nett 3-->
+					<field name="nett_3" />
 				</xpath>
 			</field>
 		</record>

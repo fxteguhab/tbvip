@@ -154,8 +154,8 @@ class purchase_order(osv.osv):
 	# kondisikan supaya price_type_id di po line ikut dicopy ke invoice
 		result = super(purchase_order, self)._prepare_inv_line(cr, uid, account_id, order_line, context=context)
 			
-		print "tbvip/purchase.py: order_line.price_type_id : %s" % (order_line.price_type_id.id)
-		raise osv.except_osv('test','test')
+		#print "tbvip/purchase.py: order_line.price_type_id : %s" % (order_line.price_type_id.id)
+		#raise osv.except_osv('test','test')
 
 		result.update({
 			'price_type_id': order_line.price_type_id.id,
@@ -390,6 +390,7 @@ class purchase_order_line(osv.osv):
 		'product_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True),
 		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
 			string='UoM Category', readonly=True)
+		#'price_unit_old': fields.function(_price_unit_old, method=True, string='Price Old', type='float'),
 	}
 	
 	_sql_constraints = [
@@ -483,12 +484,12 @@ class purchase_order_line(osv.osv):
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
 		
 		#TEGUH@20180501 : 
-		#ini buat apa ya ? ditutup dulu sementara deh .....
-		# kirim message kalau ada perubahan harga
-		#if vals.get('price_unit', False):
-		#	for purchase_line in self.browse(cr, uid, ids):
-		#		self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)
-		
+		# ini buat apa ya ? ditutup dulu sementara deh .....
+		# kirim message kalau ada perubahan harga : 
+		# dibuka lagi per 20180717
+		if vals.get('price_unit', False):
+			for purchase_line in self.browse(cr, uid, ids):
+				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)	
 
 		for po_line in self.browse(cr, uid, ids):
 		# bikin product current price baru bila belum ada
@@ -505,7 +506,7 @@ class purchase_order_line(osv.osv):
 			#TEGUH@20180501 : tambah field discount string
 			if vals.get('discount_string', False): discount_string = vals['discount_string']
 			self.pool.get('price.list')._create_product_current_price_if_none(
-				cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string, 
+				cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
 				partner_id=po_line.order_id.partner_id.id)
 		return edited_order_line
 	

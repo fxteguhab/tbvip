@@ -24,16 +24,20 @@
 				<field name="price_5" position="replace"></field>
 
 				<!-- JUNED@20180523: tambah kolom diskon, untuk sementara cukup 3 -->
+				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
+					<field name="nett_1" />
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
+					<field name="nett_2" />
 				</field>
 				<field name="price_3" position="after">
-					<field name="disc_3" />
+					<field name="disc_3" />	
+					<field name="nett_3" />
 				</field>
-
+			
 			</field>
 		</record>
 
@@ -59,14 +63,18 @@
 				<field name="price_5" position="replace"></field>
 
 				<!-- JUNED@20180523: tambah kolom diskon, untuk sementara cukup 3 -->
+				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
+					<field name="nett_1" />
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
+					<field name="nett_2" />
 				</field>
 				<field name="price_3" position="after">
 					<field name="disc_3" />
+					<field name="nett_3" />
 				</field>
 
 			</field>
@@ -98,14 +106,18 @@
 				</field>
 
 				<!-- JUNED@20180523: tambah kolom diskon, untuk sementara cukup 3 -->
+				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
+					<field name="nett_1" />
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
+					<field name="nett_2" />
 				</field>
 				<field name="price_3" position="after">
 					<field name="disc_3" />
+					<field name="nett_3" />
 				</field>
 
 			</field>
@@ -121,15 +133,22 @@
 				<field name="price_5" position="replace" />
 				<field name="uom_id_4" position="replace" />
 				<field name="uom_id_5" position="replace" />
+
 				<!-- JUNED@20180523: tambah field discount -->
+				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
+					<field name="nett_1" />
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
+					<field name="nett_2" />
 				</field>
 				<field name="price_3" position="after">
 					<field name="disc_3" />
+					<field name="nett_3" />
+				</field>
+				<field name="uom_id_3" position="after">
 					<field name="write_date"/>
 					<field name="write_uid"/>
 				</field>

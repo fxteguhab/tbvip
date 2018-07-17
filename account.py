@@ -80,7 +80,14 @@ class account_invoice_line(osv.osv):
 	_columns = {
 		'price_type_id': fields.many2one('price.type', 'Price Type', ondelete='restrict'),
 	}
-
+	
+	def _message_cost_price_changed(self, cr, uid, data, product, invoice_id, context):
+	# message kalau harga yang diinput tidak sama dengan standard price product
+		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+			account_invoice_obj = self.pool.get('account.invoice')
+			account_invoice = account_invoice_obj.browse(cr, uid, invoice_id)
+			print 'harga beda'
+	
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(account_invoice_line, self).create(cr, uid, vals, context=context)
 		new_data = self.browse(cr, uid, new_id)
@@ -89,6 +96,11 @@ class account_invoice_line(osv.osv):
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 				vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
 				vals['discount_string'], partner_id=new_data.invoice_id.partner_id.id)
+
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, vals['product_id'])
+			self._message_cost_price_changed(cr, uid, vals, product, vals['invoice_id'], context)
+
 		return new_id
 
 	def write(self, cr, uid, ids, vals, context={}):
