@@ -136,7 +136,7 @@ class sale_order(osv.osv):
 
 		if ((value >= sale_limit) or (product_watch == '[!!]')):
 			alert = '!'
-			for alert_lv in range(value // sale_limit ):
+			for alert_lv in range(int(value // sale_limit )):
 				alert += '!'
 			message_title = 'SALES('+branch+')'+product_watch+':'+cust_name
 			message_body = employee+'('+str(bon_number)+'):'+str(row_count)+' row(s):'+str("{:,.0f}".format(value))# +'\n'+'Cust:'+cust_name
@@ -196,7 +196,7 @@ class purchase_order(osv.osv):
 				'''
 		if ((value >= purchase_limit) or (product_watch == '[!!]')):
 			alert = '!'
-			for alert_lv in range(value // purchase_limit ):
+			for alert_lv in range(int(value // purchase_limit )):
 				alert += '!'
 			message_title = 'PURCHASE'+product_watch+':'+str(supplier_name)
 			message_body = str(row_count)+' row(s):'+str("{:,.0f}".format(value)) 
