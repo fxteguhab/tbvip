@@ -73,7 +73,7 @@ class tbvip_fcm_notif(osv.osv):
 				category = context.get('category','BASE')
 				lines = context.get('lines','')
 				now = datetime.now() + timedelta(hours = 7)
-				alert = context.get('alert','!!')
+				alert = context.get('alert','!')
 				db = firestore.client()
 				doc_ref = db.collection(u'notification').document()
 				doc_ref.set({
@@ -135,6 +135,9 @@ class sale_order(osv.osv):
 		#message_body = sale.employee_id.name+'/'+str(row_count)+' items(s)/'+str("{:,.0f}".format(value))		
 
 		if ((value >= sale_limit) or (product_watch == '[!!]')):
+			alert = '!'
+			for alert_lv in range(value // sale_limit ):
+				alert += '!'
 			message_title = 'SALES('+branch+')'+product_watch+':'+cust_name
 			message_body = employee+'('+str(bon_number)+'):'+str(row_count)+' row(s):'+str("{:,.0f}".format(value))# +'\n'+'Cust:'+cust_name
 			if (desc):
@@ -145,6 +148,7 @@ class sale_order(osv.osv):
 				'category':'SALES',
 				'sound_idx':SALES_SOUND_IDX,
 				'lines' : line_str,
+				'alert' : alert,
 				}
 
 			self.pool.get('tbvip.fcm_notif').send_notification(cr,uid,message_title,message_body,context=context)
@@ -191,6 +195,9 @@ class purchase_order(osv.osv):
 					self.pool.get('tbvip.fcm_notif').send_notification(cr,uid,message_title,message_body,context=context)
 				'''
 		if ((value >= purchase_limit) or (product_watch == '[!!]')):
+			alert = '!'
+			for alert_lv in range(value // purchase_limit ):
+				alert += '!'
 			message_title = 'PURCHASE'+product_watch+':'+str(supplier_name)
 			message_body = str(row_count)+' row(s):'+str("{:,.0f}".format(value)) 
 
@@ -198,6 +205,7 @@ class purchase_order(osv.osv):
 				'category':'PURCHASE',
 				'sound_idx':PURCHASE_SOUND_IDX,
 				'lines' : line_str,
+				'alert' : alert,
 				}
 
 			self.pool.get('tbvip.fcm_notif').send_notification(cr,uid,message_title,message_body,context=context)
