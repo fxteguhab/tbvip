@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-
+		
 		<record model="ir.ui.view" id="price_list_line_product_tree_inherit">
 			<field name="name">price.list.price.list.line.product.tree.inherit</field>
 			<field name="model">price.list.line.product</field>
@@ -27,15 +27,15 @@
 				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
-					<field name="nett_1" />
+					<field name="nett_1" readonly = "1"/>
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
-					<field name="nett_2" />
+					<field name="nett_2" readonly = "1"/>
 				</field>
 				<field name="price_3" position="after">
 					<field name="disc_3" />	
-					<field name="nett_3" />
+					<field name="nett_3" readonly = "1"/>
 				</field>
 			
 			</field>
@@ -66,15 +66,15 @@
 				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
-					<field name="nett_1" />
+					<field name="nett_1" readonly = "1"/>
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
-					<field name="nett_2" />
+					<field name="nett_2" readonly = "1"/>
 				</field>
 				<field name="price_3" position="after">
 					<field name="disc_3" />
-					<field name="nett_3" />
+					<field name="nett_3" readonly = "1"/>
 				</field>
 
 			</field>
@@ -109,15 +109,15 @@
 				<!-- TEGUH@20170717: tamabah kolom nett 1 -3 -->
 				<field name="price_1" position="after">
 					<field name="disc_1" />
-					<field name="nett_1" />
+					<field name="nett_1" readonly="1"/>
 				</field>
 				<field name="price_2" position="after">
 					<field name="disc_2" />
-					<field name="nett_2" />
+					<field name="nett_2" readonly="1"/>
 				</field>
 				<field name="price_3" position="after">
 					<field name="disc_3" />
-					<field name="nett_3" />
+					<field name="nett_3" readonly="1"/>
 				</field>
 
 			</field>

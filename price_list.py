@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
-from openerp.osv import osv, fields
+from openerp import api
+from openerp.osv import osv,fields
 from openerp.tools.translate import _
 
 import utility
+import openerp.addons.purchase_sale_discount.discount_utility as discount_utility
 
 # ==========================================================================================================================
 
@@ -121,6 +123,7 @@ class price_list(osv.osv):
 		return result
 
 #============== OVERIDE ===================================================================================================	
+#OVERIDE spy bisa ganti price list secara category 
 	def activate_price_list(self, cr, uid, price_list_ids, context=None):
 		product_current_price_obj = self.pool.get('product.current.price')
 		product_obj = self.pool.get('product.product')
@@ -183,7 +186,9 @@ class price_list(osv.osv):
 
 class price_list_line_product(osv.osv):
 	_inherit = 'price.list.line.product'
-	
+
+	_max_discount = 3
+
 	_columns = {
 		'disc_1':fields.char('Disc 1'),
 		'disc_2':fields.char('Disc 2'),
@@ -191,15 +196,58 @@ class price_list_line_product(osv.osv):
 		'disc_4':fields.char('Disc 4'),
 		'disc_5':fields.char('Disc 5'),
 
-		#TEGUH@20180717 : tambah field nett1 - nett 3
-		'nett_1':fields.char('Nett 1'),
-		'nett_2':fields.char('Nett 2'),
-		'nett_3':fields.char('Nett 3'),
+		#TEGUH@20180718 : tambah field nett1 - nett 3
+		'nett_1':fields.float('Nett 1', compute="_compute_nett_1"),
+		'nett_2':fields.float('Nett 2', compute="_compute_nett_2"),
+		'nett_3':fields.float('Nett 3', compute="_compute_nett_3"),
 	}
+	
+	# METHODS ---------------------------------------------------------------------------------------------------------------	
+	@api.model
+	def _calculate_discounts(self, price_unit, valid_discount_string):
+		total_discount = 0
+		for discount in discount_utility.calculate_discount(valid_discount_string, price_unit, self._max_discount):
+			total_discount += discount
+		return total_discount
+
+	@api.one
+	@api.depends('price_1', 'disc_1','product_template_id')
+	def _compute_nett_1(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_1, self.price_1, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_1,valid_discount_string)
+		self.nett_1 = self.price_1 - self.discount_amount_line
+
+	@api.one
+	@api.depends('price_2', 'disc_2','product_template_id')
+	def _compute_nett_2(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_2, self.price_2, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_2,valid_discount_string)
+		self.nett_2 = self.price_2 - self.discount_amount_line	
+
+	@api.one
+	@api.depends('price_3', 'disc_3','product_template_id')
+	def _compute_nett_3(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_3, self.price_3, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_3,valid_discount_string)
+		self.nett_3 = self.price_3 - self.discount_amount_line	
 # ==========================================================================================================================
 
 class price_list_line_category(osv.osv):
 	_inherit = 'price.list.line.category'
+
+	_max_discount = 3
 	
 	_columns = {
 		'disc_1':fields.char('Disc 1'),
@@ -208,18 +256,59 @@ class price_list_line_category(osv.osv):
 		'disc_4':fields.char('Disc 4'),
 		'disc_5':fields.char('Disc 5'),
 
-		#TEGUH@20180717 : tambah field nett1 - nett 3
-		'nett_1':fields.char('Nett 1'),
-		'nett_2':fields.char('Nett 2'),
-		'nett_3':fields.char('Nett 3'),
-
+		#TEGUH@20180718 : tambah field nett1 - nett 3
+		'nett_1':fields.float('Nett 1', compute="_compute_nett_1"),
+		'nett_2':fields.float('Nett 2', compute="_compute_nett_2"),
+		'nett_3':fields.float('Nett 3', compute="_compute_nett_3"),
 	}
 
+	# METHODS ---------------------------------------------------------------------------------------------------------------	
+	@api.model
+	def _calculate_discounts(self, price_unit, valid_discount_string):
+		total_discount = 0
+		for discount in discount_utility.calculate_discount(valid_discount_string, price_unit, self._max_discount):
+			total_discount += discount
+		return total_discount
+
+	@api.one
+	@api.depends('price_1', 'disc_1','product_category_id')
+	def _compute_nett_1(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_1, self.price_1, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_1,valid_discount_string)
+		self.nett_1 = self.price_1 - self.discount_amount_line
+
+	@api.one
+	@api.depends('price_2', 'disc_2','product_category_id')
+	def _compute_nett_2(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_2, self.price_2, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_2,valid_discount_string)
+		self.nett_2 = self.price_2 - self.discount_amount_line	
+
+	@api.one
+	@api.depends('price_3', 'disc_3','product_category_id')
+	def _compute_nett_3(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_3, self.price_3, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_3,valid_discount_string)
+		self.nett_3 = self.price_3 - self.discount_amount_line	
 # ==========================================================================================================================
 
 class product_current_price(osv.osv):
 	_inherit = 'product.current.price'
 
+	_max_discount = 3
+
 	_columns = {
 		'disc_1':fields.char('Disc 1'),
 		'disc_2':fields.char('Disc 2'),
@@ -227,12 +316,52 @@ class product_current_price(osv.osv):
 		'disc_4':fields.char('Disc 4'),
 		'disc_5':fields.char('Disc 5'),
 
-		#TEGUH@20180717 : tambah field nett1 - nett 3
-		'nett_1':fields.char('Nett 1'),
-		'nett_2':fields.char('Nett 2'),
-		'nett_3':fields.char('Nett 3'),
+		#TEGUH@20180718 : tambah field nett1 - nett 3
+		'nett_1':fields.float('Nett 1', compute="_compute_nett_1"),
+		'nett_2':fields.float('Nett 2', compute="_compute_nett_2"),
+		'nett_3':fields.float('Nett 3', compute="_compute_nett_3"),
 	}
 	
+	# METHODS ---------------------------------------------------------------------------------------------------------------	
+	@api.model
+	def _calculate_discounts(self, price_unit, valid_discount_string):
+		total_discount = 0
+		for discount in discount_utility.calculate_discount(valid_discount_string, price_unit, self._max_discount):
+			total_discount += discount
+		return total_discount
+
+	@api.one
+	@api.depends('price_1', 'disc_1','product_id')
+	def _compute_nett_1(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_1, self.price_1, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_1,valid_discount_string)
+		self.nett_1 = self.price_1 - self.discount_amount_line
+
+	@api.one
+	@api.depends('price_2', 'disc_2','product_id')
+	def _compute_nett_2(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_2, self.price_2, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_2,valid_discount_string)
+		self.nett_2 = self.price_2 - self.discount_amount_line	
+
+	@api.one
+	@api.depends('price_3', 'disc_3','product_id')
+	def _compute_nett_3(self):
+		try:
+			valid_discount_string = discount_utility.validate_discount_string(self.disc_3, self.price_3, self._max_discount)
+		except discount_utility.InvalidDiscountException as exception:
+			raise osv.except_orm(_('Warning!'), exception.message)
+		
+		self.discount_amount_line = self._calculate_discounts(self.price_3,valid_discount_string)
+		self.nett_3 = self.price_3 - self.discount_amount_line	
 # OVERRIDE ------------------------------------------------------------------------------------------------------------------
 
 	def onchange_product_id(self, cr, uid, ids, product_category_id, context=None):
@@ -240,3 +369,28 @@ class product_current_price(osv.osv):
 		res = utility.update_uom_domain_price_list(res)
 		return res
 
+
+# OVERRIDE ------------------------------------------------------------------------------------------------------------------
+class product_template(osv.osv):
+	_inherit = 'product.template'
+	
+	def _price_ids(self, cr, uid, ids, field_name, arg, context={}):
+		current_pricelist_obj = self.pool.get('product.current.price')
+		result = {}
+		for product in self.browse(cr, uid, ids):
+			variants = product.product_variant_ids
+			if len(variants) > 0:
+				variant = variants[0]
+				result[product.id] = {
+					'buy_prices': current_pricelist_obj.search(cr, uid, [
+						('product_id', '=', variant.id),
+						#('price_type_id.type','=','buy'),
+						('start_date','=','current'),
+						]),
+					'sell_prices': current_pricelist_obj.search(cr, uid, [
+						('product_id', '=', variant.id),
+						#('price_type_id.type','=','sell'),
+						('start_date','=','current'),
+						]),
+				}
+		return result
