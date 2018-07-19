@@ -215,21 +215,27 @@ class purchase_order(osv.osv):
 class purchase_order_line(osv.osv):
 	_inherit = 'purchase.order.line'
 
-	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
-		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
-			purchase_order_obj = self.pool.get('purchase.order')
-			purchase_order = purchase_order_obj.browse(cr, uid, order_id)	
+	def _message_cost_price_changed(self, cr, uid, old_price,new_price, product, order_id, context):
+		result = super(purchase_order_line, self)._message_cost_price_changed(cr, uid, old_price,new_price, product, order_id, context=context)
+		
+		purchase_order_obj = self.pool.get('purchase.order')
+		purchase_order = purchase_order_obj.browse(cr, uid, order_id)	
+		supplier_name = purchase_order.partner_id.display_name
+		po = purchase_order.name
 
-			message_title = 'PURCHASE PRICE CHANGE :'+str(product.name)
-			message_body = 'There is a change on cost price for '+str(product.name)+' in PO:'+str(purchase_order.name)+' From:'+str(product.standard_price)+' to '+str(data['price_unit'])
+		if old_price != new_price:
+			message_title = 'PRICE CHANGE:'+str(product.name)
+			message_body = 'Supplier: '+supplier_name+'('+str(po)+')\n'+'From:'+str("{:,.0f}".format(old_price))+' to '+str("{:,.0f}".format(new_price))
 			alert = '!!!'
 			context = {
 				'category':'PURCHASE',
 				'sound_idx':PURCHASE_SOUND_IDX,
-				'alert' : alert,
+				'alert' : '!!!!!!!',
 				}
 
 			self.pool.get('tbvip.fcm_notif').send_notification(cr,uid,message_title,message_body,context=context)
+
+			return result
 
 
 class product_template(osv.osv):

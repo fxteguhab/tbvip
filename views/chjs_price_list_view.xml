@@ -155,5 +155,18 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="product_current_price_search_inherit">
+			<field name="name">product.current.price.search.inherit</field>
+			<field name="model">product.current.price</field>
+			<field name="inherit_id" ref="chjs_price_list.product_current_price_search"/>
+			<field name="arch" type="xml">
+				<xpath expr="//group[@string='Search']" position="after">
+					<group string="Group by">
+						<filter string="Supplier" context="{'group_by':'partner_id'}" />
+					</group>
+				</xpath>
+			</field>
+		</record>
+
 	</data>
 </openerp>

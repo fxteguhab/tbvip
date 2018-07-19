@@ -6,9 +6,19 @@
 			<field name="priority">17</field>
 			<field name="inherit_id" ref="purchase.purchase_order_form"/>
 			<field name="arch" type="xml">
-				<button name="print_quotation" position="after">
-					<button name="print_draft_purchase_order" string="" states="draft" type="object" icon="gtk-print"/>
+				<button name="purchase_confirm" position ="attributes">
+					<attribute name = "class">{'oe_highlight' : 1}</attribute>
 				</button>
+				<button name="wkf_send_rfq" position="replace" />
+				<button name="wkf_send_rfq" position="replace" />
+				<button name="wkf_send_rfq" position="replace" />
+				<button name="print_quotation" position="replace" />
+				<button name="action_cancel" position="after">
+					<button name="print_draft_purchase_order" string="Print" states="draft" type="object" icon="gtk-print"/>
+				</button>
+				<field name="partner_ref" position="after">
+					<field name = "description" />
+				</field>
 				<field name="partner_id" position="before">
 					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
 				</field>
@@ -86,6 +96,9 @@
 				<field name="product_qty" position="after">
 					<field name="uom_category_filter_id" invisible="1"/>
 				</field>
+				<field name="price_unit" position="before">
+					<field name="nett_price_old"/>
+				</field>
 				<xpath expr="//page[@string='RFQ &amp; Bid']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>
@@ -117,13 +130,22 @@
 			</field>
 		</record>
 
+		<!-- INI TREE YG DI PURCHASE LIST PRODUCT -->
 		<record model="ir.ui.view" id="purchase_order_line_tree">
 			<field name="name">purchase.order.line.tree.inherit</field>
 			<field name="model">purchase.order.line</field>
 			<field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
 			<field name="arch" type="xml">
+				<xpath expr="//tree[1]" position="attributes">
+					<attribute name="context">{'default_order':'date_planned'} </attribute>
+				</xpath>
 				<field name="price_subtotal" position="before">
 					<field name="price_unit_nett"/>
+				</field>
+				<field name ="name" position ="replace" />
+				<field name ="date_planned" position ="replace"/>
+				<field name ="order_id" position ="before">
+					<field name="date_planned" widget="date" width="135"/>
 				</field>
 			</field>
 		</record>

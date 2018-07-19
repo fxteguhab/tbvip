@@ -52,9 +52,11 @@
 			<field name="model">stock.picking</field>
 			<field name="inherit_id" ref="stock.view_picking_form"/>
 			<field name="arch" type="xml">
+				<button name="do_print_picking" position = "replace" />
 				<button name="action_cancel" position="after">
-					<button name="print_delivery_order" string="" type="object" icon="gtk-print"/>
+					<button name="print_delivery_order" string="Print" type="object" icon="gtk-print"/>
 				</button>
+				<button name="open_barcode_interface" position = "replace" />
 			</field>
 		</record>
 

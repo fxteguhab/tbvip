@@ -23,6 +23,9 @@
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_4']" position="replace" />
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_5']" position="replace" />
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_5']" position="replace" />
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_type_id']" position="after">
+					<field name="start_date" />
+				</xpath>
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_1']" position="before">
 					<field name="disc_1" />
 					<!-- TEGUH@20180717 : tambah field nett 1-->
@@ -42,17 +45,20 @@
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_4']" position="replace" />
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='price_5']" position="replace" />
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_5']" position="replace" />
-				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_1']" position="after">
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='price_type_id']" position="after">
+						<field name="start_date" />
+				</xpath>
+				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_1']" position="before">
 					<field name="disc_1" />
 					<!-- TEGUH@20180717 : tambah field nett 1-->
 					<field name="nett_1" />
 				</xpath>
-				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_2']" position="after">
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_2']" position="before">
 					<field name="disc_2" />
 					<!-- TEGUH@20180717 : tambah field nett 2-->
 					<field name="nett_2" />
 				</xpath>
-				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_3']" position="after">
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_3']" position="before">
 					<field name="disc_3" />
 					<!-- TEGUH@20180717 : tambah field nett 3-->
 					<field name="nett_3" />

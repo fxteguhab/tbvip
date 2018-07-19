@@ -16,8 +16,6 @@ import openerp.addons.product_custom_conversion as imported_product_custom_conve
 import openerp.addons.chjs_price_list as imported_price_list
 import openerp.addons.decimal_precision as dp
 
-
-
 # ==========================================================================================================================
 
 class purchase_order(osv.osv):
@@ -72,6 +70,8 @@ class purchase_order(osv.osv):
 			('taken', 'Taken')
 		], 'Shipped or Taken'),
 		'delivered_date': fields.datetime('Delivered Date', required=True),
+		'description' :fields.char('Description'),
+
 	}
 	
 	_defaults = {
@@ -83,36 +83,40 @@ class purchase_order(osv.osv):
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	#def create(self, cr, uid, vals, context={}):
+	#	new_id = super(purchase_order, self).create(cr, uid, vals, context=context)
+	#	
+	#	# langsung confirm purchasenya bila diinginkan. otomatis dia bikin satu invoice dan satu incoming goods
+	#	if context.get('direct_confirm', False):
+	#		purchase_data = self.browse(cr, uid, new_id)
+	#		self.signal_workflow(cr, uid, [new_id], 'purchase_confirm', context)
+	#		# samakan tanggal invoice dengan tanggal PO, jadi tidak default tanggal hari ini
+	#		invoice_obj = self.pool.get('account.invoice')
+	#		for invoice in purchase_data.invoice_ids:
+	#			invoice_obj.write(cr, uid, [invoice.id], {
+	#				'date_invoice': purchase_data.date_order,
+	#			})
+	#	return new_id
 	
-	def create(self, cr, uid, vals, context={}):
-		new_id = super(purchase_order, self).create(cr, uid, vals, context=context)
-		# langsung confirm purchasenya bila diinginkan. otomatis dia bikin satu invoice dan satu incoming goods
-		if context.get('direct_confirm', False):
-			purchase_data = self.browse(cr, uid, new_id)
-			self.signal_workflow(cr, uid, [new_id], 'purchase_confirm', context)
-			# samakan tanggal invoice dengan tanggal PO, jadi tidak default tanggal hari ini
-			invoice_obj = self.pool.get('account.invoice')
-			for invoice in purchase_data.invoice_ids:
-				invoice_obj.write(cr, uid, [invoice.id], {
-					'date_invoice': purchase_data.date_order,
-				})
-		return new_id
-	
-	def write(self, cr, uid, ids, vals, context=None):
-		result = super(purchase_order, self).write(cr, uid, ids, vals, context)
-		if vals.get('state', False) and vals['state'] == 'confirmed':
-			demand_line_obj = self.pool.get('tbvip.demand.line')
-			for po in self.browse(cr, uid, ids):
-				demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
-				demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
-		# 20180411: confirm PO tidak lagi otomatis mendeliver barang; bisa ada jeda waktu
-		# antara confirm dan barang datang
-			"""
-			self.write(cr, uid, ids, {
-				'delivered_date': datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-			})
-			"""
-		return result
+	#def write(self, cr, uid, ids, vals, context=None):
+	#	result = super(purchase_order, self).write(cr, uid, ids, vals, context)
+	#	self.message_post(cr, uid, ids, body="Draft PO <b>Edited</b>", subject = "DRAFT PO EDIT",context=context)
+	#	return result
+			
+	#	result = super(purchase_order, self).write(cr, uid, ids, vals, context)
+	#	if vals.get('state', False) and vals['state'] == 'confirmed':
+	#	demand_line_obj = self.pool.get('tbvip.demand.line')
+	#		for po in self.browse(cr, uid, ids):
+	#			demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',po.order_line.ids)])
+	#			demand_line_obj.ready_demand_lines(cr, uid, demand_line_ids, context)
+	# 		#20180411: confirm PO tidak lagi otomatis mendeliver barang; bisa ada jeda waktu
+	# 		#antara confirm dan barang datang
+	#		"""
+	#		self.write(cr, uid, ids, {
+	#			'delivered_date': datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+	#		})
+	#		"""
+	#	return result
 
 	def onchange_picking_type_id(self, cr, uid, ids, picking_type_id, context=None):
 		result = super(purchase_order, self).onchange_picking_type_id(cr, uid, ids, picking_type_id, context)
@@ -132,7 +136,7 @@ class purchase_order(osv.osv):
 		})
 		return {'value': result}
 	
-	def picking_done(self, cr, uid, ids, context=None):
+	#def picking_done(self, cr, uid, ids, context=None):
 		"""
 		Overrides picking_done to also mark the picking as transfered
 		"""
@@ -148,7 +152,7 @@ class purchase_order(osv.osv):
 		picking_obj = self.pool.get('stock.picking')
 		picking_obj.do_transfer(cr, uid, picking_ids)
 		"""
-		return super(purchase_order, self).picking_done(cr, uid, ids, context)
+	#	return super(purchase_order, self).picking_done(cr, uid, ids, context)
 
 	def _prepare_inv_line(self, cr, uid, account_id, order_line, context=None):
 	# kondisikan supaya price_type_id di po line ikut dicopy ke invoice
@@ -271,7 +275,7 @@ class purchase_order(osv.osv):
 			# create the new order
 			context.update({'mail_create_nolog': True})
 			neworder_id = self.create(cr, uid, order_data)
-			self.message_post(cr, uid, [neworder_id], body=_("RFQ created"), context=context)
+			self.message_post(cr, uid, [neworder_id], body=_("Draft Merged PO Create"), context=context)
 			orders_info.update({neworder_id: old_ids})
 			allorders.append(neworder_id)
 
@@ -363,7 +367,6 @@ class purchase_order(osv.osv):
 		else:
 			raise osv.except_osv(_('Print Draft PO Error'),_('PO must have at least one line to be printed.'))
 
-
 # ==========================================================================================================================
 
 class purchase_order_line(osv.osv):
@@ -379,7 +382,7 @@ class purchase_order_line(osv.osv):
 			purchase_date = datetime.strptime(line.date_order, '%Y-%m-%d %H:%M:%S')
 			result[line.id] = purchase_date.hour * 3600 + purchase_date.minute * 60
 		return result
-	
+
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -389,8 +392,8 @@ class purchase_order_line(osv.osv):
 		'alert': fields.integer('Alert'),
 		'product_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True),
 		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
-			string='UoM Category', readonly=True)
-		#'price_unit_old': fields.function(_price_unit_old, method=True, string='Price Old', type='float'),
+			string='UoM Category', readonly=True),	
+		'nett_price_old': fields.float(string = 'Nett Old'),	
 	}
 	
 	_sql_constraints = [
@@ -405,27 +408,34 @@ class purchase_order_line(osv.osv):
 	}
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
-	
-	def _message_cost_price_changed(self, cr, uid, data, product, order_id, context):
+
+
+	def _message_cost_price_changed(self, cr, uid, old_price,new_price, product, order_id, context):
 	# message post to SUPERUSER and all users in group Purchases Manager
-	# kalau harga yang diinput tidak sama dengan standard price product
-		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+	# kalau harga yang diinput tidak sama dengan standard price product	
+		if old_price != old_price:
 			purchase_order_obj = self.pool.get('purchase.order')
-			purchase_order = purchase_order_obj.browse(cr, uid, order_id)
-			group_obj = self.pool.get('res.groups')
-			purchase_manager_group_ids = group_obj.search(cr, uid, [
-				('category_id.name', '=', 'Purchases'),
-				('name', '=', 'Manager')
-				])
-			partner_ids = [SUPERUSER_ID]
-			for user in group_obj.browse(cr, uid, purchase_manager_group_ids).users:
-				partner_ids += [user.partner_id.id]
-			partner_ids = list(set(partner_ids))
-			purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
-				body=_(
-					"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
-					 % (product.name, purchase_order.name, product.standard_price,
-				data['price_unit']))
+			purchase_order = purchase_order_obj.browse(cr, uid, order_id)			
+			message="There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s." % (product.name, purchase_order.name, old_price,new_price)		
+			purchase_order_obj.message_post(cr, uid, purchase_order.id, body=message)
+
+		#if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+		#	purchase_order_obj = self.pool.get('purchase.order')
+		#	purchase_order = purchase_order_obj.browse(cr, uid, order_id)
+		#	group_obj = self.pool.get('res.groups')
+		#	purchase_manager_group_ids = group_obj.search(cr, uid, [
+		#		('category_id.name', '=', 'Purchases'),
+		#		('name', '=', 'Manager')
+		#		])
+		#	partner_ids = [SUPERUSER_ID]
+		#	for user in group_obj.browse(cr, uid, purchase_manager_group_ids).users:
+		#		partner_ids += [user.partner_id.id]
+		#	partner_ids = list(set(partner_ids))
+		#	purchase_order_obj.message_post(cr, uid, purchase_order.id, context=context, partner_ids=partner_ids,
+		#		body=_(
+		#			"There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s.")
+		#			 % (product.name, purchase_order.name, product.standard_price,
+		#		data['price_unit']))
 	
 	def _message_line_changes(self, cr, uid, vals, line_id, create=False, context=None):
 		purchase_order_obj = self.pool.get('purchase.order')
@@ -458,19 +468,23 @@ class purchase_order_line(osv.osv):
 	def create(self, cr, uid, vals, context=None):
 		new_order_line = super(purchase_order_line, self).create(cr, uid, vals, context)
 		new_data = self.browse(cr, uid, new_order_line)
+		
 		if vals.get('product_id', False) and vals.get('price_unit', False):
+			#cek bila ada perubahan harga beli
 			product_obj = self.pool.get('product.product')
 			product = product_obj.browse(cr, uid, vals['product_id'])
-			self._message_cost_price_changed(cr, uid, vals, product, vals['order_id'], context)
-			self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
+			self._message_cost_price_changed(cr, uid, vals['nett_price_old'],vals['price_unit_nett'], product,vals['order_id'], context)
+			#self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
+		
 		# otomatis create current price kalo belum ada
 			if vals.get('price_type_id', False) and vals.get('product_uom', False):
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 					vals['price_type_id'], vals['product_id'], vals['product_uom'],
 					vals['price_unit'], vals['discount_string'], partner_id=new_data.order_id.partner_id.id)
-	# otomatis isi incoming location dengan default stock location cabang di mana user ini login
-	# artinya, secara default barang akan dikirim ke cabang user pembuat PO ini
-	# hanya bila tidak diset di vals nya
+		
+		# otomatis isi incoming location dengan default stock location cabang di mana user ini login
+		# artinya, secara default barang akan dikirim ke cabang user pembuat PO ini
+		# hanya bila tidak diset di vals nya
 		if not vals.get('location_id', False):
 			users_obj = self.pool.get('res.users')
 			incoming_location = users_obj.browse(cr, uid, [uid], context).branch_id.default_incoming_location_id
@@ -487,12 +501,12 @@ class purchase_order_line(osv.osv):
 		# ini buat apa ya ? ditutup dulu sementara deh .....
 		# kirim message kalau ada perubahan harga : 
 		# dibuka lagi per 20180717
-		if vals.get('price_unit', False):
-			for purchase_line in self.browse(cr, uid, ids):
-				self._message_cost_price_changed(cr, uid, vals, purchase_line.product_id, purchase_line.order_id.id, context)	
-
 		for po_line in self.browse(cr, uid, ids):
-		# bikin product current price baru bila belum ada
+		
+			#cek perubahan harga masih ERROR
+			#self._message_cost_price_changed(cr, uid, vals['nett_price_old'],vals['price_unit_nett'], po_line.product_id, po_line.order_id.id, context)	
+			
+			# bikin product current price baru bila belum ada
 			product_id = po_line.product_id.id
 			price_type_id = po_line.price_type_id.id
 			product_uom = po_line.product_uom.id
@@ -510,25 +524,26 @@ class purchase_order_line(osv.osv):
 				partner_id=po_line.order_id.partner_id.id)
 		return edited_order_line
 	
-	def unlink(self, cr, uid, ids, context=None):
+	#def unlink(self, cr, uid, ids, context=None):
 	# kalau line ini batal, maka demand yang menyebabkan adanya purchase order (di mana 
 	# purchase order line ini berada) ini berubah status kembali menjadi requested
 	# artinya demand tersebut dianggap belum fulfilled
-		result = super(purchase_order_line, self).unlink(cr, uid, ids, context)
-		demand_line_obj = self.pool.get('tbvip.demand.line')
-		demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',ids)])
-		demand_line_obj.write(cr, uid, demand_line_ids, {
-			'state': 'requested'
-		})
-		return result
-	
+	#	result = super(purchase_order_line, self).unlink(cr, uid, ids, context)
+	#	demand_line_obj = self.pool.get('tbvip.demand.line')
+	#	demand_line_ids = demand_line_obj.search(cr, uid, [('purchase_order_line_id','in',ids)])
+	#	demand_line_obj.write(cr, uid, demand_line_ids, {
+	#		'state': 'requested'
+	#	})
+	#	return result
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
+
 	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
 			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
 			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
 			discount_from_subtotal=False, context=None):
 		result = self.onchange_product_tbvip(cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order,
 			fiscal_position_id, date_planned, name, price_unit, state, parent_price_type_id, price_type_id,
-			discount_from_subtotal, context)
+			discount_from_subtotal,context)
 		if product_id:
 			product_obj = self.pool.get('product.product')
 			product = product_obj.browse(cr, uid, product_id)
@@ -555,7 +570,7 @@ class purchase_order_line(osv.osv):
 		oc_price_list = \
 			imported_price_list.purchase.purchase_order_line.onchange_product_id(
 			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
-			date_planned, name, price_unit, state, parent_price_type_id, price_type_id, context)
+			date_planned, name, price_unit, state, parent_price_type_id, price_type_id,context)
 	# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
 		oc_price_list['warning'] = {}
 		result['value'].update(oc_price_list.get('value', {}))
@@ -563,7 +578,10 @@ class purchase_order_line(osv.osv):
 	# default diskon diambil dari current price
 		current_price_unit = oc_price_list['value'].get('price_unit', price_unit)		
 		current_discount = self.pool.get('product.current.price').get_current(
-			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)			
+			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)	
+	# isi nett price old dari price list	
+		nett_price_old = self.pool.get('product.current.price').get_current(
+			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="nett", context=context)			
 	# jalankan onchange diskon. price unit dan discount string, as per logic di dalam 
 	# onchange_product_id_purchase_sale_discount, akan tetap memakai yang dari current price
 	# di atas
@@ -596,14 +614,15 @@ class purchase_order_line(osv.osv):
 		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
 			'product_uom': final_product_uom,
-			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id
+			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id,
+			'nett_price_old' : nett_price_old,
 		})
 		
 		return result
 
 class purchase_report(osv.osv):
 	_inherit = "purchase.report"
-# OVERRIDES -------------------------------------------------------------------------------------------------------------
+	# OVERRIDES -------------------------------------------------------------------------------------------------------------
 	#TEGUH20180425 : hapus semua tulisan cr.rate
 	def init(self, cr):
 		tools.sql.drop_view_if_exists(cr, 'purchase_report')

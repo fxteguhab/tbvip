@@ -362,14 +362,13 @@ class product_current_price(osv.osv):
 		
 		self.discount_amount_line = self._calculate_discounts(self.price_3,valid_discount_string)
 		self.nett_3 = self.price_3 - self.discount_amount_line	
+
 # OVERRIDE ------------------------------------------------------------------------------------------------------------------
 
 	def onchange_product_id(self, cr, uid, ids, product_category_id, context=None):
 		res = super(product_current_price, self).onchange_product_id(cr, uid, ids, product_category_id, context)
 		res = utility.update_uom_domain_price_list(res)
 		return res
-
-
 # OVERRIDE ------------------------------------------------------------------------------------------------------------------
 class product_template(osv.osv):
 	_inherit = 'product.template'
@@ -394,3 +393,5 @@ class product_template(osv.osv):
 						]),
 				}
 		return result
+
+
