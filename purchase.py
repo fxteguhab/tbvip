@@ -492,19 +492,16 @@ class purchase_order_line(osv.osv):
 				vals['location_id'] = incoming_location
 		return new_order_line
 	
-	def write(self, cr, uid, ids, vals, context=None):
+	def write(self, cr, uid, ids, vals, context=None):			
 		for id in ids:
-			self._message_line_changes(cr, uid, vals, id, context=None)
+			self._message_line_changes(cr, uid, vals, id, context=None)								
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
 		
-		#TEGUH@20180501 : 
-		# ini buat apa ya ? ditutup dulu sementara deh .....
-		# kirim message kalau ada perubahan harga : 
-		# dibuka lagi per 20180717
-		for po_line in self.browse(cr, uid, ids):
-		
+		for po_line in self.browse(cr, uid, ids):		
 			#cek perubahan harga masih ERROR
-			#self._message_cost_price_changed(cr, uid, vals['nett_price_old'],vals['price_unit_nett'], po_line.product_id, po_line.order_id.id, context)	
+			price_unit_nett = po_line.price_unit_nett
+			nett_price_old = po_line.nett_price_old
+			self._message_cost_price_changed(cr, uid, nett_price_old,price_unit_nett, po_line.product_id, po_line.order_id.id, context)	
 			
 			# bikin product current price baru bila belum ada
 			product_id = po_line.product_id.id
