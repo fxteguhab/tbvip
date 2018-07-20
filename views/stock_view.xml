@@ -210,6 +210,7 @@
 			<field name="inherit_id" ref="stock.view_move_tree"/>
 			<field name="arch" type="xml">
 				<field name = "date" position ="replace" />
+				<button name="%(stock.move_scrap)d" position="replace" />
 				<field name ="name" position="before">
 					<field name="date" groups="base.group_no_one"/>
 				</field>

@@ -223,7 +223,7 @@ class purchase_order_line(osv.osv):
 		supplier_name = purchase_order.partner_id.display_name
 		po = purchase_order.name
 
-		if old_price != new_price:
+		if ((old_price != new_price) and (old_price > 0)):
 			message_title = 'PRICE CHANGE:'+str(product.name)
 			message_body = 'Supplier: '+supplier_name+'('+str(po)+')\n'+'From:'+str("{:,.0f}".format(old_price))+' to '+str("{:,.0f}".format(new_price))
 			alert = '!!!'
