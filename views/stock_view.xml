@@ -56,6 +56,7 @@
 				<button name="action_cancel" position="after">
 					<button name="print_delivery_order" string="Print" type="object" icon="gtk-print"/>
 				</button>
+				<button name="do_partial_open_barcode" position = "replace" />
 				<button name="open_barcode_interface" position = "replace" />
 			</field>
 		</record>

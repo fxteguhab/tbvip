@@ -41,7 +41,7 @@
 		'menu/product_menu.xml',
 		'menu/tbvip_menu.xml',
 		'menu/purchase_menu.xml',
-		'menu/purchase_needs_menu.xml',
+		#'menu/purchase_needs_menu.xml',
 		'menu/stock_menu.xml',
 		'menu/stock_opname_menu.xml',
 		'menu/sale_menu.xml',
