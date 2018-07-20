@@ -331,11 +331,11 @@ class stock_move(osv.osv):
 				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
 	# kalau move terkait demand, "batalkan" demandnya menjadi requested
 		result = super(stock_move, self).unlink(cr, uid, ids, context)
-		demand_line_obj = self.pool.get('tbvip.demand.line')
-		demand_line_ids = demand_line_obj.search(cr, uid, [('stock_move_id','in',ids)])
-		demand_line_obj.write(cr, uid, demand_line_ids, {
-			'state': 'requested'
-		})
+	#	demand_line_obj = self.pool.get('tbvip.demand.line')
+	#	demand_line_ids = demand_line_obj.search(cr, uid, [('stock_move_id','in',ids)])
+	#	demand_line_obj.write(cr, uid, demand_line_ids, {
+	#		'state': 'requested'
+	#	})
 		return result
 	
 	def get_price_unit(self, cr, uid, move, context=None):
@@ -344,12 +344,14 @@ class stock_move(osv.osv):
 	# Jika dari Purchase, maka price untuk quants didapat dari unit price nett
 		if move.purchase_line_id:
 			return move.purchase_line_id.price_unit_nett
-		
+			
 		result = super(stock_move, self).get_price_unit(cr, uid, move, context=context)
 		
 	# Jika price yang didapat 0, maka dapatkan dari price list buy harga default
 		if not result:
+			print 'ini kalo 0'
 			price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+			#price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
 			unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
 			product_current_price_obj = self.pool.get('product.current.price')
 		

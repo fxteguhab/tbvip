@@ -105,6 +105,9 @@
 				<xpath expr="//page[@string='Deliveries &amp; Invoices']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>
+				<field name ="state" position="attributes">
+					<attribute name ="statusbar_visible">"draft,approved,done"</attribute>
+				</field>
 			</field>
 		</record>
 
