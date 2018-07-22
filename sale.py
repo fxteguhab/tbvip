@@ -44,6 +44,9 @@ class sale_order(osv.osv):
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 	}
 
+	_sql_constraints = [
+		('name_uniq', 'unique(name, company_id)', 'This order number already created'),
+	]
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
 		partner_id = None
@@ -278,7 +281,7 @@ class sale_order(osv.osv):
 			if order.payment_transfer_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
 			if order.payment_cash_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount+order.total_discount_amount, 'cash', order.invoice_ids[0].id, context=None)
 			if order.payment_receivable_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
 			if order.payment_giro_amount > 0:

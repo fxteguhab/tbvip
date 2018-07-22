@@ -95,7 +95,7 @@
 			<field name="name">koreksi.bon.log.tree</field>
 			<field name="model">koreksi.bon.log</field>
 			<field name="arch" type="xml">
-				<tree create="false" edit="false" delete="false">
+				<tree create="false" edit="false" delete="false" default_order="create_date desc">
 					<field name="create_uid" string="Corrected By"/>
 					<field name="create_date" string="Corrected Date"/>
 					<field name="old_sale_order_id"/>

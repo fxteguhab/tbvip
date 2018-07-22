@@ -7,8 +7,20 @@
 			<field name="priority">17</field>
 			<field name="inherit_id" ref="sale.view_order_form"/>
 			<field name="arch" type="xml">
-				<button name="print_quotation" position="after">
-					<button name="print_sale_order" string="" type="object" icon="gtk-print"/>
+				<xpath expr="//label[@string='Quotation ']" position="attributes">
+					<attribute name="string">Draft Sales Order</attribute>
+				</xpath>
+				<button name="print_quotation" position="replace" />
+				<button name="print_quotation" position="replace" />
+				<button name="action_cancel" position="after">
+					<button name="print_sale_order" string="Print" type="object" icon="gtk-print"/>
+				</button>
+				<button name="cancel" position="attributes">
+					<attribute name="string">Cancel Sale</attribute>
+					<attribute name="icon">gtk-cancel</attribute>
+				</button>
+				<button name="action_button_confirm" position="attributes">
+					<attribute name="icon">gtk-apply</attribute>
 				</button>
 				<button name="action_customer_pay" position="attributes">
 					<attribute name="string">Add Payment</attribute>
@@ -28,7 +40,7 @@
 					<field name="employee_id" readonly="True"/>
 					<field name="return_id" readonly="True"/>
 				</field>
-				<field name="shipped_or_taken" position="after">
+				<field name="price_type_id" position="after">
 					<!--<field name="customer_address" attrs="{'invisible': [('shipped_or_taken','!=','shipped')]}"/>-->
 					<field name="client_order_ref"/>
 				</field>
@@ -108,6 +120,10 @@
 				<field name="amount_tax" position="attributes">
 					<attribute name="invisible">True</attribute>
 				</field>
+				<field name="state" position ="attributes">
+					<attribute name ="statusbar_visible">"draft,progress,done"</attribute>
+				</field>
+				<field name="note" position ="replace" />
 			</field>
 		</record>
 

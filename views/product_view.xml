@@ -48,7 +48,7 @@
 				<xpath expr="//field[@name='sell_prices']/tree/field[@name='price_type_id']" position="after">
 						<field name="start_date" />
 				</xpath>
-				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_1']" position="before">
+				<xpath expr="//field[@name='sell_prices']/tree/field[@name='uom_id_1']" position="before">
 					<field name="disc_1" />
 					<!-- TEGUH@20180717 : tambah field nett 1-->
 					<field name="nett_1" />
