@@ -8,11 +8,15 @@
 			<field name="arch" type="xml">
 				<button name="purchase_confirm" position ="attributes">
 					<attribute name = "class">{'oe_highlight' : 1}</attribute>
+					<attribute name="icon">gtk-apply</attribute>
 				</button>
 				<button name="wkf_send_rfq" position="replace" />
 				<button name="wkf_send_rfq" position="replace" />
 				<button name="wkf_send_rfq" position="replace" />
 				<button name="print_quotation" position="replace" />
+				<button name="action_cancel" position="attributes">
+					<attribute name="icon">gtk-cancel</attribute>
+				</button>
 				<button name="action_cancel" position="after">
 					<button name="print_draft_purchase_order" string="Print" states="draft" type="object" icon="gtk-print"/>
 				</button>
@@ -20,12 +24,15 @@
 					<field name = "description" />
 				</field>
 				<field name="partner_id" position="before">
-					<field name="branch_id" on_change="onchange_branch_id(branch_id)" />
+					<field name="branch_id" on_change="onchange_branch_id(branch_id)" options="{'no_create': 1}"/> />
 				</field>
 				<field name="date_order" position="after">
 					<field name="delivered_date"/>
 				</field>
 				<field name="partner_id" position="attributes">
+					<attribute name="options">{'no_create': True}</attribute>
+				</field>
+				<field name="price_type_id" position="attributes">
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
 				<field name="picking_type_id" position="attributes">
@@ -208,7 +215,9 @@
 			<field name="inherit_id" ref="stock.view_stock_enter_transfer_details"/>
 			<field name="arch" type="xml">
 				<button name="split_quantities" position="replace"></button>
-				<field name="sourceloc_id" position="replace"></field>
+				<field name="sourceloc_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 				<field name="destinationloc_id" position="replace"></field>
 			</field>
 		</record>
