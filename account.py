@@ -79,34 +79,47 @@ class account_invoice_line(osv.osv):
 
 	_columns = {
 		'price_type_id': fields.many2one('price.type', 'Price Type', ondelete='restrict'),
+		'nett_price_old': fields.float(string = 'Nett Old'),
+		'sale_price_unit': fields.float('Sales Price'),
+		'discount_string_old': fields.char(string = 'Disc Old'),
 	}
 	
-	def _message_cost_price_changed(self, cr, uid, data, product, invoice_id, context):
-	# message kalau harga yang diinput tidak sama dengan standard price product
-		if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+	def _message_cost_price_changed(self, cr, uid, vals, context):
+		if ((vals['nett_price_old'] > 0) and (vals['nett_price_old'] != vals['nett_price_new'])):
 			account_invoice_obj = self.pool.get('account.invoice')
-			account_invoice = account_invoice_obj.browse(cr, uid, invoice_id)
-			print 'harga beda'
+			account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
+			message="There is a change on cost price for %s in Purchase Order %s. Original: %s to %s." % (product.name, purchase_order.name, old_price,new_price)		
+			account_invoice_obj.message_post(cr, uid, vals['invoice_id'], body=message)		
+
+	# message kalau harga yang diinput tidak sama dengan standard price product
+	#	if product.standard_price > 0 and data['price_unit'] != product.standard_price:
+	#		account_invoice_obj = self.pool.get('account.invoice')
+	#		account_invoice = account_invoice_obj.browse(cr, uid, invoice_id)
 	
 	def create(self, cr, uid, vals, context={}):
 		new_id = super(account_invoice_line, self).create(cr, uid, vals, context=context)
 		new_data = self.browse(cr, uid, new_id)
-	# otomatis create current price kalo belum ada
+	# otomatis create current price kalo belum ada --> ini ga dijalanin ????
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 				vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
 				vals['discount_string'], partner_id=new_data.invoice_id.partner_id.id)
 
-			product_obj = self.pool.get('product.product')
-			product = product_obj.browse(cr, uid, vals['product_id'])
-			self._message_cost_price_changed(cr, uid, vals, product, vals['invoice_id'], context)
+			#product_obj = self.pool.get('product.product')
+			#product = product_obj.browse(cr, uid, vals['product_id'])
 
+			#print 'masukk create invoice line'
+			#self._message_cost_price_changed(cr, uid, vals,  context)
+
+				
 		return new_id
 
 	def write(self, cr, uid, ids, vals, context={}):
 		result = super(account_invoice_line, self).write(cr, uid, ids, vals, context=context)
-	# bila user mengubah salah satu dari empat field di bawah ini, cek dan update
-	# current price bila perlu
+		print 'masukk write invoice line'
+		#self._message_cost_price_changed(cr, uid, vals, vals['product_id'], vals['invoice_id'], context)
+		# bila user mengubah salah satu dari empat field di bawah ini, cek dan update
+		# current price bila perlu
 		if any(field in vals.keys() for field in ['product_id','price_type_id','uos_id','price_unit']):
 			for invoice_line in self.browse(cr, uid, ids):
 			# gunakan price_type_id yang di line
@@ -128,7 +141,7 @@ class account_invoice_line(osv.osv):
 				# give up, next record please!
 					if len(price_type_ids) == 0: continue
 					price_type_id = price_type_ids[0]
-			# bikin product current price baru bila belum ada
+			# bikin product current price baru bila belum ada  --> ini juga ga dijalanin ??
 				product_id = invoice_line.product_id.id
 				product_uom = invoice_line.uos_id.id
 				price_unit = invoice_line.price_unit
@@ -142,7 +155,68 @@ class account_invoice_line(osv.osv):
 					partner_id=invoice_line.invoice_id.partner_id.id)
 		return result
 
-	
+'''
+	def onchange_product_id_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+			partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+			name=False, price_unit=False, state='draft', parent_price_type_id=False, price_type_id=False,
+			discount_from_subtotal=False, context=None):
+		result = self.onchange_product_tbvip(cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order,
+			fiscal_position_id, date_planned, name, price_unit, state, parent_price_type_id, price_type_id,
+			discount_from_subtotal,context)
+		if product_id:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, product_id)
+			result['value']['product_uom'] = product.uom_id.id
+		return result
+
+
+	def onchange_product_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+		partner_id, date_order=False, fiscal_position_id=False, date_planned=False,
+		name=False, price_unit=False, state='draft', parent_price_type_id=False, 
+		price_type_id=False, discount_from_subtotal=False, context=None):
+	# karena tbvip inherit dari berbagai modul yang sebagian punya onchange product id,
+	# maka dibuatlah method onchange ini. pada dasarnya ini memanggil onchange2 module
+	# general-purpose yang terlibat di tbvip (contoh chjs_price_list, purchase_sale_discount)
+	# dan menggabungkan hasilnya (baik warning, value, domain) ke dalam satu return
+	# hati2, urutan pemanggilan sangatlah penting karena efek yang satu bisa ditiadakan/
+	# dianulir setelah memanggil onchange yang lain.
+		
+		result = {'value': {}, 'domain': {}}
+
+		product_conversion_obj = self.pool.get('product.conversion')
+		uom_id = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom_id, context).id
+		
+	# jalankan onchange dari modul price list
+		oc_price_list = \
+			imported_price_list.purchase.purchase_order_line.onchange_product_id(
+			self, cr, uid, ids, pricelist_id, product_id, qty, uom_id, partner_id, date_order, fiscal_position_id,
+			date_planned, name, price_unit, state, parent_price_type_id, price_type_id,context)
+	# hide warning dari price_list ketika tidak menemukan harga untuk uom dan product id yang dipilih
+		oc_price_list['warning'] = {}
+		result['value'].update(oc_price_list.get('value', {}))
+
+	# default diskon diambil dari current price
+		current_price_unit = oc_price_list['value'].get('price_unit', price_unit)		
+		current_discount = self.pool.get('product.current.price').get_current(
+			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)	
+	# isi nett price old dari price list	
+		nett_price_old = self.pool.get('product.current.price').get_current(
+			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="nett", context=context)			
+	# jalankan onchange diskon. price unit dan discount string, as per logic di dalam 
+	# onchange_product_id_purchase_sale_discount, akan tetap memakai yang dari current price
+	# di atas
+		oc_purchase_sale_discount = \
+			imported_purchase_sale_discount.purchase_discount.purchase_order_line.onchange_product_id_purchase_sale_discount(
+			self, cr, uid, ids, product_id, partner_id, uom_id, qty, current_price_unit, current_discount, discount_from_subtotal)
+		if oc_purchase_sale_discount:
+			result['value'].update(oc_purchase_sale_discount.get('value', {}))
+		
+		final_product_uom = uom_id
+		if not final_product_uom:
+			product_obj = self.pool.get('product.product')
+			product = product_obj.browse(cr, uid, product_id)
+			final_product_uom = product.uom_id.id
+'''	
 # ==========================================================================================================================
 
 class account_move_line(osv.osv):

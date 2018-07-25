@@ -209,13 +209,17 @@
 			<field eval="8" name="priority"/>
 			<field name="inherit_id" ref="stock.view_move_tree"/>
 			<field name="arch" type="xml">
-				<field name = "date" position ="replace" />
+				<field name = "date" position ="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
 				<button name="%(stock.move_scrap)d" position="replace" />
 				<field name ="name" position="before">
 					<field name="date" groups="base.group_no_one"/>
 				</field>
 				<field name="date_expected" position="replace" />
-				<field name="picking_type_id" position="replace"/>
+				<field name="picking_type_id" position="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
 				 <field name="product_id" position="attributes">
 				 	<attribute name="invisible">True</attribute>
 				 </field>
@@ -231,7 +235,9 @@
 			<field eval="1" name="priority"/>
 			<field name="inherit_id" ref="stock.view_move_form"/>
 			<field name="arch" type="xml">
-				<field name ="partner_id" position="replace" />
+				<field name ="partner_id" position="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
 				<field name="location_id" position="after">
 					<field name ="partner_id" string ="Partner" />
 				</field>
@@ -250,7 +256,9 @@
 				<field name="inventory_value" position ="before">
 					<field name ="cost" />
 				</field>
-				<field name ="in_date" position="replace" />
+				<field name ="in_date" position="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
 				<field name ="product_id" position="before">
 					<field name ="in_date" />
 				</field>
@@ -263,7 +271,9 @@
 			<field eval="4" name="priority"/>
 			<field name="inherit_id" ref="stock.view_move_picking_tree"/>
 			<field name="arch" type="xml">
-				<field name ="remaining_qty" position="replace" />
+				<field name ="remaining_qty" position="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
 				<button name="%(stock.move_scrap)d" position="replace"/>
 			</field>
 		</record>

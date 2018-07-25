@@ -360,6 +360,28 @@ class stock_move(osv.osv):
 			
 			return current_price
 
+	def _get_invoice_line_vals(self, cr, uid, move, partner, inv_type, context=None):
+		result = super(stock_move, self)._get_invoice_line_vals(cr, uid, move, partner, inv_type, context=context)
+		purchase_line = move.purchase_line_id
+		if inv_type == 'in_invoice' and purchase_line:
+			price_type = 'buy'
+			price_type_ids = self.pool.get('price.type').search(cr, uid, [('type','=',price_type),('is_default','=',True),])
+			price_type_id = price_type_ids[0]
+			
+			price_type_id_sells = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
+			price_type_id_sell = price_type_id_sells[0]
+			general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
+			sale_price_unit = self.pool.get('product.current.price').get_current(
+				cr, uid, purchase_line.product_id.id,price_type_id_sell, purchase_line.product_uom.id, partner_id = general_customer_id[1],field="nett", context=context)
+			result.update({
+				'price_type_id': price_type_id,
+				'nett_price_old' : purchase_line.nett_price_old,
+				'sale_price_unit' : sale_price_unit,
+				})
+		
+		return result
+
+
 # ==========================================================================================================================
 
 class stock_sublocation(osv.osv):

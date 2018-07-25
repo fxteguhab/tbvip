@@ -408,15 +408,13 @@ class purchase_order_line(osv.osv):
 	}
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
-
-
 	def _message_cost_price_changed(self, cr, uid, old_price,new_price, product, order_id, context):
 	# message post to SUPERUSER and all users in group Purchases Manager
 	# kalau harga yang diinput tidak sama dengan standard price product	
-		if old_price != old_price:
+		if ((old_price > 0) and (old_price != new_price)):
 			purchase_order_obj = self.pool.get('purchase.order')
 			purchase_order = purchase_order_obj.browse(cr, uid, order_id)			
-			message="There is a change on cost price for %s in Purchase Order %s. Original: %s, in PO: %s." % (product.name, purchase_order.name, old_price,new_price)		
+			message="There is a change on cost price for %s in Purchase Order %s. Original: %s to %s." % (product.name, purchase_order.name, old_price,new_price)		
 			purchase_order_obj.message_post(cr, uid, purchase_order.id, body=message)
 
 		#if product.standard_price > 0 and data['price_unit'] != product.standard_price:
@@ -471,9 +469,10 @@ class purchase_order_line(osv.osv):
 		
 		if vals.get('product_id', False) and vals.get('price_unit', False):
 			#cek bila ada perubahan harga beli
-			product_obj = self.pool.get('product.product')
-			product = product_obj.browse(cr, uid, vals['product_id'])
-			self._message_cost_price_changed(cr, uid, vals['nett_price_old'],vals['price_unit_nett'], product,vals['order_id'], context)
+			#product_obj = self.pool.get('product.product')
+			#product = product_obj.browse(cr, uid, vals['product_id'])
+			#notif nya pindah ke invoice line
+			#self._message_cost_price_changed(cr, uid, vals['nett_price_old'],vals['price_unit_nett'], product,vals['order_id'], context)
 			#self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
 		
 		# otomatis create current price kalo belum ada
@@ -498,10 +497,11 @@ class purchase_order_line(osv.osv):
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
 		
 		for po_line in self.browse(cr, uid, ids):		
-			#cek perubahan harga masih ERROR
+			#cek perubahan harga, tp masih ERROR
 			price_unit_nett = po_line.price_unit_nett
 			nett_price_old = po_line.nett_price_old
-			self._message_cost_price_changed(cr, uid, nett_price_old,price_unit_nett, po_line.product_id, po_line.order_id.id, context)	
+			#notif nya pindah ke invoice line
+			#self._message_cost_price_changed(cr, uid, nett_price_old,price_unit_nett, po_line.product_id, po_line.order_id.id, context)	
 			
 			# bikin product current price baru bila belum ada
 			product_id = po_line.product_id.id

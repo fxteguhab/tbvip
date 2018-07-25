@@ -254,7 +254,8 @@ class sale_order(osv.osv):
 		
 		# if residual==0, paid
 		for invoice in invoice_obj.browse(cr, uid, invoice_id):
-			if invoice.residual == 0:
+			#if invoice.residual == 0:
+			if invoice.residual >= 0:
 				invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
 				pass
 
@@ -278,10 +279,11 @@ class sale_order(osv.osv):
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 			
 			order = sale
+			sale_discount = float(order.sale_discount)
 			if order.payment_transfer_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
 			if order.payment_cash_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount+order.sale_discount, 'cash', order.invoice_ids[0].id, context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
 			if order.payment_receivable_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
 			if order.payment_giro_amount > 0:

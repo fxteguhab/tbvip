@@ -1,5 +1,4 @@
 from openerp.osv import osv, fields
-
 from datetime import datetime
 from datetime import timedelta
 import os.path
@@ -223,9 +222,9 @@ class purchase_order_line(osv.osv):
 		supplier_name = purchase_order.partner_id.display_name
 		po = purchase_order.name
 
-		if ((old_price != new_price) and (old_price > 0)):
-			message_title = 'PRICE CHANGE:'+str(product.name)
-			message_body = 'Supplier: '+supplier_name+'('+str(po)+')\n'+'From:'+str("{:,.0f}".format(old_price))+' to '+str("{:,.0f}".format(new_price))
+		if ((old_price > 0) and (old_price != new_price)):
+			message_title = str(product.name)
+			message_body = 'From:'+str("{:,.0f}".format(old_price))+' to '+str("{:,.0f}".format(new_price)) +'\n'+supplier_name+'('+str(po)+')'
 			alert = '!!!'
 			context = {
 				'category':'PURCHASE',
