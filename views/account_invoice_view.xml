@@ -59,10 +59,10 @@
 				</xpath>
 				
 				<xpath expr="//field[@name='invoice_line']/tree/field[@name='discount']" position="after">
-					<field name="price_unit_old" />
-					<field name="discount_string_old" />
-					<field name="price_unit_nett_old" />
-					<field name="sell_price_unit" />
+					<field name="price_unit_old" invisible="1"/>
+					<field name="discount_string_old" invisible="1"/>
+					<field name="price_unit_nett_old" invisible="1"/>
+					<field name="sell_price_unit" invisible="1"/>
 				</xpath>
 
 				<xpath expr="//field[@name='tax_line']" position="replace"></xpath>
