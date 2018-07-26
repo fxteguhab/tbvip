@@ -349,7 +349,6 @@ class stock_move(osv.osv):
 		
 	# Jika price yang didapat 0, maka dapatkan dari price list buy harga default
 		if not result:
-			print 'ini kalo 0'
 			price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
 			#price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
 			unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
@@ -371,12 +370,14 @@ class stock_move(osv.osv):
 			price_type_id_sells = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
 			price_type_id_sell = price_type_id_sells[0]
 			general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
-			sale_price_unit = self.pool.get('product.current.price').get_current(
+			sell_price_unit = self.pool.get('product.current.price').get_current(
 				cr, uid, purchase_line.product_id.id,price_type_id_sell, purchase_line.product_uom.id, partner_id = general_customer_id[1],field="nett", context=context)
 			result.update({
 				'price_type_id': price_type_id,
-				'nett_price_old' : purchase_line.nett_price_old,
-				'sale_price_unit' : sale_price_unit,
+				'price_unit_old' : purchase_line.price_unit_old,
+				'discount_string_old' : purchase_line.discount_string_old,
+				'price_unit_nett_old' : purchase_line.price_unit_nett_old,
+				'sell_price_unit' : sell_price_unit,
 				})
 		
 		return result

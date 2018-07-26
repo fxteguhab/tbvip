@@ -393,7 +393,9 @@ class purchase_order_line(osv.osv):
 		'product_qty': fields.float('Quantity', digits_compute= dp.get_precision('Decimal Custom Order Line'), required=True),
 		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
 			string='UoM Category', readonly=True),	
-		'nett_price_old': fields.float(string = 'Nett Old'),	
+		'price_unit_old': fields.float(string = 'Price Old'),	
+		'price_unit_nett_old': fields.float(string = 'Nett Old'),	
+		'discount_string_old' : fields.char(string="Disc Old"),
 	}
 	
 	_sql_constraints = [
@@ -408,14 +410,14 @@ class purchase_order_line(osv.osv):
 	}
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
-	def _message_cost_price_changed(self, cr, uid, old_price,new_price, product, order_id, context):
+	#def _message_cost_price_changed(self, cr, uid, old_price,new_price, product, order_id, context):
 	# message post to SUPERUSER and all users in group Purchases Manager
 	# kalau harga yang diinput tidak sama dengan standard price product	
-		if ((old_price > 0) and (old_price != new_price)):
-			purchase_order_obj = self.pool.get('purchase.order')
-			purchase_order = purchase_order_obj.browse(cr, uid, order_id)			
-			message="There is a change on cost price for %s in Purchase Order %s. Original: %s to %s." % (product.name, purchase_order.name, old_price,new_price)		
-			purchase_order_obj.message_post(cr, uid, purchase_order.id, body=message)
+	#	if ((old_price > 0) and (old_price != new_price)):
+	#		purchase_order_obj = self.pool.get('purchase.order')
+	#		purchase_order = purchase_order_obj.browse(cr, uid, order_id)			
+	#		message="There is a change on cost price for %s in Purchase Order %s. Original: %s to %s." % (product.name, purchase_order.name, old_price,new_price)		
+	#		purchase_order_obj.message_post(cr, uid, purchase_order.id, body=message)
 
 		#if product.standard_price > 0 and data['price_unit'] != product.standard_price:
 		#	purchase_order_obj = self.pool.get('purchase.order')
@@ -467,19 +469,12 @@ class purchase_order_line(osv.osv):
 		new_order_line = super(purchase_order_line, self).create(cr, uid, vals, context)
 		new_data = self.browse(cr, uid, new_order_line)
 		
-		if vals.get('product_id', False) and vals.get('price_unit', False):
-			#cek bila ada perubahan harga beli
-			#product_obj = self.pool.get('product.product')
-			#product = product_obj.browse(cr, uid, vals['product_id'])
-			#notif nya pindah ke invoice line
-			#self._message_cost_price_changed(cr, uid, vals['nett_price_old'],vals['price_unit_nett'], product,vals['order_id'], context)
-			#self._message_line_changes(cr, uid, vals, new_order_line, create=True, context=None)
-		
+		#if vals.get('product_id', False) and vals.get('price_unit', False):			
 		# otomatis create current price kalo belum ada
-			if vals.get('price_type_id', False) and vals.get('product_uom', False):
-				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-					vals['price_type_id'], vals['product_id'], vals['product_uom'],
-					vals['price_unit'], vals['discount_string'], partner_id=new_data.order_id.partner_id.id)
+		#	if vals.get('price_type_id', False) and vals.get('product_uom', False):
+		#		self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+		#			vals['price_type_id'], vals['product_id'], vals['product_uom'],
+		#			vals['price_unit'], vals['discount_string'], partner_id=new_data.order_id.partner_id.id)
 		
 		# otomatis isi incoming location dengan default stock location cabang di mana user ini login
 		# artinya, secara default barang akan dikirim ke cabang user pembuat PO ini
@@ -496,29 +491,23 @@ class purchase_order_line(osv.osv):
 			self._message_line_changes(cr, uid, vals, id, context=None)								
 		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
 		
-		for po_line in self.browse(cr, uid, ids):		
-			#cek perubahan harga, tp masih ERROR
-			price_unit_nett = po_line.price_unit_nett
-			nett_price_old = po_line.nett_price_old
-			#notif nya pindah ke invoice line
-			#self._message_cost_price_changed(cr, uid, nett_price_old,price_unit_nett, po_line.product_id, po_line.order_id.id, context)	
-			
-			# bikin product current price baru bila belum ada
-			product_id = po_line.product_id.id
-			price_type_id = po_line.price_type_id.id
-			product_uom = po_line.product_uom.id
-			price_unit = po_line.price_unit
-			#TEGUH@20180501 : tambah field discount_string
-			discount_string = po_line.discount_string
-			if vals.get('product_id', False): product_id = vals['product_id']
-			if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
-			if vals.get('product_uom', False): product_uom = vals['product_uom']
-			if vals.get('price_unit', False): price_unit = vals['price_unit']
-			#TEGUH@20180501 : tambah field discount string
-			if vals.get('discount_string', False): discount_string = vals['discount_string']
-			self.pool.get('price.list')._create_product_current_price_if_none(
-				cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
-				partner_id=po_line.order_id.partner_id.id)
+		#for po_line in self.browse(cr, uid, ids):		
+		#	# bikin product current price baru bila belum ada
+		#	product_id = po_line.product_id.id
+		#	price_type_id = po_line.price_type_id.id
+		#	product_uom = po_line.product_uom.id
+		#	price_unit = po_line.price_unit
+		#	#TEGUH@20180501 : tambah field discount_string
+		#	discount_string = po_line.discount_string
+		#	if vals.get('product_id', False): product_id = vals['product_id']
+		#	if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
+		#	if vals.get('product_uom', False): product_uom = vals['product_uom']
+		#	if vals.get('price_unit', False): price_unit = vals['price_unit']
+		#	#TEGUH@20180501 : tambah field discount string
+		#	if vals.get('discount_string', False): discount_string = vals['discount_string']
+		#	self.pool.get('price.list')._create_product_current_price_if_none(
+		#		cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
+		#		partner_id=po_line.order_id.partner_id.id)
 		return edited_order_line
 	
 	#def unlink(self, cr, uid, ids, context=None):
@@ -576,9 +565,14 @@ class purchase_order_line(osv.osv):
 		current_price_unit = oc_price_list['value'].get('price_unit', price_unit)		
 		current_discount = self.pool.get('product.current.price').get_current(
 			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)	
-	# isi nett price old dari price list	
-		nett_price_old = self.pool.get('product.current.price').get_current(
-			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="nett", context=context)			
+	
+	# isi price nett old dari price list	
+		price_unit_nett_old = self.pool.get('product.current.price').get_current(
+			cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="nett", context=context)	
+	# isi discount_string_old dari current_discount	
+		discount_string_old = current_discount
+	# isi nett price_unit_old dari current_price_unit			
+		price_unit_old = current_price_unit
 	# jalankan onchange diskon. price unit dan discount string, as per logic di dalam 
 	# onchange_product_id_purchase_sale_discount, akan tetap memakai yang dari current price
 	# di atas
@@ -612,7 +606,10 @@ class purchase_order_line(osv.osv):
 		result['value'].update({
 			'product_uom': final_product_uom,
 			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id,
-			'nett_price_old' : nett_price_old,
+			'price_unit_nett_old' : price_unit_nett_old,
+			'price_unit_old' : price_unit_old,
+			'discount_string_old' : discount_string_old,
+
 		})
 		
 		return result

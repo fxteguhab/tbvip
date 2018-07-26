@@ -211,31 +211,6 @@ class purchase_order(osv.osv):
 
 		return result
 
-class purchase_order_line(osv.osv):
-	_inherit = 'purchase.order.line'
-
-	def _message_cost_price_changed(self, cr, uid, old_price,new_price, product, order_id, context):
-		result = super(purchase_order_line, self)._message_cost_price_changed(cr, uid, old_price,new_price, product, order_id, context=context)
-		
-		purchase_order_obj = self.pool.get('purchase.order')
-		purchase_order = purchase_order_obj.browse(cr, uid, order_id)	
-		supplier_name = purchase_order.partner_id.display_name
-		po = purchase_order.name
-
-		if ((old_price > 0) and (old_price != new_price)):
-			message_title = str(product.name)
-			message_body = 'From:'+str("{:,.0f}".format(old_price))+' to '+str("{:,.0f}".format(new_price)) +'\n'+supplier_name+'('+str(po)+')'
-			alert = '!!!'
-			context = {
-				'category':'PURCHASE',
-				'sound_idx':PURCHASE_SOUND_IDX,
-				'alert' : '!!!!!!!',
-				}
-
-			self.pool.get('tbvip.fcm_notif').send_notification(cr,uid,message_title,message_body,context=context)
-
-			return result
-
 
 class product_template(osv.osv):
 	_inherit = 'product.template'
@@ -288,3 +263,46 @@ class product_category(osv.osv):
 				'purchase_notification': data['purchase_notification'],
 			})
 		return result
+
+
+class account_invoice_line(osv.osv):
+	_inherit = 'account.invoice.line'
+
+	def _message_cost_price_changed(self, cr, uid, vals, context):
+		result = super(account_invoice_line, self)._message_cost_price_changed(cr, uid, vals, context=context)
+		message_body = ''
+		if (vals['price_unit_nett_old'] > 0):
+			if (vals['price_unit_old'] > vals['price_unit']):
+				message_body += 'PLIST DOWN From '+ str("{:,.0f}".format(vals['price_unit_old']))+' to '+str("{:,.0f}".format(vals['price_unit'])) +'\n'
+			elif (vals['price_unit_old'] < vals['price_unit']):
+				message_body += 'PLIST UP From '+ str("{:,.0f}".format(vals['price_unit_old']))+' to '+str("{:,.0f}".format(vals['price_unit'])) +'\n'
+
+			if (vals['discount_string_old'] > vals['discount_string']):
+				message_body += 'DISC DOWN From '+ vals['discount_string_old']+' to '+vals['discount_string'] +'\n'
+			elif (vals['discount_string_old'] < vals['discount_string']):
+				message_body += 'DISC DOWN From '+ vals['discount_string_old']+' to '+vals['discount_string'] +'\n'
+
+			if (vals['price_unit_nett_old'] > vals['price_unit_nett']):
+				message_body += 'NETT DOWN From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'			
+			elif (vals['price_unit_nett_old'] < vals['price_unit_nett']):
+				message_body += 'NETT UP From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'		
+
+			account_invoice_obj = self.pool.get('account.invoice')
+			account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
+			supplier_name = account_invoice.partner_id.display_name
+
+			message_title = str(vals['name'])
+			message_body += 'SELL PRICE:'+str("{:,.0f}".format(vals['sell_price_unit'])) +'\n'+'Supplier:'+supplier_name
+
+			context = {
+				'category':'INVOICE',
+				'sound_idx':PURCHASE_SOUND_IDX,
+				'alert' : '!!!!!!!',
+				}
+
+			self.pool.get('tbvip.fcm_notif').send_notification(cr,uid,message_title,message_body,context=context)
+
+			return result
+
+
+	
