@@ -271,28 +271,39 @@ class account_invoice_line(osv.osv):
 	def _cost_price_watcher(self, cr, uid, vals, context):
 		result = super(account_invoice_line, self)._cost_price_watcher(cr, uid, vals, context=context)
 		message_body = ''
-		if (vals['price_unit_nett_old'] > 0):
-			if (vals['price_unit_old'] > vals['price_unit']):
-				message_body += 'PLIST DOWN From '+ str("{:,.0f}".format(vals['price_unit_old']))+' to '+str("{:,.0f}".format(vals['price_unit'])) +'\n'
-			elif (vals['price_unit_old'] < vals['price_unit']):
-				message_body += 'PLIST UP From '+ str("{:,.0f}".format(vals['price_unit_old']))+' to '+str("{:,.0f}".format(vals['price_unit'])) +'\n'
+		price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
+		price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
+		
+		discount_string_old = vals['discount_string_old'] if 'discount_string_old' in vals else "0"
+		discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
+		
+		price_unit_old = vals['price_unit_old'] if 'price_unit_old' in vals else 0
+		price_unit = vals['price_unit'] if 'price_unit' in vals else 0
 
-			if (vals['discount_string_old'] > vals['discount_string']):
-				message_body += 'DISC DOWN From '+ str(vals['discount_string_old'])+' to '+ str(vals['discount_string']) +'\n'
+		sell_price_unit = vals['sell_price_unit'] if 'sell_price_unit' in vals else 0
+		
+		if (price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett):
+			if (price_unit_old > price_unit):
+				message_body += 'PLIST DOWN From '+ str("{:,.0f}".format(price_unit_old))+' to '+str("{:,.0f}".format(price_unit)) +'\n'
+			elif (price_unit_old < price_unit):
+				message_body += 'PLIST UP From '+ str("{:,.0f}".format(price_unit_old))+' to '+str("{:,.0f}".format(price_unit)) +'\n'
+
+			if (discount_string_old > discount_string):
+				message_body += 'DISC DOWN From '+ str(discount_string_old)+' to '+ str(discount_string) +'\n'
 			elif (vals['discount_string_old'] < vals['discount_string']):
-				message_body += 'DISC DOWN From '+ str(vals['discount_string_old'])+' to '+ str(vals['discount_string']) +'\n'
+				message_body += 'DISC DOWN From '+ str(discount_string_old)+' to '+ str(discount_string) +'\n'
 
-			if (vals['price_unit_nett_old'] > vals['price_unit_nett']):
-				message_body += 'NETT DOWN From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'			
-			elif (vals['price_unit_nett_old'] < vals['price_unit_nett']):
-				message_body += 'NETT UP From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'		
+			#if (price_unit_nett_old > price_unit_nett):
+			#	message_body += 'NETT DOWN From '+ str("{:,.0f}".format(price_unit_nett_old))+' to '+str("{:,.0f}".format(price_unit_nett)) +'\n'			
+			#elif (price_unit_nett_old < price_unit_nett):
+			#	message_body += 'NETT UP From '+ str("{:,.0f}".format(price_unit_nett_old))+' to '+str("{:,.0f}".format(price_unit_nett)) +'\n'		
 
 			account_invoice_obj = self.pool.get('account.invoice')
 			account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
 			supplier_name = account_invoice.partner_id.display_name
 
 			message_title = str(vals['name'])
-			message_body += 'SELL PRICE:'+str("{:,.0f}".format(vals['sell_price_unit'])) +'\n'+'Supplier:'+supplier_name
+			message_body += 'SELL PRICE:'+str("{:,.0f}".format(sell_price_unit)) +'\n'+'Supplier:'+supplier_name
 
 			context = {
 				'category':'INVOICE',

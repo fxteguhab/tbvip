@@ -378,8 +378,8 @@ class stock_move(osv.osv):
 				'discount_string_old' : purchase_line.discount_string_old,
 				'price_unit_nett_old' : purchase_line.price_unit_nett_old,
 				'sell_price_unit' : sell_price_unit,
-				})
-		
+				})		
+
 		return result
 
 

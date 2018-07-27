@@ -83,14 +83,15 @@ class account_invoice_line(osv.osv):
 		'discount_string_old': fields.float(string = 'Disc Old'),
 		'price_unit_nett_old': fields.float(string = 'Nett Old'),
 		'sell_price_unit': fields.float('Sales Price'),
-		'discount_string_old': fields.char(string = 'Disc Old'),
 	}
 	
-	def __cost_price_watcher(self, cr, uid, vals, context):
-		if ((vals['price_unit_nett_old'] > 0) and (vals['price_unit_nett_old'] != vals['price_unit_nett'])):
+	def _cost_price_watcher(self, cr, uid, vals, context):
+		price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
+		price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
+
+		if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett)):
 			account_invoice_obj = self.pool.get('account.invoice')
-			#account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
-			message="There is a change on cost price for %s in Invoice %s. From: %s to %s." % (vals['name'],vals['invoice_id'],vals['price_unit_nett_old'],vals['price_unit_nett'])		
+			message="There is a change on cost price for %s in Invoice %s. From: %s to %s." % (vals['name'],vals['invoice_id'],price_unit_nett_old,price_unit_nett)		
 			
 			account_invoice_obj.message_post(cr, uid, vals['invoice_id'], body=message)		
 
@@ -100,12 +101,13 @@ class account_invoice_line(osv.osv):
 		# otomatis create current price kalo belum ada 
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			new_data = self.browse(cr, uid, new_id)
+			discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 				vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
-				vals['discount_string'], partner_id=new_data.invoice_id.partner_id.id)
+				discount_string, partner_id=new_data.invoice_id.partner_id.id)
 			
 			#check for changes and send notif
-			self.__cost_price_watcher(cr, uid, vals,  context)
+			self._cost_price_watcher(cr, uid, vals,  context)
 
 		return new_id
 
@@ -156,7 +158,7 @@ class account_invoice_line(osv.osv):
 				vals['discount_string'] = invoice_line.discount_string
 				vals['sell_price_unit'] = invoice_line.sell_price_unit
 				#print "discount string : " + str(vals['invoice_id'])
-				self.__cost_price_watcher(cr, uid, vals,  context)
+				self._cost_price_watcher(cr, uid, vals,  context)
 
 		return result
 

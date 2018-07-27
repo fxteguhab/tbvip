@@ -410,7 +410,7 @@ class purchase_order_line(osv.osv):
 	}
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------
-	#def __cost_price_watcher(self, cr, uid, old_price,new_price, product, order_id, context):
+	#def _cost_price_watcher(self, cr, uid, old_price,new_price, product, order_id, context):
 	# message post to SUPERUSER and all users in group Purchases Manager
 	# kalau harga yang diinput tidak sama dengan standard price product	
 	#	if ((old_price > 0) and (old_price != new_price)):
