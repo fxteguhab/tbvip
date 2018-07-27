@@ -86,7 +86,7 @@ class account_invoice_line(osv.osv):
 		'discount_string_old': fields.char(string = 'Disc Old'),
 	}
 	
-	def _message_cost_price_changed(self, cr, uid, vals, context):
+	def __cost_price_watcher(self, cr, uid, vals, context):
 		if ((vals['price_unit_nett_old'] > 0) and (vals['price_unit_nett_old'] != vals['price_unit_nett'])):
 			account_invoice_obj = self.pool.get('account.invoice')
 			#account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
@@ -105,7 +105,7 @@ class account_invoice_line(osv.osv):
 				vals['discount_string'], partner_id=new_data.invoice_id.partner_id.id)
 			
 			#check for changes and send notif
-			self._message_cost_price_changed(cr, uid, vals,  context)
+			self.__cost_price_watcher(cr, uid, vals,  context)
 
 		return new_id
 
@@ -156,7 +156,7 @@ class account_invoice_line(osv.osv):
 				vals['discount_string'] = invoice_line.discount_string
 				vals['sell_price_unit'] = invoice_line.sell_price_unit
 				#print "discount string : " + str(vals['invoice_id'])
-				self._message_cost_price_changed(cr, uid, vals,  context)
+				self.__cost_price_watcher(cr, uid, vals,  context)
 
 		return result
 

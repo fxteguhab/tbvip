@@ -268,8 +268,8 @@ class product_category(osv.osv):
 class account_invoice_line(osv.osv):
 	_inherit = 'account.invoice.line'
 
-	def _message_cost_price_changed(self, cr, uid, vals, context):
-		result = super(account_invoice_line, self)._message_cost_price_changed(cr, uid, vals, context=context)
+	def _cost_price_watcher(self, cr, uid, vals, context):
+		result = super(account_invoice_line, self)._cost_price_watcher(cr, uid, vals, context=context)
 		message_body = ''
 		if (vals['price_unit_nett_old'] > 0):
 			if (vals['price_unit_old'] > vals['price_unit']):
@@ -278,14 +278,16 @@ class account_invoice_line(osv.osv):
 				message_body += 'PLIST UP From '+ str("{:,.0f}".format(vals['price_unit_old']))+' to '+str("{:,.0f}".format(vals['price_unit'])) +'\n'
 
 			if (vals['discount_string_old'] > vals['discount_string']):
-				message_body += 'DISC DOWN From '+ vals['discount_string_old']+' to '+vals['discount_string'] +'\n'
+				message_body += 'DISC DOWN From '+ str(vals['discount_string_old'])+' to '+ str(vals['discount_string']) +'\n'
 			elif (vals['discount_string_old'] < vals['discount_string']):
-				message_body += 'DISC DOWN From '+ vals['discount_string_old']+' to '+vals['discount_string'] +'\n'
+				message_body += 'DISC DOWN From '+ str(vals['discount_string_old'])+' to '+ str(vals['discount_string']) +'\n'
 
 			if (vals['price_unit_nett_old'] > vals['price_unit_nett']):
 				message_body += 'NETT DOWN From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'			
 			elif (vals['price_unit_nett_old'] < vals['price_unit_nett']):
 				message_body += 'NETT UP From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'		
+
+			if (vals['price_unit_nett_old'] > vals['price_unit_nett']):
 
 			account_invoice_obj = self.pool.get('account.invoice')
 			account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
