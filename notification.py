@@ -287,8 +287,6 @@ class account_invoice_line(osv.osv):
 			elif (vals['price_unit_nett_old'] < vals['price_unit_nett']):
 				message_body += 'NETT UP From '+ str("{:,.0f}".format(vals['price_unit_nett_old']))+' to '+str("{:,.0f}".format(vals['price_unit_nett'])) +'\n'		
 
-			if (vals['price_unit_nett_old'] > vals['price_unit_nett']):
-
 			account_invoice_obj = self.pool.get('account.invoice')
 			account_invoice = account_invoice_obj.browse(cr, uid, vals['invoice_id'])
 			supplier_name = account_invoice.partner_id.display_name
