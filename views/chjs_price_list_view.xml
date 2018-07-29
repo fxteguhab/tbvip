@@ -119,7 +119,15 @@
 					<field name="disc_3" />
 					<field name="nett_3" readonly="1"/>
 				</field>
-
+				<field name="partner_id" position="attributes">
+					<attribute name="required">True</attribute>
+					<attribute name="context">{'search_default_supplier':1, 'default_supplier':1, 'default_customer':0}</attribute>
+					<attribute name="domain">[('supplier','=',True)]</attribute>
+					<attribute name="options">{'no_create': True}</attribute>
+				</field>
+				<field name="product_id" position="attributes">
+					<attributes name="readonly">context.get('edit_from_product',False) == True</attributes>
+				</field>
 			</field>
 		</record>
 
