@@ -118,6 +118,33 @@
 			</field>
 		</record>
 
+		<record id="view_invoice_line_product_tree" model="ir.ui.view">
+			<field name="name">account.invoice.line.tree</field>
+			<field name="model">account.invoice.line</field>
+			<field name="arch" type="xml">
+				<tree string="Invoice Line">
+					<field name="create_date"/>
+					<!--<field name="account_id"/>
+					<field name="name"/>
+					<field name="price_type_id" />-->
+					<field name="partner_id"/>
+					<field name="quantity"/>
+					<field name="uos_id" groups="product.group_uom"/>
+					<field name="price_unit"/>
+					<field name="discount_string" groups="sale.group_discount_per_so_line"/>
+					<field name="price_unit_nett"/>
+					<field name="price_subtotal"/>
+					
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.actions.act_window" id="action_invoice_line_product_tree">
+			<field name="context">{}</field><!-- force empty -->
+			<field name="name">Invoices</field>
+			<field name="res_model">account.invoice.line</field>
+			<field name="view_id" ref="view_invoice_line_product_tree"/>
+		</record>
 
 	</data>
 </openerp>

@@ -125,7 +125,31 @@ class product_template(osv.osv):
 		'''
 		return result
 		
+	def _invoice_count(self, cr, uid, ids, field_name, arg, context=None):
+		res = dict.fromkeys(ids, 0)
+		for template in self.browse(cr, uid, ids, context=context):
+			res[template.id] = sum([p.invoice_count for p in template.product_variant_ids])
+		return res
 
+	
+	def action_view_invoices(self, cr, uid, ids, context=None):
+		products = self._get_products(cr, uid, ids, context=context)
+		result = self._get_act_window_dict(cr, uid, 'tbvip.action_invoice_line_product_tree', context=context)
+		result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "]),('account_id','=','220000 Expenses')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+		return result
+	
+
+	def _stock_opname_count(self, cr, uid, ids, field_name, arg, context=None):
+		res = dict.fromkeys(ids, 0)
+		for template in self.browse(cr, uid, ids, context=context):
+			res[template.id] = sum([p.stock_opname_count for p in template.product_variant_ids])
+		return res
+
+	def action_view_stock_opname(self, cr, uid, ids, context=None):
+		products = self._get_products(cr, uid, ids, context=context)
+		result = self._get_act_window_dict(cr, uid, 'tbvip.action_stock_opname_product_tree', context=context)
+		result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "])]"
+		return result
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -142,6 +166,8 @@ class product_template(osv.osv):
 		'brand_id': fields.many2one('product.brand', 'Brand'),
 		'tonnage': fields.float('Tonnage/Weight (kg)'),
 		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
+		'invoice_count': fields.function(_invoice_count, string='# Invoices', type='integer'),
+		'stock_opname_count': fields.function(_stock_opname_count, string='# Stock Opname', type='integer'),
 	}
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------
@@ -168,13 +194,6 @@ class product_template(osv.osv):
 
 class product_product(osv.osv):
 	_inherit = 'product.product'
-	
-	# COLUMNS ------------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
-		'rank': fields.integer('Rank'),
-	}
 	
 	def cron_product_rank(self, cr, uid, context={}):
 		sale_order_obj = self.pool.get('sale.order')
@@ -211,6 +230,42 @@ class product_product(osv.osv):
 			}, context=context)
 			rank += 1
 		return True
+
+	def _invoice_count(self, cr, uid, ids, field_name, arg, context=None):
+		Invoice = self.pool['account.invoice']
+		return {
+			product_id: Invoice.search_count(cr,uid, [('invoice_line.product_id', '=', product_id),('invoice_line.account_id','=','220000 Expenses')], context=context)  #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+			for product_id in ids
+		}
+
+	def action_view_invoices(self, cr, uid, ids, context=None):
+		if isinstance(ids, (int, long)):
+			ids = [ids]
+		result = self.pool['product.template']._get_act_window_dict(cr, uid, 'tbvip.action_invoice_line_product_tree', context=context)
+		result['domain'] = "[('product_id','in',[" + ','.join(map(str, ids)) + "]),('account_id','=','220000 Expenses')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+		return result
+	
+	def _stock_opname_count(self, cr, uid, ids, field_name, arg, context=None):
+		Invoice = self.pool['stock.inventory']
+		return {
+			product_id: Invoice.search_count(cr,uid, [('line_ids.product_id', '=', product_id)], context=context) 
+			for product_id in ids
+		}
+
+	def action_view_stock_opname(self, cr, uid, ids, context=None):
+		if isinstance(ids, (int, long)):
+			ids = [ids]
+		result = self.pool['product.template']._get_act_window_dict(cr, uid, 'tbvip.action_stock_opname_product_tree', context=context)
+		result['domain'] = "[('product_id','in',[" + ','.join(map(str, ids)) + "])]"
+		return result
+	# COLUMNS ------------------------------------------------------------------------------------------------------------------
+
+	_columns = {
+		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
+		'rank': fields.integer('Rank'),
+		'invoice_count': fields.function(_invoice_count, string='# Invoices', type='integer'),
+		'stock_opname_count': fields.function(_stock_opname_count, string='# Stock Opname', type='integer'),
+	}
 
 # ==========================================================================================================================
 

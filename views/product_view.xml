@@ -208,5 +208,88 @@
 				</field>
 			</field>
 		</record>
+
+		<record id="view_product_template_invoice_buttons_from" model="ir.ui.view">
+			<field name="name">product.template.invoice.button</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_only_form_view"/>
+			<field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='buttons']" position="inside">
+				   <button class="oe_inline oe_stat_button" name="action_view_invoices" type="object" 
+					   icon="fa-money">
+					   <field string="Invoices" name="invoice_count" widget="statinfo"/>
+				   </button>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_product_normal_invoice_buttons_from" model="ir.ui.view">
+			<field name="name">product.product.invoice.button</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view"/>
+			<field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='buttons']" position="inside">
+				   <button class="oe_inline oe_stat_button" name="action_view_invoices" type="object"
+					   icon="fa-money">
+					   <field string="Invoices" name="invoice_count" widget="statinfo"/>
+				   </button>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_product_template_stock_opname_buttons_from" model="ir.ui.view">
+			<field name="name">product.template.stock.opname.button</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_only_form_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='buttons']" position="inside">
+				   <button class="oe_inline oe_stat_button" name="action_view_stock_opname" type="object" 
+					   icon="fa-pencil-square-o">
+					   <field string="Stock Opname" name="stock_opname_count" widget="statinfo"/>
+				   </button>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="view_product_normal_stock_opname_buttons_from" model="ir.ui.view">
+			<field name="name">product.product.stock.opname.button</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//div[@name='buttons']" position="inside">
+				   <button class="oe_inline oe_stat_button" name="action_view_stock_opname" type="object"
+					   icon="fa-pencil-square-o">
+					   <field string="Stock Opname" name="stock_opname_count" widget="statinfo"/>
+				   </button>
+				</xpath>
+			</field>
+		</record>
+		
+		<record id="stock_opname_list" model="ir.ui.view">
+			<field name="name">stock.opname.list</field>
+			<field name="model">stock.inventory.line</field>
+			<field name="arch" type="xml">
+				<tree create="false" delete="false" default_order="create_date desc">
+					<field name="create_date"/>
+					<field name="location_id"/>
+					<field name="product_qty"/>
+					<field name="theoretical_qty" string="Old Qty"/>	
+					<field name="inventory_id" string = "Inventory Adjustment"/>		
+					<field name="create_uid"/>
+					<field name="state"/>
+				</tree>
+			</field>
+		</record>
+
+
+		<record model="ir.actions.act_window" id="action_stock_opname_product_tree">
+			<field name="context">{}</field><!-- force empty -->
+			<field name="name">Stock_Opname</field>
+			<field name="res_model">stock.inventory.line</field>
+			<field name="view_id" ref="stock_opname_list"/>
+		</record>
+
 	</data>
 </openerp>
