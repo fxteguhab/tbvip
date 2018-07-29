@@ -339,7 +339,8 @@ class controller_print(http.Controller):
 			purchase_needs_draft_rows.append(row)
 		# render purchase order
 		draft_po = tpl.render(
-			date=(datetime.now() + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S'),
+			date=(datetime.now()).strftime('%d/%m/%Y %H:%M:%S'),
+			#date=(datetime.now() + timedelta(hours=7)).strftime('%d/%m/%Y %H:%M:%S'),
 			supplier_name=supplier_name,
 			lines=purchase_needs_draft_rows,
 		)
