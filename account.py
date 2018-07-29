@@ -80,8 +80,8 @@ class account_invoice_line(osv.osv):
 	_columns = {
 		'price_type_id': fields.many2one('price.type', 'Price Type', ondelete='restrict'),
 		'price_unit_old': fields.float(string = 'Price Old'),
-		'discount_string_old': fields.float(string = 'Disc Old'),
 		'price_unit_nett_old': fields.float(string = 'Nett Old'),
+		'discount_string_old': fields.char(string = 'Disc Old'),
 		'sell_price_unit': fields.float('Sales Price'),
 	}
 	

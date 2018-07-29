@@ -514,6 +514,13 @@ class stock_picking(osv.osv):
 				raise osv.except_osv(_('Interbranch Move Error'),_('One or more of selected transfers has been set as Accepted. You cannot delete these anymore.'))
 		return super(stock_picking, self).unlink(cr, uid, ids, context=context)
 
+	def _get_invoice_vals(self, cr, uid, key, inv_type, journal_id, move, context=None):
+		result = super(stock_picking, self)._get_invoice_vals(cr, uid, key, inv_type, journal_id, move, context)
+		result.update({
+				'origin': move.origin,
+				})		
+	
+		return result
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	

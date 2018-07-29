@@ -129,9 +129,9 @@
 					<field name="price_type_id" />-->
 					<field name="partner_id"/>
 					<field name="quantity"/>
-					<field name="uos_id" groups="product.group_uom"/>
+					<field name="uos_id"/> <!-- groups="product.group_uom"/>-->
 					<field name="price_unit"/>
-					<field name="discount_string" groups="sale.group_discount_per_so_line"/>
+					<field name="discount_string"/>
 					<field name="price_unit_nett"/>
 					<field name="price_subtotal"/>
 					

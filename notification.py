@@ -291,7 +291,7 @@ class account_invoice_line(osv.osv):
 
 			if (discount_string_old > discount_string):
 				message_body += 'DISC DOWN From '+ str(discount_string_old)+' to '+ str(discount_string) +'\n'
-			elif (vals['discount_string_old'] < vals['discount_string']):
+			elif (discount_string_old < discount_string):
 				message_body += 'DISC DOWN From '+ str(discount_string_old)+' to '+ str(discount_string) +'\n'
 
 			#if (price_unit_nett_old > price_unit_nett):
