@@ -39,6 +39,7 @@ class tbvip_bon_book(osv.osv):
 
 	_defaults = {
 		'branch_id': _default_branch_id,
+		'issue_date': (datetime.now()).strftime(DEFAULT_SERVER_DATE_FORMAT),
 	}
 	
 # METHOD -------------------------------------------------------------------------------------------------------------------

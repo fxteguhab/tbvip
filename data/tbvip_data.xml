@@ -4,11 +4,13 @@
 		<record id="tbvip_normal_price_sell" model="price.type">
 			<field name="name">DEFAULT PRICE</field>
 			<field name="type">sell</field>
+			<field name="is_default">True</field>
 		</record>
 
 		<record id="tbvip_normal_price_buy" model="price.type">
 			<field name="name">DEFAULT PRICE</field>
 			<field name="type">buy</field>
+			<field name="is_default">True</field>
 		</record>
 
 		<record id="tbvip_customer_general" model="res.partner">
