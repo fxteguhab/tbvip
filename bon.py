@@ -1,4 +1,6 @@
 from openerp.osv import osv, fields
+from datetime import datetime
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from openerp.tools.translate import _
 
 # ==========================================================================================================================
