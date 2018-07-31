@@ -35,33 +35,36 @@ class fleet_vehicle(osv.osv):
 				gps_username = param_data.value
 			elif param_data.key == 'gps_password':
 				gps_password = param_data.value	
-	
-		#login
-		request = urllib2.Request(login_url)
-		login = urllib2.urlopen(request, urllib.urlencode({'email':gps_username,'password':gps_password}))
-
-		#get all device
-		request = urllib2.Request(devices_url)
-		request.add_header('Cookie', login.headers.get('Set-Cookie'))
-		response = urllib2.urlopen(request)
-		devices = json.load(response)
-				
-		#get all position
-		request = urllib2.Request(position_url)
-		request.add_header('Cookie', login.headers.get('Set-Cookie'))
-		response = urllib2.urlopen(request)
-		positions = json.load(response)
-			
+		
 		result = {}
-		for data in self.browse(cr, uid, ids, context=context):
-			result[data.id] = ''
-			#get device id FROM IMEI
-			deviceId = ''
-			for device in devices:
-				if data.gps_id == device['uniqueId']:
-					for position in positions:
-						if device['id'] == position['deviceId']:
-							result[data.id] = position.get("address","-")
+		if (baseUrl != ''):
+			#login
+			request = urllib2.Request(login_url)
+			login = urllib2.urlopen(request, urllib.urlencode({'email':gps_username,'password':gps_password}))
+
+			#get all device
+			request = urllib2.Request(devices_url)
+			request.add_header('Cookie', login.headers.get('Set-Cookie'))
+			response = urllib2.urlopen(request)
+			devices = json.load(response)
+					
+			#get all position
+			request = urllib2.Request(position_url)
+			request.add_header('Cookie', login.headers.get('Set-Cookie'))
+			response = urllib2.urlopen(request)
+			positions = json.load(response)
+				
+			
+			for data in self.browse(cr, uid, ids, context=context):
+				result[data.id] = ''
+				#get device id FROM IMEI
+				deviceId = ''
+				for device in devices:
+					if data.gps_id == device['uniqueId']:
+						for position in positions:
+							if device['id'] == position['deviceId']:
+								result[data.id] = position.get("address","-")
+		
 		return result
 		#--------------end new code
 

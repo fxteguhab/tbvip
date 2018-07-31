@@ -1,6 +1,6 @@
 <openerp>
 	<data>
-
+		<!--
 		<record id="tbvip_menu_kontra_bon" model="website.menu">
 			<field name="name">Kontra Bon</field>
 			<field name="url">/tbvip/kontra_bon</field>
@@ -14,7 +14,7 @@
 			<field name="parent_id" ref="website.main_menu"/>
 			<field name="sequence" type="int">59</field>
 		</record>
-
+		-->
 		<record id="action_tbvip_branch" model="ir.actions.act_window">
 			<field name="name">Branch</field>
 			<field name="res_model">tbvip.branch</field>

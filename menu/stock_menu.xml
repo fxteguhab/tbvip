@@ -103,5 +103,16 @@
 		<menuitem sequence="5" id="stock_menu_stock_sublocation" parent="stock.menu_stock_configuration" action="stock_action_stock_sublocation"/>
 		<menuitem sequence="6" id="stock_menu_stock_unit" parent="stock.menu_stock_inventory_control" action="stock_action_list_product_stock_opname"/>
 
+
+		<record id="action_edit_product_category" model="ir.actions.act_window">
+			<field name="name">Product Category</field>
+			<field name="res_model">product.category</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>	
+			<field name="search_view_id" ref="product.product_category_search_view"/>
+			<field name="view_id" ref="product.product_category_list_view"/>	
+		</record>
+		<menuitem sequence="4" id="maenu_edit_product_category" parent="stock.menu_stock_configuration" action="action_edit_product_category"/>
+
 	</data>
 </openerp>
