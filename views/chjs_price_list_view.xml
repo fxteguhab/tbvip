@@ -121,8 +121,8 @@
 				</field>
 				<field name="partner_id" position="attributes">
 					<attribute name="required">True</attribute>
-					<attribute name="context">{'search_default_supplier':1, 'default_supplier':1, 'default_customer':1}</attribute>
-					<attribute name="domain">[('supplier','=',True)]</attribute>
+					<!--<attribute name="context">{'search_default_supplier':1, 'default_supplier':1, 'default_customer':1}</attribute>
+					<attribute name="domain">[('supplier','=',True)]</attribute>-->
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
 			</field>
