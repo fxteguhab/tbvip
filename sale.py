@@ -279,7 +279,7 @@ class sale_order(osv.osv):
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 			
 			order = sale
-			sale_discount = float(order.sale_discount)
+			#sale_discount = float(order.sale_discount)
 			if order.payment_transfer_amount > 0:
 				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
 			if order.payment_cash_amount > 0:

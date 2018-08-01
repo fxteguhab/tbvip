@@ -168,6 +168,8 @@
 				<xpath expr="//group[@string='Search']" position="after">
 					<group string="Group by">
 						<filter string="Supplier" context="{'group_by':'partner_id'}" />
+						<filter string="Product" context="{'group_by':'product_id'}" />
+						<filter string="Price Type" context="{'group_by':'price_type_id'}" />
 					</group>
 				</xpath>
 			</field>
