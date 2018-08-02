@@ -29,4 +29,4 @@ import res_config
 import tbvip_stock_move
 import account_simplified_journal
 import maintenance
-import notification
+#import notification
