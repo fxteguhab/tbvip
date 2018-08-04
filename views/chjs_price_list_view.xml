@@ -125,7 +125,7 @@
 					<attribute name="domain">[('supplier','=',True)]</attribute>-->
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
-				<field name="start_date" position="after">
+				<field name="product_id" position="after">
 					<field name ="categ_id" />
 				</field>
 			</field>
