@@ -321,6 +321,9 @@ class product_current_price(osv.osv):
 		'nett_1':fields.float('Nett 1', compute="_compute_nett_1"),
 		'nett_2':fields.float('Nett 2', compute="_compute_nett_2"),
 		'nett_3':fields.float('Nett 3', compute="_compute_nett_3"),
+
+		#TEGUH@20180804 : tambah field categ_id
+		'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True)
 	}
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------	

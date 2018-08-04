@@ -125,6 +125,9 @@
 					<attribute name="domain">[('supplier','=',True)]</attribute>-->
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
+				<field name="start_date" position="after">
+					<field name ="categ_id" />
+				</field>
 			</field>
 		</record>
 
@@ -156,6 +159,7 @@
 				<field name="uom_id_3" position="after">
 					<field name="write_date"/>
 					<field name="write_uid"/>
+					<field name ="categ_id"/>
 				</field>
 			</field>
 		</record>
@@ -170,6 +174,7 @@
 						<filter string="Supplier" context="{'group_by':'partner_id'}" />
 						<filter string="Product" context="{'group_by':'product_id'}" />
 						<filter string="Price Type" context="{'group_by':'price_type_id'}" />
+						<filter string="Product Category" context="{'group_by':'categ_id'}" />
 					</group>
 				</xpath>
 			</field>
