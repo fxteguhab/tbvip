@@ -108,10 +108,10 @@ class account_invoice_line(osv.osv):
 			#check for changes and send notif
 			self._cost_price_watcher(cr, uid, vals,  context)
 
-			#force create new price	
+			#force create new price	####################################################################################################
 			price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
 			price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
-			if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett)):
+			if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett) and (vals['price_unit'] >0) ):
 				product_current_price_obj = self.pool.get('product.current.price')
 				now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
 				domain = [
@@ -138,7 +138,7 @@ class account_invoice_line(osv.osv):
 						'price_1': vals['price_unit'],
 						'disc_1' : discount_string,	
 					})
-
+				############################################################################################################################	
 		return new_id
 
 	def write(self, cr, uid, ids, vals, context={}):
@@ -190,11 +190,11 @@ class account_invoice_line(osv.osv):
 				
 				#check for changes and send notif
 				self._cost_price_watcher(cr, uid, vals,  context)
-				#force create new price	
+
+				#force create new price ##################################################################################################	
 				price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
 				price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
-				#force create new price	
-				if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett)):
+				if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett) and (price_unit >0) ):
 					product_current_price_obj = self.pool.get('product.current.price')
 					now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
 					domain = [
@@ -221,7 +221,8 @@ class account_invoice_line(osv.osv):
 						'price_1': price_unit,
 						'disc_1' : discount_string,	
 					})
-
+				############################################################################################################################
+				
 		return result
 
 # ==========================================================================================================================
