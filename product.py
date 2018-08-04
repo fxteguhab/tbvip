@@ -289,3 +289,12 @@ class product_uom(osv.osv):
 		'category_id': lambda self, cr, uid, ctx:
 			self.pool.get('ir.model.data').get_object_reference(cr, uid, 'product', 'product_uom_categ_unit')[1],
 	}
+
+class ProductSupplierinfo(osv.osv):
+	_inherit = 'product.supplierinfo'
+
+	_columns = {
+			'rank' : fields.integer(related = "product_tmpl_id.product_variant_ids.rank", string ="Rank", store= True),
+			'product_current_stock' : fields.text(related = "product_tmpl_id.product_current_stock", string ="Stock", store= True),
+			#'sales_count' : fields.integer(related = "product_tmpl_id.product_current_stock", string ="Stock", store= True),
+		}
