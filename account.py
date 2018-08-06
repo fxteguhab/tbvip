@@ -220,6 +220,7 @@ class account_invoice_line(osv.osv):
 						'product_id': product_id,
 						'price_1': price_unit,
 						'disc_1' : discount_string,	
+						'start_date': now,
 					})
 				############################################################################################################################
 				
