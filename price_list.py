@@ -318,9 +318,9 @@ class product_current_price(osv.osv):
 		'disc_5':fields.char('Disc 5'),
 
 		#TEGUH@20180718 : tambah field nett1 - nett 3
-		'nett_1':fields.float('Nett 1', compute="_compute_nett_1"),
-		'nett_2':fields.float('Nett 2', compute="_compute_nett_2"),
-		'nett_3':fields.float('Nett 3', compute="_compute_nett_3"),
+		'nett_1':fields.float('Nett 1', compute="_compute_nett_1", group_operator="avg"),
+		'nett_2':fields.float('Nett 2', compute="_compute_nett_2", group_operator="avg"),
+		'nett_3':fields.float('Nett 3', compute="_compute_nett_3", group_operator="avg"),
 
 		#TEGUH@20180804 : tambah field categ_id
 		'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True)
