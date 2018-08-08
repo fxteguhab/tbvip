@@ -92,7 +92,10 @@
 			<field name="model">account.voucher</field>
 			<field name="inherit_id" ref="account_voucher.view_voucher_filter_vendor_pay"/>
 			<field name="arch" type="xml">
-				<search string="Search Vouchers" position="inside">
+				<xpath expr="//search[@string='Search Vouchers']/field[@name='number']" position="replace">
+					<field name="reference" string="Ref #"/>
+				</xpath>
+				<search string="Search Vouchers" position="inside">		
 					<filter name="groupby_ready" string="Ready" domain="[('state','=','draft'),('is_ready','=',True)]" />
 
 					<!--TEGUH@20180405 : tambah filter kontra -->
@@ -128,5 +131,67 @@
 				</field>
 			</field>
 		</record>
+
+		<record model="ir.ui.view" id="view_vendor_receipt_form_inherit">
+			<field name="name">account.voucher.vendor.receipt.form.inherit</field>
+			<field name="model">account.voucher</field>
+			<field name="inherit_id" ref="account_voucher.view_vendor_receipt_form"/>
+			<field name="arch" type="xml">
+				<button name="cancel_voucher" position="before">
+					<button name="action_refresh" string="Refresh" type="object"/>
+				</button>
+				<button name="cancel_voucher" position="after">
+					<button name="print_kontra_bon" string="Print" type="object" icon="gtk-print"/>
+				</button>
+				<button name="proforma_voucher" position="attributes">
+					<attribute name="confirm">Are you sure to confirm this payment? This action cannot be undone.</attribute>
+				</button>
+				<field name="amount" position="before">
+					<field name="selected_amount" widget="monetary" options="{'currency_field': 'currency_id'}" />
+				</field>
+				<field name="writeoff_amount" position="replace" />
+				<field name="amount" position="after">
+					<field name="writeoff_amount" widget="monetary" options="{'currency_field': 'currency_id'}" /> <!--attrs="{'invisible': ['|',('id','=',False),('id','=',None)]}" />-->
+				</field>
+				<field name="amount" position="replace">
+					<label for="amount"/>
+					<div>
+						<field name="amount" invisible="context.get('line_type', False)" on_change="onchange_amount(amount, payment_rate, partner_id, journal_id, currency_id, type, date, payment_rate_currency_id, company_id, context)" class="oe_inline" widget='monetary' options='{"currency_field": "currency_id"}'/>
+						<button name="action_dummy" states="draft" string="(update)" type="object" class="oe_edit_only oe_link"/>
+					</div>
+				</field>
+			<!-- 
+				<label for="line_cr_ids" position="attributes">
+					<attribute name="string">Invoices (to be) Paid</attribute>
+				</label> -->
+			<!-- account_id pindah ke setelah jurnal -->
+				<field name="account_id" position="replace"/>
+				<field name="payment_option" position="replace" />
+				<field name="writeoff_acc_id" position="replace" />
+				<field name="comment" position="replace" />
+				<field name="journal_id" position="after">
+					<field name="account_id"/>
+					<field name="payment_option" required="1" 
+						attrs="{'invisible':[('writeoff_amount','=',0)]}"/>
+					<field name="writeoff_acc_id"
+						attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'required':[('payment_option','=','with_writeoff'), ('writeoff_amount','!=',0)]}"
+						domain="[('type','=','other')]"/>
+					<field name="comment"
+						attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)]}"/>					
+				</field>
+				<!--
+				<xpath expr="//separator[@string='Payment Options']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+				-->
+				<xpath expr="//field[@name='line_cr_ids']/tree/field[@name='amount']" position="after">
+					<button name="action_open_invoice" string="View Invoice" type="object" icon="gtk-dnd" />
+				</xpath>
+				<xpath expr="//field[@name='line_cr_ids']/tree/field[@name='account_id']" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</xpath>
+			</field>
+		</record>
+
 	</data>
 </openerp>

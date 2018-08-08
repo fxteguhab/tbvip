@@ -8,12 +8,12 @@
 					<group col="4">
 						<group>
 							<field name="issue_date"/>
-							<field name="employee_id"/>
+							<field name="employee_id"  options="{'no_create': 1}"/>
 							<field name="start_from"/>
 							<field name="end_at"/>
 						</group>
 						<group>
-							<field name="branch_id"/>
+							<field name="branch_id"  options="{'no_create': 1}"/>
 							<field name="create_uid" readonly="1"/>
 							<field name="total_sheets" readonly="1"/>
 							<field name="total_used" readonly="1"/>

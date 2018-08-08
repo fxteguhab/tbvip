@@ -18,13 +18,39 @@
 			<field name="model">account.invoice</field>
 			<field name="inherit_id" ref="account.invoice_form"/>
 			<field name="arch" type="xml">
-				<field name="fiscal_position" position="after">
+				<button name="action_invoice_sent" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</button>
+				<button name="action_invoice_sent" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</button>
+				<button name="invoice_print" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</button>
+				<button name="invoice_print" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</button>
+				<field name="partner_id" position="after">
+					<field name="related_sales_bon_number" string ="Invoice Number"/>
 					<field name="qty_sum"/>
 					<field name="row_count"/>
 				</field>
 				<field name="fiscal_position" position="attributes">
 					<attribute name = "invisible">True</attribute>
 				</field>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='product_id']" position="after">
+					<field name="price_type_id" />
+				</xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='account_id']" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='invoice_line_tax_id']" position="replace"></xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='name']" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</xpath>
+				<xpath expr="//field[@name='invoice_line']/tree/field[@name='discount']" position="after">
+					<field name="price_unit_nett"/>
+				</xpath>
 			</field>
 		</record>
 
@@ -42,11 +68,6 @@
 				<field name="reference" position="attributes">
 					<attribute name = "invisible">True</attribute>
 				</field>
-				<!--
-				<xpath expr="//field[@name='invoice_line']/tree/field[@name='product_id']" position="attributes">
-					<attribute name ="on_change"></attribute>
-				</xpath>
-				-->
 				<xpath expr="//field[@name='invoice_line']/tree/field[@name='product_id']" position="after">
 					<field name="price_type_id" />
 				</xpath>
@@ -95,6 +116,9 @@
 			<field name="arch" type="xml">
 				<field name="state" position="before">
 					<field name="journal_id"/>
+				</field>
+				<field name="supplier_invoice_number"  position="attributes">
+					<attribute name="string">Invoice Number</attribute>
 				</field>
 			</field>
 		</record>
