@@ -125,14 +125,14 @@ class account_invoice_line(osv.osv):
 				'price_unit_nett_old' : vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0,
 				'price_unit_nett' : vals['price_unit_nett'] if 'price_unit_nett' in vals else 0,
 				'price_unit' : vals['price_unit'],
-				'price_unit_old' : vals['price_unit_old'],
+				'price_unit_old' : vals['price_unit_old'] if 'price_unit_old' in vals else 0
 				'product_id' : vals['product_id'],
 				'price_type_id' : vals['price_type_id'],
 				'partner_name' : new_data.invoice_id.partner_id.display_name,
 				'partner_id' : new_data.invoice_id.partner_id.id,
 				'product_uom' : vals['uos_id'],
 				'discount_string' : vals['discount_string'] if 'discount_string' in vals else "0",
-				'discount_string_old' : vals['discount_string_old'],
+				'discount_string_old' : vals['discount_string_old'] if 'discount_string_old' in vals else "0"
 				'name' : vals['name'],
 				'invoice_id' : vals['invoice_id'],
 				'sell_price_unit' : vals['sell_price_unit'],
