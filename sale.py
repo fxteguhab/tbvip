@@ -184,10 +184,15 @@ class sale_order(osv.osv):
 		journal_obj = self.pool.get('account.journal')
 		account_move_line_obj = self.pool.get('account.move.line')
 		invoice_obj = self.pool.get('account.invoice')
-		
+		move_obj = self.pool.get('account.move')
+
 		account_move_id = account_move_line_obj.search(cr, uid, [('invoice', '=', invoice_id)])[0]
 		account_move = account_move_line_obj.browse(cr, uid, [account_move_id])
 		
+		for invoice in invoice_obj.browse(cr, uid, invoice_id):
+			residual = invoice.residual
+			bon_number = invoice.origin,
+
 		# Prepare voucher values for payment
 		voucher_vals = {
 			'partner_id': partner_id.id,
@@ -210,6 +215,7 @@ class sale_order(osv.osv):
 			'pre_line': True,
 			'amount': amount,
 			'type': 'receipt',
+			'reference': bon_number,
 			'line_cr_ids': [(0, False, {
 				'date_due': fields.date.today(),
 				'reconcile': True if amount >= account_move.debit - account_move.credit else False,
@@ -235,7 +241,7 @@ class sale_order(osv.osv):
 			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
 			pass
 		
-	# Get Default account on branch and change acount_id with it
+		# Get Default account on branch and change acount_id with it
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		default_account_sales = user_data.default_account_sales_override or user_data.branch_id.default_account_sales
 		journal = journal_obj.browse(cr, uid, journal_id, context)
@@ -253,11 +259,9 @@ class sale_order(osv.osv):
 		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
 		
 		# if residual==0, paid
-		for invoice in invoice_obj.browse(cr, uid, invoice_id):
-			#if invoice.residual == 0:
-			if invoice.residual >= 0:
-				invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
-				pass
+		if residual == 0:
+			invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
+			pass
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 		invoice_obj = self.pool.get('account.invoice')
@@ -290,7 +294,7 @@ class sale_order(osv.osv):
 				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, context=None)
 			
 		return result
-	
+
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
 		order_data = self.browse(cr, uid, sale_order_id)
 		commission_total = 0

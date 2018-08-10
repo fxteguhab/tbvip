@@ -14,16 +14,18 @@
 				<button name="print_quotation" position="replace" />
 				<button name="action_cancel" position="after">
 					<button name="print_sale_order" string="Print" type="object" icon="gtk-print"/>
+					
 				</button>
 				<button name="cancel" position="attributes">
 					<attribute name="string">Cancel Sale</attribute>
 					<attribute name="icon">gtk-cancel</attribute>
 				</button>
+				<button name="action_cancel" position="replace"/>
 				<button name="action_button_confirm" position="attributes">
 					<attribute name="icon">gtk-apply</attribute>
 				</button>
-				<button name="action_customer_pay" position="attributes">
-					<attribute name="string">Add Payment</attribute>
+				<button name="action_customer_pay" position="replace">
+					<button name="action_additional_payment" type="object"  String ="Add Payment" attrs="{'invisible': [('state','!=','progress')]}" icon="/tbvip/static/src/img/fa-money.png"/>
 				</button>
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">

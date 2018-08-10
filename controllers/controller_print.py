@@ -224,7 +224,8 @@ class controller_print(http.Controller):
 			row_number += 1
 			row = tpl_line.render(
 				no=str(row_number),
-				reference_number=line.move_line_id.invoice.name if line.move_line_id and line.move_line_id.invoice else '-',
+				reference_number=line.move_line_id.invoice.supplier_invoice_number if line.move_line_id and line.move_line_id.invoice else '-',
+				#reference_number=line.move_line_id.invoice.name if line.move_line_id and line.move_line_id.invoice else '-',
 				delivery_date=datetime.strptime(line.date_original, '%Y-%m-%d').strftime('%Y-%m-%d'),
 				total=self.thousand_separator(line.amount),
 			)
