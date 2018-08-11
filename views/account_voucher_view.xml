@@ -6,11 +6,14 @@
 			<field name="model">account.voucher</field>
 			<field name="inherit_id" ref="account_voucher.view_vendor_payment_form"/>
 			<field name="arch" type="xml">
-				<button name="cancel_voucher" position="before">
+				<!--<button name="cancel_voucher" position="before">
 					<button name="action_refresh" string="Refresh" type="object"/>
-				</button>
+				</button>-->
 				<button name="cancel_voucher" position="after">
 					<button name="print_kontra_bon" string="Print" type="object" icon="gtk-print"/>
+				</button>
+				<button name="cancel_voucher" position="attributes">
+					<attribute name="invisible">1</attribute>
 				</button>
 				<button name="proforma_voucher" position="attributes">
 					<attribute name="confirm">Are you sure to confirm this payment? This action cannot be undone.</attribute>
