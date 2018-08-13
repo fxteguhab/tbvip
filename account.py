@@ -116,9 +116,11 @@ class account_invoice_line(osv.osv):
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			new_data = self.browse(cr, uid, new_id)
 			discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
-			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-				vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
-				discount_string, partner_id=new_data.invoice_id.partner_id.id)
+
+			if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
+				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+					vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
+					discount_string, partner_id=new_data.invoice_id.partner_id.id)
 			
 			#check for changes and send notif
 			ctx = {
@@ -131,7 +133,7 @@ class account_invoice_line(osv.osv):
 				'partner_name' : new_data.invoice_id.partner_id.display_name,
 				'partner_id' : new_data.invoice_id.partner_id.id,
 				'product_uom' : vals['uos_id'],
-				'discount_string' : vals['discount_string'] if 'discount_string' in vals else "0",
+				'discount_string' : discount_string,
 				'discount_string_old' : vals['discount_string_old'] if 'discount_string_old' in vals else "0",
 				'name' : vals['name'],
 				'invoice_id' : vals['invoice_id'] if 'invoice_id' in vals else 0,
@@ -139,38 +141,6 @@ class account_invoice_line(osv.osv):
 				}			
 
 			self._cost_price_watcher(cr, uid, vals,  context=ctx)
-
-			#force create new price	####################################################################################################
-			#price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
-			#price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
-			#if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett) and (vals['price_unit'] >0) ):
-			#	product_current_price_obj = self.pool.get('product.current.price')
-			#	now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-			#	domain = [
-			#		('price_type_id', '=', vals['price_type_id']),
-			#		('product_id', '=', vals['product_id']),
-			#		('start_date','<=',now),
-			#		('partner_id','=',new_data.invoice_id.partner_id.id),
-			#	]
-			#	product_current_price_ids = product_current_price_obj.search(cr, uid, domain, order='start_date DESC', limit=1)
-			#	if len(product_current_price_ids) == 0:
-			#		product_current_price_obj.create(cr, uid, {
-			#		'price_type_id': vals['price_type_id'],
-			#		'product_id': vals['product_id'],
-			#		'start_date': now,
-			#		'partner_id': new_data.invoice_id.partner_id.id,
-			#		'uom_id_1': vals['uos_id'],
-			#		'price_1': vals['price_unit'],
-			#		'disc_1' : discount_string,	
-			#		})
-			#	else:
-			#		product_current_price = product_current_price_obj.browse(cr, uid, product_current_price_ids)[0]
-			#		product_current_price_obj.write(cr, uid, [product_current_price.id], {
-			#			'product_id': vals['product_id'],
-			#			'price_1': vals['price_unit'],
-			#			'disc_1' : discount_string,	
-			#		})
-			#	############################################################################################################################	
 		return new_id
 
 	def write(self, cr, uid, ids, vals, context={}):
@@ -215,31 +185,21 @@ class account_invoice_line(osv.osv):
 
 				if vals.get('product_id', False): product_id = vals['product_id']
 				if vals.get('uos_id', False): product_uom = vals['product_uom']
-
 				if vals.get('price_unit', False): price_unit = vals['price_unit']
 				if vals.get('price_unit_old', False): price_unit_old = vals['price_unit_old']
 				if vals.get('price_unit_nett', False): price_unit_nett = vals['price_unit_nett']
 				if vals.get('price_unit_nett_old', False): price_unit_nett_old = vals['price_unit_nett_old']				
 				if vals.get('discount_string', False): discount_string = vals['discount_string']	
 				if vals.get('discount_string_old', False): discount_string_old = vals['discount_string_old']
-
 				if vals.get('invoice_id', False): invoice_id = vals['invoice_id']
 				if vals.get('sell_price_unit', False): sell_price_unit = vals['sell_price_unit']
 				if vals.get('name', False): name = vals['name']
 
-				self.pool.get('price.list')._create_product_current_price_if_none(
-					cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
-					partner_id=invoice_line.invoice_id.partner_id.id)
-				
-				#check for changes and send notif
-				#vals['price_unit_old'] = invoice_line.price_unit_old
-				#vals['discount_string_old'] = invoice_line.discount_string_old
-				#vals['price_unit_nett_old'] = invoice_line.price_unit_nett_old
-				#vals['invoice_id'] = invoice_line.invoice_id.id
-				#vals['name'] = invoice_line.name
-				#vals['discount_string'] = invoice_line.discount_string
-				#vals['sell_price_unit'] = invoice_line.sell_price_unit
-				
+				if (price_type_id.type == 'buy'):
+					self.pool.get('price.list')._create_product_current_price_if_none(
+						cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
+						partner_id=invoice_line.invoice_id.partner_id.id)
+					
 				ctx = {
 					'price_unit_nett_old' : price_unit_nett_old,
 					'price_unit_nett' : price_unit_nett,
@@ -259,40 +219,6 @@ class account_invoice_line(osv.osv):
 
 				#check for changes and send notif
 				self._cost_price_watcher(cr, uid, vals,  context=ctx)
-
-				#force create new price ##################################################################################################	
-				#price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
-				#price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
-				#if ((price_unit_nett_old > 0) and (price_unit_nett_old != price_unit_nett) and (price_unit >0) ):
-				#	product_current_price_obj = self.pool.get('product.current.price')
-				#	now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-				#	domain = [
-				#		('price_type_id', '=', price_type_id),
-				#		('product_id', '=', product_id),
-				#		('start_date','<=',now),
-				#		('partner_id','=',invoice_line.invoice_id.partner_id.id),
-				#	]
-				#	product_current_price_ids = product_current_price_obj.search(cr, uid, domain, order='start_date DESC', limit=1)
-				#	if len(product_current_price_ids) == 0:
-				#		product_current_price_obj.create(cr, uid, {
-				#		'price_type_id': price_type_id,
-				#		'product_id': product_id,
-				#		'start_date': now,
-				#		'partner_id': invoice_line.invoice_id.partner_id.id,
-				#		'uom_id_1': product_uom,
-				#		'price_1': price_unit,
-				#		'disc_1' : discount_string,	
-				#		})	
-				#	else:
-				#		product_current_price = product_current_price_obj.browse(cr, uid, product_current_price_ids)[0]
-				#		product_current_price_obj.write(cr, uid, [product_current_price.id], {
-				#		'product_id': product_id,
-				#		'price_1': price_unit,
-				#		'disc_1' : discount_string,	
-				#		'start_date': now,
-				#	})
-				############################################################################################################################
-				
 				
 		return result
 
