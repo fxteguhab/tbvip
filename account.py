@@ -195,7 +195,7 @@ class account_invoice_line(osv.osv):
 				if vals.get('sell_price_unit', False): sell_price_unit = vals['sell_price_unit']
 				if vals.get('name', False): name = vals['name']
 
-				if (price_type_id.type == 'buy'):
+				if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
 					self.pool.get('price.list')._create_product_current_price_if_none(
 						cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
 						partner_id=invoice_line.invoice_id.partner_id.id)
