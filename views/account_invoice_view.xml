@@ -51,6 +51,10 @@
 				<xpath expr="//field[@name='invoice_line']/tree/field[@name='discount']" position="after">
 					<field name="price_unit_nett"/>
 				</xpath>
+				<field name="amount_tax" position="after">
+					<field name="discount_amount" widget="monetary" options="{'currency_field': 'currency_id'}"
+						   attrs="{'readonly':[('state', '!=', 'draft')]}"/>
+				</field>
 			</field>
 		</record>
 
