@@ -169,6 +169,11 @@ class product_template(osv.osv):
 		'invoice_count': fields.function(_invoice_count, string='# Invoices', type='integer'),
 		'stock_opname_count': fields.function(_stock_opname_count, string='# Stock Opname', type='integer'),
 	}
+
+	_sql_constraints = [
+		('name_uniq', 'unique(name)', 'This product already created'),
+	]
+
 	
 # DEFAULTS ----------------------------------------------------------------------------------------------------------------------
 	_defaults = {
