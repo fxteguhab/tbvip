@@ -29,7 +29,7 @@ class price_list(osv.osv):
 		product_current_price_obj = self.pool.get('product.current.price')
 		if not start_date:
 			#start_date = (datetime.now() - timedelta(hours=7)).strftime(DEFAULT_SERVER_DATE_FORMAT)
-			start_date = (datetime.now()).strftime(DEFAULT_SERVER_DATE_FORMAT)
+			start_date = (datetime.now()).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 		domain = [
 			('price_type_id', '=', price_type_id),
 			('product_id', '=', product_id),
