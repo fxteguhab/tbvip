@@ -486,10 +486,10 @@ class purchase_order_line(osv.osv):
 				vals['location_id'] = incoming_location
 		return new_order_line
 	
-	def write(self, cr, uid, ids, vals, context=None):			
-		for id in ids:
-			self._message_line_changes(cr, uid, vals, id, context=None)								
-		edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
+	#def write(self, cr, uid, ids, vals, context=None):			
+		#for id in ids:
+		#	self._message_line_changes(cr, uid, vals, id, context=None)								
+		#edited_order_line = super(purchase_order_line, self).write(cr, uid, ids, vals, context)
 		
 		#for po_line in self.browse(cr, uid, ids):		
 		#	# bikin product current price baru bila belum ada
@@ -508,7 +508,7 @@ class purchase_order_line(osv.osv):
 		#	self.pool.get('price.list')._create_product_current_price_if_none(
 		#		cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
 		#		partner_id=po_line.order_id.partner_id.id)
-		return edited_order_line
+		#return edited_order_line
 	
 	#def unlink(self, cr, uid, ids, context=None):
 	# kalau line ini batal, maka demand yang menyebabkan adanya purchase order (di mana 

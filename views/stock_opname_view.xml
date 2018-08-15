@@ -26,6 +26,7 @@
 				</field>
 				<field name="line_ids" position="attributes">
 					<attribute name="options">{'reload_on_button': True}</attribute>
+					<attribute name="readonly">1</attribute>
 				</field>
 			</field>
 		</record>
