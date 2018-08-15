@@ -191,7 +191,7 @@ class sale_order(osv.osv):
 		
 		for invoice in invoice_obj.browse(cr, uid, invoice_id):
 			residual = invoice.residual
-			bon_number = invoice.origin,
+			bon_number = invoice.origin
 
 		# Prepare voucher values for payment
 		voucher_vals = {
@@ -414,6 +414,14 @@ class sale_order(osv.osv):
 					}
 				}
 
+	def _prepare_invoice(self, cr, uid, order, lines, context=None):
+	 	result = super(sale_order, self)._prepare_invoice(cr, uid, order, lines, context)
+		result.update({
+					'reference': order.name,
+					'name': order.name,
+					'supplier_invoice_number' : order.bon_number,
+					})
+	 	return result
 
 # PRINTS -------------------------------------------------------------------------------------------------------------------
 	
