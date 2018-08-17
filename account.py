@@ -91,7 +91,7 @@ class account_invoice_line(osv.osv):
 		#price_unit = context.get('price_unit',0)
 		#price_unit_old = context.get('price_unit_old',0)
 		#product_uom = context.get('product_uom',0)
-		#product_id = context.get('product_id',0)
+		product_id = context.get('product_id',0)
 		#price_type_id = context.get('price_type_id',0)
 		name = context.get('name','')
 		invoice_id = context.get('invoice_id',0)
@@ -121,6 +121,11 @@ class account_invoice_line(osv.osv):
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 					vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
 					discount_string, partner_id=new_data.invoice_id.partner_id.id)
+				
+				self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'standard_price')
+			else:
+				if (new_data.product_id.list_price <= 1): #TEGUH@20180817 : asumsi price awal dari odoo < 1
+					self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'list_price')
 			
 			#check for changes and send notif
 			ctx = {
@@ -141,6 +146,7 @@ class account_invoice_line(osv.osv):
 				}			
 
 			self._cost_price_watcher(cr, uid, vals,  context=ctx)
+
 		return new_id
 
 	def write(self, cr, uid, ids, vals, context={}):

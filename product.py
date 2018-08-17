@@ -53,7 +53,6 @@ class product_template(osv.osv):
 	_inherit = 'product.template'
 	
 # FIELD FUNCTION METHODS ------------------------------------------------------------------------------------------------
-	
 	def _purchase_order_line_ids(self, cr, uid, ids, field_name, arg, context={}):
 		result = {}
 		for data in self.browse(cr, uid, ids):
@@ -200,6 +199,12 @@ class product_template(osv.osv):
 class product_product(osv.osv):
 	_inherit = 'product.product'
 	
+	#TEGUH@20180817 : buat ganti list_price/standard_price di product_Template
+	def _set_price(self,cr,uid,product_id,price_unit_nett,field):
+			self.write(cr, uid, [product_id.id], {
+				field: price_unit_nett,
+			})	
+
 	def cron_product_rank(self, cr, uid, context={}):
 		sale_order_obj = self.pool.get('sale.order')
 		config_param_obj = self.pool.get('ir.config_parameter')

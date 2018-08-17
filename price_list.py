@@ -373,6 +373,23 @@ class product_current_price(osv.osv):
 		res = super(product_current_price, self).onchange_product_id(cr, uid, ids, product_category_id, context)
 		res = utility.update_uom_domain_price_list(res)
 		return res
+
+	def create(self,cr,uid,vals,context={}):
+		new_id = super(product_current_price, self).create(cr, uid, vals, context=context)
+		new_data = self.browse(cr, uid, new_id)
+		nett_1 = new_data.nett_1
+		product_id = new_data.product_id
+		price_type_id = new_data.price_type_id
+
+		if (new_data.price_type_id.type == 'sell'):	
+			field = 'list_price'
+		else: #buy
+			field = 'standard_price'
+
+		self.pool.get('product.product')._set_price(cr,uid,product_id,nett_1,field)
+
+		return new_id
+
 # OVERRIDE ------------------------------------------------------------------------------------------------------------------
 class product_template(osv.osv):
 	_inherit = 'product.template'

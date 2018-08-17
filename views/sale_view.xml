@@ -208,6 +208,26 @@
 			</field>
 		</record>
 		
+		<!-- INI TREE YG DI PURCHASE LIST PRODUCT -->
+		<record model="ir.ui.view" id="view_order_line_tree_inherit">
+			<field name="name">view.order.line.tree.inherit</field>
+			<field name="model">sale.order.line</field>
+			<field name="inherit_id" ref="sale.view_order_line_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//tree[1]" position="attributes">
+					<!--<attribute name="context">{'default_order':'order_id desc'} </attribute>-->
+					<attribute name ="default_order">create_date desc</attribute>
+				</xpath>
+				<field name="price_subtotal" position="before">
+					<field name ="discount_string"/>
+					<field name="price_unit_nett"/>
+				</field>
+				<field name ="name" position ="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
+			</field>
+		</record>
+
 		<!--
 		<record id="view_sales_order_search_inherit" model="ir.ui.view">
 			<field name="name">sale.order.search.inherit</field>

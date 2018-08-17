@@ -151,7 +151,8 @@
 			<field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
 			<field name="arch" type="xml">
 				<xpath expr="//tree[1]" position="attributes">
-					<attribute name="context">{'default_order':'date_planned desc'} </attribute>
+					<!--<attribute name="context">{'default_order':'date_planned desc'} </attribute>-->
+					<attribute name ="default_order">create_date desc</attribute>
 				</xpath>
 				<field name="price_subtotal" position="before">
 					<field name ="discount_string"/>
