@@ -225,6 +225,20 @@
 				<field name ="name" position ="attributes">
 					<attribute name = "invisible">True</attribute>
 				</field>
+				<field name ="order_partner_id" position ="before">
+					<field name = "stock_location_id"/>	
+				</field>
+			</field>
+		</record>
+
+		<record id="view_sales_order_line_filter_inherit" model="ir.ui.view">
+			<field name="name">sale.order.line.select.inherit</field>
+			<field name="model">sale.order.line</field>
+			<field name="inherit_id" ref="sale.view_sales_order_line_filter"/>
+			<field name="arch" type="xml">
+				<field name = "salesman_id" position="after">
+					<filter string="Location" icon="terp-accessories-archiver" domain="[]" context="{'group_by':'stock_location_id'}"/>	
+				</field>
 			</field>
 		</record>
 

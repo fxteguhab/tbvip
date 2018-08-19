@@ -447,7 +447,12 @@ class sale_order_line(osv.osv):
 		'commission': fields.char('Commission', help="Commission String"),
 		'commission_amount': fields.float('Commission Amount'),
 		'uom_category_filter_id': fields.related('product_id', 'product_tmpl_id', 'uom_id', 'category_id', relation='product.uom.categ', type='many2one',
-			string='UoM Category', readonly=True)
+			string='UoM Category', readonly=True),
+
+		'stock_location_id': fields.related('order_id','stock_location_id',type='many2one', relation='stock.location', store=True, string='Location'),
+		#overide
+		'salesman_id':fields.related('order_id', 'employee_id',type='many2one', relation='hr.employee', store=True, string='Salesperson'),
+		
 	}
 	
 	_sql_constraints = [
