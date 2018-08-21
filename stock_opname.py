@@ -23,10 +23,10 @@ class stock_opname_memory(osv.osv_memory):
 					})
 		return super(stock_opname_memory, self).action_generate_stock_opname(cr, uid, ids, context=context)
 	
-	def _generate_stock_opname_products(self, cr, uid, context={}):
-		return self.algoritma_generate_so_products1(cr, uid, context=context)
+	def _generate_stock_opname_products(self, cr, uid, location,context={}):
+		return self.algoritma_generate_so_products2(cr, uid, location,context=context)
 
-	def algoritma_generate_so_products1(self, cr, uid, context={}):
+	def algoritma_generate_so_products1(self, cr, uid, location,context={}):
 		today = datetime.now()
 		last_week = today - timedelta(days=7)
 		last_month = today - timedelta(days=100)
@@ -66,7 +66,47 @@ class stock_opname_memory(osv.osv_memory):
 			stock_opname_products.append({'product_id': row['product_id']})
 		return stock_opname_products
 	
-	#def algoritma_generate_so_products2
+	def algoritma_generate_so_products2(self, cr, uid, location,context={}):
+		today = datetime.now()
+		last_week = today - timedelta(days=7)
+		last_month = today - timedelta(days=30)	
+		cr.execute("""
+			SELECT
+				product_id, last_sale_date
+			FROM (
+				SELECT
+					DISTINCT ON (product_id)
+					so_line.product_id, so.date_order as last_sale_date
+				FROM
+					sale_order_line so_line LEFT JOIN sale_order so
+					ON so.id = so_line.order_id
+				WHERE
+					so_line.product_id IN (
+						SELECT
+							si_line.product_id
+						FROM
+							stock_inventory_line as si_line
+						WHERE	
+							location_id = \'{}\' AND
+							(write_date is NULL OR write_date < \'{}\')
+					) AND so_line.stock_location_id = \'{}\'
+				ORDER BY
+					product_id ASC, last_sale_date DESC
+			) AS product_last_sale_date_ordered
+			WHERE
+				last_sale_date < \'{}\' AND 
+				last_sale_date > \'{}\'
+			ORDER BY
+				last_sale_date DESC
+			""".format(location, last_week, location, today, last_month)
+		)
+		stock_opname_products = []
+		for row in cr.dictfetchall():
+			stock_opname_products.append({'product_id': row['product_id']})
+		
+		return stock_opname_products
+
+
 	#def algoritma_generate_so_products3, dst sesuai perkembangan berikutnya
 
 	def action_load_inventories(self, cr, uid, ids, context=None):

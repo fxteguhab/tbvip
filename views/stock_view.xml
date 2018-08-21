@@ -84,9 +84,9 @@
 				<button name="action_cancel_draft" position="after">
 					<button name="print_stock_inventory" string="" type="object" icon="gtk-print"/>
 				</button>
-				<field name="theoretical_qty" position="after">
+				<!--<field name="theoretical_qty" position="after">
 					<field name="sublocation" readonly="True"/>
-				</field>
+				</field>-->
 			</field>
 		</record>
 
