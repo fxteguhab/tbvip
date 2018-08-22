@@ -11,11 +11,11 @@
 			<field name="arch" type="xml">
 				<form>
 					<header>
-
+						<button name="action_ready" string="Ready" type="object" states = "draft" confirm="Are you sure this interbranch stock move ready?"/>
 						<!-- edit button accept, reject & tambah button request -->
-						<button name="action_accept" string="Accept" type="object" attrs="{'invisible':['|',('state','=','accepted'),('state','=','rejected')]}" class="oe_highlight" confirm="Are you sure to accept this interbranch stock move?" />
+						<button name="action_accept" string="Accept" type="object" attrs="{'invisible':[('state', 'in', ['draft','accepted','rejected'])]}" class="oe_highlight" confirm="Are you sure to accept this interbranch stock move?" />
 
-						<button name="action_reject" string="Reject" type="object" attrs="{'invisible':['|',('state','=','accepted'),('state','=','rejected')]}" confirm="Are you sure to reject this interbranch stock move?"/>
+						<button name="action_reject" string="Reject" type="object" attrs="{'invisible':[('state', 'in', ['draft','accepted','rejected'])]}" confirm="Are you sure to reject this interbranch stock move?"/>
 
 						<button name="action_request" string="Request" type="object" states = "draft" confirm="Are you sure to request this interbranch stock move?"/>
 
@@ -151,5 +151,15 @@
 			</field>
 		</record>
 
+		 <record id="vpicktree_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.tree.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.vpicktree"/>
+            <field name="arch" type="xml">
+            	<field name = "location_dest_id" position ="before">
+            		<field name ="location_id" />
+            	</field>
+            </field>
+        </record>
 	</data>
 </openerp>

@@ -9,6 +9,7 @@ from openerp import SUPERUSER_ID, api
 _INTERBRANCH_STATE = [
 	('draft', 'Draft'),
 	('request', 'Request'),
+	('ready','Ready'),
 	('otw', 'OnTheWay'),
 	('delivered', 'Delivered'),
 	('accepted', 'Accepted'),
@@ -39,8 +40,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by', readonly=True, states={'draft': [('readonly', False)]}),
 		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by', readonly=True, states={'draft': [('readonly', False)]}),
 		#TEGUH@20180331 : field interbranch bisa diedit saat draft & request
-		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=False, states={'accepted': [('readonly', True)],'rejected': [('readonly', True)]}),
-		#'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)]}),
+		#'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=False, states={'accepted': [('readonly', True)],'rejected': [('readonly', True)]}),
+		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)],'request': [('readonly', False)]}),
 	}
 	
 	_defaults = {
@@ -106,18 +107,38 @@ class tbvip_interbranch_stock_move(osv.Model):
 		
 		return True
 
-	def action_accept(self, cr, uid, ids, context={}):
+	def action_ready(self, cr, uid, ids, context={}):	
+		#set picking state jadi Ready to Transfer
 		for interbranch_stock_move in self.browse(cr, uid, ids):
+			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)	
+
+		self.write(cr, uid, ids, {
+			'state': 'ready'
+		}, context=context)
+
+		return True
+
+	def action_accept(self, cr, uid, ids, context={}):
+		#for interbranch_stock_move in self.browse(cr, uid, ids):
 		# JUNED@20180205: ditutup as per request dari Teguh
-			"""
-			if not interbranch_stock_move.checked_by_id:
-				raise osv.except_osv(_('Warning!'), _("Please Fill field Checked By"))
-			"""
-			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
-		
+		#	"""
+		#	if not interbranch_stock_move.checked_by_id:
+		#		raise osv.except_osv(_('Warning!'), _("Please Fill field Checked By"))
+		#	"""
+		#	#self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
+		#
+
 		# tandai semua canvassing untuk interbranch ini is_executed = True
 		self._write_is_executed_canvassing(cr, uid, ids, context=context)
+		#call workflow to make picking transferred
+		picking_obj = self.pool.get('stock.picking')
+		for interbranch_stock_move in self.browse(cr, uid, ids):
+			picking_ids =  picking_obj.search(cr, uid, [('interbranch_move_id', '=', interbranch_stock_move.id)], limit = 1)
 			
+			#picking_id = [picking_ids]
+			#print "picking id:"+str(picking_id)
+			self._transfer_stock_picking(cr, uid, picking_ids, context = context)
+
 		# accepted by user uid
 		self.write(cr, uid, ids, {
 			'state': 'accepted',
@@ -147,8 +168,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 		model_obj = self.pool.get('ir.model.data')
 		if len(interbranch_stock_move.interbranch_stock_move_line_ids)>0:
 			#order the picking types with a sequence allowing to have the following suit for each warehouse: reception, internal, pick, pack, ship.
-			max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
-			max_sequence = max_sequence and max_sequence[0]['sequence'] or 0
+			#max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
+			#max_sequence = max_sequence and max_sequence[0]['sequence'] or 0
 			
 			location_src =  stock_location_obj.browse(cr, uid, interbranch_stock_move.from_stock_location_id.id)
 			location_dest = stock_location_obj.browse(cr, uid, interbranch_stock_move.to_stock_location_id.id)
@@ -166,23 +187,26 @@ class tbvip_interbranch_stock_move(osv.Model):
 				'location_dest_id': location_dest.id,
 				'origin' : 'Interbranch Stock Move ' + str(interbranch_stock_move.id),
 				'interbranch_move_id': interbranch_stock_move.id,
+				'state' :'assigned',
 			}, context=context)
 			#untuk setiap product, bikin stock movenya
 			for line in interbranch_stock_move.interbranch_stock_move_line_ids:
 				picking_type_id = stock_move_obj.create(cr, uid, vals={
-					'name': _('Stock_move') + ' ' + location_src.name + '/' + location_dest.name,
+					#'name': _('Stock_move') + ' ' + location_src.name + '/' + location_dest.name,
+					'name' : line.product_id.name_template,
 					'warehouse_id': warehouse.id,
 					'location_id': location_src.id,
 					'location_dest_id': location_dest.id,
-					'sequence': max_sequence + 1,
+					#'sequence': max_sequence + 1,
 					'product_id': line.product_id.id,
 					'product_uom': line.uom_id.id,
 					'picking_id' : picking_id,
-					'product_uom_qty' : line.qty
+					'product_uom_qty' : line.qty,
+					'state' :'assigned',
 				}, context=context)
 				
 			#call workflow to make picking transferred
-			self._transfer_stock_picking(cr, uid, [picking_id], context = context)
+			#self._transfer_stock_picking(cr, uid, [picking_id], context = context)
 		return
 	
 	def _transfer_stock_picking(self, cr, uid, ids_picking, context = {}):

@@ -30,7 +30,7 @@
 					<page string="Interbranch Lines">
 						<field name="interbranch_move_ids" attrs="{'readonly': [('state', '=', 'finished')]}">
 							<tree version="7.0" editable="bottom">
-								<field name="interbranch_move_id" domain="[('state', '=', 'draft')]"/>
+								<field name="interbranch_move_id" domain="[('state', '=', 'ready')]" options="{'no_create': 1}"/>
 								<!-- not needed, can see from interbranch_move_id.name -->
 								<!--<field name="from_stock_location_id"/>-->
 								<!--<field name="to_stock_location_id"/>-->
