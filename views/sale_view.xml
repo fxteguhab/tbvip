@@ -126,6 +126,10 @@
 					<attribute name ="statusbar_visible">"draft,progress,done"</attribute>
 				</field>
 				<field name="note" position ="replace" />
+				<field name="payment_cash_amount" position ="before">
+					<field name="is_paid"/>
+					<newline/>
+				</field>
 			</field>
 		</record>
 
