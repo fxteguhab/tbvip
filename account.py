@@ -234,19 +234,19 @@ class account_move_line(osv.osv):
 	_inherit = 'account.move.line'
 	_description = 'Modifikasi untuk menambah amount di SO'
 	
-	def create(self, cr, uid, vals, context={}):
-		new_id = super(account_move_line, self).create(cr, uid, vals, context=context)
-		if context.get('payment_method_type', False) and context.get('sale_order_id', False):
-			sale_order_obj = self.pool.get('sale.order')
-			payment_method_type = context['payment_method_type']
-			sale_order_id = context['sale_order_id']
-			sale_order_data = sale_order_obj.browse(cr, uid, sale_order_id)
-			if payment_method_type and vals.get('debit', False):
-				if payment_method_type == 'transfer' or payment_method_type == 'receivable':
-					sale_order_obj.write(cr, uid, sale_order_id, {
-						'is_complex_payment': True
-					})
-		return new_id
+	#def create(self, cr, uid, vals, context={}):
+	#	new_id = super(account_move_line, self).create(cr, uid, vals, context=context)
+	#	#if context.get('payment_method_type', False) and context.get('sale_order_id', False):
+	#		#sale_order_obj = self.pool.get('sale.order')
+	#		#payment_method_type = context['payment_method_type']
+	#		#sale_order_id = context['sale_order_id']
+	#		#sale_order_data = sale_order_obj.browse(cr, uid, sale_order_id)
+	#		#if payment_method_type and vals.get('debit', False):
+	#		#	if payment_method_type == 'transfer' or payment_method_type == 'receivable':
+	#		#		sale_order_obj.write(cr, uid, sale_order_id, {
+	#		#			'is_complex_payment': True
+	#		#		})
+	#	return new_id
 
 	def name_get(self, cr, uid, ids, context=None):
 		if not ids: return []
