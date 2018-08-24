@@ -145,33 +145,33 @@ class sale_order(osv.osv):
 		
 		return result
 	
-	def create_or_update_sale_history_from_sale_done(self, cr, uid, sale_ids, context={}):
-		sale_history_obj = self.pool.get('sale.history')
-		month_now = datetime.now().month
-		year_now = datetime.now().year
-		dict_product_sale = {}
-		for sale in self.browse(cr, uid, sale_ids):
-			month_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').month
-			year_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').year
-			if month_sale!=month_now or year_now != year_sale:
-				dict_product_sale = sale_history_obj.create_dict_for_sale_history(cr, uid, sale_ids, context)
-			for product_id, dict_branch_id in dict_product_sale.iteritems():
-				for branch_id, value in dict_branch_id.iteritems():
-					# cari dahulu apakah sudah terdapat sale_history yang lama, jika ada maka write, jika tidak maka create
-					history_id =  sale_history_obj.search(cr, uid, [('month', '=', month_sale),
-						('year', '=', year_sale),
-						('product_id', '=', product_id),
-						('branch_id', '=', branch_id)], limit = 1)
-					if history_id:
-						sale_history = sale_history_obj.browse(cr, uid, history_id)
-						sale_history_obj.write(cr, uid, history_id,  {'number_of_sales': sale_history.number_of_sales + value['qty']})
-					else:
-						sale_history_obj.create(cr, uid, {
-							'product_id': product_id,
-							'number_of_sales': value['qty'],
-							'year' : year_sale,
-							'month': month_sale,
-							'branch_id': branch_id})
+	#def create_or_update_sale_history_from_sale_done(self, cr, uid, sale_ids, context={}):
+		#sale_history_obj = self.pool.get('sale.history')
+		#month_now = datetime.now().month
+		#year_now = datetime.now().year
+		#dict_product_sale = {}
+		#for sale in self.browse(cr, uid, sale_ids):
+		#	month_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').month
+		#	year_sale = datetime.strptime(sale.date_order, '%Y-%m-%d %H:%M:%S').year
+		#	if month_sale!=month_now or year_now != year_sale:
+		#		dict_product_sale = sale_history_obj.create_dict_for_sale_history(cr, uid, sale_ids, context)
+		#	for product_id, dict_branch_id in dict_product_sale.iteritems():
+		#		for branch_id, value in dict_branch_id.iteritems():
+		#			# cari dahulu apakah sudah terdapat sale_history yang lama, jika ada maka write, jika tidak maka create
+		#			history_id =  sale_history_obj.search(cr, uid, [('month', '=', month_sale),
+		#				('year', '=', year_sale),
+		#				('product_id', '=', product_id),
+		#				('branch_id', '=', branch_id)], limit = 1)
+		#			if history_id:
+		#				sale_history = sale_history_obj.browse(cr, uid, history_id)
+		#				sale_history_obj.write(cr, uid, history_id,  {'number_of_sales': sale_history.number_of_sales + value['qty']})
+		#			else:
+		#				sale_history_obj.create(cr, uid, {
+		#					'product_id': product_id,
+		#					'number_of_sales': value['qty'],
+		#					'year' : year_sale,
+		#					'month': month_sale,
+		#					'branch_id': branch_id})
 	
 	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, context=None):
 		"""
@@ -682,3 +682,67 @@ class sale_order_line(osv.osv):
 			})
 		
 		return result
+
+class sale_report(osv.osv):
+	_inherit = "sale.report"
+
+	_columns = {
+		#TEGUH@20180401 : tambah field employee_id & branch
+		'user_id': fields.many2one('res.users', 'Kasir', readonly=True),
+		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch', readonly=True),
+	}
+
+
+	def _select(self):
+		select_str = """
+			WITH currency_rate (currency_id, rate, date_start, date_end) AS (
+					SELECT r.currency_id, r.rate, r.name AS date_start,
+						(SELECT name FROM res_currency_rate r2
+						WHERE r2.name > r.name AND
+							r2.currency_id = r.currency_id
+						 ORDER BY r2.name ASC
+						 LIMIT 1) AS date_end
+					FROM res_currency_rate r
+				)
+			 SELECT min(l.id) as id,
+					l.product_id as product_id,
+					t.uom_id as product_uom,
+					sum(l.product_uom_qty / u.factor * u2.factor) as product_uom_qty,
+					sum((l.product_uom_qty / u.factor * u2.factor) * l.price_unit) as price_total,
+					count(*) as nbr,
+					s.date_order as date,
+					s.date_confirm as date_confirm,
+					s.partner_id as partner_id,
+					s.user_id as user_id,
+					s.employee_id as employee_id,
+					s.branch_id as branch_id,
+					s.company_id as company_id,
+					extract(epoch from avg(date_trunc('day',s.date_confirm)-date_trunc('day',s.create_date)))/(24*60*60)::decimal(16,2) as delay,
+					l.state,
+					t.categ_id as categ_id,
+					s.pricelist_id as pricelist_id,
+					s.project_id as analytic_account_id,
+					s.section_id as section_id
+		"""
+		return select_str
+
+	def _group_by(self):
+		group_by_str = """
+			GROUP BY l.product_id,
+					l.order_id,
+					t.uom_id,
+					t.categ_id,
+					s.date_order,
+					s.date_confirm,
+					s.partner_id,
+					s.user_id,
+					s.employee_id,
+					s.branch_id,
+					s.company_id,
+					l.state,
+					s.pricelist_id,
+					s.project_id,
+					s.section_id
+		"""
+		return group_by_str
