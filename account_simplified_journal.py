@@ -72,12 +72,13 @@ class account_journal_simplified(osv.osv):
 					'note': 'Cash Transaction ' + location_src.name + '/' + location_dest.name,
 					'location_id': location_src.id,
 					'location_dest_id': location_dest.id,
-					'origin': 'Cash Transaction - ' + str(created_simplified_journal.name),
+					'origin': 'Retur - ' + str(created_simplified_journal.name),
 				}, context=context)
 				#untuk setiap product, bikin stock movenya
 				for line in created_simplified_journal.retur_line_ids:
 					stock_move = stock_move_obj.create(cr, uid, vals={
-						'name': _('Stock_move') + ' ' + location_src.name + '/' + location_dest.name,
+						#'name': _('Stock_move') + ' ' + location_src.name + '/' + location_dest.name,
+						'name' : line.product_id.name_template,
 						'warehouse_id': warehouse.id,
 						'location_id': location_src.id,
 						'location_dest_id': location_dest.id,
@@ -85,7 +86,9 @@ class account_journal_simplified(osv.osv):
 						'product_id': line.product_id.id,
 						'product_uom': line.product_id.uom_id.id,
 						'picking_id': picking_id,
-						'product_uom_qty': line.qty
+						'product_uom_qty': line.qty,
+						'price_unit' : line.price_unit_nett,
+						'origin': 'Retur - ' + str(created_simplified_journal.name),
 					}, context=context)
 				# Transfer created picking
 				picking_obj.do_transfer(cr, uid, picking_id, context)
@@ -150,6 +153,7 @@ class account_journal_simplified_line_retur(osv.osv):
 		'account_journal_simplified_id': fields.many2one('account.journal.simplified', 'Simplified Account Journal'),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Qty', required=True),
+		'price_unit_nett' : fields.float(related = "product_id.product_tmpl_id.list_price",string="Price Nett"),
 	}
 	
 	_defaults = {

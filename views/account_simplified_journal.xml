@@ -51,6 +51,7 @@
 						<tree editable="bottom">
 							<field name="product_id" options="{'no_create': 1}"/>
 							<field name="qty"/>
+							<field name ="price_unit_nett" />
 						</tree>
 					</field>
 					<field name="paysupp_line_ids" attrs="{'invisible': [('preset_code','!=','PAYSUPP')]}">

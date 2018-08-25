@@ -693,3 +693,62 @@ class purchase_report(osv.osv):
 					u2.factor
 			)
 		""")
+
+class procurement_order(osv.osv):
+	_inherit = 'procurement.order'
+
+	def create_procurement_purchase_order(self, cr, uid, procurement, po_vals, line_vals, context=None):
+		partner_id = po_vals['partner_id']
+		product_id = line_vals['product_id']
+		uom_id = line_vals['product_uom']
+
+		data_obj = self.pool.get('ir.model.data')
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		current_discount = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)	
+		current_price = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="price", context=context)
+
+		po_vals.update({'price_type_id': price_type_id})
+		line_vals.update({'price_type_id': price_type_id})
+		line_vals.update({'price_unit': current_price})
+		line_vals.update({'discount_string': current_discount})
+		result = super(procurement_order, self).create_procurement_purchase_order(cr, uid, procurement, po_vals, line_vals, context)
+		return result
+
+
+	def _get_po_line_values_from_proc(self, cr, uid, procurement, partner, company, schedule_date, context=None):
+		result = super(procurement_order, self)._get_po_line_values_from_proc(cr, uid, procurement, partner, company, schedule_date, context)
+		
+		partner_id = partner.id
+		product_id = procurement.product_id.id
+		uom_id = procurement.product_id.uom_po_id.id
+
+	 	data_obj = self.pool.get('ir.model.data')
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		current_discount = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)	
+		current_price = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="price", context=context)
+
+
+	 	result.update(
+	 		{
+	 			'price_unit' : current_price,
+	 			'discount_string' : current_discount,
+	 		})
+
+	 	return result
+
+	def _calc_new_qty_price(self, cr, uid, procurement, po_line=None, cancel=False, context=None):
+	 	result = super(procurement_order, self)._calc_new_qty_price(cr, uid, procurement, po_line, cancel, context)
+	 	
+	 	qty = result[0]
+
+	 	data_obj = self.pool.get('ir.model.data')
+	 	partner_id = po_line.order_id.partner_id.id
+	 	product_id = procurement.product_id.id
+		uom_id = procurement.product_id.uom_po_id.id
+
+		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		current_price = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="price", context=context)
+	 	
+	 	return qty, current_price
+
+

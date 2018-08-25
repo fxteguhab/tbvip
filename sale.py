@@ -279,6 +279,7 @@ class sale_order(osv.osv):
 			stock_picking_id = delivery['res_id']
 			if stock_picking_id:
 				picking_obj.write(cr, uid,stock_picking_id, {'related_sales_bon_number': sale.bon_number})
+				picking_obj.write(cr, uid,stock_picking_id, {'note': sale.customer_address})
 			# Make invoice open
 			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 			
