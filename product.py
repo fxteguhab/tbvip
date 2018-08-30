@@ -308,3 +308,8 @@ class ProductSupplierinfo(osv.osv):
 			'product_current_stock' : fields.text(related = "product_tmpl_id.product_current_stock", string ="Stock", store= True),
 			#'sales_count' : fields.integer(related = "product_tmpl_id.product_current_stock", string ="Stock", store= True),
 		}
+
+#class make_procurement(osv.osv_memory):
+#	_inherit = 'make.procurement'
+#
+#	def make_procurement(self, cr, uid, ids, context=None):

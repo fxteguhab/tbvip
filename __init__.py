@@ -14,7 +14,7 @@ import bon
 import demand
 import account
 import res_users
-import stock_opname
+#import stock_opname
 import fleet
 import canvassing
 import product_production

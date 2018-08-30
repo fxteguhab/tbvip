@@ -4,6 +4,7 @@ from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from lxml import etree
+from zk import ZK, const
 
 # ==========================================================================================================================
 
@@ -139,6 +140,26 @@ class hr_attendance(osv.osv):
 			res['arch'] = etree.tostring(doc)
 		
 		return res
+
+	def get_attendace_data(self,cr,uid,contex={}):
+		conn = None
+		zk = ZK('tbvip85.ddns.net', port=4370, timeout=55)
+		try:
+			conn = zk.connect()
+			conn.disable_device()
+			last_fetch = '2018-08-25 12:00:00'
+			attendance = conn.get_attendance()
+			if (attendance):
+				for attend in attendance:
+					if (attend.timestamp > datetime.strptime(last_fetch,'%Y-%m-%d %H:%M:%S')):
+						print attend.user_id,attend.timestamp
+			conn.enable_device()
+		except Exception, e:
+			raise osv.except_osv(_('Fingerprint Error'),_('Process Terminate.'))
+			print "Process terminate : {}".format(e)
+		finally:
+			if conn:
+				conn.disconnect()
 
 # ==========================================================================================================================
 

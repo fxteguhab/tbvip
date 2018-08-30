@@ -15,14 +15,14 @@
 			<field name="domain">[('is_sup_bonus', '=', True)]</field>
 			<field name="context">{'default_is_sup_bonus': True, 'default_type': 'product'}</field>
 		</record>
-
+		<!--
 		<record id="stock_action_check_stock" model="ir.actions.act_window">
 			<field name="name">Check Stock</field>
 			<field name="res_model">stock.check.memory</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">form</field>
 		</record>
-
+		-->
 		<record id="stock_action_stock_sublocation" model="ir.actions.act_window">
 			<field name="name">Stock Sublocations</field>
 			<field name="res_model">stock.sublocation</field>
