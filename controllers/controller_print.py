@@ -72,8 +72,9 @@ class controller_print(http.Controller):
 			row = tpl_line.render(
 				no=str(row_number),
 				name=line.product_id.name if line.product_id.name else '',
-				location=line.location_id.name if line.location_id.name else '',
-				qty='' if inv_adj.state == 'draft' else self.thousand_separator(line.product_qty),
+				#location=line.location_id.name if line.location_id.name else '',
+				#qty='' if inv_adj.state == 'draft' else self.thousand_separator(line.product_qty),
+				qty= self.thousand_separator(line.theoretical_qty) if inv_adj.state == 'confirm' else self.thousand_separator(line.product_qty),
 			)
 			stock_opname_rows.append(row)
 		# render stock opname
@@ -82,6 +83,7 @@ class controller_print(http.Controller):
 			expiration_datetime=datetime.strptime(inv_adj.expiration_date, '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y %H:%M:%S'),
 			employee_name=inv_adj.employee_id.name,
 			stock_opname_line=stock_opname_rows,
+			location_id = inv_adj.location_id.name,
 		)
 		return stock_opname
 	

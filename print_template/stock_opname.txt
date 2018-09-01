@@ -3,9 +3,9 @@ ${'STOCK OPNAME'.center(80)}
 ${'Tanggal'.ljust(15)}${(': '+datetime).ljust(65)}
 ${'Expired'.ljust(15)}${(': '+expiration_datetime).ljust(65)}
 ${'Employee'.ljust(15)}${(': '+employee_name)[:65].ljust(65)}
-
+${'Location'.ljust(15)}${(': '+location_id)[:65].ljust(65)}
 ${'-'*80}
-| ${'No'.ljust(2)} | ${'Item Name'.ljust(40)} | ${'Item Location'.ljust(16)} | ${'Qty'.ljust(9)} |
+| ${'No'.ljust(2)} | ${'Item Name'.ljust(40)} | ${'Qty'.ljust(9)} |
 ${'-'*80}
 % for val in stock_opname_line:
 ${val}
