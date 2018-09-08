@@ -19,6 +19,12 @@
 						<button name="332" string="⇒ Update" type="action" class="oe_link"/>
 					</div>
 				</field>
+				<field name ="buy_prices" position = "attributes">
+					<attribute name = "groups">tbvip.group_management_administrator</attribute>
+				</field>
+				<button name="action_update_current" position="attributes">
+					<attribute name = "groups">tbvip.group_management_administrator</attribute>
+				</button>
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_4']" position="replace" />
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_4']" position="replace" />
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_5']" position="replace" />
