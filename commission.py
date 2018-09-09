@@ -290,7 +290,7 @@ class product_current_commission(osv.osv):
 			new_ids.append(new_product_current_commission_id)
 
 			#TEGUH@20180331 : copy commision value ke product.commison
-			product_obj.set_commission(cr,uid,product_id,commission_line.commission)
+			#product_obj.set_commission(cr,uid,product_id,commission_line.commission)
 		return new_ids
 	
 	def cron_product_current_commission(self, cr, uid, context={}):

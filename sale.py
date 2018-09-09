@@ -463,13 +463,13 @@ class sale_order_line(osv.osv):
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
-	def create(self, cr, uid, vals, context={}):
-		new_id = super(sale_order_line, self).create(cr, uid, vals, context)
-		new_data = self.browse(cr, uid, new_id)
-		product_obj = self.pool.get('product.current.commission')
-		current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
-		vals['commission'] = current_commission
-		vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
+	#def create(self, cr, uid, vals, context={}):
+		#new_id = super(sale_order_line, self).create(cr, uid, vals, context)
+		#new_data = self.browse(cr, uid, new_id)
+		#product_obj = self.pool.get('product.current.commission')
+		#current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
+		#vals['commission'] = current_commission
+		#vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
 		#TEGUH@20180502 : tambah field disc
 		#disc = ''
 		#if vals.get('product_id', False) and vals.get('price_unit', False) and \
@@ -478,11 +478,11 @@ class sale_order_line(osv.osv):
 		#		vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'], disc,
 		#		partner_id=new_data.order_id.partner_id.id)
 
-		return new_id
+		#return new_id
 	
-	def write(self, cr, uid, ids, vals, context=None):
-		for id in ids:
-			vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
+	#def write(self, cr, uid, ids, vals, context=None):
+	#	for id in ids:
+	#		vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
 		#for so_line in self.browse(cr, uid, ids):
 		#	product_id = so_line.product_id.id
 		#	price_type_id = so_line.price_type_id.id
@@ -497,7 +497,7 @@ class sale_order_line(osv.osv):
 			#self.pool.get('price.list')._create_product_current_price_if_none(
 			#	cr, uid, price_type_id, product_id, product_uom, price_unit, disc,
 			#	partner_id=so_line.order_id.partner_id.id)
-		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
+	#	return super(sale_order_line, self).write(cr, uid, ids, vals, context)
 	
 	def unlink(self, cr, uid, ids, context=None):
 		result = super(sale_order_line, self).unlink(cr, uid, ids, context)
@@ -553,6 +553,16 @@ class sale_order_line(osv.osv):
 		try:
 			valid_commission_string = commission_utility.validate_commission_string(commission)
 			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit_commission, qty)
+		except commission_utility.InvalidCommissionException:
+			return False
+		return commission_amount
+	
+	def _calculate_commission_amount2(self, cr, uid, product_id,product_uom_qty,product_uom, price_unit_nett):		
+		commission_obj = self.pool.get('product.current.commission')
+		commission = commission_obj.get_current_commission(cr, uid, product_id)
+		try:
+			valid_commission_string = commission_utility.validate_commission_string(commission)
+			commission_amount = commission_utility.calculate_commission(valid_commission_string, price_unit_nett, product_uom_qty)
 		except commission_utility.InvalidCommissionException:
 			return False
 		return commission_amount
@@ -664,11 +674,13 @@ class sale_order_line(osv.osv):
 		current_commission = product_obj.get_current_commission(cr, uid, product)
 		result['value']['commission'] = current_commission
 		
+		commission_amount = self._calculate_commission_amount2(cr,uid,product,qty,uom,current_price)
+		result['value']['commission_amount'] = commission_amount
 		return result
 	
 	def onchange_product_uom_qty_tbvip(self, cr, uid, ids, pricelist, product, qty=0, uom=False, qty_uos=0, uos=False,
 			name='', partner_id=False, lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False,
-			flag=False, warehouse_id=False, price_unit=False, discount_string=False, context=None):
+			flag=False, warehouse_id=False, price_unit=False, discount_string=False, commission = False,context=None):
 		result = super(sale_order_line, self).onchange_product_uom_qty(
 			cr, uid, ids, pricelist, product, qty, uom, qty_uos, uos, name, partner_id,
 			lang, update_tax, date_order, packaging, fiscal_position, flag, warehouse_id, price_unit, context=None)
@@ -677,10 +689,14 @@ class sale_order_line(osv.osv):
 		
 		result_purchase_sale_discount = imported_purchase_sale_discount.sale_discount.sale_order_line.onchange_order_line(
 			self, cr, uid, ids, qty, price_unit, uom, product, discount_string, context=None)
+		
+		commission_amount = self._calculate_commission_amount2(cr,uid,product,qty,uom,result_purchase_sale_discount['value']['price_unit_nett'])
+
 		if result_purchase_sale_discount and result_purchase_sale_discount['value'].get('price_subtotal', False):
 			result['value'].update({
-				'price_subtotal': result_purchase_sale_discount['value']['price_subtotal']
-			})
+				'price_subtotal': result_purchase_sale_discount['value']['price_subtotal'],
+				'commission_amount' : commission_amount,
+			}) 
 		
 		return result
 
