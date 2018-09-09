@@ -264,35 +264,38 @@ class sale_order(osv.osv):
 			pass
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
+
 		invoice_obj = self.pool.get('account.invoice')
 		picking_obj = self.pool.get('stock.picking')
 		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
 		for sale in self.browse(cr, uid, ids):
 			if sale.bon_number and sale.date_order:
 				self._update_bon_book(cr, uid, sale.bon_number, sale.date_order)
-			# make invoice and make its state to open
-			self.signal_workflow(cr, uid, [sale.id], 'manual_invoice', context)
-			# append bon number to invoice
-			invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
-			# append bon number to picking
-			delivery = self.action_view_delivery(cr, uid, sale.id, context=context)
-			stock_picking_id = delivery['res_id']
-			if stock_picking_id:
-				picking_obj.write(cr, uid,stock_picking_id, {'related_sales_bon_number': sale.bon_number})
-				picking_obj.write(cr, uid,stock_picking_id, {'note': sale.customer_address})
-			# Make invoice open
-			invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
-			
-			order = sale
-			#sale_discount = float(order.sale_discount)
-			if order.payment_transfer_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
-			if order.payment_cash_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
-			if order.payment_receivable_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
-			if order.payment_giro_amount > 0:
-				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, context=None)
+				# make invoice and make its state to open
+				self.signal_workflow(cr, uid, [sale.id], 'manual_invoice', context)
+				# append bon number to invoice
+				invoice_obj.write(cr, uid, sale.invoice_ids.ids, {'related_sales_bon_number': sale.bon_number})
+				# append bon number to picking
+				delivery = self.action_view_delivery(cr, uid, sale.id, context=context)
+				stock_picking_id = delivery['res_id']
+				if stock_picking_id:
+					picking_obj.write(cr, uid,stock_picking_id, {'related_sales_bon_number': sale.bon_number})
+					picking_obj.write(cr, uid,stock_picking_id, {'note': sale.customer_address})
+				# Make invoice open
+				invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
+				
+				order = sale
+				#sale_discount = float(order.sale_discount)
+				if order.payment_transfer_amount > 0:
+					self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
+				if order.payment_cash_amount > 0:
+					self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
+				if order.payment_receivable_amount > 0:
+					self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
+				if order.payment_giro_amount > 0:
+					self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, context=None)
+			else:
+				raise osv.except_orm(_('Bon Number Empty'), _('You must fill bon number.'))
 			
 		return result
 
