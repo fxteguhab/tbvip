@@ -1,3 +1,4 @@
+from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 import commission_utility
 from openerp.tools.translate import _
@@ -425,7 +426,26 @@ class sale_order(osv.osv):
 					'name': order.name,
 					'supplier_invoice_number' : order.bon_number,
 					})
-	 	return result
+		return result
+
+	def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False,lazy=True):
+		hide_total = self.pool.get('ir.config_parameter').get_param(cr, uid, 'sum_total_admin_only','0')
+		if (hide_total == '1') and (uid !=SUPERUSER_ID):
+			if ('amount_total' in fields):
+				fields.remove('amount_total')
+			if ('payment_cash_amount' in fields):
+				fields.remove('payment_cash_amount')
+			if ('payment_transfer_amount' in fields):
+				fields.remove('payment_transfer_amount')
+			if ('payment_receivable_amount' in fields):
+				fields.remove('payment_receivable_amount')	
+			if ('payment_giro_amount' in fields):
+				fields.remove('payment_giro_amount')
+			if ('sale_discount_amount' in fields):
+				fields.remove('sale_discount_amount')
+			if ('total_discount_amount' in fields):
+				fields.remove('total_discount_amount')					
+		return super(sale_order, self).read_group(cr, uid, domain, fields, groupby, offset, limit, context, orderby, lazy)
 
 # PRINTS -------------------------------------------------------------------------------------------------------------------
 	
