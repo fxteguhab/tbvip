@@ -255,6 +255,7 @@ class product_current_commission(osv.osv):
 	_columns = {
 		'product_id': fields.many2one('product.product', 'Product', required=True, ondelete='restrict'),
 		'commission': fields.char('Commission', help="Commission String"),
+		'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True),
 	}
 	
 	_sql_constraints = [

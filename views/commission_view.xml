@@ -88,10 +88,12 @@
 			<field name="name">product.current.commission.form</field>
 			<field name="model">product.current.commission</field>
 			<field name="arch" type="xml">
-				<form string="Product Current Price" version="7.0">
+				<form string="Product Current Commission" version="7.0">
 					<group>
 						<field name="product_id"/>
+						<field name="categ_id"/>
 						<field name="commission"/>
+
 					</group>
 				</form>
 			</field>
@@ -101,8 +103,9 @@
 			<field name="name">product.current.commission.tree</field>
 			<field name="model">product.current.commission</field>
 			<field name="arch" type="xml">
-				<tree string="Product Current Price" version="7.0">
+				<tree string="Product Current Commission" version="7.0">
 					<field name="product_id"/>
+					<field name="categ_id"/>
 					<field name="commission"/>
 				</tree>
 			</field>
