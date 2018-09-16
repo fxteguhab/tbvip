@@ -222,12 +222,12 @@
 				<field name="picking_type_id" position="attributes">
 					<attribute name = "invisible">True</attribute>
 				</field>
-				 <field name="product_id" position="attributes">
+				<!--<field name="product_id" position="attributes">
 				 	<attribute name="invisible">True</attribute>
-				 </field>
-				 <field name ="state" position ="before">
-				 	<field name ="partner_id" string ="Partner" />
-				 </field>
+				</field>-->
+				<field name ="state" position ="before">
+					<field name ="partner_id" string ="Partner" />
+				</field>
 			</field>
 		</record>
 
