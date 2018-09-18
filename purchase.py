@@ -166,13 +166,13 @@ class purchase_order(osv.osv):
 			})
 		return result
 	
-	def action_invoice_create(self, cr, uid, ids, context=None):
+	#def action_invoice_create(self, cr, uid, ids, context=None):
 		"""Overrides so that on creating invoice from confirming a PO, the invoice is set as open
 		:param ids: list of ids of purchase orders.
 		:return: ID of created invoice.
 		:rtype: int
 		"""
-		result = super(purchase_order, self).action_invoice_create(cr, uid, ids, context)
+		#result = super(purchase_order, self).action_invoice_create(cr, uid, ids, context)
 		# 20180411: ditutup karena per April 2018 invoice digenerate bukan ketika PO di-confirm
 		# tapi ketika barang datang. Ditambah lagi, juga ada request supaya ketika PO 
 		# sudah jadi invoice pun masih bisa diedit sebelum benar2 menjadi hutang
@@ -181,7 +181,7 @@ class purchase_order(osv.osv):
 		for invoice in invoice_obj.browse(cr, uid, [result]):
 			invoice.signal_workflow('invoice_open')
 		"""
-		return result
+		#return result
 	
 	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
 	# supaya kalau sudah set partner lalu set payment term, bila lalu ganti partner lagi

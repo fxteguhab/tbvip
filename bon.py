@@ -97,3 +97,10 @@ class tbvip_bon_book(osv.osv):
 			if bon.total_used > 0:
 				raise osv.except_orm(_('Deleting bon book error'), _('You cannot delete any bon book that has been used.'))
 		return super(tbvip_bon_book, self).unlink(cr, uid, ids, context)
+
+	def _cek_last_book_residual(self,cr,uid,employee_id,branch_id):
+		bon_book_ids = self.search(cr, uid,[('employee_id','=',employee_id),('branch_id','=',branch_id)],order = "id desc")
+		last_id = bon_book_ids[1]
+		bon = self.browse(cr, uid, last_id)
+		residual = (bon.end_at - bon.start_from + 1)-bon.total_used
+		return residual

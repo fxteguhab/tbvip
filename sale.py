@@ -530,7 +530,7 @@ class sale_order_line(osv.osv):
 			'state': 'requested'
 		})
 		return result
-	
+	'''
 	def _calculate_commission_amount(self, cr, uid, order_line, sale_order_line_id):
 		product_uom_obj = self.pool.get('product.uom')
 		product_obj = self.pool.get('product.product')
@@ -579,7 +579,7 @@ class sale_order_line(osv.osv):
 		except commission_utility.InvalidCommissionException:
 			return False
 		return commission_amount
-	
+	'''
 	def _calculate_commission_amount2(self, cr, uid, product_id,product_uom_qty,product_uom, price_unit_nett):		
 		commission_obj = self.pool.get('product.current.commission')
 		commission = commission_obj.get_current_commission(cr, uid, product_id)
@@ -671,7 +671,7 @@ class sale_order_line(osv.osv):
 			lang, update_tax, date_order, fiscal_position, context=None)
 		if result.get('domain', False) and temp.get('domain', False):
 			result['domain']['product_uom'] = result['domain']['product_uom'] + temp['domain']['product_uom']
-		
+		commission_amount = 0
 		custom_product_uom = False
 		if temp['value'].get('product_uom', False):
 			custom_product_uom = temp['value']['product_uom']
@@ -681,10 +681,12 @@ class sale_order_line(osv.osv):
 			if uom_record:
 				product_current_price_obj = self.pool.get('product.current.price')
 				current_price = product_current_price_obj.get_current(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
+
 				if current_price:
 					result['value'].update({
 						'price_unit': current_price
 					})
+					commission_amount = self._calculate_commission_amount2(cr,uid,product,qty,uom,current_price)
 			
 		product_obj = self.pool.get('product.product')
 		product_browsed = product_obj.browse(cr, uid, product)
@@ -697,7 +699,7 @@ class sale_order_line(osv.osv):
 		current_commission = product_obj.get_current_commission(cr, uid, product)
 		result['value']['commission'] = current_commission
 		
-		commission_amount = self._calculate_commission_amount2(cr,uid,product,qty,uom,current_price)
+		
 		result['value']['commission_amount'] = commission_amount
 		return result
 	
@@ -721,6 +723,24 @@ class sale_order_line(osv.osv):
 				'commission_amount' : commission_amount,
 			}) 
 		
+		return result
+
+	def _prepare_order_line_invoice_line(self, cr, uid, line, account_id=False, context=None):
+		result = super(sale_order_line, self)._prepare_order_line_invoice_line(cr, uid, line, account_id=account_id, context=context)
+		price_type_id_buys = self.pool.get('price.type').search(cr, uid, [('type','=','buy'),('is_default','=',True),])
+		price_type_id_buy = price_type_id_buys[0]
+		price_type_id_sells = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
+		price_type_id_sell = price_type_id_sells[0]
+		general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
+		buy_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id, field="nett", context=context)
+		sell_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_sell, line.product_uom.id, partner_id = general_customer_id[1], context=context)
+		sell_price_unit_nett = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_sell, line.product_uom.id, partner_id = general_customer_id[1],field="nett", context=context)
+		result.update({
+			'price_type_id': line.price_type_id.id,
+			'buy_price_unit' : buy_price_unit,
+			'price_unit_old' : sell_price_unit,
+			'price_unit_nett_old' : sell_price_unit_nett,
+			})
 		return result
 
 class sale_report(osv.osv):

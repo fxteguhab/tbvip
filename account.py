@@ -83,6 +83,7 @@ class account_invoice_line(osv.osv):
 		'price_unit_nett_old': fields.float(string = 'Nett Old'),
 		'discount_string_old': fields.char(string = 'Disc Old'),
 		'sell_price_unit': fields.float('Sales Price'),
+		'buy_price_unit': fields.float('Buy Price'),
 	}
 	
 	def _cost_price_watcher(self, cr, uid, vals, context={}):
@@ -116,7 +117,6 @@ class account_invoice_line(osv.osv):
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			new_data = self.browse(cr, uid, new_id)
 			discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
-
 			if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 					vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
@@ -143,6 +143,8 @@ class account_invoice_line(osv.osv):
 				'name' : vals['name'],
 				'invoice_id' : vals['invoice_id'] if 'invoice_id' in vals else 0,
 				'sell_price_unit' : vals['sell_price_unit'] if 'sell_price_unit' in vals else 0,
+				'buy_price_unit' : vals['buy_price_unit'] if 'buy_price_unit' in vals else 0,
+				'type' : new_data.invoice_id.type,
 				}			
 
 			self._cost_price_watcher(cr, uid, vals,  context=ctx)
@@ -187,6 +189,7 @@ class account_invoice_line(osv.osv):
 
 				invoice_id = invoice_line.invoice_id.id
 				sell_price_unit = invoice_line.sell_price_unit
+				buy_price_unit = invoice_line.buy_price_unit
 				name = invoice_line.name
 
 				if vals.get('product_id', False): product_id = vals['product_id']
@@ -199,13 +202,16 @@ class account_invoice_line(osv.osv):
 				if vals.get('discount_string_old', False): discount_string_old = vals['discount_string_old']
 				if vals.get('invoice_id', False): invoice_id = vals['invoice_id']
 				if vals.get('sell_price_unit', False): sell_price_unit = vals['sell_price_unit']
+				if vals.get('buy_price_unit', False): buy_price_unit = vals['buy_price_unit']
 				if vals.get('name', False): name = vals['name']
 
 				if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
 					self.pool.get('price.list')._create_product_current_price_if_none(
 						cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
 						partner_id=invoice_line.invoice_id.partner_id.id)
-					
+					invoice_type = 'in_invoice'
+				elif invoice_line.invoice_id.type in ['out_invoice']:	
+					invoice_type = 'out_invoice'
 				ctx = {
 					'price_unit_nett_old' : price_unit_nett_old,
 					'price_unit_nett' : price_unit_nett,
@@ -221,6 +227,8 @@ class account_invoice_line(osv.osv):
 					'name' : name,
 					'invoice_id' : invoice_id,
 					'sell_price_unit' : sell_price_unit,
+					'buy_price_unit' : buy_price_unit,
+					'type' : invoice_type,
 					}
 
 				#check for changes and send notif
