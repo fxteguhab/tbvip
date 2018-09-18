@@ -84,6 +84,7 @@ class account_invoice_line(osv.osv):
 		'discount_string_old': fields.char(string = 'Disc Old'),
 		'sell_price_unit': fields.float('Sales Price'),
 		'buy_price_unit': fields.float('Buy Price'),
+		'sale_line_id': fields.many2one('sale.order.line', 'Sale Order Line'),
 	}
 	
 	def _cost_price_watcher(self, cr, uid, vals, context={}):
@@ -112,7 +113,7 @@ class account_invoice_line(osv.osv):
 	
 	def create(self, cr, uid, vals, context={}):		
 		new_id = super(account_invoice_line, self).create(cr, uid, vals, context=context)		
-		
+		invoice_type = ''
 		# otomatis create current price kalo belum ada 
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			new_data = self.browse(cr, uid, new_id)
@@ -123,9 +124,11 @@ class account_invoice_line(osv.osv):
 					discount_string, partner_id=new_data.invoice_id.partner_id.id)
 				
 				self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'standard_price')
-			else:
+				invoice_type = 'in_invoice'
+			elif vals.get('sale_line_id',False):
 				if (new_data.product_id.list_price <= 1): #TEGUH@20180817 : asumsi price awal dari odoo < 1
 					self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'list_price')
+				invoice_type = 'out_invoice'
 			
 			#check for changes and send notif
 			ctx = {
@@ -144,7 +147,7 @@ class account_invoice_line(osv.osv):
 				'invoice_id' : vals['invoice_id'] if 'invoice_id' in vals else 0,
 				'sell_price_unit' : vals['sell_price_unit'] if 'sell_price_unit' in vals else 0,
 				'buy_price_unit' : vals['buy_price_unit'] if 'buy_price_unit' in vals else 0,
-				'type' : new_data.invoice_id.type,
+				'type' : invoice_type,
 				}			
 
 			self._cost_price_watcher(cr, uid, vals,  context=ctx)

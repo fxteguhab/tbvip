@@ -311,6 +311,10 @@ class stock_check_memory_line(osv.osv_memory):
 class stock_move(osv.osv):
 	_inherit = 'stock.move'
 	
+	#_columns = {
+	#	'sale_line_id': fields.many2one('sale.order.line','Sale Order Line', ondelete='set null', select=True,readonly=True),
+	#}
+
 	def create(self, cr, uid, vals, context={}):
 		context = {} if context is None else context
 		new_id = super(stock_move, self).create(cr, uid, vals, context=context)
@@ -344,13 +348,18 @@ class stock_move(osv.osv):
 	# Jika dari Purchase, maka price untuk quants didapat dari unit price nett
 		if move.purchase_line_id:
 			return move.purchase_line_id.price_unit_nett
-			
+		#if move.sale_line_id:
+		#	return move.sale_line_id.price_unit_nett
+
 		result = super(stock_move, self).get_price_unit(cr, uid, move, context=context)
 		
 	# Jika price yang didapat 0, maka dapatkan dari price list buy harga default
 		if not result:
+			#if move.purchase_line_id:
+			#	price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+			#if move.sale_line_id:	
+			#	price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_sell').id
 			price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
-			#price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
 			unit_id = data_obj.get_object(cr, uid, 'product', 'product_uom_unit').id
 			product_current_price_obj = self.pool.get('product.current.price')
 		
