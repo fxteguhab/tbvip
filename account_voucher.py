@@ -70,15 +70,20 @@ class account_voucher(osv.osv):
 			acc_journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
 			if acc_journal.type == 'cash':
 				account_id = cash_account_id
+				reference = 'CASH'
 			elif acc_journal.type == 'bank':
 				account_id = bank_account_id
+				reference = ''
 			if result:
 				if 'value' in result:
 					result['value']['account_id'] = account_id
+					result['value']['reference'] = reference
 				else:
 					result['value'] = {'account_id': account_id}
+					result['value'] = {'reference': reference}
 			else:
 				result = {'value': {'account_id': account_id}}
+				result = {'value': {'reference': reference}}
 				
 		return result
 	
