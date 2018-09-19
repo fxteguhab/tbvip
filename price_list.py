@@ -323,10 +323,16 @@ class product_current_price(osv.osv):
 		'nett_3':fields.float('Nett 3', compute="_compute_nett_3", group_operator="avg"),
 
 		#TEGUH@20180804 : tambah field categ_id
-		'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True)
+		#'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True)
+		'categ_id' : fields.char('Category', compute="_compute_category"),
 	}
 	
 	# METHODS ---------------------------------------------------------------------------------------------------------------	
+	@api.one
+	@api.depends('product_id')
+	def _compute_category(self):
+		self.categ_id =  self.product_id.categ_id.name
+
 	@api.model
 	def _calculate_discounts(self, price_unit, valid_discount_string):
 		total_discount = 0
