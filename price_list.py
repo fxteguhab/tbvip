@@ -50,6 +50,7 @@ class price_list(osv.osv):
 				#TEGUH@20180501 : tambah field diskon
 				'disc_1' : disc,
 			})
+		'''
 		else:
 			add = True
 			field_uom = False
@@ -92,25 +93,26 @@ class price_list(osv.osv):
 					})
 				else:
 					pass  # penuh field uomnya
+		'''
 		# tidak ada uom baru yang diperkenalkan untuk price ini
 		# tetaplah cari utk uom yang diminta, apakah harganya 0. kalau iya maka 
 		# ubah harga itu
-			else:
-				if price:
-					if product_current_price['uom_id_1'].id == uom_id and not product_current_price['price_1']:
-						field_price = 'price_1'
-					if product_current_price['uom_id_2'].id == uom_id and not product_current_price['price_2']:
-						field_price = 'price_2'
-					if product_current_price['uom_id_3'].id == uom_id and not product_current_price['price_3']:
-						field_price = 'price_3'
-					if product_current_price['uom_id_4'].id == uom_id and not product_current_price['price_4']:
-						field_price = 'price_4'
-					if product_current_price['uom_id_5'].id == uom_id and not product_current_price['price_5']:
-						field_price = 'price_5'
-					if field_price:
-						product_current_price_obj.write(cr, uid, [product_current_price.id], {
-							field_price: price,
-						})
+		#	else:
+		#		if price:
+		#			if product_current_price['uom_id_1'].id == uom_id and not product_current_price['price_1']:
+		#				field_price = 'price_1'
+		#			if product_current_price['uom_id_2'].id == uom_id and not product_current_price['price_2']:
+		#				field_price = 'price_2'
+		#			if product_current_price['uom_id_3'].id == uom_id and not product_current_price['price_3']:
+		#				field_price = 'price_3'
+		#			if product_current_price['uom_id_4'].id == uom_id and not product_current_price['price_4']:
+		#				field_price = 'price_4'
+		#			if product_current_price['uom_id_5'].id == uom_id and not product_current_price['price_5']:
+		#				field_price = 'price_5'
+		#			if field_price:
+		#				product_current_price_obj.write(cr, uid, [product_current_price.id], {
+		#					field_price: price,
+		#				})
 
 	def _prepare_product_price_line(self, price_list_line):
 		result = super(price_list, self)._prepare_product_price_line(price_list_line)

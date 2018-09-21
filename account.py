@@ -118,11 +118,12 @@ class account_invoice_line(osv.osv):
 		if vals.get('price_type_id', False) and vals.get('uos_id', False):
 			new_data = self.browse(cr, uid, new_id)
 			discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
-			if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
-				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+			
+			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
 					vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
 					discount_string, partner_id=new_data.invoice_id.partner_id.id)
-				
+
+			if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
 				self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'standard_price')
 				invoice_type = 'in_invoice'
 			elif vals.get('sale_line_id',False):
@@ -208,10 +209,11 @@ class account_invoice_line(osv.osv):
 				if vals.get('buy_price_unit', False): buy_price_unit = vals['buy_price_unit']
 				if vals.get('name', False): name = vals['name']
 
-				if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
-					self.pool.get('price.list')._create_product_current_price_if_none(
+				self.pool.get('price.list')._create_product_current_price_if_none(
 						cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
 						partner_id=invoice_line.invoice_id.partner_id.id)
+				
+				if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
 					invoice_type = 'in_invoice'
 				elif invoice_line.invoice_id.type in ['out_invoice']:	
 					invoice_type = 'out_invoice'
