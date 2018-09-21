@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="product_category_form_conversion_inherit_inherit">
+			<field name="name">product.category.common.form.inherit.inherit</field>
+			<field name="model">product.category</field>
+			<field name="inherit_id" ref="product.product_category_form_view"/>
+			<field name="arch" type="xml">
+				<group name="conversion_group" position ="replace" />
+				<group name ="parent" position="after">
+					<group>
+						<group name="conversion_group" col="1">
+							<field name="product_conversion_ids">
+								<tree create="false" delete="false" editable="false">
+									<field name="conversion"/>
+									<field name="uom_id"/>
+								</tree>
+							</field>
+						</group>
+					</group>
+				</group>
+			</field>
+		</record>
+	</data>
+</openerp>

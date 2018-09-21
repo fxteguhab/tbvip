@@ -80,6 +80,7 @@
 		'views/tbvip_stock_move_view.xml',
 		'views/account_simplified_journal.xml',
 		#'views/notification_view.xml',
+		#'views/product_conversion_view.xml',
 		'workflows/purchase_workflow.xml',
 		'menu/accounting_menu.xml',
 		# 'menu/account_receivable_limit.xml',
