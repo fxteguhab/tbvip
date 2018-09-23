@@ -422,6 +422,7 @@ class sale_order(osv.osv):
 	def _prepare_invoice(self, cr, uid, order, lines, context=None):
 	 	result = super(sale_order, self)._prepare_invoice(cr, uid, order, lines, context)
 		result.update({
+					'date_invoice' : order.date_order,
 					'reference': order.name,
 					'name': order.name,
 					'supplier_invoice_number' : order.bon_number,
