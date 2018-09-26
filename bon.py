@@ -41,7 +41,7 @@ class tbvip_bon_book(osv.osv):
 
 	_defaults = {
 		'branch_id': _default_branch_id,
-		'issue_date': (datetime.now()).strftime(DEFAULT_SERVER_DATE_FORMAT),
+		'issue_date':  lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 	}
 	
 # METHOD -------------------------------------------------------------------------------------------------------------------
@@ -100,7 +100,10 @@ class tbvip_bon_book(osv.osv):
 
 	def _cek_last_book_residual(self,cr,uid,employee_id,branch_id):
 		bon_book_ids = self.search(cr, uid,[('employee_id','=',employee_id),('branch_id','=',branch_id)],order = "id desc")
-		last_id = bon_book_ids[1]
-		bon = self.browse(cr, uid, last_id)
-		residual = (bon.end_at - bon.start_from + 1)-bon.total_used
+		if len(bon_book_ids) > 1:
+			last_id = bon_book_ids[1]
+			bon = self.browse(cr, uid, last_id)
+			residual = (bon.end_at - bon.start_from + 1)-bon.total_used
+		else:
+			residual = 0
 		return residual
