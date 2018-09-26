@@ -728,33 +728,34 @@ class sale_order_line(osv.osv):
 
 	def _prepare_order_line_invoice_line(self, cr, uid, line, account_id=False, context=None):
 		result = super(sale_order_line, self)._prepare_order_line_invoice_line(cr, uid, line, account_id=account_id, context=context)
-		price_type_id_buys = self.pool.get('price.type').search(cr, uid, [('type','=','buy'),('is_default','=',True),])
-		price_type_id_buy = price_type_id_buys[0]
-		price_type_id_sells = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
-		price_type_id_sell = price_type_id_sells[0]
-		general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
-		sell_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_sell, line.product_uom.id, partner_id = general_customer_id[1], context=context)
+		price_type_id_buys   = self.pool.get('price.type').search(cr, uid, [('type','=','buy'),('is_default','=',True),])
+		price_type_id_buy    = price_type_id_buys[0]
+		price_type_id_sells  = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
+		price_type_id_sell   = price_type_id_sells[0]
+		general_customer_id  = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
+		sell_price_unit 	 = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_sell, line.product_uom.id, partner_id = general_customer_id[1], context=context)
+		sell_price_disc		 = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_sell, line.product_uom.id, partner_id = general_customer_id[1],field="disc", context=context)
 		sell_price_unit_nett = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_sell, line.product_uom.id, partner_id = general_customer_id[1],field="nett", context=context)
 		
-		#ini mestinya ngambil dari cost quant, if 0 then ambil dari price list
+		#ambil harga beli dari last invoice if null then ambil dari price list
 		nett_price = 0
 		invoice_obj = self.pool.get('account.invoice.line')
 		invoice_line_id = invoice_obj.search(cr, uid, [('product_id','=',line.product_id.id),('purchase_line_id','!=',None)],order='create_date DESC', limit=1)
 		if invoice_line_id:
-			for invoice_line in invoice_obj.browse(cr, uid, invoice_line_id[0]):
-				price_subtotal = invoice_line.price_subtotal
-				product_qty = invoice_line.quantity
+			invoice_line = invoice_obj.browse(cr, uid, invoice_line_id[0])
+			price_subtotal = invoice_line.price_subtotal
+			product_qty = invoice_line.quantity if invoice_line.quantity > 0 else 1
 			nett_price = price_subtotal / product_qty
-
-		if nett_price <= 0:
-			buy_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id, field="nett", context=context)
-		else:
 			buy_price_unit = nett_price
+		else:
+			buy_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id, field="nett", context=context)
+				
 		result.update({
 			'price_type_id': line.price_type_id.id,
 			'buy_price_unit' : buy_price_unit,
 			'price_unit_old' : sell_price_unit,
 			'price_unit_nett_old' : sell_price_unit_nett,
+			'discount_string_old' : sell_price_disc,
 			'sale_line_id':line.id,
 			})
 
