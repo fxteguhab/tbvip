@@ -112,6 +112,7 @@
 					<!-- TEGUH@20180405: add group by week & today -->
 					<!--<filter string="Week" name="filter_week_inventory_adjustment" context="{'group_by':'date:week'}"/>-->
 					<filter string="Day"  name="filter_day_inventory_adjustment" context="{'group_by':'date:day'}"/>
+					<filter string="Location"  name="filter_location_inventory_adjustment" context="{'group_by':'location_id'}"/>
 					<!--<filter string="Today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>-->
 				<!--</group>-->
 				</filter>
@@ -181,8 +182,12 @@
 			<field name="inherit_id" ref="stock.view_inventory_tree"/>
 			<field name="arch" type="xml">
 				<field name="state" position="after">
-					<field name="line_ids" string="Line(s)"/>
+					<!--<field name="line_ids" string="Line(s)"/>
+					<field name="move_ids" string="Adjustment(s)"/>-->
 					<field name="total_qty" string="Total Qty"/>
+					<field name="line_count"/>
+					<field name="move_count"/>
+					<field name="validity" widget="progressbar"/>
 					<field name="employee_id"/>
 					<field name="create_uid"/>
 				</field>
@@ -266,6 +271,24 @@
 				</field>
 			</field>
 		</record>
+
+		<record id="stock_quant_filter_inherit" model="ir.ui.view">
+			<field name="name">stock.quant.filter.inherit</field>
+			<field name="model">stock.quant</field>
+			<field name="inherit_id" ref="stock.quant_search_view"/>
+			<field name="arch" type="xml">
+				<group string ="Group by..." position ="after">
+					<group string="Group By Timeline">
+						<filter string="Year"  name="filter_year_inventory_adjustment" context="{'group_by':'in_date:year'}"/>
+						<filter string="Month"  name="filter_month_inventory_adjustment" context="{'group_by':'in_date:month'}"/>
+						<filter string="Week"  name="filter_week_inventory_adjustment" context="{'group_by':'in_date:week'}"/>
+						<filter string="Day"  name="filter_day_inventory_adjustment" context="{'group_by':'in_date:day'}"/>
+					</group>
+					<filter string="Today" domain="[('in_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('in_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+				</group>
+			</field>
+		</record>
+
 
 		<record id="view_move_picking_tree_inherit" model="ir.ui.view">
 			<field name="name">stock.move.tree.inherit</field>

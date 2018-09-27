@@ -126,9 +126,10 @@ class account_invoice_line(osv.osv):
 			if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
 				self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'standard_price')
 				invoice_type = 'in_invoice'
-			elif vals.get('sale_line_id',False):
+			elif vals.get('sale_line_id',False): #if "sell"
 				if (new_data.product_id.list_price <= 1): #TEGUH@20180817 : asumsi price awal dari odoo < 1
 					self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.price_unit_nett,'list_price')
+					self.pool.get('product.product')._set_price(cr,uid,new_data.product_id,new_data.buy_price_unit,'standard_price')
 				invoice_type = 'out_invoice'
 			
 			#check for changes and send notif
