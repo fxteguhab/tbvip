@@ -50,7 +50,7 @@ class price_list(osv.osv):
 				#TEGUH@20180501 : tambah field diskon
 				'disc_1' : disc,
 			})
-		'''
+		
 		else:
 			add = True
 			field_uom = False
@@ -93,7 +93,7 @@ class price_list(osv.osv):
 					})
 				else:
 					pass  # penuh field uomnya
-		'''
+		
 		# tidak ada uom baru yang diperkenalkan untuk price ini
 		# tetaplah cari utk uom yang diminta, apakah harganya 0. kalau iya maka 
 		# ubah harga itu
