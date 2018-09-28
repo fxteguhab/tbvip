@@ -387,7 +387,6 @@ class stock_move(osv.osv):
 				'price_unit_nett_old' : purchase_line.price_unit_nett_old,
 				'sell_price_unit' : sell_price_unit,
 				})		
-
 		return result
 
 
@@ -530,6 +529,21 @@ class stock_picking(osv.osv):
 	
 		return result
 	
+	def _prepare_values_extra_move(self, cr, uid, op, product, remaining_qty, context=None):
+		result = super(stock_picking, self)._prepare_values_extra_move(cr, uid, op, product, remaining_qty, context)
+		
+		product_id = product.id
+		picking_id = op.picking_id.id
+		stock_move_obj = self.pool.get('stock.move')
+		stock_move_id = stock_move_obj.search(cr, uid, [('picking_id', '=', picking_id),('product_id','=',product_id),('purchase_line_id','!=',None)], limit=1, context=context)
+		stock_move = stock_move_obj.browse(cr,uid,stock_move_id)
+
+		result.update({
+				'origin': stock_move.origin,
+				'purchase_line_id' : stock_move.purchase_line_id.id
+				})	
+		return result
+	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
 	def print_delivery_order(self, cr, uid, ids, context):
@@ -541,4 +555,4 @@ class stock_picking(osv.osv):
 			}
 		else:
 			raise osv.except_osv(_('Print Stock Picking Error'),_('Stock Picking must have at least one line to be printed.'))
-		
+
