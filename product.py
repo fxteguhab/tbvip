@@ -178,6 +178,7 @@ class product_template(osv.osv):
 	_defaults = {
 		'is_sup_bonus': False,
 		'type': 'product',
+		'sale_delay' : 0,
 		#'commission' : '0',
 	}
 	
