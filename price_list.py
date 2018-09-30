@@ -388,9 +388,9 @@ class product_current_price(osv.osv):
 		nett_1 = new_data.nett_1
 		product_id = new_data.product_id
 		price_type_id = new_data.price_type_id
-		today = datetime.now()
+		now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
 		
-		if (new_data.start_date <= today):
+		if (new_data.start_date <= now):
 			if (new_data.price_type_id.type == 'sell'):	
 				field = 'list_price'
 			else: #buy
