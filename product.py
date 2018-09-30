@@ -202,7 +202,7 @@ class product_product(osv.osv):
 	
 	#TEGUH@20180817 : buat ganti list_price/standard_price di product_Template
 	def _set_price(self,cr,uid,product_id,price_unit_nett,field):
-			self.write(cr, uid, [product_id.id], {
+			self.write(cr, uid, [product_id], {
 				field: price_unit_nett,
 			})	
 
