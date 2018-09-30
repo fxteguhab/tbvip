@@ -4,7 +4,11 @@ from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
 from lxml import etree
-from zk import ZK, const
+
+try:
+	from zk import ZK, const
+except:
+	pass
 
 # ==========================================================================================================================
 

@@ -187,32 +187,26 @@ class sale_order(osv.osv):
 		invoice_obj = self.pool.get('account.invoice')
 		move_obj = self.pool.get('account.move')
 
-		account_move_id = account_move_line_obj.search(cr, uid, [('invoice', '=', invoice_id)])[0]
-		account_move = account_move_line_obj.browse(cr, uid, [account_move_id])
-		
-		for invoice in invoice_obj.browse(cr, uid, invoice_id):
-			residual = invoice.residual
-			bon_number = invoice.origin
+	# cari di antara move line terkait invoice ini, nilai piutangnya
+	# dicirikan dengan type account receivable
+	# diasumsikan per invoice cuman ada 1 line yang piutang
+		account_move_ids = account_move_line_obj.search(cr, uid, [
+			('invoice','=',invoice_id),
+			('account_id.type','=','receivable')
+			])
+		if len(account_move_ids) == 0:
+			raise osv.except_osv(_('Payment Error'),_("There is no receivable account in this invoice's journal."))
+		account_move = account_move_line_obj.browse(cr, uid, account_move_ids[0])
+
+		invoice = invoice_obj.browse(cr, uid, invoice_id)
+		bon_number = invoice.origin
 
 		# Prepare voucher values for payment
 		voucher_vals = {
 			'partner_id': partner_id.id,
-			# 'company_id': 1,
-			# 'period_id': 11,
-			# 'payment_rate_currency_id': 38,
-			# 'date': '2017-10-16',
-			# 'payment_rate': 1,
-			# 'reference': False,
-			# 'writeoff_acc_id': False,
-			# 'analytic_id': False,
-			# 'is_multi_currency': False,
-			# 'narration': False,
-			# 'name': False
 			'payment_method_type': payment_method,
 			'comment': 'Write-Off',
 			'payment_option': 'without_writeoff',
-			# 'journal_id': 8,
-			# 'account_id': 172,
 			'pre_line': True,
 			'amount': amount,
 			'type': 'receipt',
@@ -222,7 +216,7 @@ class sale_order(osv.osv):
 				'reconcile': True if amount >= account_move.debit - account_move.credit else False,
 				'date_original': fields.date.today(),
 				'move_line_id': account_move.id,
-				'amount_unreconciled': account_move.debit - account_move.credit,
+				'amount_unreconciled': account_move.debit - amount, #account_move.credit,
 				'amount': amount,
 				'amount_original': account_move.debit,
 				'account_id': account_move.account_id.id
@@ -258,11 +252,14 @@ class sale_order(osv.osv):
 		# Create payment
 		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
 		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
-		
-		# if residual==0, paid
-		if residual == 0:
+	
+	# browse ulang supaya mendapatkan nilai residual terbaru, setelah ada pembayaran
+	# di atas
+	# kalau sisa invoice sudah 0, langsung tandai Paid
+		invoice = invoice_obj.browse(cr, uid, invoice_id)
+		residual = invoice.residual
+		if invoice.residual <= 0:
 			invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
-			pass
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 
@@ -284,7 +281,6 @@ class sale_order(osv.osv):
 					picking_obj.write(cr, uid,stock_picking_id, {'note': sale.customer_address})
 				# Make invoice open
 				invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
-				
 				order = sale
 				#sale_discount = float(order.sale_discount)
 				if order.payment_transfer_amount > 0:
