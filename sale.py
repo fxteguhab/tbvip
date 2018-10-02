@@ -472,7 +472,7 @@ class sale_order_line(osv.osv):
 
 		'stock_location_id': fields.related('order_id','stock_location_id',type='many2one', relation='stock.location', store=True, string='Location'),
 		#overide
-		'salesman_id':fields.related('order_id', 'employee_id',type='many2one', relation='hr.employee', store=True, string='Salesperson'),
+		#'salesman_id':fields.related('order_id', 'employee_id',type='many2one', relation='hr.employee', store=True, string='Salesperson'),
 		
 	}
 	
