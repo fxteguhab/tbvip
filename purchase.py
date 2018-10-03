@@ -533,7 +533,7 @@ class purchase_order_line(osv.osv):
 		if product_id:
 			product_obj = self.pool.get('product.product')
 			product = product_obj.browse(cr, uid, product_id)
-			result['value']['product_uom'] = product.uom_id.id
+			result['value']['product_uom'] = product.uom_po_id.id#product.uom_id.id
 		return result
 	
 	def onchange_product_tbvip(self, cr, uid, ids, pricelist_id, product_id, qty, uom_id,
@@ -586,7 +586,7 @@ class purchase_order_line(osv.osv):
 		if not final_product_uom:
 			product_obj = self.pool.get('product.product')
 			product = product_obj.browse(cr, uid, product_id)
-			final_product_uom = product.uom_id.id
+			final_product_uom = product.uom_po_id.id #product.uom_id.id
 
 	# jalankan onchange custom conversion
 		"""
@@ -605,7 +605,7 @@ class purchase_order_line(osv.osv):
 		product = product_obj.browse(cr, uid, product_id)
 		result['value'].update({
 			'product_uom': final_product_uom,
-			'uom_category_filter_id': product.product_tmpl_id.uom_id.category_id.id,
+			'uom_category_filter_id': product.product_tmpl_id.uom_po_id.category_id.id, #product.product_tmpl_id.uom_id.category_id.id,
 			'price_unit_nett_old' : price_unit_nett_old,
 			'price_unit_old' : price_unit_old,
 			'discount_string_old' : discount_string_old,
