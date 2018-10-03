@@ -126,10 +126,11 @@
 					<attribute name ="statusbar_visible">"draft,progress,done"</attribute>
 				</field>
 				<field name="note" position ="replace" />
-				<field name="payment_cash_amount" position ="before">
-					<field name="is_paid"/>
-					<newline/>
-				</field>
+				<xpath expr="//page[@name='payments']/group[1]" position="before">
+					<group>
+						<field name="is_paid"/>
+					</group>
+				</xpath>
 			</field>
 		</record>
 

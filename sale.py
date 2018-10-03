@@ -62,12 +62,29 @@ class sale_order(osv.osv):
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		return user_data.branch_id.id or None
 
+	def _default_payment_cash_journal(self, cr, uid, context={}):
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		if user_data.default_journal_sales_override:
+			return user_data.default_journal_sales_override.id
+		else:
+			if user_data.branch_id.default_journal_sales:
+				return user_data.branch_id.default_journal_sales.id
+			else:
+				return None
+
+	def _default_payment_receivable_journal(self, cr, uid, context={}):
+		journal_id = self.pool.get('account.journal').search(cr, uid, [('type', 'in', ['bank'])], limit=1)
+		return journal_id and journal_id[0] or None
+
+
 	_defaults = {
 		'partner_id': _default_partner_id,
 		'branch_id': _default_branch_id,
 		'shipped_or_taken': 'taken',
 		'stock_location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_outgoing_location_id.id,
 		'is_paid': True,
+		'payment_cash_journal': _default_payment_cash_journal,
+		'payment_receivable_journal': _default_payment_receivable_journal,
 		#,'bon_number' : '0'
 	}
 	
@@ -174,12 +191,16 @@ class sale_order(osv.osv):
 		#					'month': month_sale,
 		#					'branch_id': branch_id})
 	
-	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, context=None):
+	# JUNED@20181003: _make_payment yang valid untuk implementasi tbvip adalah yang di 
+	#sini, bukan yang di sale_multiple_payment
+	def _make_payment(self, cr, uid, partner_id, amount, payment_method, invoice_id, journal_id=None, context={}):
 		"""
 		Register payment. Return
 		"""
-		if payment_method not in ['transfer', 'cash', 'receivable', 'giro']:
-			return False
+		if payment_method not in ['transfer', 'cash', 'receivable', 'giro']: return False
+		if amount <= 0: return False
+		if not journal_id:
+			raise osv.except_osv(_('Payment Error'), _('Please supply journal for payment method %s.') % payment_method)
 		
 		voucher_obj = self.pool.get('account.voucher')
 		journal_obj = self.pool.get('account.journal')
@@ -200,6 +221,7 @@ class sale_order(osv.osv):
 
 		invoice = invoice_obj.browse(cr, uid, invoice_id)
 		bon_number = invoice.origin
+		journal = journal_obj.browse(cr, uid, journal_id, context)
 
 		# Prepare voucher values for payment
 		voucher_vals = {
@@ -211,6 +233,8 @@ class sale_order(osv.osv):
 			'amount': amount,
 			'type': 'receipt',
 			'reference': bon_number,
+			'journal_id': journal_id,
+			'account_id': journal.default_debit_account_id.id or journal.default_credit_account_id.id,
 			'line_cr_ids': [(0, False, {
 				'date_due': fields.date.today(),
 				'reconcile': True if amount >= account_move.debit - account_move.credit else False,
@@ -222,36 +246,10 @@ class sale_order(osv.osv):
 				'account_id': account_move.account_id.id
 			})],
 		}
-		
-		if payment_method == 'transfer':
-			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
-			pass
-		elif payment_method == 'cash':
-			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['cash'])], limit=1)
-			pass
-		elif payment_method == 'receivable':
-			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
-			pass
-		elif payment_method == 'giro':
-			journal_id = journal_obj.search(cr, uid, [('type', 'in', ['bank'])], limit=1)
-			pass
-		
-		# Get Default account on branch and change acount_id with it
-		user_data = self.pool['res.users'].browse(cr, uid, uid)
-		default_account_sales = user_data.default_account_sales_override or user_data.branch_id.default_account_sales
-		journal = journal_obj.browse(cr, uid, journal_id, context)
-		if default_account_sales:
-			voucher_vals.update({
-				'account_id': default_account_sales.id}
-			)
-		else:
-			voucher_vals.update({
-				'account_id': journal.default_debit_account_id.id or journal.default_credit_account_id.id}
-			)
 
 		# Create payment
-		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context)
-		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context)
+		voucher_id = voucher_obj.create(cr, uid, voucher_vals, context=context)
+		voucher_obj.signal_workflow(cr, uid, [voucher_id], 'proforma_voucher', context=context)
 	
 	# browse ulang supaya mendapatkan nilai residual terbaru, setelah ada pembayaran
 	# di atas
@@ -282,15 +280,12 @@ class sale_order(osv.osv):
 				# Make invoice open
 				invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
 				order = sale
+
 				#sale_discount = float(order.sale_discount)
-				if order.payment_transfer_amount > 0:
-					self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, context=None)
-				if order.payment_cash_amount > 0:
-					self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, context=None)
-				if order.payment_receivable_amount > 0:
-					self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, context=None)
-				if order.payment_giro_amount > 0:
-					self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, context=None)
+				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, journal_id=order.payment_transfer_journal.id)
+				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, journal_id=order.payment_cash_journal.id)
+				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, journal_id=order.payment_receivable_journal.id)
+				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, journal_id=order.payment_giro_journal.id)
 			else:
 				raise osv.except_orm(_('Bon Number Empty'), _('You must fill bon number.'))
 			
