@@ -85,6 +85,8 @@ class sale_order(osv.osv):
 		'is_paid': True,
 		'payment_cash_journal': _default_payment_cash_journal,
 		'payment_receivable_journal': _default_payment_receivable_journal,
+		'payment_giro_journal' : _default_payment_receivable_journal,
+		'payment_transfer_journal' : _default_payment_receivable_journal,
 		#,'bon_number' : '0'
 	}
 	

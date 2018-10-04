@@ -327,6 +327,18 @@ class tbvip_day_end(osv.osv):
 		# default branch adalah tempat user sekarang ditugaskan
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		return user_data.branch_id.id or None
+
+	def _default_account_cash(self, cr, uid, context={}):
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		if user_data.branch_id.default_account_cash:
+			return user_data.branch_id.default_account_cash.id
+		else:
+			return None
+
+	def _default_partner_id(self, cr, uid, context={}):
+		# default branch adalah tempat user sekarang ditugaskan
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		return user_data.partner_id.id or None
 	
 	_columns = {
 		'day_end_date': fields.datetime('Day End Date', required=True),
@@ -369,21 +381,27 @@ class tbvip_day_end(osv.osv):
 		
 		'balance': fields.float('Balance'),
 		'desc': fields.text('Description'),
+
+		'default_account_cash' : fields.many2one('account.account', 'Default Cash Account'),
+		'partner_id' : fields.many2one('res.partner','Partner Id Counterpart')
 	}
 	
 	_defaults = {
 		'day_end_date': lambda *a: datetime.today().strftime('%Y-%m-%d %H:%M:%S'),
 		'branch_id': _default_branch_id,
 		'modal_cash': _default_modal_cash,
+		'default_account_cash' : _default_account_cash,
+		'partner_id' : _default_partner_id,
 	}
 	
 	def create(self, cr, uid, vals, context=None):
 		vals['branch_id'] = self._default_branch_id(cr, uid, context=context)
 		
 		account_account_obj = self.pool.get('account.account')
+		now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
 		kas_id = vals['kas_id']
 		kas = account_account_obj.browse(cr, uid, kas_id, context=context)
-		
+		journal_entry_obj = self.pool.get('account.move')
 		vals.update({
 			'amend_number': self.calculate_amend_number(cr, uid, kas_id, vals['day_end_date'], context=context),
 			'amount_100': vals['qty_100'] * 100,
@@ -403,15 +421,15 @@ class tbvip_day_end(osv.osv):
 			vals['amount_10000'] + vals['amount_20000'] + vals['amount_50000'] + vals['amount_100000']
 		vals['omzet_cash'] = self.calculate_omzet_cash(cr, uid, kas, context=context)
 		vals['modal_cash'] = self._default_modal_cash(cr, uid, context=context)
+		vals['default_account_cash'] = self._default_account_cash(cr,uid, context =context)
+		vals['partner_id'] = self._default_partner_id(cr,uid, context =context)
 		vals['total_cash'] = vals['subtotal_cash'] + vals['extra_amount_1'] + vals['extra_amount_2'] + vals['extra_amount_3']
 		vals['balance'] = vals['total_cash'] - vals['omzet_cash'] - vals['modal_cash']
 		
 		# update to kas if not balanced
 		if vals['balance'] != 0:
-			kas_id = vals['kas_id']
-			journal_entry_obj = self.pool.get('account.move')
-			now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-			name = 'DAY END ' + now,
+			#kas_id = vals['kas_id']	
+			name = 'BALANCING :'+str(kas.name)+' (' + datetime.today().strftime('%Y-%m-%d %H:%M:%S')+')'
 			acount_from = self.pool.get('account.account').search(cr, uid, [('code', '=', '122000')], limit=1)[0]
 			entry_data = journal_entry_obj.account_move_prepare(cr, uid, self.pool.get('account.journal').search(cr, uid, [('type', 'in', ['cash'])], limit=1)[0], date=vals.get('journal_date'), ref=name)
 			entry_data['line_id'] = [
@@ -420,16 +438,42 @@ class tbvip_day_end(osv.osv):
 					'account_id': vals['kas_id'],
 					'debit': vals['balance'] if vals['balance'] > 0 else 0,
 					'credit': -vals['balance'] if vals['balance'] < 0 else 0,
+					'partner_id': vals['partner_id'],
 				}],
 				[0, False, {
 					'name': name,
 					'account_id': acount_from,
 					'debit': -vals['balance'] if vals['balance'] < 0 else 0,
 					'credit': vals['balance'] if vals['balance'] > 0 else 0,
+					'partner_id': vals['partner_id'],
 				}],
 			]
 			new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
 			journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
+
+		#sisanya ditarik ke default account cash cabang tsb
+		name = 'DAY END :'+str(kas.name)+' (' + datetime.today().strftime('%Y-%m-%d %H:%M:%S')+')'
+		entry_data = journal_entry_obj.account_move_prepare(cr, uid, self.pool.get('account.journal').search(cr, uid, [('type', 'in', ['cash'])], limit=1)[0], date=vals.get('journal_date'), ref=name)
+		entry_data['line_id'] = [
+			[0, False, {
+				'name': name,
+				'account_id': vals['kas_id'],
+				'debit': 0,
+				'credit': vals['omzet_cash'] + vals['balance'],
+				'partner_id': vals['partner_id'],
+				'to_check' : True,
+			}],
+			[0, False, {
+				'name': name,
+				'account_id': vals['default_account_cash'],
+				'debit': vals['omzet_cash'] + vals['balance'],
+				'credit': 0,
+				'partner_id': vals['partner_id'],
+				'to_check' : True,
+			}],
+		]
+		new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+		journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
 		
 		return super(tbvip_day_end, self).create(cr, uid, vals, context)
 	

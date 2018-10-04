@@ -20,6 +20,7 @@ class tbvip_branch(osv.osv):
 		'default_stock_location_id': fields.many2one('stock.location', 'Default Stock Location'),
 		'default_journal_purchase' : fields.many2one('account.journal', 'Default Purchase Cash Journal'),
 		'default_journal_sales' : fields.many2one('account.journal', 'Default Sale Cash Journal '),
+		'default_account_cash' : fields.many2one('account.account', 'Default Cash Account'),
 		'address': fields.text('Address', required=True),
 		'default_open_hour': fields.float('Default Open Hour'),
 		'default_closed_hour': fields.float('Default Closed Hour'),
