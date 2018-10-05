@@ -39,9 +39,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 		'state': fields.selection(_INTERBRANCH_STATE, 'State', readonly=False),
 		'accepted_by_user_id': fields.many2one('res.users', 'Accepted by', readonly=True, states={'draft': [('readonly', False)]}),
 		'rejected_by_user_id': fields.many2one('res.users', 'Rejected by', readonly=True, states={'draft': [('readonly', False)]}),
-		#TEGUH@20180331 : field interbranch bisa diedit saat draft & request
-		#'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=False, states={'accepted': [('readonly', True)],'rejected': [('readonly', True)]}),
-		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=True, states={'draft': [('readonly', False)],'request': [('readonly', False)]}),
+		'interbranch_stock_move_line_ids': fields.one2many('tbvip.interbranch.stock.move.line', 'header_id', 'Move Lines', readonly=False, states={'accepted': [('readonly', True)],'rejected': [('readonly', True)]}),
 	}
 	
 	_defaults = {
