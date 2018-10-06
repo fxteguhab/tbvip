@@ -21,6 +21,8 @@ class tbvip_branch(osv.osv):
 		'default_journal_purchase' : fields.many2one('account.journal', 'Default Purchase Cash Journal'),
 		'default_journal_sales' : fields.many2one('account.journal', 'Default Sale Cash Journal '),
 		'default_account_cash' : fields.many2one('account.account', 'Default Cash Account'),
+		'default_account_sales' : fields.many2one('account.account', 'Default Account Sales'),
+		'default_account_purchase' : fields.many2one('account.account', 'Default Account Purchase'),
 		'address': fields.text('Address', required=True),
 		'default_open_hour': fields.float('Default Open Hour'),
 		'default_closed_hour': fields.float('Default Closed Hour'),
