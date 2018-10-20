@@ -11,7 +11,7 @@
 			<field name="arch" type="xml">
 				<form>
 					<header>
-						<button name="action_ready" string="Ready" type="object" states = "draft" confirm="Are you sure this interbranch stock move ready?"/>
+						<button name="action_ready" string="Ready" type="object" attrs="{'invisible':[('state', 'not in', ['draft','request'])]}" confirm="Are you sure this interbranch stock move ready?"/>
 						<!-- edit button accept, reject & tambah button request -->
 						<button name="action_accept" string="Accept" type="object" attrs="{'invisible':[('state', 'in', ['draft','accepted','rejected'])]}" class="oe_highlight" confirm="Are you sure to accept this interbranch stock move?" />
 
