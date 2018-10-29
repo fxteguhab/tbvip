@@ -780,7 +780,7 @@ class sale_report(osv.osv):
 					l.product_id as product_id,
 					t.uom_id as product_uom,
 					sum(l.product_uom_qty / u.factor * u2.factor) as product_uom_qty,
-					sum((l.product_uom_qty / u.factor * u2.factor) * l.price_unit) as price_total,
+					sum((l.product_uom_qty / u.factor * u2.factor) * (l.price_unit / u2.factor)) as price_total,
 					count(*) as nbr,
 					s.date_order as date,
 					s.date_confirm as date_confirm,
