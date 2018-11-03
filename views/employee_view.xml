@@ -9,8 +9,13 @@
 				<xpath expr="//field[@name='address_home_id']" position="replace">
 					<field name="address"/>
 				</xpath>
+				<xpath expr="//field[@name='active']" position="attributes">
+					<attribute name="string">Misc</attribute>
+				</xpath>
 				<xpath expr="//field[@name='active']" position="before">
 					<field name="fingerprint_id"/>
+					<field name="is_spg"/>
+					<field name="default_modal_cash"/>
 				</xpath>
 			</field>
 		</record>
@@ -25,8 +30,9 @@
 					<field name="fingerprint_id"/>
 					<!-- <field name="mobile_phone"/> -->
 				</xpath>
-
-
+				<xpath expr="//field[@name='parent_id']" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</xpath>
 			</field>
 		</record>
 

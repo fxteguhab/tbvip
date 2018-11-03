@@ -1,16 +1,38 @@
 
 <openerp>
 	<data>
-
+		
 		<record model="ir.ui.view" id="hr_employee_form_inherit">
 			<field name="name">hr.employee.form.inherit</field>
 			<field name="model">hr.employee</field>
 			<field name="inherit_id" ref="hr.view_employee_form"/>
 			<field name="arch" type="xml">
-				<field name="department_id" position="before">
-					<field name="is_spg"/>
-					<field name="default_modal_cash"/>
+				<field name="parent_id" position="attributes">
+					<attribute name="invisible">True</attribute>
 				</field>
+				<field name="coach_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="job_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="department_id" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="work_location" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+			</field>
+		</record>
+		
+		<record id="hr_hr_employee_view_form2_inherit" model="ir.ui.view">
+			<field name="name">hr.hr.employee.view.form2.inherit</field>
+			<field name="model">hr.employee</field>
+			<field name="inherit_id" ref="hr_contract.hr_hr_employee_view_form2"/>
+			<field name="arch" type="xml">
+				<field name="manager" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field> 
 			</field>
 		</record>
 
