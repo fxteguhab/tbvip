@@ -1,5 +1,6 @@
 
 from openerp.osv import osv, fields
+from openerp.http import request
 from openerp.tools.misc import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import datetime, timedelta
 from openerp.tools.translate import _
@@ -170,6 +171,58 @@ class hr_attendance(osv.osv):
 class hr_payslip(osv.osv):
 	_inherit = 'hr.payslip'
 	
+	def _compute_gaji(self, cr, uid, ids, field_name, arg, context=None):
+		result = dict.fromkeys(ids, 0)
+		for payslip in self.browse(cr, uid, ids, context=context):
+			bonus = {}
+			for input_line in payslip.input_line_ids:
+				bonus.update({input_line.code: input_line.amount})
+			line = {}
+			for payslip_line in payslip.line_ids:
+				line.update({payslip_line.code: payslip_line.total})
+			
+			minimum_so_point = request.env['ir.config_parameter'].get_param('hr_point.minimum_so_point')
+			minimum_so_point = float(minimum_so_point)
+			if bonus.get('POIN_SO_POINT', 0) >= minimum_so_point:
+				total_bonus_value = bonus.get('POIN_XTRA_BONUS', 0) \
+									- bonus.get('POIN_PENALTY_BONUS', 0) \
+									+ bonus.get('POIN_MOBIL_BONUS', 0) \
+									+ bonus.get('POIN_MOTOR_BONUS', 0) \
+									+ bonus.get('POIN_SO_BONUS', 0) \
+									+ bonus.get('POIN_SALES_BONUS', 0) \
+									+ bonus.get('POIN_ADM_BONUS', 0)
+			else:
+				total_bonus_value = 0
+
+			total_minggu= line.get('BASIC', 0) + total_bonus_value
+
+			result[payslip.id] = total_minggu
+		return result
+
+	def _compute_thp(self, cr, uid, ids, field_name, arg, context=None):
+		result = dict.fromkeys(ids, 0)
+		for payslip in self.browse(cr, uid, ids, context=context):
+			loan = 0
+			saving = 0
+			loan_label = "Cicil"
+			saving_label = "Tabung"
+			if payslip.saving_action == 'inc':
+				saving_label = "Tabung"
+				saving = payslip.saving_amount
+			elif payslip.saving_action == 'dec':
+				saving_label = "Tarik"
+				saving = -payslip.saving_amount
+			if payslip.loan_action == 'inc':
+				loan_label = "Pinjam"
+				loan = payslip.loan_amount
+			elif payslip.loan_action == 'dec':
+				loan_label = "Cicil"
+				loan = -payslip.loan_amount
+
+			gaji= payslip.gaji - saving + loan
+			result[payslip.id] = gaji
+		return result
+
 	_columns = {
 		'current_saving': fields.float('Current Saving', help="Saving of this employee in the moment this payslip is generated"),
 		'current_loan': fields.float('Current Loan', help="Loan of this employee in the moment this payslip is generated"),
@@ -177,6 +230,8 @@ class hr_payslip(osv.osv):
 		'loan_amount': fields.float('Loan Amount'),
 		'saving_action': fields.selection([('inc', 'Simpan'), ('dec', 'Ambil')], 'Saving Action'),
 		'saving_amount': fields.float('Saving Amount'),
+		'gaji': fields.function(_compute_gaji, string='Gaji Bruto', type='float', store = True, group_operator="sum"),
+		'thp': fields.function(_compute_thp, string='Take Home Pay', type='float', store = True, group_operator="sum"),
 	}
 	
 	def print_payslip_dot_matrix(self, cr, uid, ids, context):

@@ -80,6 +80,32 @@
 			</field>
 		</record>
 
+		<record id="view_hr_payslip_filter_inherit" model="ir.ui.view">
+			<field name="name">hr.payslip.select.inherit</field>
+			<field name="model">hr.payslip</field>
+			<field name="inherit_id" ref="hr_payroll.view_hr_payslip_filter"/>
+			<field name="arch" type="xml">
+				<group string="Group By" position ="after">
+					<group string="Timeline">
+						<filter name="groupby_year" string="Year" context="{'group_by':'date_from:year'}"/>
+						<filter name="groupby_month" string="Month" context="{'group_by':'date_from:month'}"/>
+						<filter name="groupby_week" string="Week" context="{'group_by':'date_from:week'}"/>
+						<filter name="groupby_day" string="Day" context="{'group_by':'date_from:day'}"/>	
+					</group>
+				</group> 
+			</field>
+		</record>
 
+		<record id="view_hr_payslip_tree_inherit" model="ir.ui.view">
+			<field name="name">hr.payslip.tree.inherit</field>
+			<field name="model">hr.payslip</field>
+			<field name="inherit_id" ref="hr_payroll.view_hr_payslip_tree"/>
+			<field name="arch" type="xml">
+				<field name ="date_to" position ="after">
+					<field name ="gaji" />
+					<field name ="thp" />
+				</field>
+			</field>
+		</record>
 	</data>
 </openerp>
