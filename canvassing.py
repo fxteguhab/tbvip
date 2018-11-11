@@ -13,6 +13,23 @@ from datetime import datetime, date, timedelta
 class canvassing_canvas(osv.osv):
 	_inherit = 'canvassing.canvas'
 	
+	def _max_load_time(self, cr, uid, ids, field_name, arg, context=None):
+		fmt = '%Y-%m-%d %H:%M:%S'
+		result = {}
+		for canvass in self.browse(cr, uid, ids, context=context):
+			delta_list = []
+			for line in canvass.stock_line_ids:
+				if line.stock_picking_id:
+					sale_order_obj = self.pool('sale.order')
+					sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
+					if len(sale_order_id) > 0:
+						sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
+						sale_time = datetime.strptime(sale_order.create_date, fmt)
+						diff = datetime.strptime(line.create_date, fmt) - sale_time
+						delta_list.append(diff)	
+			result[canvass.id] = max(delta_list) if len(delta_list) > 0 else '0'
+		return result
+
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -20,6 +37,7 @@ class canvassing_canvas(osv.osv):
 		'total_distance': fields.float('Total Distance', readonly=True),
 		'is_recalculated': fields.boolean('Is Recalculated?', search=False),
 		'interbranch_move_ids': fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
+		'max_load_time' : fields.function(_max_load_time, type='char',string='Max Load Time'), 
 	}
 
 	_defaults = {
@@ -275,6 +293,56 @@ class canvasssing_canvas_stock_line(osv.Model):
 		'is_executed': True,
 	}
 
+	def _sales_order_id(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.stock_picking_id:
+				sale_order_obj = self.pool('sale.order')
+				sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
+				result[line.id] = sale_order_id[0]
+		return result
+
+	def _load_time(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		fmt = '%Y-%m-%d %H:%M:%S'
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.stock_picking_id:
+				sale_order_obj = self.pool('sale.order')
+				sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
+				sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
+				sale_time = datetime.strptime(sale_order.create_date, fmt)
+				diff = datetime.strptime(line.create_date, fmt) - sale_time
+				#time_delta = (diff.days * 24 * 60) + (diff.seconds/60)
+				result[line.id] = diff
+			else:
+				result[line.id] = 0
+		return result
+
+	_columns = {
+		'sales_order_id': fields.function(_sales_order_id, type='many2one', relation='sale.order',string='Sales Order'),
+		'load_time' :fields.function(_load_time, type='char',string='Load Time'),
+	}
+
+	def action_open_sales_order(self, cr, uid, ids, context={}):
+		model_obj = self.pool.get('ir.model.data')
+		model, view_id = model_obj.get_object_reference(cr, uid, 'sale', 'view_order_form')
+		line_data = self.browse(cr, uid, ids[0], context=context)
+
+		return {
+			'type': 'ir.actions.act_window',
+			'name': 'Sale Order Detail',
+			'view_mode': 'form',
+			'view_type': 'form',
+			'view_id': view_id,
+			'res_id': line_data.sales_order_id.id,
+			'res_model': 'sale.order',
+			'nodestroy': True,
+			'flags': {'form': {'options': {'mode': 'view'} } },
+			'context': {'simple_view': 1},
+			'target': 'new',
+		}
+
+
 """
 20170924 JUNED: ditutup karena perhitungan jarak dikondisikan untuk satu perjalanan secara 
 keseluruhan, menggunakan API dari service GPS yang dipakai
@@ -305,10 +373,6 @@ class canvasssing_canvas_stock_line(osv.Model):
 					'distance': google_map.distance(obj.address,obj.canvas_id.branch_id.address,'driving',api='masukkan_google_api_key_yang_benar'),
 				})
 """
-
-
-
-
 # ==========================================================================================================================
 
 class canvassing_canvas_interbranch_line(osv.Model):
@@ -358,3 +422,22 @@ class canvassing_canvas_interbranch_line(osv.Model):
 					raise osv.except_osv(_('Warning!'), _("Interbranch Stock Move \"%s\" had already been rejected!") %
 						(interbranch_move.move_date + ' | ' + interbranch_move.from_stock_location_id.name + ' -> ' + interbranch_move.to_stock_location_id.name,))
 		return result
+
+	def action_open_interbrach_move(self, cr, uid, ids, context={}):
+		model_obj = self.pool.get('ir.model.data')
+		model, view_id = model_obj.get_object_reference(cr, uid, 'tbvip', 'tbvip_interbranch_stock_move_form')
+		line_data = self.browse(cr, uid, ids[0], context=context)
+
+		return {
+			'type': 'ir.actions.act_window',
+			'name': 'Interbranch Transfer',
+			'view_mode': 'form',
+			'view_type': 'form',
+			'view_id': view_id,
+			'res_id': line_data.interbranch_move_id.id,
+			'res_model': 'tbvip.interbranch.stock.move',
+			'nodestroy': True,
+			'flags': {'form': {'options': {'mode': 'view'} } },
+			'context': {'simple_view': 1},
+			'target': 'new',
+		}

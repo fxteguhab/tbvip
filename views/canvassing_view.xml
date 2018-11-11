@@ -36,9 +36,20 @@
 								<!--<field name="to_stock_location_id"/>-->
 								<field name="is_executed"/>
 								<field name="notes"/>
+								<button name="action_open_interbrach_move" string="Detail" type="object" icon="gtk-dnd" attrs="{'invisible': [('interbranch_move_id','=',False)]}" />
 							</tree>
 						</field>
 					</page>
+				</page>
+				<xpath expr="//notebook/page[@string='Stock Pickings']/field[@name='stock_line_ids']/tree/field[@name='notes']" position="after">
+					<field name ="load_time"/>
+					<button name="action_open_sales_order" string="Detail" type="object" icon="gtk-dnd" attrs="{'invisible': [('stock_picking_id','=',False)]}" />
+				</xpath>
+				<page string="Stock Pickings" position="attributes">
+					<attribute name="string">External</attribute>
+				</page>
+				<page string="Interbranch Lines" position="attributes">
+					<attribute name="string">Internal</attribute>
 				</page>
 			</field>
 		</record>
@@ -58,6 +69,37 @@
 				</xpath>
 			</field>
 		</record>
+
+
+		<record model="ir.ui.view" id="canvassing_canvas_tree_inherit">
+			<field name="name">canvassing.canvas.tree.inherit</field>
+			<field name="model">canvassing.canvas</field>
+			<field name="type">tree</field>
+			<field name="inherit_id" ref="canvassing.canvassing_canvas_tree"/>
+			<field name="arch" type="xml">
+				<field name="name" position="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
+				<field name="date_created" position="attributes">
+					<attribute name = "invisible">True</attribute>
+				</field>
+				<field name="state" position="replace"/>
+				<field name="create_uid" position="after">
+					<field name="stock_line_ids" string="External"/>
+					<field name="interbranch_move_ids" string="Internal"/>
+					<field name="max_load_time" />
+					<field name="state"/>
+				</field>
+				<field name="driver1_id" position="attributes">
+					<attribute name = "string">Driver</attribute>
+				</field>
+				<field name="driver2_id" position="attributes">
+					<attribute name = "string">Co Driver</attribute>
+				</field>	
+			</field>
+		</record>
+
+
 
 	</data>
 </openerp>
