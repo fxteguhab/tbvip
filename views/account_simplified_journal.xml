@@ -32,8 +32,10 @@
 				<field name="preset_id" position="attributes">
 					<attribute name="on_change">onchange_preset_id(preset_id)</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="invisible">context.get('invisible_all',False)</attribute>
 				</field>
 				<field name="preset_id" position="after">
+					<field name="preset_id" domain="[('code', 'ilike','RETUR'),('branch_id','=',branch_id)]" invisible="context.get('invisible_retur',True)" on_change="onchange_preset_id(preset_id)" options="{'no_create': 1}"/>
 					<field name="preset_code" invisible="1"/>
 					<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}" options="{'no_create': 1}"/>
 				</field>
