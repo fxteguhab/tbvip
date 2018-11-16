@@ -1,23 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 	<data>
-
-		<record id="action_retur_sales" model="ir.actions.act_window">
-			<field name="name">Retur Sales</field>
-			<field name="res_model">account.journal.simplified</field>
-			<field name="view_type">form</field>
-			<field name="view_mode">form</field>
-			<field name="target">new</field>
-			<field name="context">{'invisible_all': True,'invisible_retur':False}</field>
-		</record>
-
-
 		<menuitem id="menu_tbvip_cash_transaction_root" parent="account.menu_finance"
 				sequence="10" name="Cash Transactions"/>
 		<menuitem id="menu_tbvip_cash_transaction" parent="menu_tbvip_cash_transaction_root"
 				sequence="10" action="account_simplified_journal.simplified_journal_action_entry"/>
-
-		<menuitem sequence="8" id="menu_retur_sales" parent="base.menu_sales"
-				action="action_retur_sales"/>
 	</data>
 </openerp>

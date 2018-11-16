@@ -9,6 +9,7 @@
 					<field name="branch_id"/>
 					<field name="default_journal_purchase_override"/>
 					<field name="default_journal_sales_override"/>
+					<field name="default_journal_sales_retur_override"/>
 				</field>
 			</field>
 		</record>

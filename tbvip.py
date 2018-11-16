@@ -20,6 +20,7 @@ class tbvip_branch(osv.osv):
 		'default_stock_location_id': fields.many2one('stock.location', 'Default Stock Location'),
 		'default_journal_purchase' : fields.many2one('account.journal', 'Default Purchase Cash Journal'),
 		'default_journal_sales' : fields.many2one('account.journal', 'Default Sale Cash Journal '),
+		'default_journal_sales_retur' : fields.many2one('account.journal', 'Default Sale Retur Cash Journal '),
 		'default_account_cash' : fields.many2one('account.account', 'Default Cash Account'),
 		'default_account_sales' : fields.many2one('account.account', 'Default Account Sales'),
 		'default_account_purchase' : fields.many2one('account.account', 'Default Account Purchase'),

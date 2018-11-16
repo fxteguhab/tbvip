@@ -79,6 +79,7 @@
 						<field name="default_outgoing_location_id"/>
 						<field name="default_journal_purchase"/>
 						<field name="default_journal_sales"/>
+						<field name="default_journal_sales_retur"/>
 						<field name="default_account_cash"/>
 						<field name="default_account_sales"/>
 						<field name="default_account_purchase"/>

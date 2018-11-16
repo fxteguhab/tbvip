@@ -14,4 +14,6 @@ class res_users(osv.osv):
 			help="Overrides default purchase cash journal from branch."),
 		'default_journal_sales_override': fields.many2one('account.journal', 'Default Sale Cash Journal',
 			help="Overrides default purchase cash journal from branch."),
+		'default_journal_sales_retur_override': fields.many2one('account.journal', 'Default Sale Retur Cash Journal',
+			help="Overrides default purchase cash journal from branch."),
 	}
