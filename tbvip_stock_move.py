@@ -81,6 +81,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# state otw melalui canvassing on the way
 		for data in self.browse(cr, uid, ids):
 			if data.state not in ['accepted','rejected']:
+				self.message_post(cr, uid, ids,body=_("On the way to transfer"))
 				self.write(cr, uid, ids, {
 				'state': 'otw'
 				}, context=context)
@@ -91,6 +92,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 	# state delivered melalui canvassing delivered
 		for data in self.browse(cr, uid, ids):
 			if data.state not in ['accepted','rejected']:
+				self.message_post(cr, uid, ids,body=_("Transfer Delivered"))
 				self.write(cr, uid, ids, {
 				'state': 'delivered'
 				}, context=context)
@@ -98,7 +100,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 		return True
 
 	def action_request(self, cr, uid, ids, context=None):
-	# state request dr button
+		self.message_post(cr, uid, ids,body=_("Requested Transfer"))
+		# state request dr button
 		self.write(cr, uid, ids, {
 		'state': 'request'
 		}, context=context)
@@ -109,7 +112,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 		#set picking state jadi Ready to Transfer
 		for interbranch_stock_move in self.browse(cr, uid, ids):
 			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)	
-
+			
+		self.message_post(cr, uid, ids,body=_("State change to Ready - Stock picking created"))
 		self.write(cr, uid, ids, {
 			'state': 'ready'
 		}, context=context)
@@ -137,6 +141,7 @@ class tbvip_interbranch_stock_move(osv.Model):
 			#print "picking id:"+str(picking_id)
 			self._transfer_stock_picking(cr, uid, picking_ids, context = context)
 
+		self.message_post(cr, uid, ids,body=_("Transfer Accepted"))
 		# accepted by user uid
 		self.write(cr, uid, ids, {
 			'state': 'accepted',
@@ -145,6 +150,8 @@ class tbvip_interbranch_stock_move(osv.Model):
 		return True
 	
 	def action_reject(self, cr, uid, ids, context=None):
+
+		self.message_post(cr, uid, ids,body=_("Transfer Rejected"))
 		# rejected by user uid
 		self.write(cr, uid, ids, {
 			'state': 'rejected',
