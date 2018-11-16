@@ -32,6 +32,7 @@
 				<field name="preset_id" position="attributes">
 					<attribute name="on_change">onchange_preset_id(preset_id)</attribute>
 					<attribute name="options">{'no_create': 1}</attribute>
+					<attribute name="domain">[('branch_id','=',branch_id)]</attribute>
 				</field>
 				<field name="preset_id" position="after">
 					<field name="preset_code" invisible="1"/>
