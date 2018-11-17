@@ -43,7 +43,7 @@
 			<field name="name">"sale.retur.list"</field>
 			<field name="model">sale.retur</field>
 			<field name="arch" type="xml">
-				<tree string="Sales Retur" default_order="journal_date desc" delete="false">
+				<tree string="Sales Retur" default_order="journal_date desc">
 					<field name="journal_date" />
 					<field name="branch_id" readonly="True" required="True"/>
 					<field name="create_uid" string="Input By" />
