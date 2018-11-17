@@ -72,7 +72,85 @@ class account_invoice(osv.osv):
 			recs = self.search([('name', operator, name)] + args, limit=limit)
 		return recs.name_get()
 	
-# ==========================================================================================================================
+	def _cost_price_watcher(self, cr, uid, ids, context={}):
+		price_unit_nett = context.get('price_unit_nett',0)
+		price_unit_nett_old = context.get('price_unit_nett_old',0)
+		product_id = context.get('product_id',0)
+		name = context.get('name','')
+		invoice_id = context.get('invoice_id',0)
+		invoice_type = context.get('type',0)
+		price_unit = context.get('price_unit',0)
+
+		if (price_unit_nett_old > 0) and (round(price_unit_nett_old) != round(price_unit_nett)):
+			account_invoice_obj = self.pool.get('account.invoice')
+			message="There is a change on cost price for %s in Invoice %s. From: %s to %s." % (name,invoice_id,price_unit_nett_old,price_unit_nett)		
+			account_invoice_obj.message_post(cr, uid, invoice_id, body=message)				
+
+			if (invoice_type == 'in_invoice'): #buy
+				self.pool.get('product.product')._set_price(cr,uid,product_id,price_unit_nett,'standard_price') #catet last buy di standard_buy
+			if (invoice_type == 'out_invoice'): #sell
+				self.pool.get('product.product')._set_price(cr,uid,product_id,price_unit,'list_price')#catet last sell di list_price
+
+	def invoice_validate(self, cr, uid, ids, context=None):
+		result = super(account_invoice, self).invoice_validate(cr, uid, ids, context=context)
+		invoice = self.browse(cr,uid,ids)
+		invoice_line_ids = invoice.invoice_line
+		for invoice_line_id in invoice_line_ids:
+			invoice_line = self.pool.get('account.invoice.line').browse(cr,uid, invoice_line_id.id,context)
+						
+			price_type_id = invoice_line.price_type_id.id
+			product_id = invoice_line.product_id.id
+			product_uom = invoice_line.uos_id.id
+			categ_id = invoice_line.product_id.categ_id.name
+
+			price_unit = invoice_line.price_unit
+			price_unit_old = invoice_line.price_unit_old
+			price_unit_nett = invoice_line.price_unit_nett
+			price_unit_nett_old = invoice_line.price_unit_nett_old
+			discount_string = invoice_line.discount_string
+			discount_string_old = invoice_line.discount_string_old
+
+			invoice_id = invoice_line.invoice_id.id
+			sell_price_unit = invoice_line.sell_price_unit
+			buy_price_unit = invoice_line.buy_price_unit
+			name = invoice_line.name
+			partner_name = invoice_line.invoice_id.partner_id.display_name
+			partner_id =  invoice_line.invoice_id.partner_id.id
+			origin = invoice_line.origin
+
+			if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
+				invoice_type = 'in_invoice'
+			elif invoice_line.invoice_id.type in ['out_invoice']:	
+				invoice_type = 'out_invoice'
+
+			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
+
+			ctx = {
+				'price_unit_nett_old' : price_unit_nett_old,
+				'price_unit_nett' : price_unit_nett,
+				'price_unit' : price_unit,
+				'price_unit_old' : price_unit_old,
+				'product_id' :  product_id,
+				'price_type_id' : price_type_id,
+				'partner_name' : partner_name,
+				'partner_id' : partner_id,
+				'product_uom' : product_uom,
+				'discount_string' : discount_string,
+				'discount_string_old' : discount_string_old,
+				'name' : name,
+				'invoice_id' : invoice_id,
+				'sell_price_unit' : sell_price_unit,
+				'buy_price_unit' : buy_price_unit,
+				'type' : invoice_type,
+				'categ_id' : categ_id,
+				'origin' : origin,
+				}
+
+				#check for changes and send notif
+			self._cost_price_watcher(cr, uid, ids,  context=ctx)
+
+		return result
+# =========================================================================================================================
 
 class account_invoice_line(osv.osv):
 	_inherit = 'account.invoice.line'
@@ -86,82 +164,55 @@ class account_invoice_line(osv.osv):
 		'buy_price_unit': fields.float('Buy Price'),
 		'sale_line_id': fields.many2one('sale.order.line', 'Sale Order Line'),
 	}
-	
-	def _cost_price_watcher(self, cr, uid, vals, context={}):
-		price_unit_nett = context.get('price_unit_nett',0)
-		price_unit_nett_old = context.get('price_unit_nett_old',0)
-		product_id = context.get('product_id',0)
-		name = context.get('name','')
-		invoice_id = context.get('invoice_id',0)
-		invoice_type = context.get('type',0)
-		price_unit = context.get('price_unit',0)
-		#price_unit_old = context.get('price_unit_old',0)
-		#product_uom = context.get('product_uom',0)
-		#price_type_id = context.get('price_type_id',0)
-		#sell_price_unit = context.get('sell_price_unit',0)
-		#discount_string = context.get('discount_string','0')
-		#discount_string_old = context.get('discount_string_old','0')
-		#price_unit_nett_old = vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0
-		#price_unit_nett = vals['price_unit_nett'] if 'price_unit_nett' in vals else 0
-		#price_unit = vals['price_unit'] if 'price_unit' in vals else 0
 
-		if (price_unit_nett_old > 0) and (round(price_unit_nett_old) != round(price_unit_nett)):
-			account_invoice_obj = self.pool.get('account.invoice')
-			message="There is a change on cost price for %s in Invoice %s. From: %s to %s." % (name,invoice_id,price_unit_nett_old,price_unit_nett)		
-			account_invoice_obj.message_post(cr, uid, invoice_id, body=message)				
-
-			if (invoice_type == 'in_invoice'): #buy
-				self.pool.get('product.product')._set_price(cr,uid,product_id,price_unit_nett,'standard_price') #catet last buy di standard_buy
-			if (invoice_type == 'out_invoice'): #sell
-				self.pool.get('product.product')._set_price(cr,uid,product_id,price_unit,'list_price')#catet last sell di list_price
-
-	
-	def create(self, cr, uid, vals, context={}):		
-		new_id = super(account_invoice_line, self).create(cr, uid, vals, context=context)		
+'''	
+	#def create(self, cr, uid, vals, context={}):		
+	#	new_id = super(account_invoice_line, self).create(cr, uid, vals, context=context)		
 		
 		# otomatis create current price kalo belum ada 
-		if vals.get('price_type_id', False) and vals.get('uos_id', False):
-			new_data = self.browse(cr, uid, new_id)		
+		#if vals.get('price_type_id', False) and vals.get('uos_id', False):
+			#new_data = self.browse(cr, uid, new_id)		
 			
-			################################### SET NEW PRICE LIST, LIST PRICE , STANDARD PRICE ######################################
-			discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
-			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-					vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
-					discount_string, partner_id=new_data.invoice_id.partner_id.id)
-			invoice_type = ''
-			if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
-				invoice_type = 'in_invoice'	
-			elif vals.get('sale_line_id',False): #if "sell"
-				invoice_type = 'out_invoice'
+			#discount_string = vals['discount_string'] if 'discount_string' in vals else "0"
+			#invoice_type = ''
+			#if new_data.invoice_id.type in ['in_invoice']: #if "buy"	
+			#	invoice_type = 'in_invoice'	
+			#elif vals.get('sale_line_id',False): #if "sell"
+			#	invoice_type = 'out_invoice'
 				
+			################################### SET NEW PRICE LIST, #####################################################################
+			#self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+			#		vals['price_type_id'], vals['product_id'], vals['uos_id'], vals['price_unit'],
+			#		discount_string, partner_id=new_data.invoice_id.partner_id.id)
 			#############################################################################################################################
 
 			#check for changes and send notif
-			ctx = {
-				'price_unit_nett_old' : vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0,
-				'price_unit_nett' : vals['price_unit_nett'] if 'price_unit_nett' in vals else 0,
-				'price_unit' : vals['price_unit'],
-				'price_unit_old' : vals['price_unit_old'] if 'price_unit_old' in vals else 0,
-				'product_id' : vals['product_id'],
-				'price_type_id' : vals['price_type_id'],
-				'partner_name' : new_data.invoice_id.partner_id.display_name,
-				'partner_id' : new_data.invoice_id.partner_id.id,
-				'product_uom' : vals['uos_id'],
-				'discount_string' : vals['discount_string'] if 'discount_string' in vals else "0",
-				'discount_string_old' : vals['discount_string_old'] if 'discount_string_old' in vals else "0",
-				'name' : vals['name'],
-				'invoice_id' : vals['invoice_id'] if 'invoice_id' in vals else 0,
-				'sell_price_unit' : vals['sell_price_unit'] if 'sell_price_unit' in vals else 0,
-				'buy_price_unit' : vals['buy_price_unit'] if 'buy_price_unit' in vals else 0,
-				'type' : invoice_type,
-				'origin': vals['origin'] if 'origin' in vals else "",
-				'categ_id' : new_data.product_id.categ_id.name,
-				}			
+			#ctx = {
+			#	'price_unit_nett_old' : vals['price_unit_nett_old'] if 'price_unit_nett_old' in vals else 0,
+			#	'price_unit_nett' : vals['price_unit_nett'] if 'price_unit_nett' in vals else 0,
+			#	'price_unit' : vals['price_unit'],
+			#	'price_unit_old' : vals['price_unit_old'] if 'price_unit_old' in vals else 0,
+			#	'product_id' : vals['product_id'],
+			#	'price_type_id' : vals['price_type_id'],
+			#	'partner_name' : new_data.invoice_id.partner_id.display_name,
+			#	'partner_id' : new_data.invoice_id.partner_id.id,
+			#	'product_uom' : vals['uos_id'],
+			#	'discount_string' : vals['discount_string'] if 'discount_string' in vals else "0",
+			#	'discount_string_old' : vals['discount_string_old'] if 'discount_string_old' in vals else "0",
+			#	'name' : vals['name'],
+			#	'invoice_id' : vals['invoice_id'] if 'invoice_id' in vals else 0,
+			#	'sell_price_unit' : vals['sell_price_unit'] if 'sell_price_unit' in vals else 0,
+			#	'buy_price_unit' : vals['buy_price_unit'] if 'buy_price_unit' in vals else 0,
+			#	'type' : invoice_type,
+			#	'origin': vals['origin'] if 'origin' in vals else "",
+			#	'categ_id' : new_data.product_id.categ_id.name,
+			#	}			
 
-			self._cost_price_watcher(cr, uid, vals,  context=ctx)
+			#self._cost_price_watcher(cr, uid, vals,  context=ctx)
 
-		return new_id
-
+	#	return new_id
+'''
+'''
 	def write(self, cr, uid, ids, vals, context={}):
 		result = super(account_invoice_line, self).write(cr, uid, ids, vals, context=context)	
 		# bila user mengubah salah satu dari empat field di bawah ini, cek dan update
@@ -219,9 +270,9 @@ class account_invoice_line(osv.osv):
 				if vals.get('buy_price_unit', False): buy_price_unit = vals['buy_price_unit']
 				if vals.get('name', False): name = vals['name']
 
-				self.pool.get('price.list')._create_product_current_price_if_none(
-						cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
-						partner_id=invoice_line.invoice_id.partner_id.id)
+				#self.pool.get('price.list')._create_product_current_price_if_none(
+				#		cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,
+				#		partner_id=invoice_line.invoice_id.partner_id.id)
 				
 				if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
 					invoice_type = 'in_invoice'
@@ -248,10 +299,10 @@ class account_invoice_line(osv.osv):
 					}
 
 				#check for changes and send notif
-				self._cost_price_watcher(cr, uid, vals,  context=ctx)
+				#self._cost_price_watcher(cr, uid, vals,  context=ctx)
 				
 		return result
-
+'''
 # ==========================================================================================================================
 
 class account_move_line(osv.osv):
