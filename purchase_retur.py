@@ -15,11 +15,11 @@ class purchase_retur(osv.osv):
 
 	def calc_amount(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
-		for sale_retur in self.browse(cr, uid, ids, context=context):
+		for purchase_retur in self.browse(cr, uid, ids, context=context):
 			total = 0
-			for line in sale_retur.retur_line_ids:
+			for line in purchase_retur.retur_line_ids:
 				total += line.price_unit_nett * line.qty
-			result[sale_retur.id] = total
+			result[purchase_retur.id] = total
 		return result
 
 
@@ -29,8 +29,8 @@ class purchase_retur(osv.osv):
 		'amount': fields.function(calc_amount, type="float", string="Total Amount"),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 		'employee_id': fields.many2one('hr.employee', 'Employee'),
-		'retur_line_ids': fields.one2many('sale.retur.line', 'sale_retur_id', 'Product Retur:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
-		'payment_sale_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
+		'retur_line_ids': fields.one2many('sale.retur.line', 'purchase_retur_id', 'Product Retur:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'payment_purchase_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
 		'partner_id': fields.many2one('res.partner', 'Customer'),
 		'desc': fields.char('Description'),
 		'bon_number': fields.char('Bon Number'),
@@ -80,7 +80,7 @@ class purchase_retur(osv.osv):
 	_defaults = {
 		'journal_date': lambda self, cr, uid, context: datetime.now(),
 		'branch_id': _default_branch_id,
-		'payment_sale_retur_journal': _default_payment_cash_journal,
+		'payment_purchase_retur_journal': _default_payment_cash_journal,
 		'partner_id': _default_partner_id,
 		'state': 'draft',
 		'refund_journal_id': _get_journal,
@@ -94,7 +94,7 @@ class purchase_retur(osv.osv):
 		company = cashier.company_id
 
 		retur = self.browse(cr,uid,ids)
-		journal_retur = retur.payment_sale_retur_journal
+		journal_retur = retur.payment_purchase_retur_journal
 		partner_id = retur.partner_id
 		name = str(journal_retur.name) 
 		date = retur.journal_date
@@ -250,11 +250,11 @@ class purchase_retur(osv.osv):
 		}, context=context)
 
 
-class sale_retur_line(osv.osv):
+class purchase_retur_line(osv.osv):
 	_name = 'sale.retur.line'
 	
 	_columns = {
-		'sale_retur_id': fields.many2one('sale.retur', 'Sale Retur'),
+		'purchase_retur_id': fields.many2one('sale.retur', 'Sale Retur'),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Qty', required=True),
 		'price_unit_nett' : fields.float(related = "product_id.product_tmpl_id.list_price",string="Price Nett"),

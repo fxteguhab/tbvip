@@ -118,10 +118,10 @@ class account_invoice(osv.osv):
 			partner_id =  invoice_line.invoice_id.partner_id.id
 			origin = invoice_line.origin
 
-			if invoice_line.invoice_id.type in ['in_invoice']: #if "buy"
-				invoice_type = 'in_invoice'
-			elif invoice_line.invoice_id.type in ['out_invoice']:	
-				invoice_type = 'out_invoice'
+		if invoice.type in ['in_invoice']: #if "buy"
+			invoice_type = 'in_invoice'
+		elif invoice.type in ['out_invoice']:	
+			invoice_type = 'out_invoice'
 
 			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
 
