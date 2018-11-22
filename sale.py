@@ -733,16 +733,24 @@ class sale_order_line(osv.osv):
 		#ambil harga beli dari last invoice if null then ambil dari price list
 		nett_price = 0
 		invoice_obj = self.pool.get('account.invoice.line')
-		invoice_line_id = invoice_obj.search(cr, uid, [('product_id','=',line.product_id.id),('purchase_line_id','!=',None)],order='create_date DESC', limit=1)
+		invoice_line_id = invoice_obj.search(cr, uid, [('product_id','=',line.product_id.id),('purchase_line_id','!=',False)],order='create_date DESC')
 		if invoice_line_id:
-			invoice_line = invoice_obj.browse(cr, uid, invoice_line_id[0])
+			idx = 0
+			invoice_line = invoice_obj.browse(cr, uid, invoice_line_id[idx])
+			while ((invoice_line.price_subtotal <= 0) or (invoice_line.quantity <= 0)) and (idx < len(invoice_line_id)-1):
+				idx += 1
+				invoice_line = invoice_obj.browse(cr, uid, invoice_line_id[idx])
+
 			price_subtotal = invoice_line.price_subtotal
-			product_qty = invoice_line.quantity if invoice_line.quantity > 0 else 1
+			product_qty = invoice_line.quantity #if invoice_line.quantity > 0 else 1
 			nett_price = price_subtotal / product_qty
-			buy_price_unit = nett_price
+			if nett_price > 0:
+				buy_price_unit = nett_price
+			else:
+				buy_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id, field="nett", context=context)
 		else:
 			buy_price_unit = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id, field="nett", context=context)
-				
+
 		result.update({
 			'price_type_id': line.price_type_id.id,
 			'buy_price_unit' : buy_price_unit,

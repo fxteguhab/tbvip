@@ -3,7 +3,7 @@
 	<data>
 
 		<record id="sale_retur_action_entry" model="ir.actions.act_window">
-			<field name="name">Retur Sales Order</field> 
+			<field name="name">Return Sales Order</field> 
 			<field name="res_model">sale.retur</field> 
 			<field name="view_type">form</field> 
 			<field name="view_mode">tree,form</field> 

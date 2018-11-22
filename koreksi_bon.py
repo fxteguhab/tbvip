@@ -15,7 +15,8 @@ class koreksi_bon(osv.osv_memory):
 		'sale_order_id': fields.many2one('sale.order', 'Sale Order', required=True,  domain=[('state', '!=', 'cancel')]),
 		'order_line': fields.one2many('koreksi.bon.sale.order.line', 'koreksi_bon_id', 'Order Lines'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', readonly=True),
-		'date_order': fields.date('Date Order', readonly=True),
+		#'date_order': fields.date('Date Order', readonly=True),
+		'date_order': fields.datetime('Date Order', required=True),
 		'bon_number': fields.char('Bon Number', readonly=True),
 		'partner_id': fields.many2one('res.partner', 'Customer', readonly=True),
 		'price_type_id': fields.many2one('price.type', 'Price Type', readonly=True),
@@ -200,7 +201,7 @@ class koreksi_bon(osv.osv_memory):
 			new_sale_order_id = sale_order_obj.create(cr, uid, {
 				'name': 'Koreksi ' + koreksi_bon.sale_order_id.name,
 				'branch_id': koreksi_bon.sale_order_id.branch_id.id,
-				'date_order': koreksi_bon.sale_order_id.date_order,
+				'date_order': koreksi_bon.date_order,
 				'bon_number': koreksi_bon.sale_order_id.bon_number,
 				'partner_id': koreksi_bon.sale_order_id.partner_id.id,
 				'price_type_id': koreksi_bon.sale_order_id.price_type_id.id,
