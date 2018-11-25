@@ -393,14 +393,15 @@ class stock_move(osv.osv):
 		result = super(stock_move, self).action_done(cr, uid, ids, context=context)
 		po_obj = self.pool.get('purchase.order')
 		stock_mv = self.browse(cr, uid, ids, context)
-		po_line_id = stock_mv[0].purchase_line_id.id
-		
-		purchase_order_line = self.pool.get('purchase.order.line').browse(cr, uid, po_line_id)
-		purchase_order =  po_obj.browse(cr, uid, purchase_order_line.order_id.id)
-		
-		po_obj.write(cr, uid, purchase_order.id, {
-			'delivered_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-			})
+		if (stock_mv):
+			po_line_id = stock_mv[0].purchase_line_id.id
+			
+			purchase_order_line = self.pool.get('purchase.order.line').browse(cr, uid, po_line_id)
+			purchase_order =  po_obj.browse(cr, uid, purchase_order_line.order_id.id)
+			
+			po_obj.write(cr, uid, purchase_order.id, {
+				'delivered_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+				})
 		return result
 # ==========================================================================================================================
 
