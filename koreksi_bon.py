@@ -144,6 +144,44 @@ class koreksi_bon(osv.osv_memory):
 					writeoff_journal_id = inv.journal_id.id,
 					writeoff_acc_id=inv.account_id.id
 				)
+
+			#### revoke journal untuk kas laci#######################################################################
+			journal_entry_obj = self.pool.get('account.move')
+			journal_obj = self.pool.get('account.journal')
+			user_obj = self.pool.get('res.users')
+			cashier = user_obj.browse(cr, uid, uid)
+
+			if cashier.default_journal_sales_override:
+				journal_retur_id = cashier.default_journal_sales_retur_override.id
+			elif cashier.branch_id.default_journal_sales_retur:
+				journal_retur_id = cashier.branch_id.default_journal_sales_retur.id
+
+			journal_retur =  journal_obj.browse(cr, uid, journal_retur_id, context=context)
+			name = 'REVOKE '+inv.name
+			entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
+			entry_data['line_id'] = [
+				[0,False,{
+					'name': name, 
+					'account_id': journal_retur.default_credit_account_id.id,
+					'credit': inv.amount_total, #vals.get('amount', 0),
+					'debit': 0,
+					'partner_id' : cashier.partner_id.id,
+				}],
+				[0,False,{
+					'name': name, 
+					'account_id': journal_retur.default_debit_account_id.id, 
+					'debit': inv.amount_total, 
+					'credit': 0,
+					'partner_id' : inv.commercial_partner_id.id,
+				}],
+			]
+
+			new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+			journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
+			
+			inv_obj.write(cr, uid, invoice_ids, {
+				'state': 'cancel'
+			}, context=context)
 			return
 	
 	def action_save_koreksi_bon(self, cr, uid, ids, context=None):
