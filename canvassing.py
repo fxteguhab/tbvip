@@ -27,7 +27,19 @@ class canvassing_canvas(osv.osv):
 						sale_time = datetime.strptime(sale_order.create_date, fmt)
 						diff = datetime.strptime(line.create_date, fmt) - sale_time
 						delta_list.append(diff)	
+
+			for line in canvass.interbranch_move_ids:
+				if line.interbranch_move_id:
+					interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+					transfer_id = interbranch_stock_move_obj.search(cr,uid,[('id', '=', line.interbranch_move_id.id)], limit=1)
+					if len(transfer_id) > 0:
+						transfer = interbranch_stock_move_obj.browse(cr, uid, transfer_id[0])
+						transfer_time = datetime.strptime(transfer.create_date, fmt)
+						diff = datetime.strptime(line.create_date, fmt) - transfer_time
+						delta_list.append(diff)	
+
 			result[canvass.id] = max(delta_list) if len(delta_list) > 0 else '0'
+
 		return result
 
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
@@ -297,9 +309,26 @@ class canvasssing_canvas_stock_line(osv.Model):
 		result = {}
 		for line in self.browse(cr, uid, ids, context=context):
 			if line.stock_picking_id:
-				sale_order_obj = self.pool('sale.order')
-				sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
-				result[line.id] = sale_order_id[0]
+				if (line.stock_picking_id.picking_type_id.code == 'outgoing'):
+					sale_order_obj = self.pool('sale.order')
+					sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
+					if len(sale_order_id) > 0:
+						result[line.id] = sale_order_id[0]
+				else:
+					result = False
+		return result
+
+	def _purchase_order_id(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.stock_picking_id:
+				if (line.stock_picking_id.picking_type_id.code == 'incoming'):
+					pruchase_order_obj = self.pool('purchase.order')
+					purchase_order_id = pruchase_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)	
+					if len(purchase_order_id) > 0:
+						result[line.id] = purchase_order_id[0]
+				else:
+					result = False
 		return result
 
 	def _load_time(self, cr, uid, ids, field_name, arg, context=None):
@@ -323,15 +352,17 @@ class canvasssing_canvas_stock_line(osv.Model):
 
 	_columns = {
 		'sales_order_id': fields.function(_sales_order_id, type='many2one', relation='sale.order',string='Sales Order'),
+		'purchase_order_id': fields.function(_purchase_order_id, type='many2one', relation='purchase.order',string='Purchase Order'),
 		'load_time' :fields.function(_load_time, type='char',string='Load Time'),
 	}
 
 	def action_open_sales_order(self, cr, uid, ids, context={}):
-		model_obj = self.pool.get('ir.model.data')
-		model, view_id = model_obj.get_object_reference(cr, uid, 'sale', 'view_order_form')
+		
 		line_data = self.browse(cr, uid, ids[0], context=context)
-
-		return {
+		if (line_data.sales_order_id):
+			model_obj = self.pool.get('ir.model.data')
+			model, view_id = model_obj.get_object_reference(cr, uid, 'sale', 'view_order_form')
+			return {
 			'type': 'ir.actions.act_window',
 			'name': 'Sale Order Detail',
 			'view_mode': 'form',
@@ -343,7 +374,25 @@ class canvasssing_canvas_stock_line(osv.Model):
 			'flags': {'form': {'options': {'mode': 'view'} } },
 			'context': {'simple_view': 1},
 			'target': 'new',
-		}
+			}
+		elif (line_data.purchase_order_id):
+			model_obj = self.pool.get('ir.model.data')
+			model, view_id = model_obj.get_object_reference(cr, uid, 'purchase', 'purchase_order_form')
+			return {
+			'type': 'ir.actions.act_window',
+			'name': 'Purchase Order Detail',
+			'view_mode': 'form',
+			'view_type': 'form',
+			'view_id': view_id,
+			'res_id': line_data.purchase_order_id.id,
+			'res_model': 'purchase.order',
+			'nodestroy': True,
+			'flags': {'form': {'options': {'mode': 'view'} } },
+			'context': {'simple_view': 1},
+			'target': 'new',
+			}
+
+		
 
 
 """
@@ -384,12 +433,32 @@ class canvassing_canvas_interbranch_line(osv.Model):
 	
 	# COLUMNS --------------------------------------------------------------------------------------------------------------
 	
+	def _load_time(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		fmt = '%Y-%m-%d %H:%M:%S'
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.interbranch_move_id:
+				interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
+				transfer_id = interbranch_stock_move_obj.search(cr,uid,[('id', '=', line.interbranch_move_id.id)], limit=1)
+				if len(transfer_id) > 0:
+					transfer = interbranch_stock_move_obj.browse(cr, uid, transfer_id[0])
+					transfer_time = datetime.strptime(transfer.create_date, fmt)
+					diff = datetime.strptime(line.create_date, fmt) - transfer_time
+					#time_delta = (diff.days * 24 * 60) + (diff.seconds/60)
+					result[line.id] = diff
+				else:
+					result[line.id] = 0
+			else:
+				result[line.id] = 0
+		return result
+
 	_columns = {
 		'canvas_id': fields.many2one('canvassing.canvas', 'Canvas'),
 		'interbranch_move_id': fields.many2one('tbvip.interbranch.stock.move', 'Interbranch Stock Move', required=True),
 		'is_executed': fields.boolean('Is Executed'),
 		'notes': fields.text('Notes'),
 		'canvas_state': fields.related('canvas_id', 'state', type="char", string="Canvas State"),
+		'load_time' :fields.function(_load_time, type='char',string='Load Time'),
 		# not needed, can see from interbranch_move_id.name
 		# 'from_stock_location_id': fields.related('interbranch_move_id', 'from_stock_location_id',
 		# 	type="many2one", relation="stock.location", string="Incoming Location"),

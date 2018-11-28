@@ -57,9 +57,19 @@ class tbvip_interbranch_stock_move(osv.Model):
 		for interbranch_move in self.browse(cr, uid, ids, context):
 			localized_date = fields.datetime.context_timestamp(cr, uid, datetime.strptime(interbranch_move.move_date,
 				DEFAULT_SERVER_DATETIME_FORMAT), context)
+			'''
 			result.append((
 				interbranch_move.id,
 				'{} | {} -> {}'.format(
+					localized_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+					interbranch_move.from_stock_location_id.name,
+					interbranch_move.to_stock_location_id.name
+				)
+			'''
+			result.append((
+				interbranch_move.id,
+				'{} | {} -> {}'.format(
+					interbranch_move.id,
 					localized_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
 					interbranch_move.from_stock_location_id.name,
 					interbranch_move.to_stock_location_id.name
@@ -150,6 +160,12 @@ class tbvip_interbranch_stock_move(osv.Model):
 		return True
 	
 	def action_reject(self, cr, uid, ids, context=None):
+
+		#call workflow to make picking cancelled
+		picking_obj = self.pool.get('stock.picking')
+		for interbranch_stock_move in self.browse(cr, uid, ids):
+			picking_ids =  picking_obj.search(cr, uid, [('interbranch_move_id', '=', interbranch_stock_move.id)], limit = 1)
+			picking_obj.action_cancel(cr, uid, picking_ids, context = context)
 
 		self.message_post(cr, uid, ids,body=_("Transfer Rejected"))
 		# rejected by user uid

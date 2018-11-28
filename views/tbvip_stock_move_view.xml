@@ -11,7 +11,7 @@
 			<field name="arch" type="xml">
 				<form>
 					<header>
-						<button name="action_ready" string="Ready" type="object" attrs="{'invisible':[('state', 'not in', ['draft','request','delivered'])]}" confirm="Are you sure this interbranch stock move ready?"/>
+						<button name="action_ready" string="Ready" type="object" attrs="{'invisible':[('state', 'not in', ['draft','request'])]}" confirm="Are you sure this interbranch stock move ready?"/>
 						<!-- edit button accept, reject & tambah button request -->
 						<button name="action_accept" string="Accept" type="object" attrs="{'invisible':[('state', 'in', ['draft','accepted','rejected'])]}" class="oe_highlight" confirm="Are you sure to accept this interbranch stock move?" />
 
@@ -29,6 +29,9 @@
 						<button name="print_interbranch_stock_move" string="Print" type="object" icon="gtk-print"/>
 						<field name="state" widget="statusbar" readonly="1"/>
 					</header>
+					<group col="2">
+						<field name="id"/>
+					</group>
 					<group col="4">
 						<group>
 							<field name="move_date"/>
@@ -70,6 +73,7 @@
 			<field name="arch" type="xml">
 				<!-- TEGUH@20180405 : tambah atribut color -->
 				<tree colors="blue:state == 'request';red:state in ('otw','delivered');green:state == 'draft'">
+					<field name ="id" />
 					<field name="move_date"/>
 					<field name="from_stock_location_id"/>
 					<field name="to_stock_location_id"/>

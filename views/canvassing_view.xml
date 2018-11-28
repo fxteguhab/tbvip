@@ -27,7 +27,7 @@
 					<attribute name="invisible">True</attribute>
 				</page>
 				<page string="Trip Expenses" position="before">
-					<page string="Interbranch Lines">
+					<page string="Internal">
 						<field name="interbranch_move_ids" attrs="{'readonly': [('state', '=', 'finished')]}">
 							<tree version="7.0" editable="bottom">
 								<field name="interbranch_move_id" domain="[('state', '=', 'ready')]" options="{'no_create': 1}"/>
@@ -36,20 +36,18 @@
 								<!--<field name="to_stock_location_id"/>-->
 								<field name="is_executed"/>
 								<field name="notes"/>
-								<button name="action_open_interbrach_move" string="Detail" type="object" icon="gtk-dnd" attrs="{'invisible': [('interbranch_move_id','=',False)]}" />
+								<field name ="load_time"/>
+								<button name="action_open_interbrach_move" string="⇒ Detail" type="object" class="oe_link" attrs="{'invisible': [('interbranch_move_id','=',False)]}" />
 							</tree>
 						</field>
 					</page>
 				</page>
 				<xpath expr="//notebook/page[@string='Stock Pickings']/field[@name='stock_line_ids']/tree/field[@name='notes']" position="after">
 					<field name ="load_time"/>
-					<button name="action_open_sales_order" string="Detail" type="object" icon="gtk-dnd" attrs="{'invisible': [('stock_picking_id','=',False)]}" />
+					<button name="action_open_sales_order" string="⇒ Detail" type="object" class="oe_link" attrs="{'invisible': [('stock_picking_id','=',False)]}" />
 				</xpath>
 				<page string="Stock Pickings" position="attributes">
 					<attribute name="string">External</attribute>
-				</page>
-				<page string="Interbranch Lines" position="attributes">
-					<attribute name="string">Internal</attribute>
 				</page>
 			</field>
 		</record>
@@ -77,6 +75,9 @@
 			<field name="type">tree</field>
 			<field name="inherit_id" ref="canvassing.canvassing_canvas_tree"/>
 			<field name="arch" type="xml">
+				<field name="name" position="before">
+					<field name="id"/>
+				</field>
 				<field name="name" position="attributes">
 					<attribute name = "invisible">True</attribute>
 				</field>
