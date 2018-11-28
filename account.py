@@ -93,6 +93,9 @@ class account_invoice(osv.osv):
 
 	def invoice_validate(self, cr, uid, ids, context=None):
 		result = super(account_invoice, self).invoice_validate(cr, uid, ids, context=context)
+		
+		model, general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
+
 		invoice = self.browse(cr,uid,ids)
 		invoice_line_ids = invoice.invoice_line
 		for invoice_line_id in invoice_line_ids:
@@ -118,12 +121,12 @@ class account_invoice(osv.osv):
 			partner_id =  invoice_line.invoice_id.partner_id.id
 			origin = invoice_line.origin
 
-		if invoice.type in ['in_invoice']: #if "buy"
-			invoice_type = 'in_invoice'
-		elif invoice.type in ['out_invoice']:	
-			invoice_type = 'out_invoice'
-
-			self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
+			if invoice.type in ['in_invoice']: #if "buy"
+				invoice_type = 'in_invoice'
+				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
+			elif invoice.type in ['out_invoice']:	
+				invoice_type = 'out_invoice'
+				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=general_customer_id)
 
 			ctx = {
 				'price_unit_nett_old' : price_unit_nett_old,
