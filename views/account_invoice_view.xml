@@ -123,6 +123,7 @@
             	</xpath>
 				<field name="state" position="before">
 					<field name="journal_id"/>
+					<field name="name"/>
 				</field>
 				<field name="supplier_invoice_number"  position="attributes">
 					<attribute name="string">Invoice Number</attribute>

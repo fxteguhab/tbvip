@@ -31,7 +31,7 @@ class purchase_retur(osv.osv):
 		'employee_id': fields.many2one('hr.employee', 'Employee'),
 		'retur_line_ids': fields.one2many('sale.retur.line', 'purchase_retur_id', 'Product Retur:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'payment_purchase_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
-		'partner_id': fields.many2one('res.partner', 'Customer'),
+		'partner_id': fields.many2one('res.partner', 'Supplier'),
 		'desc': fields.char('Description'),
 		'bon_number': fields.char('Bon Number'),
 		'state': fields.selection(_RETUR_STATE, 'State', required=True),
@@ -53,13 +53,14 @@ class purchase_retur(osv.osv):
 				return user_data.branch_id.default_journal_sales_retur.id
 			else:
 				return None
-
+	'''
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
 		model, general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
 		partner_id = general_customer_id
 		return partner_id
-
+	'''
+	
 	def _get_journal(self, cr, uid, context=None):
 		"""
 		Fungsi ini didapat dari account_invoice_refund tanpa ada perubahan fungsi
@@ -81,7 +82,7 @@ class purchase_retur(osv.osv):
 		'journal_date': lambda self, cr, uid, context: datetime.now(),
 		'branch_id': _default_branch_id,
 		'payment_purchase_retur_journal': _default_payment_cash_journal,
-		'partner_id': _default_partner_id,
+		#'partner_id': _default_partner_id,
 		'state': 'draft',
 		'refund_journal_id': _get_journal,
 	}

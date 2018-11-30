@@ -120,12 +120,12 @@ class account_invoice(osv.osv):
 			partner_name = invoice_line.invoice_id.partner_id.display_name
 			partner_id =  invoice_line.invoice_id.partner_id.id
 			origin = invoice_line.origin
-
+			invoice_type = invoice.type
 			if invoice.type in ['in_invoice']: #if "buy"
-				invoice_type = 'in_invoice'
+				#invoice_type = 'in_invoice'
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
 			elif invoice.type in ['out_invoice']:	
-				invoice_type = 'out_invoice'
+				#invoice_type = 'out_invoice'
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=general_customer_id)
 
 			ctx = {
