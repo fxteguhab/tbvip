@@ -515,7 +515,7 @@ class tbvip_day_end(osv.osv):
 				'debit': 0,
 				'credit': vals['omzet_cash'] + vals['balance'],
 				'partner_id': vals['partner_id'],
-				'to_check' : True,
+				#'to_check' : True,
 			}],
 			[0, False, {
 				'name': name,
@@ -523,7 +523,7 @@ class tbvip_day_end(osv.osv):
 				'debit': vals['omzet_cash'] + vals['balance'],
 				'credit': 0,
 				'partner_id': vals['partner_id'],
-				'to_check' : True,
+				#'to_check' : True,
 			}],
 		]
 		new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)

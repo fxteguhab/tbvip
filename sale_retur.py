@@ -33,11 +33,114 @@ class sale_retur(osv.osv):
 		'payment_sale_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
 		'partner_id': fields.many2one('res.partner', 'Customer'),
 		'desc': fields.char('Description'),
-		'bon_number': fields.char('Bon Number'),
 		'state': fields.selection(_RETUR_STATE, 'State', required=True),
 		'period' : fields.many2one('account.period', 'Force period'),
 		'refund_journal_id' : fields.many2one('account.journal', 'Refund Journal'),
+		'bon_number': fields.char('Bon Number Return '),
+		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number Return'),
+
+		'employee_id_old_sales': fields.many2one('hr.employee', 'Sell by'),
+		'bon_number_old_sales': fields.char('Bon Number Sales'),
 	}
+
+	def onchange_old_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
+		result = {}
+		result['value'] = {}
+		if bon_number and date_order:
+			try:
+				bon_book = self.check_and_get_old_bon_number(cr, uid, bon_number, date_order)
+				if bon_book:
+					result['value'].update({
+						'employee_id_old_sales': bon_book.employee_id.id
+					})
+			except Exception, e:
+				result['value'].update({
+					'employee_id_old_sales': '',
+					'bon_number_old_sales': '',
+				})
+				result['warning'] = {
+					'title': e.name,
+					'message': e.value,
+				}
+			finally:
+				return result
+		return result
+
+	def onchange_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
+		result = {}
+		result['value'] = {}
+		if bon_number and date_order:
+			try:
+				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
+				if bon_book:
+					result['value'].update({
+						'employee_id': bon_book.employee_id.id
+					})
+			except Exception, e:
+				result['value'].update({
+					'employee_id': '',
+					'bon_number': '',
+				})
+				result['warning'] = {
+					'title': e.name,
+					'message': e.value,
+				}
+			finally:
+				return result
+		return result
+
+	def check_and_get_old_bon_number(self, cr, uid, bon_number, date_order):
+		user_data = self.pool.get('res.users').browse(cr, uid, uid)
+		branch_id = user_data.branch_id.id or None
+		bon_book = self._get_bon_book(cr, uid, bon_number, context = {})
+		if bon_book.used_numbers:
+			used_numbers = bon_book.used_numbers.split(', ')
+			for used_number in used_numbers:
+				if used_number == bon_number:
+					return bon_book
+
+	def check_and_get_bon_number(self, cr, uid, bon_number, date_order):
+		user_data = self.pool.get('res.users').browse(cr, uid, uid)
+		branch_id = user_data.branch_id.id or None
+		bon_book = self._get_bon_book(cr, uid, bon_number, context = {})
+		if bon_book.total_used >= bon_book.total_sheets:
+			raise osv.except_orm(_('Bon book is full'), _('All sheets in bon book have already been used.'))
+		else:
+			if bon_book.used_numbers:
+				used_numbers = bon_book.used_numbers.split(', ')
+				for used_number in used_numbers:
+					if used_number == bon_number:
+						raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
+			return bon_book
+
+	def _get_bon_book(self, cr, uid, bon_number, context = {}):
+		bon_book_obj = self.pool.get('tbvip.bon.book')
+		user_data = self.pool.get('res.users').browse(cr, uid, uid)
+		branch_id = user_data.branch_id.id or None
+		bon_book_id = bon_book_obj.search(cr, uid, [
+			('branch_id', '=', branch_id),
+			('start_from', '<=', int(bon_number)),
+			('end_at', '>=', int(bon_number)),
+		], limit=1, order='issue_date DESC')
+		bon_book = bon_book_obj.browse(cr, uid, bon_book_id)
+		if not bon_book:
+			raise osv.except_orm(_('Creating sale return error'),
+				_('There is no bon book with the given number in your branch.'))
+		return bon_book
+
+	def _update_bon_book(self, cr, uid, bon_number, date_order):
+		bon_book_obj = self.pool.get('tbvip.bon.book')
+		if bon_number and date_order:
+			bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
+			if bon_book:
+				temp_book_number = bon_book.used_numbers
+				if not temp_book_number:
+					temp_book_number = ""
+				bon_book_obj.write(cr, uid, bon_book.id, {
+					'total_used': bon_book.total_used + 1,
+					'used_numbers': (temp_book_number + ', ' + bon_number) if (len(temp_book_number)>=1) else bon_number,
+				})
+		return
 
 	def _default_branch_id(self, cr, uid, context={}):
 	# default branch adalah tempat user sekarang ditugaskan
@@ -243,7 +346,9 @@ class sale_retur(osv.osv):
 				writeoff_journal_id = refund_journal_id.id,
 				writeoff_acc_id=journal_retur.default_debit_account_id.id,
 			)
-		
+
+		#self._update_bon_book(cr, uid, retur.bon_number, retur.journal_date)
+
 		self.write(cr, uid, ids, {
 			'state': 'done',
 			'period':period,

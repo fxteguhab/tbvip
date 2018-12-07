@@ -5,7 +5,7 @@
 			<field name="name">sale.retur.form</field>
 			<field name="model">sale.retur</field>
 			<field name="arch" type="xml">
-				<form string="Sales Retur">
+				<form string="Sales Return">
 					<header>
 						<button name="button_retur" string="Retur" type="object" attrs="{'invisible': [('state','!=','draft')]}"/>
 						<field name="state" widget="statusbar"/>
@@ -20,8 +20,12 @@
 								<field name="amount" class="oe_inline"/>
 								<button name="calc_amount" string="⇒ Update" type="action" class="oe_link" attrs="{'invisible': [('state','!=','draft')]}"/>
 							</div>
+							<field name="bon_number" /><!--on_change="onchange_bon_number(bon_number, journal_date)"/>-->
 							<field name="employee_id" options="{'no_create': 1}"/>
-							<field name="bon_number" />
+							<field name="bon_number_old_sales"/><!-- on_change="onchange_old_bon_number(bon_number_old_sales, journal_date)"/>-->
+							<field name="employee_id_old_sales"/>
+							
+
 							<field name="partner_id" options="{'no_create': 1}"/>
 							<field name="desc" />
 						</group>
