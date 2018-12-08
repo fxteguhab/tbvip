@@ -1,6 +1,5 @@
 <openerp>
 	<data>
-
 		<record forcecreate="True" id="decimal_custom_order_line" model="decimal.precision">
 			<field name="name">Decimal Custom Order Line</field>
 			<field name="digits">2</field>
@@ -66,40 +65,5 @@
 				</div>
 			</t>
 		</template>
-
-		<record id="tbvip_branch_form" model="ir.ui.view">
-			<field name="name">tbvip.branch.form</field>
-			<field name="model">tbvip.branch</field>
-			<field name="arch" type="xml">
-				<form>
-					<group>
-						<field name="name"/>
-						<field name="default_stock_location_id"/>
-						<field name="default_incoming_location_id"/>
-						<field name="default_outgoing_location_id"/>
-						<field name="default_journal_purchase"/>
-						<field name="default_journal_sales"/>
-						<field name="default_journal_sales_retur"/>
-						<field name="default_account_cash"/>
-						<field name="default_account_sales"/>
-						<field name="default_account_purchase"/>
-						<field name="address"/>
-						<field name="default_open_hour" widget="float_time"/>
-						<field name="default_closed_hour" widget="float_time"/>
-						<field name="fingerprint_id" />
-					</group>
-				</form>
-			</field>
-		</record>
-		<record id="tbvip_branch_tree" model="ir.ui.view">
-			<field name="name">tbvip.branch.tree</field>
-			<field name="model">tbvip.branch</field>
-			<field name="arch" type="xml">
-				<tree>
-					<field name="name"/>
-				</tree>
-			</field>
-		</record>
-
 	</data>
 </openerp>

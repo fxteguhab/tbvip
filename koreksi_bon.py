@@ -151,10 +151,19 @@ class koreksi_bon(osv.osv_memory):
 			user_obj = self.pool.get('res.users')
 			cashier = user_obj.browse(cr, uid, uid)
 
+			branch_id = cashier.branch_id.id
+			branch_data = self.pool['tbvip.branch'].browse(cr,uid,branch_id)
+			branch_employee = branch_data.employee_list
+			journal_retur_id = None
+			for employee in branch_employee:
+				if employee.user_id.id == uid:
+					journal_retur_id =  employee.default_journal_sales_retur_override.id
+			'''
 			if cashier.default_journal_sales_override:
 				journal_retur_id = cashier.default_journal_sales_retur_override.id
 			elif cashier.branch_id.default_journal_sales_retur:
 				journal_retur_id = cashier.branch_id.default_journal_sales_retur.id
+			'''
 
 			journal_retur =  journal_obj.browse(cr, uid, journal_retur_id, context=context)
 			name = 'REVOKE '+inv.name

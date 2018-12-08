@@ -367,6 +367,18 @@ class tbvip_day_end(osv.osv):
 		return len(day_end_ids)
 	
 	def _default_modal_cash(self, cr, uid, context={}):
+
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		branch_id = user_data.branch_id.id
+		branch_data = self.pool['tbvip.branch'].browse(cr,uid,branch_id)
+		branch_employee = branch_data.employee_list
+		default_modal_cash = 0
+		for employee in branch_employee:
+			if employee.user_id.id == uid:
+				default_modal_cash =  employee.default_modal_cash
+		return default_modal_cash
+
+		'''
 		# default from employee setting
 		employee_obj = self.pool.get('hr.employee')
 		employee_ids = employee_obj.search(cr, uid, [
@@ -376,13 +388,26 @@ class tbvip_day_end(osv.osv):
 			return employee_obj.browse(cr, uid, employee_ids[0], context=context).default_modal_cash
 		else:
 			return 0
+		'''
 	
 	def _default_branch_id(self, cr, uid, context={}):
 		# default branch adalah tempat user sekarang ditugaskan
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		return user_data.branch_id.id or None
 
+	def _default_kas_id(self, cr, uid, context={}):
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		branch_id = user_data.branch_id.id
+		branch_data = self.pool['tbvip.branch'].browse(cr,uid,branch_id)
+		branch_employee = branch_data.employee_list
+		default_account_cash = None
+		for employee in branch_employee:
+			if employee.user_id.id == uid:
+				default_account_cash =  employee.default_account_cash.id
+		return default_account_cash
+
 	def _default_account_cash(self, cr, uid, context={}):
+		#default pool cash vault collector
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		if user_data.branch_id.default_account_cash:
 			return user_data.branch_id.default_account_cash.id
@@ -398,7 +423,7 @@ class tbvip_day_end(osv.osv):
 		'day_end_date': fields.datetime('Day End Date', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'amend_number': fields.integer('Amend Number'),
-		'kas_id': fields.many2one('account.account', 'Kas', required=True, domain=[('is_tbvip_kas', '=', True)]),
+		'kas_id': fields.many2one('account.account', 'Kas', required=True, readonly=True, domain=[('is_tbvip_kas', '=', True)]),
 
 		'qty_100': fields.integer('100', help='A Hundred Quantity'),
 		'qty_200': fields.integer('200', help='Two Hundred Quantity'),
@@ -446,6 +471,7 @@ class tbvip_day_end(osv.osv):
 		'modal_cash': _default_modal_cash,
 		'default_account_cash' : _default_account_cash,
 		'partner_id' : _default_partner_id,
+		'kas_id': _default_kas_id,
 	}
 	
 	def create(self, cr, uid, vals, context=None):

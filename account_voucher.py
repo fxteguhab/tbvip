@@ -39,18 +39,34 @@ class account_voucher(osv.osv):
 	def _get_account_id(self, cr, uid, ttype, user_id, context=None):
 		# Get Default account on branch and change account_id with it
 		user_data = self.pool['res.users'].browse(cr, uid, user_id)
-		default_account_purchase =  user_data.branch_id.default_account_purchase
-		default_account_sales = user_data.branch_id.default_account_sales
+		#default_account_purchase =  user_data.branch_id.default_account_cash #user_data.branch_id.default_account_purchase
+		#default_account_sales = user_data.branch_id.default_account_cash #user_data.branch_id.default_account_sales
+		
+		default_account_cash = user_data.branch_id.default_account_cash
+		default_account_bank = user_data.branch_id.default_account_bank
+
 		cash_account_id = False
+		if (default_account_cash):
+			cash_account_id = default_account_cash.id
+
+		'''	
 		if ttype in ('sale', 'receipt') and default_account_sales:
 			cash_account_id = default_account_sales.id
 		elif ttype in ('purchase', 'payment'):
 			cash_account_id = default_account_purchase.id
-		
+		'''
+
 		bank_account_id = False
+		if default_account_bank:
+			bank_account_id = default_account_bank.id
+		
+
+
+		'''
 		bank_account_ids = self.pool.get('account.account').search(cr, uid, [('type', 'not in', ['view']), ('user_type.code', '=', 'bank')], context=context, limit=1)
 		if len(bank_account_ids) > 0:
 			bank_account_id = bank_account_ids[0]
+		'''
 		return cash_account_id, bank_account_id
 	
 	def basic_onchange_partner(self, cr, uid, ids, partner_id, journal_id, ttype, context=None):
@@ -143,7 +159,16 @@ class account_voucher(osv.osv):
 					total -= line.amount
 			result[account_voucher_data.id] = total
 		return result
-
+	'''
+	def action_kontra(self, cr, uid, ids, context=None):
+		self.message_post(cr, uid, ids,body=_("Update State to Kontra"))
+		# state request dr button
+		self.write(cr, uid, ids, {
+		'state': 'kontra'
+		}, context=context)
+		
+		return True
+	'''
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -155,18 +180,35 @@ class account_voucher(osv.osv):
 			help="Transaction reference number.", copy=False),
 		'amount': fields.float('Total Paid', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'selected_amount': fields.function(_selected_amount, type="float", string="Total Amount"),
+		'kontra' : fields.boolean('Kontra'),
+		#'state':fields.selection(
+		#	[('draft','Draft'),
+		#	 ('kontra','Kontra'),
+		#	 ('cancel','Cancelled'),
+		#	 ('proforma','Pro-forma'),
+		#	 ('posted','Posted')
+		#	], 'Status', readonly=True, track_visibility='onchange', copy=False,
+		#	help=' * The \'Draft\' status is used when a user is encoding a new and unconfirmed Voucher. \
+		#				\n* The \'Pro-forma\' when voucher is in Pro-forma status,voucher does not have an voucher number. \
+		#				\n* The \'Posted\' status is used when user create voucher,a voucher number is generated and voucher entries are created in account \
+		#				\n* The \'Cancelled\' status is used when user cancel voucher.'),
 	}
 
 	_defaults = {
 		'check_maturity_date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
 		'writeoff_acc_id': _default_writeoff_acc_id,
 		'comment': _('Rounding'),
+		'kontra' : False,
 	}
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
 	
 	def print_kontra_bon(self, cr, uid, ids, context):
 		if self.browse(cr,uid,ids)[0].line_dr_ids:
+			self.write(cr, uid, ids, {
+			'kontra': True
+			}, context=context)
+
 			return {
 				'type' : 'ir.actions.act_url',
 				'url': '/tbvip/print/account.voucher/' + str(ids[0]),

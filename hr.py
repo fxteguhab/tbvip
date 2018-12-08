@@ -24,7 +24,7 @@ class hr_employee(osv.osv):
 		'is_spg': fields.boolean('Is SPG?'),
 		'employee_no': fields.char('Employee No.'),
 		'fingerprint_id': fields.char('Fingerprint ID'),
-		'default_modal_cash': fields.float('Default Modal Cash', help='Only needed when the employee is an administrator.'),
+		#'default_modal_cash': fields.float('Default Modal Cash', help='Only needed when the employee is an administrator.'),
 		'wallet_owner_saving_id': fields.many2one('wallet.owner', 'Saving Wallet'),
 		'wallet_owner_loan_id': fields.many2one('wallet.owner', 'Loan Wallet'),
 	}

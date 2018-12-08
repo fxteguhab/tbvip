@@ -5,34 +5,6 @@ import os
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 
-
-# ==========================================================================================================================
-class tbvip_branch(osv.osv):
-	_name = 'tbvip.branch'
-	_description = 'Store branches'
-	
-# COLUMNS ------------------------------------------------------------------------------------------------------------------
-	
-	_columns = {
-		'name': fields.char('Branch Name', required=True),
-		'default_incoming_location_id': fields.many2one('stock.location', 'Default Incoming Location'),
-		'default_outgoing_location_id': fields.many2one('stock.location', 'Default Outgoing Location'),
-		'default_stock_location_id': fields.many2one('stock.location', 'Default Stock Location'),
-		'default_journal_purchase' : fields.many2one('account.journal', 'Default Purchase Cash Journal'),
-		'default_journal_sales' : fields.many2one('account.journal', 'Default Sale Cash Journal '),
-		'default_journal_sales_retur' : fields.many2one('account.journal', 'Default Sale Retur Cash Journal '),
-		'default_account_cash' : fields.many2one('account.account', 'Default Cash Account'),
-		'default_account_sales' : fields.many2one('account.account', 'Default Account Sales'),
-		'default_account_purchase' : fields.many2one('account.account', 'Default Account Purchase'),
-		'address': fields.text('Address', required=True),
-		'default_open_hour': fields.float('Default Open Hour'),
-		'default_closed_hour': fields.float('Default Closed Hour'),
-		'fingerprint_id': fields.char('Fingerprint ID'),
-	}
-
-
-# ==========================================================================================================================
-
 class tbvip_mysql_bridge(osv.osv):
 	_name = 'tbvip.mysql.bridge'
 	_auto = False

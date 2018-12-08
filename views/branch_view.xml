@@ -1,0 +1,63 @@
+<openerp>
+	<data>
+		<record id="tbvip_branch_form" model="ir.ui.view">
+			<field name="name">tbvip.branch.form</field>
+			<field name="model">tbvip.branch</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<group string ="General Information">
+							<field name="name"/>
+							<field name="address"/>
+							<field name="default_open_hour" widget="float_time"/>
+							<field name="default_closed_hour" widget="float_time"/>
+							<field name="fingerprint_id" />
+						</group>
+						<group string="Warehouse">
+							<field name="default_stock_location_id" options="{'no_create': 1}"/>
+							<field name="default_incoming_location_id" options="{'no_create': 1}"/>
+							<field name="default_outgoing_location_id" options="{'no_create': 1}"/>
+						</group>
+						<group string="Accounting-Purchase">
+							<field name="default_account_cash" options="{'no_create': 1}"/>
+							<field name="default_account_bank" options="{'no_create': 1}"/>
+						</group>
+						<group string="Accounting-Sale">
+							<field name="default_journal_sales_bank" options="{'no_create': 1}"/>	
+						</group>
+					</group>
+					<group>
+						<label for = "employee_list" /> 
+						<field name="employee_list" nolabel="1"/>
+					</group>
+				</form>
+			</field>
+		</record>
+		<record id="tbvip_branch_tree" model="ir.ui.view">
+			<field name="name">tbvip.branch.tree</field>
+			<field name="model">tbvip.branch</field>
+			<field name="arch" type="xml">
+				<tree>
+					<field name="name"/>
+					<field name="address"/>
+				</tree>
+			</field>
+		</record>
+
+		<record id="tbvip_branch_employee_tree" model="ir.ui.view">
+			<field name="name">tbvip.branch.employee.tree</field>
+			<field name="model">tbvip.branch.employee</field>
+			<field name="arch" type="xml">
+				<tree editable="bottom">
+					<field name="name"/>
+					<field name="user_id" options="{'no_create': 1}"/>
+					<field name="default_modal_cash"/>
+					<field name="default_account_cash" options="{'no_create': 1}"/>
+					<field name="default_journal_sales_override" options="{'no_create': 1}"/>
+					<field name="default_journal_sales_retur_override" options="{'no_create': 1}"/>
+				</tree>
+			</field>
+		</record>
+
+	</data>
+</openerp>

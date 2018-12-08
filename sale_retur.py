@@ -149,6 +149,16 @@ class sale_retur(osv.osv):
 
 	def _default_payment_cash_journal(self, cr, uid, context={}):
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		branch_id = user_data.branch_id.id
+		branch_data = self.pool['tbvip.branch'].browse(cr,uid,branch_id)
+		branch_employee = branch_data.employee_list
+		default_journal_sales = None
+		for employee in branch_employee:
+			if employee.user_id.id == uid:
+				default_journal_sales =  employee.default_journal_sales_retur_override.id
+		return default_journal_sales
+		'''
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		if user_data.default_journal_sales_retur_override:
 			return user_data.default_journal_sales_retur_override.id
 		else:
@@ -156,7 +166,8 @@ class sale_retur(osv.osv):
 				return user_data.branch_id.default_journal_sales_retur.id
 			else:
 				return None
-
+		'''
+		
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
 		model, general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')

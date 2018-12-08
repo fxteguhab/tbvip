@@ -15,7 +15,7 @@
 				<xpath expr="//field[@name='active']" position="before">
 					<field name="fingerprint_id"/>
 					<field name="is_spg"/>
-					<field name="default_modal_cash"/>
+					<!--<field name="default_modal_cash"/>-->
 				</xpath>
 			</field>
 		</record>
