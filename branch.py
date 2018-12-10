@@ -76,8 +76,8 @@ class tbvip_branch_employee(osv.osv):
 
 		if (user_id):
 			#2 nama sama di branch sama
-			if (self.search(cr, uid, [('user_id', '=', user_id),('branch_id','=',branch_id)], limit=1, context=context)):
-				raise osv.except_osv(_('Warning!'), _("This employee already in that branch"))
+			#if (self.search(cr, uid, [('user_id', '=', user_id),('branch_id','=',branch_id)], limit=1, context=context)):
+			#	raise osv.except_osv(_('Warning!'), _("This employee already in that branch"))
 
 			#hapus data employee di branch lain
 			employee_id = self.search(cr, uid, [('user_id', '=', user_id),('branch_id','!=',branch_id)], limit=1, context=context)
