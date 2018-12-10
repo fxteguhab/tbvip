@@ -198,11 +198,15 @@
 
 				<filter string="Order Month" position="before">
 					<filter name="groupby_employee" string="Employee" context="{'group_by':'employee_id'}"/>
+					<filter name="groupby_state" string="State" context="{'group_by':'state'}"/>
 					<filter name="groupby_branch" string="Branch" context="{'group_by':'branch_id'}"/>
 				</filter>
 				<filter string="Order Month" position="after">
-					<filter string="Order Date" name="Date" context="{'group_by':'date_order:day'}" help="Ordered date of the sales order"/>
+					<filter string="Date" name="Date" context="{'group_by':'date_order:day'}" help="Ordered date of the sales order"/>
 					<filter string="Today" name="filter_date_order_today" domain="[('date_order','&gt;=',datetime.datetime.combine(context_today(), datetime.time(0,0,0))),('date_order','&lt;=',datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>	
+				</filter>
+				<filter string="Order Month" position="attributes">
+					<attribute name ="string">Month</attribute>
 				</filter>
 				<filter string="Salesperson" position="attributes">
 					<attribute name="string">Cashier</attribute>
