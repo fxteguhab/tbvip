@@ -14,6 +14,9 @@
 					<field name="state" widget="statusbar" statusbar_visible="draft,kontra,posted" statusbar_colors='{"proforma":"blue"}'/>
 				</field>
 				-->
+				<field name="partner_id" position="attributes">
+					<attribute name="options">{'no_create': True}</attribute>
+				</field>
 				<button name="cancel_voucher" position="after">
 					<!--<button name="action_kontra" string="Kontra" type="object" states = "draft" confirm="Are you sure to kontra this payment?"/>-->
 					<button name="print_kontra_bon" string="Print" type="object" icon="gtk-print"/>
@@ -61,9 +64,12 @@
 					<field name="account_id" invisible="1" />
 					<field name="payment_option" required="1" 
 						attrs="{'invisible':[('writeoff_amount','=',0)]}"/>
+					<field name="writeoff_acc_id" invisible="1"/>
+					<!--
 					<field name="writeoff_acc_id"
 						attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'required':[('payment_option','=','with_writeoff'), ('writeoff_amount','!=',0)]}"
 						domain="[('type','=','other')]"/>
+					-->
 					<field name="comment"
 						attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)]}"/>					
 				</field>
@@ -183,9 +189,12 @@
 					<field name="account_id"/>
 					<field name="payment_option" required="1" 
 						attrs="{'invisible':[('writeoff_amount','=',0)]}"/>
+					<field name="writeoff_acc_id" invisible="1"/>
+					<!--
 					<field name="writeoff_acc_id"
 						attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)], 'required':[('payment_option','=','with_writeoff'), ('writeoff_amount','!=',0)]}"
 						domain="[('type','=','other')]"/>
+					-->
 					<field name="comment"
 						attrs="{'invisible':['|', ('payment_option','!=','with_writeoff'), ('writeoff_amount','=',0)]}"/>					
 				</field>

@@ -479,7 +479,8 @@ class tbvip_day_end(osv.osv):
 		
 		account_account_obj = self.pool.get('account.account')
 		now = datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-		kas_id = vals['kas_id']
+		#kas_id = vals['kas_id']
+		kas_id = self._default_kas_id(cr, uid, context=context)
 		kas = account_account_obj.browse(cr, uid, kas_id, context=context)
 		journal_entry_obj = self.pool.get('account.move')
 		vals.update({
@@ -515,7 +516,7 @@ class tbvip_day_end(osv.osv):
 			entry_data['line_id'] = [
 				[0, False, {
 					'name': name,
-					'account_id': vals['kas_id'],
+					'account_id': kas_id,#vals['kas_id'],
 					'debit': vals['balance'] if vals['balance'] > 0 else 0,
 					'credit': -vals['balance'] if vals['balance'] < 0 else 0,
 					'partner_id': vals['partner_id'],
@@ -537,7 +538,7 @@ class tbvip_day_end(osv.osv):
 		entry_data['line_id'] = [
 			[0, False, {
 				'name': name,
-				'account_id': vals['kas_id'],
+				'account_id': kas_id,#vals['kas_id'],
 				'debit': 0,
 				'credit': vals['omzet_cash'] + vals['balance'],
 				'partner_id': vals['partner_id'],
@@ -552,7 +553,7 @@ class tbvip_day_end(osv.osv):
 				#'to_check' : True,
 			}],
 		]
-		new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+		new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)	
 		journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
 		
 		return super(tbvip_day_end, self).create(cr, uid, vals, context)

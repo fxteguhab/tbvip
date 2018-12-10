@@ -198,6 +198,7 @@ class account_voucher(osv.osv):
 		'check_maturity_date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
 		'writeoff_acc_id': _default_writeoff_acc_id,
 		'comment': _('Rounding'),
+		'payment_option' : 'with_writeoff',
 		'kontra' : False,
 	}
 	
