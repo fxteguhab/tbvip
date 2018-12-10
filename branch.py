@@ -74,6 +74,14 @@ class tbvip_branch_employee(osv.osv):
 		if vals.get('user_id', False): user_id = vals['user_id']
 		if vals.get('branch_id', False): branch_id = vals['branch_id']
 
+		#hapus branch di old_user
+		if (old_user_id):
+			#hapus branch id res_user yg lama
+			user_obj = self.pool.get('res.users')
+			user_obj.write(cr, uid, old_user_id, {
+				'branch_id': False,
+			})
+			
 		if (user_id):
 			#2 nama sama di branch sama
 			#if (self.search(cr, uid, [('user_id', '=', user_id),('branch_id','=',branch_id)], limit=1, context=context)):
@@ -90,12 +98,6 @@ class tbvip_branch_employee(osv.osv):
 				'branch_id': branch_id,
 			})
 
-		#hapus branch di old_user
-		if (old_user_id):
-			#hapus branch id res_user yg lama
-			user_obj = self.pool.get('res.users')
-			user_obj.write(cr, uid, old_user_id, {
-				'branch_id': False,
-			})
+		
 		return super(tbvip_branch_employee, self).write(cr, uid, ids, vals, context)
 # ==========================================================================================================================
