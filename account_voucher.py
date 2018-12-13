@@ -34,6 +34,13 @@ class account_voucher(osv.osv):
 			partner = self.pool.get('res.partner').browse(cr, uid, partner_id)
 			if len(partner.bank_ids) > 0:
 				result['value']['bank_id'] = partner.bank_ids[0].id
+		
+		new_dr_ids = []
+		for key in result['value']['line_dr_ids']:
+			in_kontra = self.pool.get('account.voucher.line').search(cr, uid, [('move_line_id', '=', key['move_line_id']),('reconcile','=',True)], limit=1)
+			if not in_kontra:
+				new_dr_ids.append(key)
+		result['value']['line_dr_ids']= new_dr_ids
 		return result
 	
 	def _get_account_id(self, cr, uid, ttype, user_id, context=None):
