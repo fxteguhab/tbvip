@@ -5,6 +5,11 @@ from datetime import datetime, date, timedelta
 import openerp.addons.decimal_precision as dp
 
 # ==========================================================================================================================
+_PAYMENT_METHOD = [
+	('cash', 'CASH'),
+	('giro', 'GIRO'),
+	('transfer', 'TRANSFER'),
+]
 
 class account_voucher(osv.osv):
 	_inherit = 'account.voucher'
@@ -35,12 +40,13 @@ class account_voucher(osv.osv):
 			if len(partner.bank_ids) > 0:
 				result['value']['bank_id'] = partner.bank_ids[0].id
 		
-		new_dr_ids = []
-		for key in result['value']['line_dr_ids']:
-			in_kontra = self.pool.get('account.voucher.line').search(cr, uid, [('move_line_id', '=', key['move_line_id']),('reconcile','=',True)], limit=1)
-			if not in_kontra:
-				new_dr_ids.append(key)
-		result['value']['line_dr_ids']= new_dr_ids
+		if result['value'].get('line_dr_ids',False):
+			new_dr_ids = []
+			for key in result['value']['line_dr_ids']:
+				in_kontra = self.pool.get('account.voucher.line').search(cr, uid, [('move_line_id', '=', key['move_line_id']),('reconcile','=',True)], limit=1)
+				if not in_kontra:
+					new_dr_ids.append(key)
+			result['value']['line_dr_ids']= new_dr_ids
 		return result
 	
 	def _get_account_id(self, cr, uid, ttype, user_id, context=None):
@@ -188,6 +194,8 @@ class account_voucher(osv.osv):
 		'amount': fields.float('Total Paid', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'selected_amount': fields.function(_selected_amount, type="float", string="Total Amount"),
 		'kontra' : fields.boolean('Kontra'),
+		#'payment_method' : fields.selection(_PAYMENT_METHOD, 'Payment Method', required=True),
+
 		#'state':fields.selection(
 		#	[('draft','Draft'),
 		#	 ('kontra','Kontra'),
@@ -207,6 +215,7 @@ class account_voucher(osv.osv):
 		'comment': _('Rounding'),
 		'payment_option' : 'with_writeoff',
 		'kontra' : False,
+		#'payment_method' : 'giro',
 	}
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------
