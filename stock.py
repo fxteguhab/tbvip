@@ -13,6 +13,11 @@ class stock_quant(osv.osv):
 	"""
 	_inherit = "stock.quant"
 	
+	_columns = {
+		'cost': fields.float('Unit Cost',group_operator="avg"),
+		#'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True),
+	}
+
 	def _get_inventory_value(self, cr, uid, quant, context=None):
 		"""
 		Overrides so that inventory value is calculated from qty * quant.cost; instead of
@@ -347,7 +352,10 @@ class stock_move(osv.osv):
 		data_obj = self.pool.get('ir.model.data')
 	# Jika dari Purchase, maka price untuk quants didapat dari unit price nett
 		if move.purchase_line_id:
-			return move.purchase_line_id.price_unit_nett or move.product_id.standard_price
+			price = move.purchase_line_id.price_unit_nett or move.product_id.standard_price
+			price = price / move.product_id.uom_id.factor
+			return price
+			#return move.purchase_line_id.price_unit_nett or move.product_id.standard_price
 		#elif move.sale_line_id:
 		else:	
 			return move.product_id.list_price
@@ -365,6 +373,7 @@ class stock_move(osv.osv):
 			product_current_price_obj = self.pool.get('product.current.price')
 			product = move.product_id
 			current_price = product_current_price_obj.get_current(cr, uid, product.id, price_type_id, unit_id,field="nett")
+			current_price = current_price / move.product_id.uom_id.factor
 			return current_price
 
 	def _get_invoice_line_vals(self, cr, uid, move, partner, inv_type, context=None):
