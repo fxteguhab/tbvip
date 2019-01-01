@@ -24,7 +24,7 @@ class canvassing_canvas(osv.osv):
 					sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
 					if len(sale_order_id) > 0:
 						sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
-						sale_time = datetime.strptime(sale_order.create_date, fmt)
+						sale_time = datetime.strptime(sale_order.delivery_date, fmt)
 						diff = datetime.strptime(line.create_date, fmt) - sale_time
 						delta_list.append(diff)	
 
