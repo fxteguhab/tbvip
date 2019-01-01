@@ -25,8 +25,11 @@ class canvassing_canvas(osv.osv):
 					if len(sale_order_id) > 0:
 						sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
 						sale_time = datetime.strptime(sale_order.delivery_date, fmt)
-						diff = datetime.strptime(line.create_date, fmt) - sale_time
-						delta_list.append(diff)	
+						delivery_date = datetime.strptime(line.create_date, fmt)
+						diff = '00:00:00'
+						if delivery_date > sale_time :
+							diff =  delivery_date - sale_time
+							delta_list.append(diff)	
 
 			for line in canvass.interbranch_move_ids:
 				if line.interbranch_move_id:
@@ -35,10 +38,13 @@ class canvassing_canvas(osv.osv):
 					if len(transfer_id) > 0:
 						transfer = interbranch_stock_move_obj.browse(cr, uid, transfer_id[0])
 						transfer_time = datetime.strptime(transfer.create_date, fmt)
-						diff = datetime.strptime(line.create_date, fmt) - transfer_time
-						delta_list.append(diff)	
+						delivery_date = datetime.strptime(line.create_date, fmt)
+						diff = '00:00:00'
+						if delivery_date > sale_time :
+							diff =  delivery_date - transfer_time
+							delta_list.append(diff)		
 
-			result[canvass.id] = max(delta_list) if len(delta_list) > 0 else '0'
+			result[canvass.id] = max(delta_list) if len(delta_list) > 0 else '00:00:00'
 
 		return result
 
@@ -340,9 +346,11 @@ class canvasssing_canvas_stock_line(osv.Model):
 				sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
 				if len(sale_order_id) > 0:
 					sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
-					sale_time = datetime.strptime(sale_order.create_date, fmt)
-					diff = datetime.strptime(line.create_date, fmt) - sale_time
-					#time_delta = (diff.days * 24 * 60) + (diff.seconds/60)
+					sale_time = datetime.strptime(sale_order.delivery_date, fmt)
+					delivery_date = datetime.strptime(line.create_date, fmt)
+					diff = '00:00:00'
+					if delivery_date > sale_time :
+						diff =  delivery_date - sale_time
 					result[line.id] = diff
 				else:
 					result[line.id] = 0
