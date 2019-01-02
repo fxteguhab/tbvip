@@ -40,7 +40,7 @@ class canvassing_canvas(osv.osv):
 						transfer_time = datetime.strptime(transfer.create_date, fmt)
 						delivery_date = datetime.strptime(line.create_date, fmt)
 						diff = '00:00:00'
-						if delivery_date > sale_time :
+						if delivery_date > transfer_time :
 							diff =  delivery_date - transfer_time
 							delta_list.append(diff)		
 
