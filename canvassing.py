@@ -60,6 +60,7 @@ class canvassing_canvas(osv.osv):
 
 	_defaults = {
 		'is_recalculated': False,
+		'max_load_time' : '00:00:00',
 	}
 	
 	# OVERRIDES --------------------------------------------------------------------------------------------------------------
@@ -309,6 +310,7 @@ class canvasssing_canvas_stock_line(osv.Model):
 
 	_defaults = {
 		'is_executed': True,
+		'load_time' : '00:00:00',
 	}
 
 	def _sales_order_id(self, cr, uid, ids, field_name, arg, context=None):
@@ -353,9 +355,9 @@ class canvasssing_canvas_stock_line(osv.Model):
 						diff =  delivery_date - sale_time
 					result[line.id] = diff
 				else:
-					result[line.id] = 0
+					result[line.id] = '00:00:00'
 			else:
-				result[line.id] = 0
+				result[line.id] = '00:00:00'
 		return result
 
 	_columns = {
@@ -448,6 +450,7 @@ class canvassing_canvas_interbranch_line(osv.Model):
 			if line.interbranch_move_id:
 				interbranch_stock_move_obj = self.pool.get('tbvip.interbranch.stock.move')
 				transfer_id = interbranch_stock_move_obj.search(cr,uid,[('id', '=', line.interbranch_move_id.id)], limit=1)
+				diff = '00:00:00'
 				if len(transfer_id) > 0:
 					transfer = interbranch_stock_move_obj.browse(cr, uid, transfer_id[0])
 					transfer_time = datetime.strptime(transfer.create_date, fmt)
@@ -455,9 +458,9 @@ class canvassing_canvas_interbranch_line(osv.Model):
 					#time_delta = (diff.days * 24 * 60) + (diff.seconds/60)
 					result[line.id] = diff
 				else:
-					result[line.id] = 0
+					result[line.id] = '00:00:00'
 			else:
-				result[line.id] = 0
+				result[line.id] = '00:00:00'
 		return result
 
 	_columns = {
@@ -476,6 +479,7 @@ class canvassing_canvas_interbranch_line(osv.Model):
 
 	_defaults = {
 		'is_executed': True,
+		'load_time' : '00:00:00',
 	}
 	
 	def create(self, cr, uid, vals, context={}):
