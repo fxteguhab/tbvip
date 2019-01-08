@@ -27,6 +27,7 @@ class hr_employee(osv.osv):
 		#'default_modal_cash': fields.float('Default Modal Cash', help='Only needed when the employee is an administrator.'),
 		'wallet_owner_saving_id': fields.many2one('wallet.owner', 'Saving Wallet'),
 		'wallet_owner_loan_id': fields.many2one('wallet.owner', 'Loan Wallet'),
+		'branch_id': fields.related('user_id', 'branch_id','name', type="char", string="Branch"),
 	}
 	
 	def create(self, cr, uid, vals, context=None):

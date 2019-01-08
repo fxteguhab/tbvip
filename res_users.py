@@ -9,7 +9,7 @@ class res_users(osv.osv):
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'branch_id': fields.many2one('tbvip.branch', 'Branch', readonly=True),
+		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 	}
 	'''
 	'default_journal_purchase_override': fields.many2one('account.journal', 'Default Purchase Cash Journal',

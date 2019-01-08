@@ -25,6 +25,9 @@
 				<page string="HR Settings" position ="attributes">
 					<attribute name ="groups">tbvip.group_management_administrator</attribute>
 				</page>
+				<field name="active" position="attributes">
+					<attribute name="string">Active</attribute>
+				</field>
 			</field>
 		</record>
 		
