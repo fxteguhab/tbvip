@@ -110,7 +110,7 @@ class controller_print(http.Controller):
 			line.update({payslip_line.code: payslip_line.total})
 		
 		total_bonus_point = bonus.get('POIN_XTRA_POINT', 0) \
-							- bonus.get('POIN_PENALTY_POINT', 0) \
+							+ bonus.get('POIN_PENALTY_POINT', 0) \
 							+ bonus.get('POIN_MOBIL_POINT', 0) \
 							+ bonus.get('POIN_MOTOR_POINT', 0) \
 							+ bonus.get('POIN_SO_POINT', 0) \
@@ -123,7 +123,7 @@ class controller_print(http.Controller):
 		minimum_so_point = float(minimum_so_point)
 		if bonus.get('POIN_SO_POINT', 0) >= minimum_so_point:
 			total_bonus_value = bonus.get('POIN_XTRA_BONUS', 0) \
-								- bonus.get('POIN_PENALTY_BONUS', 0) \
+								+ bonus.get('POIN_PENALTY_BONUS', 0) \
 								+ bonus.get('POIN_MOBIL_BONUS', 0) \
 								+ bonus.get('POIN_MOTOR_BONUS', 0) \
 								+ bonus.get('POIN_SO_BONUS', 0) \

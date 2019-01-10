@@ -36,11 +36,12 @@
 				</field>
 				<field name="preset_id" position="after">
 					<field name="preset_code" invisible="1"/>
-					<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}" options="{'no_create': 1}"/>
+					<!--<field name="employee_id" attrs="{'required': [('preset_code','=','EXPENSE')]}" options="{'no_create': 1}"/>-->
 				</field>
 				<form position="attributes">
 					<attribute name="edit">false</attribute>
 				</form>
+				<!--
 				<field name="name" position="after">
 					<field name="expense_line_ids" attrs="{'invisible': [('preset_code','!=','EXPENSE')]}">
 						<tree editable="bottom">
@@ -63,6 +64,7 @@
 						</tree>
 					</field>
 				</field>
+				-->
 			</field>
 		</record>
 
@@ -77,6 +79,7 @@
 				</field>
 				<tree position="attributes">
 					<attribute name="edit">false</attribute>
+					<attribute name="default_order">journal_date desc</attribute>
 				</tree>
 			</field>
 		</record>

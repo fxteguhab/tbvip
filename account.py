@@ -420,7 +420,7 @@ class tbvip_day_end(osv.osv):
 		return user_data.partner_id.id or None
 	
 	_columns = {
-		'day_end_date': fields.datetime('Day End Date', required=True),
+		'day_end_date': fields.datetime('Date', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		'amend_number': fields.integer('Amend Number'),
 		'kas_id': fields.many2one('account.account', 'Kas', required=True, readonly=True, domain=[('is_tbvip_kas', '=', True)]),

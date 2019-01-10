@@ -49,7 +49,7 @@
 					<field name="omzet_cash"/>
 					<field name="modal_cash"/>
 					<field name="balance"/>
-					
+					<field name="desc"/>
 				</tree>
 			</field>
 		</record>

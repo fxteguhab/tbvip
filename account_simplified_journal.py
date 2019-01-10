@@ -22,8 +22,9 @@ class account_journal_simplified(osv.osv):
 	_defaults = {
 		'branch_id': lambda self, cr, uid, context: self.pool.get('res.users').browse(cr, uid, uid, context).branch_id.id,
 	}
-	
+	'''
 	def create(self, cr, uid, vals, context={}):
+		
 		def _execute_tbvip_scenarios(created_simplified_journal):
 			code = created_simplified_journal.preset_id.code
 			if code.startswith('EXPENSE'):
@@ -46,7 +47,7 @@ class account_journal_simplified(osv.osv):
 						'name': created_simplified_journal.name,
 						'uom_id': line.product_id.uom_id.id,
 						'unit_amount': line.amount,
-						'unit_quantity': line.qty,
+						#'unit_quantity': line.qty,
 					})
 			elif code.startswith("RETUR"):
 				# retur barang, harus plus list barang yang diretur. Ketika save transaksi, buat stock picking baru dengan
@@ -110,7 +111,7 @@ class account_journal_simplified(osv.osv):
 		# Check for some particular codes for several tbvip related scenarios
 		_execute_tbvip_scenarios(self.browse(cr, uid, new_id, context))
 		return new_id
-	
+	'''
 	def onchange_preset_id(self, cr, uid, ids, preset_id, context=None):
 		result = {
 			'value': {

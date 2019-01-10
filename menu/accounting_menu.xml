@@ -21,15 +21,14 @@
 
 		<!-- DAY END -->
 		<record id="tbvip_action_stock_day_end" model="ir.actions.act_window">
-			<field name="name">Day End</field>
+			<field name="name">Cash Register</field>
 			<field name="res_model">tbvip.day.end</field>
 			<field name="view_type">form</field>
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<menuitem sequence="3" id="tbvip_menu_day_end" name="Day End" parent="account.menu_finance"/>
-		<menuitem sequence="31" id="tbvip_menu_item_day_end"
-				parent="tbvip_menu_day_end" action="tbvip_action_stock_day_end"/>
+		<menuitem sequence="3" id="tbvip_menu_day_end" name="Cash Register" parent="account.menu_finance"/>
+		<menuitem sequence="31" id="tbvip_menu_item_day_end" parent="tbvip_menu_day_end" action="tbvip_action_stock_day_end"/>
 
 		<!-- Customer Refunds -->
 		<menuitem action="account.action_invoice_tree3" id="account.menu_action_invoice_tree3" parent="account.menu_finance_receivables"
