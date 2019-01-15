@@ -113,5 +113,18 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="product_current_commission_search">
+			<field name="name">product.current.commission.search</field>
+			<field name="model">product.current.commission</field>
+			<field name="arch" type="xml">
+				<search string="Product Current Commission Search">
+					<group string="Group By">
+						<filter name="groupby_categ_id" string="Category" context="{'group_by':'categ_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+
 	</data>
 </openerp>
