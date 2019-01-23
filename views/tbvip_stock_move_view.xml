@@ -166,6 +166,9 @@
 				<field name = "partner_id" position ="after">
 					<field name ="note" />
 				</field>
+				<field name = "date" position ="after">
+					<field name ="min_date" />
+				</field>
 			</field>
 		</record>
 	</data>
