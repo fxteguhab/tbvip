@@ -50,6 +50,9 @@
 				<field name="employee_id" position="after">
 					<field name="branch_id"/>
 				</field>
+				<field name="name" position="after">
+					<field name="time" widget="float_time"/>
+				</field>
 			</field>
 		</record>
 
@@ -60,6 +63,9 @@
 			<field name="arch" type="xml">
 				<field name="employee_id" position="after">
 					<field name="branch_id"/>
+				</field>
+				<field name="name" position="after">
+					<field name="time" widget="float_time"/>
 				</field>
 			</field>
 		</record>

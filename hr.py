@@ -73,11 +73,20 @@ class hr_employee(osv.osv):
 
 class hr_attendance(osv.osv):
 	_inherit = 'hr.attendance'
-	
+
+	def _compute_time(self, cr, uid, ids, field_name, arg, context=None):
+		fmt = '%Y-%m-%d %H:%M:%S'
+		result = {}
+		for attendance_data in self.browse(cr, uid, ids, context=context):
+			create_time = datetime.strptime(attendance_data.name, fmt) + timedelta(hours=7)	
+			result[attendance_data.id] = create_time.hour + (create_time.minute / 60.0)
+		return result
+
 	# COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
+		'time': fields.function(_compute_time,type='float',string='Time',group_operator="avg",store=True),
 	}
 
 	def create(self, cr, uid, vals, context={}):
