@@ -53,6 +53,19 @@
 			<field eval="" name="args" />
 		</record>
 
+		<record forcecreate="True" id="ir_cron_update_state_expired_campaign" model="ir.cron">
+			<field name="name">Update State Expired Campaign</field>
+			<field eval="True" name="active" />
+			<field name="user_id" ref="base.user_root" />
+			<field name="interval_number">1</field>
+			<field name="interval_type">days</field>
+			<field name="numbercall">-1</field>
+			<field name="active">1</field>
+			<field eval="'tbvip.campaign'" name="model" />
+			<field eval="'cron_expired_campaign'" name="function" />
+			<field eval="" name="args" />
+		</record>
+
 		<!--
 		<record forcecreate="True" id="cron_sync_product_category" model="ir.cron">
 		  <field name="name">Sync products and categories from old database</field>

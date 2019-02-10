@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="tbvip_action_tbvip_campaign" model="ir.actions.act_window">
+			<field name="name">Campaign Promo</field>
+			<field name="res_model">tbvip.campaign</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem id="menu_campaign_sales" name="Campaign Promo" parent="base.menu_base_partner" sequence="5"/>
+		<menuitem sequence="3" id="tbvip_menu_tbvip_campaign" parent="menu_campaign_sales" action="tbvip_action_tbvip_campaign"/>
+
+		<menuitem id="menu_campaign_stock" name="Campaign Promo" parent="stock.menu_stock_root" sequence="5"/>
+		<menuitem sequence="3" id="tbvip_menu_tbvip_campaign" parent="menu_campaign_stock" action="tbvip_action_tbvip_campaign"/>
+	</data>
+</openerp>

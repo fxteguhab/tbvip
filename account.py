@@ -72,6 +72,87 @@ class account_invoice(osv.osv):
 			recs = self.search([('name', operator, name)] + args, limit=limit)
 		return recs.name_get()
 	
+	def _campaign_promo_watcher(self, cr, uid, ids, context={}):
+		invoice_id = context.get('invoice_id',0)
+		product_id = context.get('product_id',0)
+		partner_id = context.get('partner_id',0)
+		price_unit = context.get('price_unit',0)
+		invoice_date = context.get('invoice_date',0)
+		product_name = context.get('name',0)
+		invoice_number = context.get('origin',0)
+		qty = context.get('qty',0)
+
+		product_template_id = self.pool['product.product'].browse(cr, uid, product_id).product_tmpl_id
+		product_template = self.pool['product.template'].browse(cr, uid, product_template_id.id) 
+		categ_id = product_template.categ_id
+		
+		campaign_list = []
+		campaign_ids = self.pool['tbvip.campaign'].search(cr, uid, ['&','&',('state','=','running'),('partner_id', '=',partner_id),'&',('date_start','<=',invoice_date),('date_end','>=',invoice_date)])
+
+		qty_min = 0
+		poin = 0
+		weight = 0
+
+		if len(campaign_ids) > 0:
+			product_ids = self.pool['tbvip.campaign.product.line'].search(cr, uid, [('campaign_id', 'in',campaign_ids),('product_template_id', '=',product_template_id.id)])	
+			for product in self.pool['tbvip.campaign.product.line'].browse(cr,uid,product_ids) : 
+				campaign_list.append(product.campaign_id.id)
+				min_qty = product.min_qty
+				poin = product.poin
+				weight = product_template.tonnage
+
+			if not product_ids:
+				category_ids = self.pool['tbvip.campaign.category.line'].search(cr, uid, [('campaign_id', 'in',campaign_ids),('product_category_id', '=',categ_id.id)])
+				for category in self.pool['tbvip.campaign.category.line'].browse(cr,uid,category_ids): 
+					campaign_list.append(category.campaign_id.id)
+					min_qty = category.min_qty
+					poin = category.poin
+					product_category = self.pool['product.category'].browse(cr,uid,category.product_category_id.id)
+					weight = product_category.tonnage
+
+		if len(campaign_list) > 0:
+			active_campaign_ids = self.pool['tbvip.campaign'].browse(cr, uid, campaign_list)
+			invoice_line_id = self.pool['tbvip.campaign.invoice.line']
+
+			for active_campaign in active_campaign_ids:
+				targets = active_campaign.target_line_ids
+
+				current_amount = 0
+				if active_campaign.measure == 'value': current_amount = (qty * price_unit)
+				elif active_campaign.measure == 'poin': current_amount = ((qty // min_qty) * poin)
+				elif active_campaign.measure == 'tonase': current_amount = (qty * weight)
+
+				active_campaign.current_amount += current_amount 
+
+				if active_campaign.invoice_type == 'one_invoice':
+					remainder = current_amount
+					for target in targets:
+						if (remainder >= target.target_amount):
+							target.achievement_counter += remainder // target.target_amount
+							active_campaign.current_achievement += remainder // target.target_amount
+							remainder = remainder % target.target_amount
+
+				if active_campaign.invoice_type == 'many_invoice':
+					remainder = active_campaign.current_amount
+					active_campaign.current_achievement = 0
+					for target in targets:
+						if (remainder >= target.target_amount):
+							target.achievement_counter =  remainder // target.target_amount
+							active_campaign.current_achievement += target.achievement_counter 
+							remainder = remainder % target.target_amount	
+
+				invoice_line_id.create(cr, uid, {
+				'campaign_id': active_campaign.id,
+				'invoice_id': invoice_id,
+				'invoice_date': invoice_date,
+				'invoice_origin':invoice_number,
+				'qty':qty,
+				'invoice_ref': product_name,
+				'amount': current_amount,
+			}, context)
+
+				
+
 	def _cost_price_watcher(self, cr, uid, ids, context={}):
 		price_unit_nett = context.get('price_unit_nett',0)
 		price_unit_nett_old = context.get('price_unit_nett_old',0)
@@ -120,10 +201,15 @@ class account_invoice(osv.osv):
 			partner_name = invoice_line.invoice_id.partner_id.display_name
 			partner_id =  invoice_line.invoice_id.partner_id.id
 			origin = invoice_line.origin
+			quantity = invoice_line.quantity
+			invoice_date = invoice_line.write_date
+
 			invoice_type = invoice.type
+			invoice_number = ''
 			if invoice.type in ['in_invoice']: #if "buy"
 				#invoice_type = 'in_invoice'
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
+
 			elif invoice.type in ['out_invoice']:	
 				#invoice_type = 'out_invoice'
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=general_customer_id)
@@ -147,10 +233,13 @@ class account_invoice(osv.osv):
 				'type' : invoice_type,
 				'categ_id' : categ_id,
 				'origin' : origin,
+				'qty' : quantity,
+				'invoice_date' : invoice_date,
 				}
 
 				#check for changes and send notif
 			self._cost_price_watcher(cr, uid, ids,  context=ctx)
+			self._campaign_promo_watcher(cr, uid, ids,  context=ctx)
 
 		return result
 # =========================================================================================================================

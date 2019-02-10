@@ -25,24 +25,27 @@ class sale_order(osv.osv):
 	_inherit = 'sale.order'
 	
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
-	
+	def _default_amount_residual(self, cr, uid, ids, field_name, arg, context):
+		result = {}
+		for sale_order in self.browse(cr, uid, ids, context):
+			result[sale_order.id] = 0
+			if len(sale_order.invoice_ids) > 0:
+				result[sale_order.id] = sale_order.invoice_ids[0].residual
+		return result
+
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
-		
 		#TEGUH@20180412 : bon book not required
 		'bon_number': fields.char('Bon Number', readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
 		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number'),
-		
-		#'bon_number': fields.char('Bon Number', required=True, readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
-		#'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number', required=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		#TEGUH@20180412 : employee id  not required
 		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
-		#'employee_id': fields.many2one('hr.employee', 'Employee', required=True, readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_paid': fields.boolean('Paid ?'),
 		'return_amount' : fields.float('Return Amount'),
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
+		'amount_residual':fields.function(_default_amount_residual,type='float',string='Balance'),
 	}
 
 	_sql_constraints = [
@@ -92,7 +95,6 @@ class sale_order(osv.osv):
 
 		#journal_id = self.pool.get('account.journal').search(cr, uid, [('type', 'in', ['bank'])], limit=1)
 		#return journal_id and journal_id[0] or None
-
 
 	_defaults = {
 		'partner_id': _default_partner_id,

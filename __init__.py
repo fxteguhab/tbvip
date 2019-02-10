@@ -32,3 +32,4 @@ import account_simplified_journal
 import maintenance
 #import notification
 import sale_retur
+import campaign

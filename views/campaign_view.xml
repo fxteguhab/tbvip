@@ -1,0 +1,129 @@
+<openerp>
+	<data>
+		<record model="ir.ui.view" id="tbvip_campaign_form">
+			<field name="name">tbvip.campaign.form</field>
+			<field name="model">tbvip.campaign</field>
+			<field name="arch" type="xml">
+				<form string="Bon" version="7.0">
+					<header>
+						<button name="set_to_running" type="object" string="Activate" class="oe_highlight"
+								confirm="Are you sure to activate this promo?" states="draft"/>
+						<button name="set_to_expired" type="object" string="Expire" class="oe_highlight"
+								confirm="Are you sure to expire this promo?" states="running"/>
+						<field name="state" widget="statusbar"/>
+					</header>
+					<group col="4">
+						<group>
+							<field name="partner_id" options="{'no_create': 1}"/>
+							<field name="name"/>
+							<field name="date_start"/>
+							<field name="date_end"/>
+							<field name="measure"/>
+							<field name="invoice_type"/>
+						</group>
+						<group>
+							<field name="current_amount"/>
+							<field name="current_achievement"/>
+							<field name="date_reward"/>
+						</group>
+					</group>
+					<notebook>
+						<page string='Target-Reward'>
+							<field name="target_line_ids"/>
+						</page>
+						<page string="Category">
+							<field name="category_line_ids"/>
+						</page>
+						<page string="Product">
+							<field name="product_line_ids"/>
+						</page>
+						<page string="Invoice(s)">
+							<field name="invoice_line_ids"/>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_campaign_tree">
+			<field name="name">tbvip.campaign.tree</field>
+			<field name="model">tbvip.campaign</field>
+			<field name="arch" type="xml">
+				<tree string="Bon" version="7.0">
+					<field name="partner_id"/>
+					<field name="name"/>
+					<field name="date_start"/>
+					<field name="date_end"/>
+					<field name="measure"/>
+					<field name="invoice_type"/>
+					<field name="current_amount"/>
+					<field name="current_achievement"/>
+					<field name="date_reward"/>
+					<field name="state"/>
+					<field name="target_line_ids"/>
+					<field name="product_line_ids"/>
+					<field name="category_line_ids"/>
+					<field name="invoice_line_ids"/>
+				</tree>
+			</field>
+		</record>
+		
+		<record model="ir.ui.view" id="tbvip_campaign_category_line_tree">
+			<field name="name">tbvip.campaign.category.line.tree</field>
+			<field name="model">tbvip.campaign.category.line</field>
+			<field name="arch" type="xml">
+				<tree string="Campaign Category Line" version="7.0" editable="bottom">
+					<field name="product_category_id" options="{'no_create': 1}"/>
+					<field name="min_qty"/>
+					<field name="poin"/>
+					<field name="discount_str"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_campaign_product_line_tree">
+			<field name="name">tbvip.campaign.product.line.tree</field>
+			<field name="model">tbvip.campaign.product.line</field>
+			<field name="arch" type="xml">
+				<tree string="Campaign Product Line" version="7.0" editable="bottom">
+					<field name="product_template_id" options="{'no_create': 1}"/>
+					<field name="min_qty"/>
+					<field name="poin"/>
+					<field name="discount_str"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_campaign_target_line_tree">
+			<field name="name">tbvip.campaign.target.line.tree</field>
+			<field name="model">tbvip.campaign.target.line</field>
+			<field name="arch" type="xml">
+				<tree string="Target-Reward Line" version="7.0" editable="bottom">
+					<field name="target_amount"/>
+					<field name="reward_type"/>
+					<field name="reward_amount"/>
+					<field name="reward_desc"/>
+					<field name="achievement_counter" readonly="True"/>
+				</tree>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="tbvip_campaign_invoice_line_tree">
+			<field name="name">tbvip.campaign.invoice.line.tree</field>
+			<field name="model">tbvip.campaign.invoice.line</field>
+			<field name="arch" type="xml">
+				<tree string="Invoice(s) Line" default_order="invoice_origin desc">
+					<field name="invoice_id"/>
+					<field name="invoice_date"/>
+					<field name="invoice_origin"/>
+					<field name="qty"/>
+					<field name="invoice_ref"/>
+					<field name="amount"/>
+				</tree>
+			</field>
+		</record>
+
+
+	</data>
+</openerp>
+
