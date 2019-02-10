@@ -609,7 +609,7 @@ class purchase_order_line(osv.osv):
 			'price_unit_nett_old' : price_unit_nett_old,
 			'price_unit_old' : price_unit_old,
 			'discount_string_old' : discount_string_old,
-
+			'wh_qty': product.qty_available,
 		})
 		
 		return result
