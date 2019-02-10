@@ -195,7 +195,7 @@ class hr_payslip(osv.osv):
 			minimum_so_point = float(minimum_so_point)
 			if bonus.get('POIN_SO_POINT', 0) >= minimum_so_point:
 				total_bonus_value = bonus.get('POIN_XTRA_BONUS', 0) \
-									- bonus.get('POIN_PENALTY_BONUS', 0) \
+									+ bonus.get('POIN_PENALTY_BONUS', 0) \
 									+ bonus.get('POIN_MOBIL_BONUS', 0) \
 									+ bonus.get('POIN_MOTOR_BONUS', 0) \
 									+ bonus.get('POIN_SO_BONUS', 0) \
@@ -203,9 +203,9 @@ class hr_payslip(osv.osv):
 									+ bonus.get('POIN_ADM_BONUS', 0)
 			else:
 				total_bonus_value = 0
-
+			
 			total_minggu= line.get('BASIC', 0) + total_bonus_value
-
+			print "total_minggu: "+ str(total_minggu)
 			result[payslip.id] = total_minggu
 		return result
 
