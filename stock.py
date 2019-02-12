@@ -3,8 +3,6 @@ from openerp.tools.translate import _
 from datetime import datetime, timedelta
 from openerp import api
 
-
-
 # ==========================================================================================================================
 
 class stock_quant(osv.osv):
@@ -578,3 +576,54 @@ class stock_picking(osv.osv):
 		else:
 			raise osv.except_osv(_('Print Stock Picking Error'),_('Stock Picking must have at least one line to be printed.'))
 
+
+
+class stock_opname_inject(osv.osv):
+	_inherit = "stock.opname.inject"
+
+	def create(self, cr, uid, vals, context={}):
+		active_ids = False
+		if context:
+			active_ids = context.get('active_ids',False)
+		if active_ids:
+			product_obj = self.pool.get('product.product')
+			product_ids = product_obj.search(cr, uid, [('product_tmpl_id','in',active_ids)])
+		
+			for product_id in product_ids:
+				vals['product_id'] = product_id
+				self.create(cr, uid, vals, context=None)
+
+		else:		
+			return super(stock_opname_inject, self).create(cr, uid, vals, context=context)
+
+	def action_add(self, cr, uid, ids, context=None):
+		return {'type': 'ir.actions.act_window_close'}
+			
+'''
+class stock_opname_inject_wizard(osv.osv):
+	_name = "stock.opname.inject.wizard"
+	_description = "Stock opname inject wizard"
+	
+	_columns = {
+		'location_id': fields.many2one('stock.location', 'Location', required=True, select=True),
+		'product_id': fields.many2many('product.product', 'Product', required=True),
+		'priority': fields.selection([(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'), (6, '6')], 'Priority',
+			required=True),
+		'active': fields.boolean('Active'),
+		'domain': fields.selection(_EMPLOYEE_DOMAIN_TYPE, 'Domain'),
+		'employee_id' : fields.many2one('hr.employee','Employee'),
+	}
+	
+	# DEFAULTS --------------------------------------------------------------------------------------------------------------
+	
+	_defaults = {
+		'priority': 1,
+		'active': True,
+		'location_id': lambda self, cr, uid, ctx: self.pool.get('res.users').browse(cr, uid, uid, ctx).branch_id.default_stock_location_id.id,
+	}
+
+	def action_add(self, cr, uid, ids, context=None):
+		active_ids = context.get('active_ids',0)
+		print "active_ids: "+str(active_ids)
+		#return {'type': 'ir.actions.act_window_close'}
+'''

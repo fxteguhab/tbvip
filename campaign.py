@@ -108,7 +108,7 @@ class tbvip_campign_product_line(osv.osv):
 
 class tbvip_campign_target_line(osv.osv):
 	_name = "tbvip.campaign.target.line"
-	_description = "Target Reward Line"
+	_description = "Target Campaign Line"
 	_order = 'target_amount desc'
 
 	_columns = {
@@ -122,7 +122,7 @@ class tbvip_campign_target_line(osv.osv):
 
 class tbvip_campign_invoice_line(osv.osv):
 	_name = "tbvip.campaign.invoice.line"
-	_description = "Invoice Reward Line"
+	_description = "Invoice Campaign Line"
 	_order = 'amount desc'
 
 	_columns = {
