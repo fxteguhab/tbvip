@@ -10,6 +10,10 @@
 								confirm="Are you sure to activate this promo?" states="draft"/>
 						<button name="set_to_expired" type="object" string="Expire" class="oe_highlight"
 								confirm="Are you sure to expire this promo?" states="running"/>
+						<button name="set_to_draft" type="object" string="set to Draft" class="oe_highlight"
+								confirm="Are you sure to make this promo back to draft?" states="expired"/>
+						<button name="recalculate_campaign_promo" type="object" string="reCalculate Promo" class="oe_highlight"
+								confirm="Are you sure to ReCalculate this promo?"/>
 						<field name="state" widget="statusbar"/>
 					</header>
 					<group col="4">
@@ -25,6 +29,7 @@
 							<field name="current_amount"/>
 							<field name="current_achievement"/>
 							<field name="date_reward"/>
+							<field name="reward_received"/>
 						</group>
 					</group>
 					<notebook>
