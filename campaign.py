@@ -47,6 +47,7 @@ class tbvip_campign(osv.osv):
 		'category_line_ids': fields.one2many('tbvip.campaign.category.line', 'campaign_id', 'Category Lines'),
 		'invoice_line_ids': fields.one2many('tbvip.campaign.invoice.line', 'campaign_id', 'Invoice Lines'),
 		'reward_received' : fields.boolean('Reward Received'),
+		'residual': fields.float('Residual'),
 		'state': fields.selection(_STATE,'State', required=True),
 	}
 
@@ -211,6 +212,8 @@ class tbvip_campign(osv.osv):
 					target.achievement_counter =  remainder // target.target_amount
 					active_campaign.current_achievement += target.achievement_counter 
 					remainder = remainder % target.target_amount
+
+		active_campaign.residual = remainder
 
 class tbvip_campign_product_line(osv.osv):
 	_name = "tbvip.campaign.product.line"

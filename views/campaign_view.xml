@@ -28,6 +28,7 @@
 						<group>
 							<field name="current_amount"/>
 							<field name="current_achievement"/>
+							<field name="residual"/>
 							<field name="date_reward"/>
 							<field name="reward_received"/>
 						</group>

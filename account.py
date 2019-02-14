@@ -141,6 +141,8 @@ class account_invoice(osv.osv):
 							active_campaign.current_achievement += target.achievement_counter 
 							remainder = remainder % target.target_amount	
 
+				active_campaign.residual = remainder
+				
 				invoice_line_id.create(cr, uid, {
 				'campaign_id': active_campaign.id,
 				'invoice_id': invoice_id,
