@@ -42,6 +42,14 @@ class purchase_order(osv.osv):
 		user_data = self.pool['res.users'].browse(cr, uid, uid)
 		return user_data.branch_id.id or None
 	
+	def _compute_day(self, cr, uid, ids, field_name, arg, context={}):
+		fmt = '%Y-%m-%d %H:%M:%S'
+		result = {}
+		for data in self.browse(cr, uid, ids):
+			po_date = datetime.strptime(data.date_order, fmt)
+			result[data.id] = po_date.strftime("%A")
+		return result
+			
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -71,6 +79,7 @@ class purchase_order(osv.osv):
 		], 'Shipped or Taken'),
 		'delivered_date': fields.datetime('Delivered Date', required=True),
 		'description' :fields.char('Description'),
+		'day' :fields.function(_compute_day,type='char',string='Order Day', store=True),
 
 	}
 	

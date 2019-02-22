@@ -121,6 +121,7 @@ class account_invoice(osv.osv):
 				if active_campaign.measure == 'value': current_amount = (qty * price_unit)
 				elif active_campaign.measure == 'poin': current_amount = ((qty // min_qty) * poin)
 				elif active_campaign.measure == 'tonase': current_amount = (qty * weight)
+				elif active_campaign.measure == 'qty': current_amount = qty
 
 				active_campaign.current_amount += current_amount 
 

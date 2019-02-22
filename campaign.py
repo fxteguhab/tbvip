@@ -3,6 +3,7 @@ from datetime import datetime
 
 _MEASURE_ = [
 	('tonase', 'Product Weight'),
+	('qty', 'Product Qty'),
 	('value', 'Product Value'),
 	('poin', 'Product Poin'),
 ]
@@ -164,13 +165,13 @@ class tbvip_campign(osv.osv):
 
 			qty_min = 0
 			poin = 0
-			weight = 0
+			weight = product_template.tonnage
 
 			product_ids = self.pool['tbvip.campaign.product.line'].search(cr, uid, [('campaign_id', '=',campaign_id),('product_template_id', '=',product_template_id.id)])	
 			for product in self.pool['tbvip.campaign.product.line'].browse(cr,uid,product_ids) : 
 				min_qty = product.min_qty
 				poin = product.poin
-				weight = product_template.tonnage
+				#weight = product_template.tonnage
 
 			if not product_ids:
 				category_ids = self.pool['tbvip.campaign.category.line'].search(cr, uid, [('campaign_id', '=',campaign_id),('product_category_id', '=',categ_id.id)])
@@ -178,12 +179,13 @@ class tbvip_campign(osv.osv):
 					min_qty = category.min_qty
 					poin = category.poin
 					product_category = self.pool['product.category'].browse(cr,uid,category.product_category_id.id)
-					weight = product_category.tonnage
+					#weight = product_category.tonnage
 
 			current_amount = 0
 			if active_campaign.measure == 'value': current_amount = (qty * price_unit)
 			elif active_campaign.measure == 'poin': current_amount = ((qty // min_qty) * poin)
 			elif active_campaign.measure == 'tonase': current_amount = (qty * weight)
+			elif active_campaign.measure == 'qty': current_amount = qty
 
 			active_campaign.current_amount += current_amount 
 
@@ -205,6 +207,7 @@ class tbvip_campign(osv.osv):
 				'amount': current_amount,
 			}, context)
 
+		remainder = 0
 		if active_campaign.invoice_type == 'many_invoice':
 			remainder = active_campaign.current_amount
 			for target in targets:

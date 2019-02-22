@@ -253,6 +253,15 @@ class tbvip_interbranch_stock_move(osv.Model):
 			raise osv.except_osv(_('Print Interbranch Stock Move Error'),_('Interbranch must have at least one line to be printed.'))
 
 
+	def write(self, cr, uid, ids, vals, context=None):
+		result = super(tbvip_interbranch_stock_move, self).write(cr, uid, ids, vals, context)
+		picking_obj = self.pool.get('stock.picking')
+		for interbranch_stock_move in self.browse(cr, uid, ids):
+			picking_ids =  picking_obj.search(cr, uid, [('interbranch_move_id', '=', interbranch_stock_move.id)], limit = 1)
+			picking_obj.unlink(cr, uid, picking_ids)
+			self._create_picking_draft(cr, uid, interbranch_stock_move, context=context)
+
+		return result
 
 # ==========================================================================================================================
 
