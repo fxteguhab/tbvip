@@ -123,6 +123,7 @@
 					<field name="invoice_date"/>
 					<field name="invoice_origin"/>
 					<field name="qty"/>
+					<field name="discount_string"/>
 					<field name="invoice_ref"/>
 					<field name="amount"/>
 				</tree>

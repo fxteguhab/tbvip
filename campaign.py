@@ -159,6 +159,8 @@ class tbvip_campign(osv.osv):
 			product_name = campaign_invoice_line.name
 			invoice_number = campaign_invoice_line.origin
 			qty = campaign_invoice_line.quantity
+			discount_string = campaign_invoice_line.discount_string
+
 			product_template_id = self.pool['product.product'].browse(cr, uid, product_id).product_tmpl_id
 			product_template = self.pool['product.template'].browse(cr, uid, product_template_id.id) 
 			categ_id = product_template.categ_id
@@ -202,6 +204,7 @@ class tbvip_campign(osv.osv):
 				'invoice_id': invoice_id,
 				'invoice_date': invoice_date,
 				'invoice_origin':invoice_number,
+				'discount_string':discount_string,
 				'qty':qty,
 				'invoice_ref': product_name,
 				'amount': current_amount,
@@ -276,6 +279,7 @@ class tbvip_campign_invoice_line(osv.osv):
 		'invoice_date' : fields.date('Invoice Date', required=True),
 		'invoice_origin':fields.char('Origin'),
 		'qty' : fields.float('Qty'),
+		'discount_string' : fields.char('Discount'),
 		'invoice_ref' : fields.char('Product'),
 		'amount' : fields.float('Total Amount'),
 	}

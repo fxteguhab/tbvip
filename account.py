@@ -80,6 +80,7 @@ class account_invoice(osv.osv):
 		invoice_date = context.get('invoice_date',0)
 		product_name = context.get('name',0)
 		invoice_number = context.get('origin',0)
+		discount_string = context.get('discount_string','')
 		qty = context.get('qty',0)
 
 		product_template_id = self.pool['product.product'].browse(cr, uid, product_id).product_tmpl_id
@@ -149,6 +150,7 @@ class account_invoice(osv.osv):
 				'invoice_id': invoice_id,
 				'invoice_date': invoice_date,
 				'invoice_origin':invoice_number,
+				'discount_string':discount_string,
 				'qty':qty,
 				'invoice_ref': product_name,
 				'amount': current_amount,
