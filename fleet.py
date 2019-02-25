@@ -54,19 +54,23 @@ class fleet_vehicle(osv.osv):
 		device_id = None
 		for data in self.browse(cr, uid, ids, context=context):
 			vehicle_gps_id = data.gps_id
-
+			gps_id = '0'
 			for device in devices:
 				if vehicle_gps_id == device['uniqueId']:
 					gps_id = device['id']
 					#print "gps_id: "+str(gps_id)
 					break
-			payload = {'id' : gps_id}
-			header =  {'cookie':cookie, 'Accept':'application/json'}	
-			results = requests.get(position_url,headers= header,params=payload)
-			summary =  results.json()
-			if not summary: return 0
-			#print "address: "+str(summary[0]['address'])
-			result[data.id] = (summary[0]['address'])
+
+			if gps_id != '0':
+				payload = {'id' : gps_id}
+				header =  {'cookie':cookie, 'Accept':'application/json'}	
+				results = requests.get(position_url,headers= header,params=payload)
+				summary =  results.json()
+				if not summary: return 0
+				#print "address: "+str(summary[0]['address'])
+				result[data.id] = (summary[0]['address'])
+			else:
+				result[data.id] = '-'
 
 		return result
 		'''
@@ -163,5 +167,4 @@ class fleet_vehicle(osv.osv):
 		'gps_renew': fields.date('GPS SIM Renewal'),
 		'location': fields.function(_location, type='char', method=True, string='Location', help='Location of the vehicle'),
 	}
-
 # ==========================================================================================================================
