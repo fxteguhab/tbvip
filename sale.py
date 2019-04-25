@@ -183,7 +183,7 @@ class sale_order(osv.osv):
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
-				self._calculate_margin_total(cr, uid, new_id)
+				self._calculate_margin_total(cr, uid, sale_id)
 		
 		return result
 	
