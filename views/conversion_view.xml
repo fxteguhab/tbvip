@@ -11,7 +11,32 @@
 						[('category_id','=', uom_category_filter_id), ('is_auto_create', '=', False)]
 					</attribute>
 				</field>
+				<field name="conversion" position="after">
+					<field name="categ_id"/>
+				</field>
+				<field name="product_category_id" position ="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
 			</field>
 		</record>
+
+		<record id="conversion_product_conversion_search" model="ir.ui.view">
+			<field name="name">conversion.product.conversion.search</field>
+			<field name="model">product.conversion</field>
+			<field name="arch" type="xml">
+				<search>
+					<field name ="product_template_id"/>
+					<field name ="categ_id"/>
+					<field name ="uom_id"/>
+					<group string="Group by">
+						<filter string="Category" name="categ_id" domain="[]" context="{'group_by': 'categ_id'}"/>
+						<filter string="Product" name="product_id" domain="[]" context="{'group_by': 'product_template_id'}"/>
+						<filter string="UoM" name="uom_id" domain="[]" context="{'group_by': 'uom_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
+
+
 	</data>
 </openerp>

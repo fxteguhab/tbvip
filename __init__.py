@@ -33,3 +33,4 @@ import maintenance
 #import notification
 import sale_retur
 import campaign
+import custom_uom

@@ -46,6 +46,7 @@ class sale_order(osv.osv):
 		'return_amount' : fields.float('Return Amount'),
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 		'amount_residual':fields.function(_default_amount_residual,type='float',string='Balance'),
+		'total_margin' : fields.float('Margin', readonly=True),
 	}
 
 	_sql_constraints = [
@@ -136,6 +137,7 @@ class sale_order(osv.osv):
 				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
+		self._calculate_margin_total(cr, uid, new_id)
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -181,6 +183,7 @@ class sale_order(osv.osv):
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
+				self._calculate_margin_total(cr, uid, new_id)
 		
 		return result
 	
@@ -329,6 +332,15 @@ class sale_order(osv.osv):
 			'commission_total': commission_total
 			})
 	
+	def _calculate_margin_total(self, cr, uid, sale_order_id):
+		order_data = self.browse(cr, uid, sale_order_id)
+		margin_total = 0
+		for order_line in order_data.order_line:
+			margin_total += order_line.margin
+		self.write(cr, uid, [sale_order_id], {
+			'total_margin': margin_total
+			})
+
 	def check_and_get_bon_number(self, cr, uid, bon_number, date_order):
 		user_data = self.pool.get('res.users').browse(cr, uid, uid)
 		branch_id = user_data.branch_id.id or None
@@ -486,6 +498,26 @@ class sale_order(osv.osv):
 class sale_order_line(osv.osv):
 	_inherit = 'sale.order.line'
 	
+# FIELD FUNCTION ------------------------------------------------------------------------------------------------------------------
+	def _calc_margin(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.price_unit_nett > 0:
+				sell_price_unit_nett = line.price_unit_nett
+				buy_price_unit_nett = line.product_id.standard_price
+
+				if buy_price_unit_nett > 10:
+					buy_price_unit = buy_price_unit_nett
+				else:
+					buy_price_unit = sell_price_unit_nett * 95 / 100
+				
+
+				result[line.id] = (sell_price_unit_nett - buy_price_unit) * line.product_uos_qty
+			else:
+				result[line.id] = 0
+
+		return result
+
 # COLUMNS ------------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -496,6 +528,7 @@ class sale_order_line(osv.osv):
 			string='UoM Category', readonly=True),
 
 		'stock_location_id': fields.related('order_id','stock_location_id',type='many2one', relation='stock.location', store=True, string='Location'),
+		'margin' : fields.function(_calc_margin, type="float", string="Margin"),
 		#overide
 		#'salesman_id':fields.related('order_id', 'employee_id',type='many2one', relation='hr.employee', store=True, string='Salesperson'),
 		

@@ -11,13 +11,13 @@
 			<field name="type">other</field>
 			<field name="user_type" ref="account.data_account_type_income"/>
 		</record>
-
+		<!--
 		<record id="sale_discount" model="account.account">
 			<field name="name">Sale Discount</field>
 			<field name="code">220999</field>
 			<field name="type">other</field>
 			<field name="user_type" ref="account.data_account_type_income"/>
 		</record>
-
+		-->
 	</data>
 </openerp>
