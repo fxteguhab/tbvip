@@ -149,6 +149,55 @@ class product_template(osv.osv):
 		result = self._get_act_window_dict(cr, uid, 'tbvip.action_stock_opname_product_tree', context=context)
 		result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "])]"
 		return result
+
+	def _get_last_sale(self, cr, uid, ids, name, args, context=None):
+		result = {}
+		last_sale = ''
+		for id in ids:
+			cr.execute("""
+			SELECT DISTINCT ON (sl.name)
+			sl.name, so_line.write_date, hr.name_related
+			FROM sale_order_line so_line
+			LEFT JOIN hr_employee hr ON hr.id = so_line.salesman_id
+			LEFT JOIN stock_location sl ON sl.id = so_line.stock_location_id
+			LEFT JOIN product_product pp ON pp.product_tmpl_id = %d
+			WHERE so_line.product_id = pp.id
+			ORDER BY sl.name,so_line.write_date DESC
+			""" % id)
+			for row in cr.dictfetchall():
+				last_sale = last_sale +'\n' +str(row['name'])+' || '+str(row['write_date'])+' || '+str(row['name_related'])
+			result[id] =last_sale
+		
+		return result
+			
+	def _get_last_sale_delta(self, cr, uid, ids, name, args, context=None):
+		result = {}
+		fmt = '%Y-%m-%d %H:%M:%S'
+		now = datetime.today().strftime(fmt)
+		
+
+		for id in ids:
+			last_sale = str(self.browse(cr,uid,id,context=context).create_date)
+			sale = False
+			cr.execute("""
+			SELECT DISTINCT ON (sl.name)
+			sl.name, so_line.write_date, hr.name_related
+			FROM sale_order_line so_line
+			LEFT JOIN hr_employee hr ON hr.id = so_line.salesman_id
+			LEFT JOIN stock_location sl ON sl.id = so_line.stock_location_id
+			LEFT JOIN product_product pp ON pp.product_tmpl_id = %d
+			WHERE so_line.product_id = pp.id
+			ORDER BY sl.name,so_line.write_date DESC
+			""" % id)
+			for row in cr.dictfetchall():
+				last_sale =  str(row['write_date'])
+
+			last_sale_date =  datetime.strptime(last_sale.split("+")[0].split(".")[0],fmt)
+			delta = (datetime.today() - last_sale_date).days
+			result[id] =delta
+			
+		return result
+
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -167,6 +216,10 @@ class product_template(osv.osv):
 		'stock_unit_id': fields.many2one('stock.unit', 'Stock Unit'),
 		'invoice_count': fields.function(_invoice_count, string='# Invoices', type='integer'),
 		'stock_opname_count': fields.function(_stock_opname_count, string='# Stock Opname', type='integer'),
+		'last_sale': fields.function(_get_last_sale, string="Last Sale", type='text', readonly=True, store=False),
+		'last_sale_delta': fields.function(_get_last_sale_delta, string="Last Sale Delta", type='float', readonly=True),
+		'latest_inventory_adjustment_date': fields.datetime('Latest Inventory Adjustment Date', readonly=True),
+		'latest_inventory_adjustment_employee_id': fields.many2one('hr.employee', 'Latest Inventory Adjustment Employee', readonly=True),
 	}
 
 	_sql_constraints = [
@@ -179,6 +232,7 @@ class product_template(osv.osv):
 		'is_sup_bonus': False,
 		'type': 'product',
 		'sale_delay' : 0,
+		'last_sale_delta' : 0,
 		#'commission' : '0',
 	}
 	

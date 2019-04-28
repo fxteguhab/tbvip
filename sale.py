@@ -15,10 +15,6 @@ import openerp.addons.product_custom_conversion as imported_product_custom_conve
 import openerp.addons.chjs_price_list as imported_price_list
 
 
-
-
-
-
 # ==========================================================================================================================
 
 class sale_order(osv.osv):
