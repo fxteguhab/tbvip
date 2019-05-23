@@ -29,6 +29,19 @@ class sale_order(osv.osv):
 				result[sale_order.id] = sale_order.invoice_ids[0].residual
 		return result
 
+	def _calculate_margin_total(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for order_data in self.browse(cr, uid, ids,context):
+			result[order_data.id] = 0
+			for order_line in order_data.order_line:
+				result[order_data.id] += order_line.margin
+			"""
+			self.write(cr, uid, [sale_order_id], {
+				'total_margin': margin_total
+				})
+			"""
+		return result
+
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
 		#TEGUH@20180412 : bon book not required
@@ -42,7 +55,8 @@ class sale_order(osv.osv):
 		'return_amount' : fields.float('Return Amount'),
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 		'amount_residual':fields.function(_default_amount_residual,type='float',string='Balance'),
-		'total_margin' : fields.float('Margin', readonly=True),
+		#'total_margin' : fields.float('Margin', readonly=True),
+		'total_margin' : fields.function(_calculate_margin_total, type="float", string="Margin", store=True),
 	}
 
 	_sql_constraints = [
@@ -133,7 +147,7 @@ class sale_order(osv.osv):
 				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
-		self._calculate_margin_total(cr, uid, new_id)
+		#self._calculate_margin_total(cr, uid, new_id)
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -179,7 +193,7 @@ class sale_order(osv.osv):
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
-				self._calculate_margin_total(cr, uid, sale_id)
+				#self._calculate_margin_total(cr, uid, sale_id)
 		
 		return result
 	
@@ -324,18 +338,11 @@ class sale_order(osv.osv):
 					order_line[2]['product_uom'], order_line[2]['product_uom_qty'], product.product_tmpl_id.uom_id.id)
 				commission_total += (qty * order_line[2]['commission_amount'])
 			"""
+		
 		self.write(cr, uid, [sale_order_id], {
 			'commission_total': commission_total
 			})
 	
-	def _calculate_margin_total(self, cr, uid, sale_order_id):
-		order_data = self.browse(cr, uid, sale_order_id)
-		margin_total = 0
-		for order_line in order_data.order_line:
-			margin_total += order_line.margin
-		self.write(cr, uid, [sale_order_id], {
-			'total_margin': margin_total
-			})
 
 	def check_and_get_bon_number(self, cr, uid, bon_number, date_order):
 		user_data = self.pool.get('res.users').browse(cr, uid, uid)
