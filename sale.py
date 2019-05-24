@@ -29,18 +29,31 @@ class sale_order(osv.osv):
 				result[sale_order.id] = sale_order.invoice_ids[0].residual
 		return result
 
+	"""
 	def _calculate_margin_total(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
 		for order_data in self.browse(cr, uid, ids,context):
 			result[order_data.id] = 0
 			for order_line in order_data.order_line:
 				result[order_data.id] += order_line.margin
-			"""
+			
 			self.write(cr, uid, [sale_order_id], {
 				'total_margin': margin_total
 				})
-			"""
+			
 		return result
+	"""
+	def _calculate_margin_total(self, cr, uid, sale_order_id):
+		order_data = self.browse(cr, uid, sale_order_id)
+		margin_total = 0
+
+		for order_line in order_data.order_line:
+			margin_total += order_line.margin
+		
+		self.write(cr, uid, [sale_order_id], {
+			'total_margin': margin_total
+			})
+			
 
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
@@ -55,8 +68,8 @@ class sale_order(osv.osv):
 		'return_amount' : fields.float('Return Amount'),
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 		'amount_residual':fields.function(_default_amount_residual,type='float',string='Balance'),
-		#'total_margin' : fields.float('Margin', readonly=True),
-		'total_margin' : fields.function(_calculate_margin_total, type="float", string="Margin", store=True),
+		'total_margin' : fields.float('Margin', readonly=True),
+		#'total_margin' : fields.function(_calculate_margin_total, type="float", string="Margin", store=True),
 	}
 
 	_sql_constraints = [
@@ -147,7 +160,7 @@ class sale_order(osv.osv):
 				})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
-		#self._calculate_margin_total(cr, uid, new_id)
+		self._calculate_margin_total(cr, uid, new_id)
 		return new_id
 	
 	def write(self, cr, uid, ids, vals, context=None):
@@ -193,7 +206,7 @@ class sale_order(osv.osv):
 		if vals.get('order_line', False):
 			for sale_id in ids:
 				self._calculate_commission_total(cr, uid, sale_id)
-				#self._calculate_margin_total(cr, uid, sale_id)
+				self._calculate_margin_total(cr, uid, sale_id)
 		
 		return result
 	
@@ -504,20 +517,65 @@ class sale_order_line(osv.osv):
 # FIELD FUNCTION ------------------------------------------------------------------------------------------------------------------
 	def _calc_margin(self, cr, uid, ids, field_name, arg, context=None):
 		result = {}
+		product_uom_obj		 = self.pool.get('product.uom')
+		price_type_id_buys   = self.pool.get('price.type').search(cr, uid, [('type','=','buy'),('is_default','=',True),])
+		price_type_id_buy    = price_type_id_buys[0]
+		
+		for line in self.browse(cr, uid, ids, context=context):
+			sell_price_unit_nett = line.price_unit_nett
+			buy_price_unit_nett = line.product_id.standard_price
+			if buy_price_unit_nett > 0:
+				buy_price_unit = buy_price_unit_nett
+			else:
+				#ambil dari current price buy
+				buy_price_unit_price_list = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id,field="nett", context=context)
+				if buy_price_unit_price_list > 0:
+					buy_price_unit = buy_price_unit_price_list 
+					self.pool.get('product.product')._set_price(cr,uid,line.product_id.id,buy_price_unit,'standard_price')
+				else:
+					buy_price_unit = 0
+
+			if line.product_id.uom_id != line.product_id.uom_po_id :
+
+				uom_po_factor = product_uom_obj.browse(cr, uid, line.product_id.uom_po_id.id)
+				uom_factor = product_uom_obj.browse(cr, uid, line.product_id.uom_id.id)
+				factor = 1.0
+				if uom_po_factor.uom_type == 'reference':
+					if uom_factor.uom_type == 'smaller':
+						factor =  uom_po_factor.factor / uom_factor.factor
+					else:
+						factor =  uom_po_factor.factor * uom_factor.factor
+				else:
+					if uom_po_factor.uom_type == 'smaller':
+						factor =  uom_factor.factor / uom_po_factor.factor
+					else:
+						factor =  uom_factor.factor * uom_po_factor.factor
+
+				buy_price_unit = buy_price_unit * factor
+
+			result[line.id] = (sell_price_unit_nett - buy_price_unit) * line.product_uom_qty
+
+		"""
 		for line in self.browse(cr, uid, ids, context=context):
 			if line.price_unit_nett > 0:
 				sell_price_unit_nett = line.price_unit_nett
 				buy_price_unit_nett = line.product_id.standard_price
-
-				if buy_price_unit_nett > 10:
+				
+				if buy_price_unit_nett > 5:
 					buy_price_unit = buy_price_unit_nett
 				else:
-					buy_price_unit = sell_price_unit_nett * 95 / 100
-				
+					#ambil dari current price buy
+					buy_price_unit_price_list = self.pool.get('product.current.price').get_current(cr, uid, line.product_id.id,price_type_id_buy, line.product_uom.id,field="nett", context=context)
+					if buy_price_unit_price_list > 0:
+						buy_price_unit = buy_price_unit_price_list 
+						self.pool.get('product.product')._set_price(cr,uid,line.product_id.id,buy_price_unit,'standard_price')
+					else:
+						buy_price_unit = 0
 
-				result[line.id] = (sell_price_unit_nett - buy_price_unit) * line.product_uos_qty
+				result[line.id] = (sell_price_unit_nett - buy_price_unit) * line.product_uom_qty
 			else:
 				result[line.id] = 0
+		"""
 
 		return result
 

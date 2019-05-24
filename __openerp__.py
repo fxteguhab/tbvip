@@ -9,7 +9,7 @@
 	'maintainer': 'Christyan Juniady and Associates',
 	'website': 'http://www.chjs.biz',
 	'depends': [
-		"base", "board", "web", "website",
+		"base", "board", "web", "website","hr_payroll",
 		"account_accountant", "account_cancel", "stock", "sale", "purchase", "fleet", "hr", "hr_attendance", "hr_expense",
 		"chjs_custom_view", "chjs_price_list",
 		"purchase_sale_discount", "stock_opname", "account_receivable_limit",
