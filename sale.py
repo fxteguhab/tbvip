@@ -2,7 +2,7 @@ from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 import commission_utility
 from openerp.tools.translate import _
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 import openerp.addons.decimal_precision as dp
 
 
@@ -34,12 +34,9 @@ class sale_order(osv.osv):
 		result = {}
 		for order_data in self.browse(cr, uid, ids,context):
 			result[order_data.id] = 0
+			if (order_data.create_date )
 			for order_line in order_data.order_line:
 				result[order_data.id] += order_line.margin
-			
-			self.write(cr, uid, [sale_order_id], {
-				'total_margin': margin_total
-				})
 			
 		return result
 	"""
@@ -53,7 +50,7 @@ class sale_order(osv.osv):
 		self.write(cr, uid, [sale_order_id], {
 			'total_margin': margin_total
 			})
-			
+	
 
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
@@ -75,6 +72,7 @@ class sale_order(osv.osv):
 	_sql_constraints = [
 		('name_uniq', 'unique(name, company_id)', 'This order number already created'),
 	]
+
 	def _default_partner_id(self, cr, uid, context={}):
 	# kalau penjualan cash, default customer adalah general customer
 		partner_id = None
@@ -253,7 +251,7 @@ class sale_order(osv.osv):
 		journal_obj = self.pool.get('account.journal')
 		account_move_line_obj = self.pool.get('account.move.line')
 		invoice_obj = self.pool.get('account.invoice')
-		move_obj = self.pool.get('account.move')
+		#move_obj = self.pool.get('account.move')
 
 	# cari di antara move line terkait invoice ini, nilai piutangnya
 	# dicirikan dengan type account receivable
@@ -302,7 +300,7 @@ class sale_order(osv.osv):
 	# di atas
 	# kalau sisa invoice sudah 0, langsung tandai Paid
 		invoice = invoice_obj.browse(cr, uid, invoice_id)
-		residual = invoice.residual
+		#residual = invoice.residual
 		if invoice.residual <= 0:
 			invoice_obj.write(cr, uid, [invoice_id], {'reconciled': True}, context)
 
@@ -382,8 +380,8 @@ class sale_order(osv.osv):
 						raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
 			return bon_book
 		'''
-		if bon_book.used_numbers:
-			used_numbers = bon_book.used_numbers.split(', ')
+		#if bon_book.used_numbers:
+			#used_numbers = bon_book.used_numbers.split(', ')
 			#for used_number in used_numbers:
 			#	if used_number == bon_number:
 			#		raise osv.except_orm(_('Bon number error'), _('Bon number in the latest bon book has been used.'))
@@ -536,7 +534,6 @@ class sale_order_line(osv.osv):
 					buy_price_unit = 0
 
 			if line.product_id.uom_id != line.product_id.uom_po_id :
-
 				uom_po_factor = product_uom_obj.browse(cr, uid, line.product_id.uom_po_id.id)
 				uom_factor = product_uom_obj.browse(cr, uid, line.product_id.uom_id.id)
 				factor = 1.0
