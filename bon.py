@@ -31,7 +31,7 @@ class tbvip_bon_book(osv.osv):
 		'total_sheets': fields.function(_total_sheets, string='Total Sheets', type='integer', store={},
 			help='Total sheets, calculated as End At - Start From + 1.'),
 		'total_used': fields.integer('Total Used', help='Total sheets that have been used.'),
-		'used_numbers': fields.text('Used Numbers', help='All bon numbers that have been used.'),
+		'used_numbers': fields.text('Used Numbers', help='All invoice number(s) that have been used.'),
 	}
 	
 	_sql_constraints = [

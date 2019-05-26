@@ -55,8 +55,8 @@ class sale_order(osv.osv):
 	_columns = {
 		'commission_total': fields.float('Commission Total', readonly=True),
 		#TEGUH@20180412 : bon book not required
-		'bon_number': fields.char('Bon Number', readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
-		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number'),
+		'bon_number': fields.char('Invoice No', readonly="True", states={'draft': [('readonly', False)], 'sent': [('readonly', False)]}),
+		'bon_book_id': fields.many2one('tbvip.bon.book', 'Invoice No'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		#TEGUH@20180412 : employee id  not required
 		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
@@ -333,7 +333,7 @@ class sale_order(osv.osv):
 				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, journal_id=order.payment_receivable_journal.id)
 				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, journal_id=order.payment_giro_journal.id)
 			else:
-				raise osv.except_orm(_('Bon Number Empty'), _('You must fill bon number.'))
+				raise osv.except_orm(_('Invoice No Empty'), _('You must fill Invoice No.'))
 			
 		return result
 

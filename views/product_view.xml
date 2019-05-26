@@ -56,6 +56,7 @@
 					<!-- TEGUH@20180717 : tambah field nett 3-->
 					<field name="nett_3" />
 				</xpath>
+
 			</field>
 		</record>
 
@@ -140,7 +141,7 @@
 				<div name="options" position="inside">
 					<div>
 						<field name="is_sup_bonus" class="oe_inline"/>
-						<label for="is_sup_bonus" string="Is Supplier Bonus"/>
+						<label for="is_sup_bonus" string="Bonus Product"/>
 					</div>
 				</div>
 				<group name="sale_condition" position="inside">
@@ -175,6 +176,9 @@
 					<attribute name="invisible">1</attribute>
 				</xpath>
 				<field name="categ_id" position="replace" />
+				<xpath expr="//page[@string='Accounting']" position="attributes">
+					<attribute name="invisible">True</attribute>	
+				</xpath>
 			</field>
 		</record>
 
@@ -340,5 +344,16 @@
 			</field>
 		</record>
 
+		<record id="view_stock_product_tree_inherit3" model="ir.ui.view">
+			<field name="name">product.stock.tree.inherit3</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_product_tree_view"/>
+			<field name="arch" type="xml">
+				<xpath expr="//tree[1]" position="attributes">
+					<attribute name="create">0</attribute>
+				</xpath>
+
+			</field>
+		</record>
 	</data>
 </openerp>

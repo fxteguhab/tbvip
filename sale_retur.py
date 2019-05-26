@@ -29,18 +29,18 @@ class sale_retur(osv.osv):
 		'amount': fields.function(calc_amount, type="float", string="Total Amount"),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 		'employee_id': fields.many2one('hr.employee', 'Employee'),
-		'retur_line_ids': fields.one2many('sale.retur.line', 'sale_retur_id', 'Product Retur:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		'retur_line_ids': fields.one2many('sale.retur.line', 'sale_retur_id', 'Product Return:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'payment_sale_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
 		'partner_id': fields.many2one('res.partner', 'Customer'),
 		'desc': fields.char('Description'),
 		'state': fields.selection(_RETUR_STATE, 'State', required=True),
 		'period' : fields.many2one('account.period', 'Force period'),
 		'refund_journal_id' : fields.many2one('account.journal', 'Refund Journal'),
-		'bon_number': fields.char('Bon Number Return '),
+		'bon_number': fields.char('Return Invoice No '),
 		'bon_book_id': fields.many2one('tbvip.bon.book', 'Bon Number Return'),
 
 		'employee_id_old_sales': fields.many2one('hr.employee', 'Sell by'),
-		'bon_number_old_sales': fields.char('Bon Number Sales'),
+		'bon_number_old_sales': fields.char('Sale Invoice No'),
 	}
 
 	def onchange_old_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
