@@ -116,10 +116,13 @@
 			<field name="inherit_id" ref="product.product_template_form_view"/>
 			<field name="arch" type="xml">
 				<field name="type" position="before">
-					<field name="brand_id" />
+					<!--<field name="brand_id" />-->
 					<!--<field name="tonnage"/>-->
 					<!--<field name="stock_unit_id"/>-->
 					<field name="categ_id" />
+				</field>
+				<field name="product_manager" position="after">
+					<field name="brand_id" />
 				</field>
 				<field name="uom_id" position="after">
 					<label for="product_current_stock"/>
