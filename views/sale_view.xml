@@ -229,9 +229,21 @@
 				<filter string="Quotations" position="attributes">
 					<attribute name="string">Draft</attribute>
 				</filter>
+				<filter string="Done" position="attributes">
+					<attribute name="name">done</attribute>
+				</filter>
 			</field>
 		</record>
 		
+		<record id="view_sales_order_filter_inherit_inherit" model="ir.ui.view">
+			<field name="name">sale.order.list.select.inherit_inherit</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale_multiple_payment.sale_order_filter_inherit"/>
+			<field name="arch" type="xml">	
+				<filter string="EDC Only" position="replace"></filter>
+			</field>
+		</record>		
+
 		<!-- INI TREE YG DI PURCHASE LIST PRODUCT -->
 		<record model="ir.ui.view" id="view_order_line_tree_inherit">
 			<field name="name">view.order.line.tree.inherit</field>
