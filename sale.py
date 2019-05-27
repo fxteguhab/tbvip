@@ -156,6 +156,11 @@ class sale_order(osv.osv):
 					'bon_book_id': bon_book.id,
 					'employee_id': bon_book.employee_id.id
 				})
+		if not (vals.get('price_type_id',False)):
+			price_type_ids = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
+			vals.update({
+				'price_type_id' : price_type_ids[0]
+			})
 		new_id = super(sale_order, self).create(cr, uid, vals, context)
 		self._calculate_commission_total(cr, uid, new_id)
 		self._calculate_margin_total(cr, uid, new_id)
@@ -199,6 +204,11 @@ class sale_order(osv.osv):
 						'bon_book_id': bon_book.id,
 						'employee_id': bon_book.employee_id.id
 					})
+			#if not (vals.get('price_type_id',False)):
+			#	price_type_ids = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
+			#	vals['price_type_id'] = price_type_ids[0]
+			
+			#print "vals_write :"+str(vals)	
 			result = super(sale_order, self).write(cr, uid, sale_order_data.id, vals, context)
 			
 		if vals.get('order_line', False):

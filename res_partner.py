@@ -50,7 +50,7 @@ class res_partner(osv.osv):
 
 			# price_total is in the currency with rate = 1
 			# total_invoice should be displayed in the current user's currency
-			print "query : "+str(query)
+			
 			cr.execute(query, where_clause_params + [user_currency_id])
 			result[partner_id] = cr.fetchone()[0]
 
