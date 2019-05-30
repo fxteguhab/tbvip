@@ -134,7 +134,8 @@ class product_template(osv.osv):
 	def action_view_invoices(self, cr, uid, ids, context=None):
 		products = self._get_products(cr, uid, ids, context=context)
 		result = self._get_act_window_dict(cr, uid, 'tbvip.action_invoice_line_product_tree', context=context)
-		result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "]),('account_id','=','220000 Expenses')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+		#result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "]),('account_id','=','220000 Expenses')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+		result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "]),('partner_id.supplier','=','True')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
 		return result
 	
 
@@ -299,7 +300,8 @@ class product_product(osv.osv):
 	def _invoice_count(self, cr, uid, ids, field_name, arg, context=None):
 		Invoice = self.pool['account.invoice']
 		return {
-			product_id: Invoice.search_count(cr,uid, [('invoice_line.product_id', '=', product_id),('invoice_line.account_id','=','220000 Expenses')], context=context)  #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+			#product_id: Invoice.search_count(cr,uid, [('invoice_line.product_id', '=', product_id),('invoice_line.account_id','=','220000 Expenses')], context=context)  #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+			product_id: Invoice.search_count(cr,uid, [('invoice_line.product_id', '=', product_id),('invoice_line.partner_id.supplier','=','True')], context=context)  #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
 			for product_id in ids
 		}
 
@@ -307,7 +309,8 @@ class product_product(osv.osv):
 		if isinstance(ids, (int, long)):
 			ids = [ids]
 		result = self.pool['product.template']._get_act_window_dict(cr, uid, 'tbvip.action_invoice_line_product_tree', context=context)
-		result['domain'] = "[('product_id','in',[" + ','.join(map(str, ids)) + "]),('account_id','=','220000 Expenses')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+		#result['domain'] = "[('product_id','in',[" + ','.join(map(str, ids)) + "]),('account_id','=','220000 Expenses')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
+		result['domain'] = "[('product_id','in',[" + ','.join(map(str, ids)) + "]),('invoice_line.partner_id.supplier','=','True')]" #TEGUH@20180729 : terpaksa hardcode , ga tau cara ambil nya scr logic :D
 		return result
 	
 	def _stock_opname_count(self, cr, uid, ids, field_name, arg, context=None):

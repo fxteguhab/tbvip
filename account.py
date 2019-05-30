@@ -699,7 +699,7 @@ class account_account(osv.osv):
 	_inherit = 'account.account'
 	
 	_columns = {
-		'is_tbvip_kas': fields.boolean('Kas'),
+		'is_tbvip_kas': fields.boolean('Cash Register'),
 	}
 	
 
