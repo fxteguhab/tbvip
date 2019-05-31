@@ -34,3 +34,4 @@ import maintenance
 import sale_retur
 import campaign
 import custom_uom
+import purchase_retur

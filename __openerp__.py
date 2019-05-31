@@ -81,6 +81,7 @@
 		'views/tbvip_stock_move_view.xml',
 		'views/account_simplified_journal.xml',
 		'views/sale_retur_view.xml',
+		'views/purchase_retur_view.xml',
 		'views/campaign_view.xml',
 		#'views/notification_view.xml',
 		#'views/product_conversion_view.xml',

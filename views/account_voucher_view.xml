@@ -79,6 +79,12 @@
 				<xpath expr="//field[@name='line_dr_ids']/tree/field[@name='amount']" position="after">
 					<button name="action_open_invoice" string="View Invoice" type="object" icon="gtk-dnd" />
 				</xpath>
+				<xpath expr="//field[@name='line_dr_ids']/tree/field[@name='move_line_id']" position="attributes">
+					<attribute name="string">Invoice No</attribute>
+				</xpath>
+				<xpath expr="//field[@name='line_cr_ids']/tree/field[@name='amount']" position="after">
+					<button name="action_open_invoice" string="View Invoice" type="object" icon="gtk-dnd" />
+				</xpath>
 				<xpath expr="//field[@name='line_dr_ids']/tree/field[@name='account_id']" position="attributes">
 					<attribute name="invisible">1</attribute>
 				</xpath>

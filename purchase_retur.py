@@ -5,6 +5,7 @@ from datetime import datetime, date, timedelta
 
 _RETUR_STATE = [
 	('draft', 'Draft'),
+	('open','Open'),
 	('done', 'Done'),
 ]
 
@@ -28,15 +29,15 @@ class purchase_retur(osv.osv):
 		#'amount': fields.float('Amount', required=True),
 		'amount': fields.function(calc_amount, type="float", string="Total Amount"),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
-		'employee_id': fields.many2one('hr.employee', 'Employee'),
-		'retur_line_ids': fields.one2many('sale.retur.line', 'purchase_retur_id', 'Product Return:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
-		'payment_purchase_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
-		'partner_id': fields.many2one('res.partner', 'Supplier'),
+		#'employee_id': fields.many2one('hr.employee', 'Employee'),
+		'retur_line_ids': fields.one2many('purchase.retur.line', 'purchase_retur_id', 'Product Return:',  required=True, readonly=True, states={'draft':[('readonly',False)]}),
+		#'payment_purchase_retur_journal': fields.many2one('account.journal', 'Journal for Cash Retur', domain=[('type','in',['cash','bank'])]),
+		'partner_id': fields.many2one('res.partner', 'Supplier', required=True, domain="[('supplier', '=', True)]"),
 		'desc': fields.char('Description'),
-		'bon_number': fields.char('Invoice No'),
+		'bon_number': fields.char('Invoice No', required=True),
 		'state': fields.selection(_RETUR_STATE, 'State', required=True),
 		'period' : fields.many2one('account.period', 'Force period'),
-		'refund_journal_id' : fields.many2one('account.journal', 'Refund Journal'),
+		'refund_journal_id' : fields.many2one('account.journal', 'Purchase Refund Journal'),
 	}
 
 	def _default_branch_id(self, cr, uid, context={}):
@@ -45,21 +46,10 @@ class purchase_retur(osv.osv):
 		return user_data.branch_id.id or None
 
 	def _default_payment_cash_journal(self, cr, uid, context={}):
-		user_data = self.pool['res.users'].browse(cr, uid, uid)
-		if user_data.default_journal_sales_retur_override:
-			return user_data.default_journal_sales_retur_override.id
+		if user_data.branch_id.default_journal_purchase_retur:
+			return user_data.branch_id.default_journal_purchase_retur.id
 		else:
-			if user_data.branch_id.default_journal_sales_retur:
-				return user_data.branch_id.default_journal_sales_retur.id
-			else:
-				return None
-	'''
-	def _default_partner_id(self, cr, uid, context={}):
-	# kalau penjualan cash, default customer adalah general customer
-		model, general_customer_id = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
-		partner_id = general_customer_id
-		return partner_id
-	'''
+			return None
 	
 	def _get_journal(self, cr, uid, context=None):
 		"""
@@ -69,7 +59,7 @@ class purchase_retur(osv.osv):
 		user_obj = self.pool.get('res.users')
 		if context is None:
 			context = {}
-		inv_type = context.get('type', 'out_invoice')
+		inv_type = context.get('type', 'in_invoice')
 		company_id = user_obj.browse(cr, uid, uid, context=context).company_id.id
 		type = (inv_type == 'out_invoice') and 'sale_refund' or \
 			   (inv_type == 'out_refund') and 'sale' or \
@@ -81,8 +71,6 @@ class purchase_retur(osv.osv):
 	_defaults = {
 		'journal_date': lambda self, cr, uid, context: datetime.now(),
 		'branch_id': _default_branch_id,
-		'payment_purchase_retur_journal': _default_payment_cash_journal,
-		#'partner_id': _default_partner_id,
 		'state': 'draft',
 		'refund_journal_id': _get_journal,
 	}
@@ -95,13 +83,13 @@ class purchase_retur(osv.osv):
 		company = cashier.company_id
 
 		retur = self.browse(cr,uid,ids)
-		journal_retur = retur.payment_purchase_retur_journal
 		partner_id = retur.partner_id
-		name = str(journal_retur.name) 
+		name = str(retur.partner_id.name)+'/ '+ str(retur.bon_number)
 		date = retur.journal_date
 		amount = retur.amount
 		refund_journal_id = retur.refund_journal_id
 
+		
 		period = retur.period.id
 		if not retur.period.id:
 			cr.execute("select name from ir_model_fields \
@@ -120,46 +108,19 @@ class purchase_retur(osv.osv):
 			if res:
 				period = res[0]
 
-		#print "refund_journal_id:"+str(retur.refund_journal_id)
-		#print "branch:"+str(vals.get('branch_id'))
-		#print "journal_retur_id: "+str(journal_retur.id)
-		#print "default_debit_account_id: "+str(journal_retur.default_debit_account_id)
-
-		entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
-		entry_data['line_id'] = [
-			[0,False,{
-				'name': name, 
-				'account_id': journal_retur.default_credit_account_id.id, 
-				'credit': amount, #vals.get('amount', 0),
-				'debit': 0,
-				'partner_id' : cashier.partner_id.id,
-			}],
-			[0,False,{
-				'name': name, 
-				'account_id': journal_retur.default_debit_account_id.id, 
-				'debit': amount, #vals.get('amount', 0),
-				'credit': 0,
-				'partner_id' : partner_id.id,
-			}],
-		]
-
-		new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
-		journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
-
 		inv_obj = self.pool.get('account.invoice')
-		account_m_line_obj = self.pool.get('account.move.line')
 		picking_obj = self.pool.get('stock.picking')
 		model_obj = self.pool.get('ir.model.data')
 		location_obj = self.pool.get('stock.location')
 		stock_move_obj = self.pool.get('stock.move')
 		warehouse_obj = self.pool.get('stock.warehouse')
 		
-		location_src = location_obj.browse(cr, uid, model_obj.get_object_reference(cr, uid, 'stock', 'stock_location_customers')[1])
-		location_dest = retur.branch_id.default_incoming_location_id
+		location_dest = location_obj.browse(cr, uid, model_obj.get_object_reference(cr, uid, 'stock', 'stock_location_suppliers')[1])
+		location_src = retur.branch_id.default_incoming_location_id
 		warehouse_id = warehouse_obj.search(cr, uid, [('lot_stock_id', '=', location_src.id)], limit=1)
 		warehouse = warehouse_obj.browse(cr, uid, warehouse_id, context)
-		max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
-		max_sequence = max_sequence and max_sequence[0]['sequence'] or 0
+		#max_sequence = self.pool.get('stock.picking.type').search_read(cr, uid, [], ['sequence'], order='sequence desc')
+		#max_sequence = max_sequence and max_sequence[0]['sequence'] or 0
 		
 		picking_id = picking_obj.create(cr, uid, {
 			'picking_type_id': model_obj.get_object_reference(cr, uid, 'stock', 'picking_type_internal')[1],
@@ -167,7 +128,7 @@ class purchase_retur(osv.osv):
 			'note': 'Cash Transaction ' + location_src.name + '/' + location_dest.name,
 			'location_id': location_src.id,
 			'location_dest_id': location_dest.id,
-			'origin': 'Retur - ' + str(name),
+			'origin': 'Purchase Retur - ' + str(name),
 		}, context=context)
 		#untuk setiap product, bikin stock movenya
 		for line in retur.retur_line_ids:
@@ -182,14 +143,14 @@ class purchase_retur(osv.osv):
 				'picking_id': picking_id,
 				'product_uom_qty': line.qty,
 				'price_unit' : line.price_unit_nett,
-				'origin': 'Retur - ' + str(name),
+				'origin': 'Purchase Retur - ' + str(name),
 			}, context=context)
 		# Transfer created picking
 		picking_obj.do_transfer(cr, uid, picking_id, context)
 
 
 		###################################################################################################################################################################
-		price_type_ids = self.pool.get('price.type').search(cr, uid, [('type','=','sell'),('is_default','=',True),])
+		price_type_ids = self.pool.get('price.type').search(cr, uid, [('type','=','buy'),('is_default','=',True),])
 		default_price_type_id = price_type_ids[0]
 
 		retur_lines = []	
@@ -202,60 +163,44 @@ class purchase_retur(osv.osv):
 			values['product_id'] = return_line.product_id.id
 			values['name'] = return_line.product_id.name_template
 			values['partner_id'] = partner_id.id
-			values['account_id'] = return_line.product_id.categ_id.property_account_income_categ.id #journal_retur.default_debit_account_id.id
+			values['account_id'] = return_line.product_id.categ_id.property_account_expense_categ.id #journal_retur.default_debit_account_id.id
 			values['price_type_id'] = default_price_type_id
 			if values:
 				retur_lines.append((0, 0, values))
 		
 		#  Bikin Invoice refund
 		refund_invoice = inv_obj.create(cr, uid, {
-			'reference' : name,
-			'date_due' : date,
+			'reference' : str(retur.desc),
+			#'date_due' : date,
 			'number'  : False,
 			'company_id' : cashier.company_id.id,
 			'partner_id' : partner_id.id,
 			'journal_id' : refund_journal_id.id,
  			'date_invoice': date,
- 			'type' : 'out_refund',
+ 			'type' : 'in_refund',
  			'state' : 'draft',
- 			'origin': name,
+ 			'origin': retur.id,
  			'invoice_line' : retur_lines,
- 			'account_id' : journal_retur.default_debit_account_id.id,
+ 			'account_id' : refund_journal_id.default_debit_account_id.id,
  			'period_id': period,
+ 			'name':name,
 		}, context=context)
 		
 		inv_obj.button_compute(cr, uid, refund_invoice)
-
-		to_reconcile_ids = {}
-		
 		refund = inv_obj.browse(cr, uid, refund_invoice, context=context)
 		refund.signal_workflow('invoice_open')
-		
-		for tmpline in refund.move_id.line_id:
-			if tmpline.account_id.id == journal_retur.default_debit_account_id.id:
-				if not to_reconcile_ids.get(tmpline.account_id.id, False):
-					to_reconcile_ids.setdefault(tmpline.account_id.id, []).append(tmpline.id)
-				else:
-					to_reconcile_ids[tmpline.account_id.id].append(tmpline.id)
 
-		for account in to_reconcile_ids:
-			account_m_line_obj.reconcile(cr, uid, to_reconcile_ids[account],
-				writeoff_period_id=period,
-				writeoff_journal_id = refund_journal_id.id,
-				writeoff_acc_id=journal_retur.default_debit_account_id.id,
-			)
-		
 		self.write(cr, uid, ids, {
-			'state': 'done',
+			'state': 'open',
 			'period':period,
 		}, context=context)
-
+		
 
 class purchase_retur_line(osv.osv):
-	_name = 'sale.retur.line'
+	_name = 'purchase.retur.line'
 	
 	_columns = {
-		'purchase_retur_id': fields.many2one('sale.retur', 'Sale Retur'),
+		'purchase_retur_id': fields.many2one('purchase.retur', 'Purchase Retur'),
 		'product_id': fields.many2one('product.product', 'Product', required=True),
 		'qty': fields.float('Qty', required=True),
 		'price_unit_nett' : fields.float(related = "product_id.product_tmpl_id.list_price",string="Price Nett"),

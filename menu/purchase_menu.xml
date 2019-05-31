@@ -16,5 +16,16 @@
 				'search_default_group_by_delivery_day':1,
 			}"/>
 		</record>
+
+		<record id="purchase_retur_action_entry" model="ir.actions.act_window">
+			<field name="name">Purchase Return</field> 
+			<field name="res_model">purchase.retur</field> 
+			<field name="view_type">form</field> 
+			<field name="view_mode">tree,form</field> 
+		</record>
+
+		<menuitem id="menu_return_purchase" name="Purchase Return" parent="base.menu_purchase_root" sequence="5"/>
+		<menuitem sequence="5" parent="menu_return_purchase" id="purchase_retur_menu_entry" action="purchase_retur_action_entry" />
+
 	</data>
 </openerp>
