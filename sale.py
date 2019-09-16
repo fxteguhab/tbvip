@@ -253,7 +253,7 @@ class sale_order(osv.osv):
 		Register payment. Return
 		"""
 		if payment_method not in ['transfer', 'cash', 'receivable', 'giro']: return False
-		if amount < 0: return False
+		if amount <= 0: return False
 		if not journal_id:
 			raise osv.except_osv(_('Payment Error'), _('Please supply journal for payment method %s.') % payment_method)
 		
