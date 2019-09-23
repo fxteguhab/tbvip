@@ -119,8 +119,8 @@ class canvassing_canvas(osv.osv):
 		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
 		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) + timedelta(minutes=10)
 
-		date_depart = date_depart.isoformat()
-		date_delivered = date_delivered.isoformat()
+		date_depart = date_depart.isoformat()+'Z'
+		date_delivered = date_delivered.isoformat() + 'Z'
 
 		payload = {'deviceId' : device_id, 'from' :date_depart,'to':date_delivered }
 		header =  {'cookie':cookie, 'Accept':'application/json'}
