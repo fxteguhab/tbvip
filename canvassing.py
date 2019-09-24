@@ -116,8 +116,12 @@ class canvassing_canvas(osv.osv):
 		
 		# ambil jarak antara waktu mulai dan selesai
 		# dikasih teloransi 10 menit sebelum dan sesudah, as per request 20170929
-		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
-		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) + timedelta(minutes=10)
+		#date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) - timedelta(minutes=10)
+		#date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=7) + timedelta(minutes=10)
+
+		#24sep2019 : penambahan 10 menit direvoke, -7GMT krn ga sinkron database traccar
+		date_depart = datetime.strptime(canvas_data.date_depart, DEFAULT_SERVER_DATETIME_FORMAT) - timedelta(hours=7)
+		date_delivered = datetime.strptime(canvas_data.date_delivered, DEFAULT_SERVER_DATETIME_FORMAT) - timedelta(hours=7)
 
 		date_depart = date_depart.isoformat()+'Z'
 		date_delivered = date_delivered.isoformat() + 'Z'
