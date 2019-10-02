@@ -70,6 +70,7 @@
 						product_packaging, parent.fiscal_position, False, parent.warehouse_id,
 						parent.price_type_id, price_type_id, context)
 					</attribute>
+					<attribute name="options">{'no_create': 1}</attribute>
 				</xpath>
 				<xpath expr="/form/sheet/notebook/page[1]/field[@name='order_line']/tree/field[@name='product_id']"
 						position="attributes">

@@ -43,7 +43,7 @@ class fleet_vehicle(osv.osv):
 			response = urllib2.urlopen(request, urllib.urlencode({'email':gps_username,'password':gps_password}))
 			cookie = response.headers.get('Set-Cookie')
 		except:
-			return -1 # -1 artinya error
+			return result #-1 # -1 artinya error
 
 		#get all device
 		request = urllib2.Request(devices_url)

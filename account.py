@@ -199,6 +199,7 @@ class account_invoice(osv.osv):
 			discount_string = invoice_line.discount_string
 			discount_string_old = invoice_line.discount_string_old
 
+			bon_number = invoice_line.invoice_id.related_sales_bon_number
 			invoice_id = invoice_line.invoice_id.id
 			sell_price_unit = invoice_line.sell_price_unit
 			buy_price_unit = invoice_line.buy_price_unit
@@ -240,6 +241,7 @@ class account_invoice(osv.osv):
 				'origin' : origin,
 				'qty' : quantity,
 				'invoice_date' : invoice_date,
+				'bon_number' : bon_number,
 				}
 
 				#check for changes and send notif

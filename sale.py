@@ -778,9 +778,11 @@ class sale_order_line(osv.osv):
 			uom=False, qty_uos=0, uos=False, name='', partner_id=False,
 			lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False,
 			warehouse_id=False, parent_price_type_id=False, price_type_id=False, context=None):
+		
 		product_conversion_obj = self.pool.get('product.conversion')
 		uom = product_conversion_obj.get_uom_from_auto_uom(cr, uid, uom, context).id
-		
+		general_customer_id  = self.pool['ir.model.data'].get_object_reference(cr, uid, 'tbvip', 'tbvip_customer_general')
+
 		# dari sale tidak perlu karena di tempat lain di panggil menggunakan super
 		# dari modul portal_sale dan sale_stock dan sale_multiple_payment tidak ada override onchange product id
 		result_price_list = imported_price_list.sale.sale_order_line.onchange_product_id_price_list(self, cr, uid, ids, pricelist, product, qty,
@@ -804,6 +806,8 @@ class sale_order_line(osv.osv):
 			if uom_record:
 				product_current_price_obj = self.pool.get('product.current.price')
 				current_price = product_current_price_obj.get_current(cr, uid, product, price_type_id, uom_record.id, partner_id=partner_id)
+				if (current_price == 0):
+					current_price = product_current_price_obj.get_current(cr, uid, product, price_type_id, uom_record.id, partner_id=general_customer_id[1])
 
 				if current_price:
 					result['value'].update({
