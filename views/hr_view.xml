@@ -85,8 +85,21 @@
 				</xpath>
 			</field>
 		</record>
-
-
+		
+		<record id="hr_point_employee_point_search_inherit" model="ir.ui.view">
+			<field name="name">hr.point.employee.point.search.inherit</field>
+			<field name="model">hr.point.employee.point</field>
+			<field name="inherit_id" ref="hr_point_payroll.hr_point_employee_point_search"/>
+			<field name="arch" type="xml">
+				<xpath expr="//filter[@string='Today']" position="after">
+					
+					<filter string="This Week" name="this_week" domain="[
+						('event_date','&gt;=',(context_today()+relativedelta(weeks=-2,days=1,weekday=0)).strftime('%Y-%m-%d')),('event_date','&lt;',(context_today()+relativedelta(weekday=6)).strftime('%Y-%m-%d'))]" help="Journal invoices of the current and the last weeks" />
+					
+				</xpath>
+			</field>
+		</record>
+		
 		<record model="ir.ui.view" id="hr_payslip_form_inherit">
 			<field name="name">hr.payslip.form.inherit</field>
 			<field name="model">hr.payslip</field>
