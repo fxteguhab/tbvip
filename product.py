@@ -1,3 +1,4 @@
+from openerp import api
 from openerp.osv import osv, fields
 from datetime import datetime, timedelta
 
@@ -199,6 +200,19 @@ class product_template(osv.osv):
 			
 		return result
 
+	@api.multi
+	@api.depends('qty_available','min_qty')
+	def _get_is_stock_exhausted(self):		
+		for product in self:
+			product.is_stock_exhausted = product.qty_available < product.min_qty
+
+	@api.multi
+	@api.depends('qty_available','max_qty')
+	def _get_is_stock_overstock(self):
+		result = {}
+		for product in self:
+			product.is_stock_overstock = product.qty_available > product.max_qty
+
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -221,6 +235,10 @@ class product_template(osv.osv):
 		'last_sale_delta': fields.function(_get_last_sale_delta, string="Last Sale Delta", type='float', readonly=True),
 		'latest_inventory_adjustment_date': fields.datetime('Latest Inventory Adjustment Date', readonly=True),
 		'latest_inventory_adjustment_employee_id': fields.many2one('hr.employee', 'Latest Inventory Adjustment Employee', readonly=True),
+		'min_qty': fields.float("Min Qty", group_operator="avg"),
+		'max_qty': fields.float("Max Qty", group_operator="avg"),
+		'is_stock_exhausted' : fields.boolean(compute = '_get_is_stock_exhausted', string="Stock Exhausted", store=True),
+		'is_stock_overstock' : fields.boolean(compute = '_get_is_stock_overstock', string="Over Stock", store=True),
 	}
 
 	_sql_constraints = [
@@ -234,6 +252,8 @@ class product_template(osv.osv):
 		'type': 'product',
 		'sale_delay' : 0,
 		'last_sale_delta' : 0,
+		'min_qty' : 0,
+		'max_qty' : 1,
 		#'commission' : '0',
 	}
 	

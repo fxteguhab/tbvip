@@ -281,7 +281,7 @@ class product_current_commission(osv.osv):
 		}, context=context)
 	
 	def _create_product_current_commission(self, cr, uid, product_ids, commission_line, context=None):
-		product_obj = self.pool.get('product.template')
+		#product_obj = self.pool.get('product.template')
 		new_ids = []
 		for product_id in product_ids:
 			new_product_current_commission_id = self.create(cr, uid, {

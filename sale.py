@@ -66,6 +66,7 @@ class sale_order(osv.osv):
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
 		'amount_residual':fields.function(_default_amount_residual,type='float',string='Balance'),
 		'total_margin' : fields.float('Margin', readonly=True),
+		'date_due': fields.date('Due Date'),
 		#'total_margin' : fields.function(_calculate_margin_total, type="float", string="Margin", store=True),
 	}
 
@@ -128,6 +129,7 @@ class sale_order(osv.osv):
 		'payment_receivable_journal': _default_payment_receivable_journal,
 		'payment_giro_journal' : _default_payment_receivable_journal,
 		'payment_transfer_journal' : _default_payment_receivable_journal,
+		'date_due' : fields.datetime.now,
 		#,'bon_number' : '0'
 	}
 	

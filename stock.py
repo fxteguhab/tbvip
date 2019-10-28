@@ -483,6 +483,12 @@ class stock_inventory_line(osv.osv):
 class stock_inventory(osv.osv):
 	_inherit = 'stock.inventory'
 	
+	def _get_total_qty(self, cr, uid, ids, field_name, args, context=None):
+		res = {}
+		for inv in self.browse(cr, uid, ids, context=context):
+			res[inv.id] = sum([x.product_qty for x in inv.line_ids])
+		return res
+
 	# PRINTS ---------------------------------------------------------------------------------------------------------------
 	
 	def print_stock_inventory(self, cr, uid, ids, context):
@@ -492,6 +498,11 @@ class stock_inventory(osv.osv):
 			'target': 'self',
 		}
 
+# COLUMNS ---------------------------------------------------------------------------------------------------------------
+	
+	_columns = {
+		'total_qty': fields.function(_get_total_qty, type="float", group_operator="sum"),
+	}
 # ==========================================================================================================================
 
 class stock_picking(osv.osv):

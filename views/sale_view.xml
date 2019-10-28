@@ -40,6 +40,7 @@
 				<!--<field name="customer_address" position="replace"/>-->
 				<field name="shipped_or_taken" position="before">
 					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
+					<field name="date_due"/>
 					<field name="employee_id" readonly="True"/>
 					<field name="return_id" readonly="True"/>
 				</field>
