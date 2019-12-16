@@ -95,19 +95,24 @@
 		</record>
 
 		<!--TEGUH@20180405:tambah sort di tree -->
-		<!--
+		
 		<record id="view_voucher_tree_inherit" model="ir.ui.view">
 			<field name="name">account.voucher.tree.inherit</field>
 			<field name="model">account.voucher</field>
 			<field name="inherit_id" ref="account_voucher.view_voucher_tree"/>
 			<field name="arch" type="xml">
+				<field name="number" position="attributes">
+					<attribute name="invisible">1</attribute>
+				</field>
+				<field name="date" position="after">
+					<field name = "check_maturity_date"/>
+				</field>
 				<xpath expr="//tree[1]" position="attributes">
-					<attribute name = "default_order">"check_maturity_date asc"</attribute>
+					<attribute name = "default_order">check_maturity_date asc</attribute>
 				</xpath>
-
 			</field>
 		</record>
-		-->
+		
 		<!-- TEGUH@20180405 : ganti id,name  -->
 		<record id="view_voucher_filter_vendor_pay_inherit" model="ir.ui.view">
 			<field name="name">account.voucher.purchase.pay.select.inherit</field> 
