@@ -172,19 +172,27 @@ class account_voucher(osv.osv):
 					total -= line.amount
 			result[account_voucher_data.id] = total
 		return result
-	'''
-	def action_kontra(self, cr, uid, ids, context=None):
-		self.message_post(cr, uid, ids,body=_("Update State to Kontra"))
+	
+	def action_paid(self, cr, uid, ids, context=None):
+		#self.message_post(cr, uid, ids,body=_("Invoice Paid"))
 		# state request dr button
 		self.write(cr, uid, ids, {
-		'state': 'kontra'
+		'state': 'paid',
+		'date': datetime.today().strftime('%Y-%m-%d'),
 		}, context=context)
 		
 		return True
-	'''
+	
+	def write(self, cr, uid, ids, vals, context={}):
+		result = super(account_voucher, self).write(cr, uid, ids, vals, context=context)	
+		if any(field in vals.keys() for field in ['reference']):		
+			self.message_post(cr, uid, ids,body=_("Reference Updated"))
+		return result
+
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
+		'date':fields.date('Effective Date', readonly=False, select=True, states={'posted':[('readonly',True)]}, help="Effective date for accounting entries", copy=False),
 		'check_maturity_date': fields.date(string='Giro Maturity Date',
 			readonly=True, states={'draft': [('readonly', False)]}),
 		'bank_id': fields.many2one('res.partner.bank', 'Supplier Bank Account'),
@@ -196,17 +204,17 @@ class account_voucher(osv.osv):
 		'kontra' : fields.boolean('Kontra'),
 		#'payment_method' : fields.selection(_PAYMENT_METHOD, 'Payment Method', required=True),
 
-		#'state':fields.selection(
-		#	[('draft','Draft'),
-		#	 ('kontra','Kontra'),
-		#	 ('cancel','Cancelled'),
-		#	 ('proforma','Pro-forma'),
-		#	 ('posted','Posted')
-		#	], 'Status', readonly=True, track_visibility='onchange', copy=False,
-		#	help=' * The \'Draft\' status is used when a user is encoding a new and unconfirmed Voucher. \
-		#				\n* The \'Pro-forma\' when voucher is in Pro-forma status,voucher does not have an voucher number. \
-		#				\n* The \'Posted\' status is used when user create voucher,a voucher number is generated and voucher entries are created in account \
-		#				\n* The \'Cancelled\' status is used when user cancel voucher.'),
+		'state':fields.selection(
+			[('draft','Draft'),
+			 ('paid','Paid'),
+			 ('cancel','Cancelled'),
+			 ('proforma','Pro-forma'),
+			 ('posted','Posted')
+			], 'Status', readonly=True, track_visibility='onchange', copy=False,
+			help=' * The \'Draft\' status is used when a user is encoding a new and unconfirmed Voucher. \
+						\n* The \'Pro-forma\' when voucher is in Pro-forma status,voucher does not have an voucher number. \
+						\n* The \'Posted\' status is used when user create voucher,a voucher number is generated and voucher entries are created in account \
+						\n* The \'Cancelled\' status is used when user cancel voucher.'),
 	}
 
 	_defaults = {
