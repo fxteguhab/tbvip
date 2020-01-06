@@ -19,6 +19,7 @@
 				</field>
 				<button name="cancel_voucher" position="after">
 					<button name="action_paid" string="Paid" type="object" states = "draft"/>
+					<button name="action_cancel_paid" string="Cancel Paid" type="object" icon="gtk-cancel" states = "paid"/>
 					<button name="print_kontra_bon" string="Print" type="object" icon="gtk-print"/>
 				</button>
 				<button name="cancel_voucher" position="attributes">
@@ -27,6 +28,7 @@
 				<button name="proforma_voucher" position="attributes">
 					<attribute name="confirm">Are you sure to validate this payment? This action cannot be undone.</attribute>
 					<attribute name="states">paid</attribute>
+					<attribute name="icon">gtk-apply</attribute>
 				</button>
 				<field name="state" position="attributes">
 					<attribute name ="statusbar_visible">draft,paid,posted</attribute>

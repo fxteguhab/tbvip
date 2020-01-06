@@ -182,6 +182,14 @@ class account_voucher(osv.osv):
 		}, context=context)
 		
 		return True
+
+	def action_cancel_paid(self, cr, uid, ids, context=None):
+		# state request dr button
+		self.write(cr, uid, ids, {
+		'state': 'draft',
+		}, context=context)
+		
+		return True
 	
 	def write(self, cr, uid, ids, vals, context={}):
 		result = super(account_voucher, self).write(cr, uid, ids, vals, context=context)	
