@@ -41,6 +41,12 @@ class account_invoice(osv.osv):
 		'qty_sum': fields.function(_qty_sum, type="integer", string="Qty Sum"),
 		'row_count': fields.function(_row_count, type="integer", string="Row Count"),
 		'related_sales_bon_number': fields.char("Nomor Bon", readonly=True),
+		'date_due' : fields.date(string='Due Date', readonly=False, index=True, copy=False,
+			help="If you use payment terms, the due date will be computed automatically at the generation "
+			"of accounting entries. The payment term may compute several due dates, for example 50% "
+			"now and 50% in one month, but if you want to force a due date, make sure that the payment "
+			"term is not set on the invoice. If you keep the payment term and the due date empty, it "
+			"means direct payment."),
 	}
 	
 	def invoice_auto_done(self, cr, uid, ids, context=None):
