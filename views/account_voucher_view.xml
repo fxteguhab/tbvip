@@ -137,19 +137,25 @@
 					<!--TEGUH@20180405 : tambah filter kontra -->
 					<filter name="groupby_kontra" string="Kontra" domain="[('state','=','draft'),('is_ready','=',False)]" />
 					<filter name="groupby_paid" string="Paid" domain="[('state','=','paid')]" />
-					<group expand="0" string="Group By Date">
-						<filter name="group_by_order_year" string="Order Year" context="{'group_by':'create_date:year'}"/>
-						<filter name="group_by_order_month" string="Order Month" context="{'group_by':'create_date:month'}"/>
-						<filter name="group_by_order_week" string="Order Week" context="{'group_by':'create_date:week'}"/>
-						<filter name="group_by_order_day" string="Order Day" context="{'group_by':'create_date:day'}"/>
-						<filter string="Order Today" domain="[('create_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('create_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+					<group expand="0" string="Group By Create Date">
+						<filter name="group_by_order_year" string="Year" context="{'group_by':'create_date:year'}"/>
+						<filter name="group_by_order_month" string="Month" context="{'group_by':'create_date:month'}"/>
+						<filter name="group_by_order_week" string="Week" context="{'group_by':'create_date:week'}"/>
+						<filter name="group_by_order_day" string="Day" context="{'group_by':'create_date:day'}"/>
+						<filter string="Create Today" domain="[('create_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('create_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
 					</group>
-					
-					<group expand="0" string="Group By Check Maturity Date">
-						<filter name="group_by_order_year" string="Due Year" context="{'group_by':'check_maturity_date:year'}"/>
-						<filter name="group_by_order_month" string="Due Month" context="{'group_by':'check_maturity_date:month'}"/>
-						<filter name="group_by_order_week" string="Due Week" context="{'group_by':'check_maturity_date:week'}"/>
-						<filter name="group_by_order_day" string="Due Day" context="{'group_by':'check_maturity_date:day'}"/>
+					<group expand="0" string="Group By Effective Date">
+						<filter name="group_by_effective_year" string="Year" context="{'group_by':'date:year'}"/>
+						<filter name="group_by_effective_month" string="Month" context="{'group_by':'date:month'}"/>
+						<filter name="group_by_effective_week" string="Week" context="{'group_by':'date:week'}"/>
+						<filter name="group_by_effective_day" string="Day" context="{'group_by':'date:day'}"/>
+						<filter string="Effective Today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+					</group>
+					<group expand="0" string="Group By Maturity Date">
+						<filter name="group_by_mat_year" string="Year" context="{'group_by':'check_maturity_date:year'}"/>
+						<filter name="group_by_mat_month" string="Month" context="{'group_by':'check_maturity_date:month'}"/>
+						<filter name="group_by_mat_week" string="Week" context="{'group_by':'check_maturity_date:week'}"/>
+						<filter name="group_by_mat_day" string="Day" context="{'group_by':'check_maturity_date:day'}"/>
 						<filter string="Due Today" domain="[('check_maturity_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('check_maturity_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
 					</group>
 					

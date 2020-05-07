@@ -65,6 +65,18 @@
 					<filter string="Branch" name="branch" domain="[]"
 						context="{'group_by': 'branch_id'}"/>
 				</xpath>
+				<filter name="date_depart_month" position="before">
+					<filter string="Year" context="{'group_by':'date_depart:year'}" />
+				</filter>
+				<filter name="date_depart_month" position="after">
+					<filter string="Week" context="{'group_by':'date_depart:week'}" />
+				</filter>
+				<filter name="driver1_id" position="attributes">
+					<attribute name = "string">Driver</attribute>
+				</filter>
+				<filter name="driver2_id" position="attributes">
+					<attribute name = "string">Co Driver</attribute>
+				</filter>
 			</field>
 		</record>
 
