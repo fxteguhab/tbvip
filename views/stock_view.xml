@@ -106,24 +106,6 @@
 			<field name="model">stock.inventory</field>
 			<field name="inherit_id" ref="stock.view_inventory_filter"/>
 			<field name="arch" type="xml">
-				
-				<!--<filter string ="Week" position ="after">-->
-				<!--<group string="Group By" position="inside">-->
-					<!--<filter string="Month" name="filter_month_inventory_adjustment" context="{'group_by':'date:month'}"/>-->
-					<!-- TEGUH@20180405: add group by week & today -->
-					<!--<filter string="Week" name="filter_week_inventory_adjustment" context="{'group_by':'date:week'}"/>-->
-					
-					<!--<filter string="Today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>-->
-				<!--</group>-->
-				<!--</filter>-->
-				<!-- TEGUH@20180405: add group by created by & employee
-				<group string="Group By" position="after">
-					<group string="Group By HR">
-						<filter string="Created By" name="create_uid" domain="[]" context="{'group_by': 'create_uid'}"/>
-                        <filter string="Employee" name="employee_id" domain="[]" context="{'group_by': 'employee_id'}"/>
-					</group>
-				</group>
-				-->
 				<filter string="Inventories Month" position="attributes">
 					<attribute name = "invisible">True</attribute>
 				</filter>
@@ -136,6 +118,11 @@
 						<filter string="Month"  name="filter_day_inventory_adjustment" context="{'group_by':'date:month'}"/>
 						<filter string="Week"  name="filter_day_inventory_adjustment" context="{'group_by':'date:week'}"/>
 						<filter string="Day"  name="filter_day_inventory_adjustment" context="{'group_by':'date:day'}"/>
+						<filter string="Today" domain="[('date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>
+					</group>
+					<group string="Group By HR">
+						<filter string="Admin" name="create_uid" domain="[]" context="{'group_by': 'create_uid'}"/>
+						<filter string="Employee" name="employee_id" domain="[]" context="{'group_by': 'employee_id'}"/>
 					</group>
 				</group>
 			</field>
