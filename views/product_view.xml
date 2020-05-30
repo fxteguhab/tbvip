@@ -381,5 +381,21 @@
 
 			</field>
 		</record>
+
+		<record id="view_product_margin_tree_inherit" model="ir.ui.view">
+			<field name="name">product.margin.tree.inherit</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product_margin.view_product_margin_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//tree[1]" position="attributes">
+					<attribute name = "default_order">total_margin_rate asc</attribute>
+				</xpath>
+				<field name="default_code" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+			</field>
+		</record>
+
+
 	</data>
 </openerp>
