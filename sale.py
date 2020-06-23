@@ -59,7 +59,7 @@ class sale_order(osv.osv):
 		'bon_book_id': fields.many2one('tbvip.bon.book', 'Invoice No'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		#TEGUH@20180412 : employee id  not required
-		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
+		'employee_id': fields.many2one('hr.employee', 'Employee'),# readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_paid': fields.boolean('Paid ?'),
 		'return_amount' : fields.float('Return Amount'),

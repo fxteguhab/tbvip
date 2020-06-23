@@ -30,7 +30,7 @@
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">
 					<field name="branch_id" readonly="True"/>
-					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"/>
+					<field name="bon_number"/><!-- on_change="onchange_bon_number(bon_number, date_order)"/>-->
 					<field name ="create_uid" readonly="True"/>
 				</field>
 				<field name="partner_id" position="attributes">
@@ -39,9 +39,9 @@
 				<field name="client_order_ref" position="replace"/>
 				<!--<field name="customer_address" position="replace"/>-->
 				<field name="shipped_or_taken" position="before">
-					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
+					<field name="date_order"/><!-- on_change="onchange_bon_number(bon_number, date_order)"/>-->
 					<field name="date_due"/>
-					<field name="employee_id" readonly="True"/>
+					<field name="employee_id" options="{'no_create': 1}"/><!-- readonly="True"/>-->
 					<field name="return_id" readonly="True"/>
 				</field>
 				<field name="price_type_id" position="after">
