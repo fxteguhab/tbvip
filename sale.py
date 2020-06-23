@@ -347,6 +347,9 @@ class sale_order(osv.osv):
 			else:
 				raise osv.except_orm(_('Invoice No Empty'), _('You must fill Invoice No.'))
 			
+			if not sale.employee_id:
+				raise osv.except_orm(_('Employee Empty'), _('Employee Name Error'))	
+			
 		return result
 
 	def _calculate_commission_total(self, cr, uid, sale_order_id):
@@ -408,15 +411,21 @@ class sale_order(osv.osv):
 			('start_from', '<=', int(bon_number)),
 			('end_at', '>=', int(bon_number)),
 		], limit=1, order='issue_date DESC')
-		bon_book = bon_book_obj.browse(cr, uid, bon_book_id)
+		
+		bon_book = None
+		"""
+		bon_book = bon_book_obj.browse(cr, uid, bon_book_id)		
 		if not bon_book:
 			raise osv.except_orm(_('Creating sale order error'),
 				_('There is no bon book with the given number in your branch.'))
+		"""
 		return bon_book
 	
 	def onchange_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
 		result = {}
 		result['value'] = {}
+
+		"""
 		if bon_number and date_order:
 			try:
 				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
@@ -435,6 +444,11 @@ class sale_order(osv.osv):
 				}
 			finally:
 				return result
+		"""
+		result['value'].update({
+						'date_due': date_order
+					})
+
 		return result
 		
 	def _update_bon_book(self, cr, uid, bon_number, date_order):
