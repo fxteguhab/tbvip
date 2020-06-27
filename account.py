@@ -47,6 +47,9 @@ class account_invoice(osv.osv):
 			"now and 50% in one month, but if you want to force a due date, make sure that the payment "
 			"term is not set on the invoice. If you keep the payment term and the due date empty, it "
 			"means direct payment."),
+		'supplier_invoice_number' : fields.char(string='Supplier Invoice Number', required=True,
+			help="The reference of this invoice as provided by the supplier.",
+			readonly=True, states={'draft': [('readonly', False)]})
 	}
 	
 	def invoice_auto_done(self, cr, uid, ids, context=None):
