@@ -34,14 +34,17 @@
 					<attribute name ="statusbar_visible">draft,paid,posted</attribute>
 				</field>
 				<field name="date" position="before">
-					<field name ="create_date"/>
+					<field name ="create_date" readonly = "1"/>
 				</field>
-				<field name="reference" position="after">
-					<field name="check_maturity_date"  />
+				<field name="reference" position="after">					
 					<field name="bank_id" domain="[('partner_id','=',partner_id)]" />
 					<field name="is_ready" readonly="1" invisible="1" />
 					<field name="id" invisible="1" />
 					<field name ="kontra" />
+				</field>
+				<field name="create_date" position="after">
+					<field name="paid_date"/>
+					<field name="check_maturity_date"/>
 				</field>
 				<field name="amount" position="before">
 					<field name="selected_amount" widget="monetary" options="{'currency_field': 'currency_id'}" />

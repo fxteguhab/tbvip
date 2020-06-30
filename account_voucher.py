@@ -178,7 +178,7 @@ class account_voucher(osv.osv):
 		# state request dr button
 		self.write(cr, uid, ids, {
 		'state': 'paid',
-		'date': datetime.today().strftime('%Y-%m-%d'),
+		#'date': datetime.today().strftime('%Y-%m-%d'),
 		}, context=context)
 		
 		return True
@@ -201,8 +201,8 @@ class account_voucher(osv.osv):
 	
 	_columns = {
 		'date':fields.date('Effective Date', readonly=False, select=True, states={'posted':[('readonly',True)]}, help="Effective date for accounting entries", copy=False),
-		'check_maturity_date': fields.date(string='Giro Maturity Date',
-			readonly=True, states={'draft': [('readonly', False)]}),
+		'paid_date': fields.date(string='Paid Date',readonly=True, states={'draft': [('readonly', False)]}),
+		'check_maturity_date': fields.date(string='Giro Maturity Date',	readonly=True, states={'draft': [('readonly', False)]}),
 		'bank_id': fields.many2one('res.partner.bank', 'Supplier Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
 		'reference': fields.char('Ref #', readonly=False, states={},
@@ -227,6 +227,8 @@ class account_voucher(osv.osv):
 
 	_defaults = {
 		'check_maturity_date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
+		'paid_date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
+		'date': lambda *a: datetime.today().strftime('%Y-%m-%d'),
 		'writeoff_acc_id': _default_writeoff_acc_id,
 		'comment': _('Rounding'),
 		'payment_option' : 'with_writeoff',
