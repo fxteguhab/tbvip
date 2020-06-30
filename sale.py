@@ -59,7 +59,7 @@ class sale_order(osv.osv):
 		'bon_book_id': fields.many2one('tbvip.bon.book', 'Invoice No'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
 		#TEGUH@20180412 : employee id  not required
-		'employee_id': fields.many2one('hr.employee', 'Employee'),# readonly=True),
+		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
 		'stock_location_id': fields.many2one('stock.location', 'Location'),
 		'is_paid': fields.boolean('Paid ?'),
 		'return_amount' : fields.float('Return Amount'),
@@ -412,20 +412,17 @@ class sale_order(osv.osv):
 			('end_at', '>=', int(bon_number)),
 		], limit=1, order='issue_date DESC')
 		
-		bon_book = None
-		"""
 		bon_book = bon_book_obj.browse(cr, uid, bon_book_id)		
 		if not bon_book:
 			raise osv.except_orm(_('Creating sale order error'),
 				_('There is no bon book with the given number in your branch.'))
-		"""
+		
 		return bon_book
 	
 	def onchange_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
 		result = {}
 		result['value'] = {}
-
-		"""
+		
 		if bon_number and date_order:
 			try:
 				bon_book = self.check_and_get_bon_number(cr, uid, bon_number, date_order)
@@ -444,7 +441,7 @@ class sale_order(osv.osv):
 				}
 			finally:
 				return result
-		"""
+		
 		result['value'].update({
 						'date_due': date_order
 					})
