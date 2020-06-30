@@ -48,6 +48,11 @@ class canvassing_canvas(osv.osv):
 
 		return result
 
+	def _default_branch_id(self, cr, uid, context={}):
+	# default branch adalah tempat user sekarang ditugaskan
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		return user_data.branch_id.id or None
+
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -61,6 +66,7 @@ class canvassing_canvas(osv.osv):
 	_defaults = {
 		'is_recalculated': False,
 		'max_load_time' : '00:00:00',
+		'branch_id': _default_branch_id,
 	}
 	
 	# OVERRIDES --------------------------------------------------------------------------------------------------------------
