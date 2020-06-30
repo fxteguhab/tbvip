@@ -30,7 +30,7 @@
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">
 					<field name="branch_id" readonly="True"/>
-					<field name="bon_number"/><!-- on_change="onchange_bon_number(bon_number, date_order)"/>-->
+					<field name="bon_number" on_change="onchange_bon_number(bon_number, date_order)"/>
 					<field name ="create_uid" readonly="True"/>
 				</field>
 				<field name="partner_id" position="attributes">
