@@ -178,7 +178,7 @@ class account_voucher(osv.osv):
 		# state request dr button
 		self.write(cr, uid, ids, {
 		'state': 'paid',
-		#'date': datetime.today().strftime('%Y-%m-%d'),
+		'paid_date': datetime.today().strftime('%Y-%m-%d'),
 		}, context=context)
 		
 		return True
