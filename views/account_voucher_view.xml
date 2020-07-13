@@ -18,8 +18,9 @@
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
 				<button name="cancel_voucher" position="after">
-					<button name="action_paid" string="Paid" type="object" states = "draft"/>
-					<button name="action_cancel_paid" string="Cancel Paid" type="object" icon="gtk-cancel" states = "paid"/>
+					<button name="action_ready" string="Ready" type="object" icon="gtk-apply" states = "draft"/>
+					<button name="action_paid" string="Paid" type="object" icon="gtk-paste" states = "ready"/>
+					<button name="action_cancel_paid" string="set to Draft" type="object" icon="gtk-cancel" states = "paid,ready"/>
 					<button name="print_kontra_bon" string="Print" type="object" icon="gtk-print"/>
 				</button>
 				<button name="cancel_voucher" position="attributes">
@@ -31,7 +32,7 @@
 					<attribute name="icon">gtk-apply</attribute>
 				</button>
 				<field name="state" position="attributes">
-					<attribute name ="statusbar_visible">draft,paid,posted</attribute>
+					<attribute name ="statusbar_visible">draft,ready,paid,posted</attribute>
 				</field>
 				<field name="date" position="before">
 					<field name ="create_date" readonly = "1"/>
@@ -40,7 +41,7 @@
 					<field name="bank_id" domain="[('partner_id','=',partner_id)]" />
 					<field name="is_ready" readonly="1" invisible="1" />
 					<field name="id" invisible="1" />
-					<field name ="kontra" />
+					<!--<field name ="kontra" />-->
 				</field>
 				<field name="create_date" position="after">
 					<field name="paid_date"/>
@@ -135,8 +136,8 @@
 					<field name="reference" string="Ref #"/>
 				</xpath>
 				<search string="Search Vouchers" position="inside">		
-					<filter name="groupby_ready" string="Ready" domain="[('state','=','draft'),('is_ready','=',True)]" />
-
+					<!--<filter name="groupby_ready" string="Ready" domain="[('state','=','draft'),('is_ready','=',True)]" />-->
+					<filter name="groupby_ready" string="Ready" domain="[('state','=','ready')]" />
 					<!--TEGUH@20180405 : tambah filter kontra -->
 					<filter name="groupby_kontra" string="Kontra" domain="[('state','=','draft'),('is_ready','=',False)]" />
 					<filter name="groupby_paid" string="Paid" domain="[('state','=','paid')]" />

@@ -173,6 +173,48 @@ class account_voucher(osv.osv):
 			result[account_voucher_data.id] = total
 		return result
 	
+	def action_ready(self, cr, uid, ids, context=None):
+		account_voucher_data = self.browse(cr, uid, ids, context=context)
+		if (account_voucher_data.reference):
+			self.message_post(cr, uid, ids,body=_("Payment Ready"))
+			# state request dr button
+			self.write(cr, uid, ids, {
+			'state': 'ready',
+			}, context=context)
+		else:
+			raise osv.except_orm(_('Preparing Payment Error'),_('Please enter Reference.'))
+
+		#isi giro
+		check_no = ''
+		account_voucher_data = self.browse(cr, uid, ids, context=context)
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+			space_pos = account_voucher_data.reference.find(" ")
+			check_code = account_voucher_data.reference[0:space_pos].upper()
+			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
+			check_slip_obj = self.pool['tbvip.check.line']
+			check_slip_id = check_slip_obj.search(cr, uid, [('code', '=',check_code),('no', '=',check_no)])
+			check_slip = check_slip_obj.browse(cr, uid, check_slip_id)		
+			if not check_slip:
+				raise osv.except_orm(_('Writing Check Slip Error'),_('There is no check slip with the given number.'))
+			else:
+				check_slip_obj.write(cr, uid, check_slip_id, {
+					'issue_date': datetime.now(),	
+					'maturity_date'	: account_voucher_data.check_maturity_date,
+					'partner_id' : account_voucher_data.partner_id.id, 
+					'bank_id' : account_voucher_data.bank_id.id,
+					'amount' : account_voucher_data.amount,
+				})
+
+			check_book_obj = self.pool['tbvip.check.book']
+			check_book = check_book_obj.browse(cr, uid, check_slip.check_id.id)
+			if (check_book):
+				check_book_obj.write(cr, uid, check_slip.check_id.id, {
+					'total_used': check_book.total_used + 1,
+				})
+		return True
+
+
+
 	def action_paid(self, cr, uid, ids, context=None):
 		#self.message_post(cr, uid, ids,body=_("Invoice Paid"))
 		# state request dr button
@@ -180,6 +222,21 @@ class account_voucher(osv.osv):
 		'state': 'paid',
 		'paid_date': datetime.today().strftime('%Y-%m-%d'),
 		}, context=context)
+
+		#isi giro
+		check_no = ''
+		account_voucher_data = self.browse(cr, uid, ids, context=context)
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+			space_pos = account_voucher_data.reference.find(" ")
+			check_code = account_voucher_data.reference[0:space_pos].upper()
+			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
+			check_slip_obj = self.pool['tbvip.check.line']
+			check_slip_id = check_slip_obj.search(cr, uid, [('code', '=',check_code),('no', '=',check_no)])
+			check_slip = check_slip_obj.browse(cr, uid, check_slip_id)		
+			if check_slip:
+				check_slip_obj.write(cr, uid, check_slip_id, {
+					'paid_date': account_voucher_data.paid_date,	
+				})
 		
 		return True
 
@@ -188,7 +245,34 @@ class account_voucher(osv.osv):
 		self.write(cr, uid, ids, {
 		'state': 'draft',
 		}, context=context)
-		
+
+		#hapus isi giro
+		check_no = ''
+		account_voucher_data = self.browse(cr, uid, ids, context=context)
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+			space_pos = account_voucher_data.reference.find(" ")
+			check_code = account_voucher_data.reference[0:space_pos]
+			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
+			check_slip_obj = self.pool['tbvip.check.line']
+			check_slip_id = check_slip_obj.search(cr, uid, [('code', '=',check_code),('no', '=',check_no)])
+			check_slip = check_slip_obj.browse(cr, uid, check_slip_id)		
+			if check_slip:
+				check_slip_obj.write(cr, uid, check_slip_id, {
+					'paid_date': False,	
+					'issue_date': False,	
+					'maturity_date'	: False,
+					'partner_id' : False,
+					'bank_id' : False,
+					'amount' : False,
+				})
+			
+			check_book_obj = self.pool['tbvip.check.book']
+			check_book = check_book_obj.browse(cr, uid, check_slip.check_id.id)
+			if (check_book):
+				check_book_obj.write(cr, uid, check_slip.check_id.id, {
+					'total_used': check_book.total_used - 1,
+				})
+
 		return True
 	
 	def write(self, cr, uid, ids, vals, context={}):
@@ -197,6 +281,23 @@ class account_voucher(osv.osv):
 			self.message_post(cr, uid, ids,body=_("Reference Updated"))
 		return result
 
+	def proforma_voucher(self, cr, uid, ids, context=None):
+		result = super(account_voucher, self).proforma_voucher(cr, uid, ids, context=context)	
+		#isi giro
+		check_no = ''
+		account_voucher_data = self.browse(cr, uid, ids, context=context)
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+			space_pos = account_voucher_data.reference.find(" ")
+			check_code = account_voucher_data.reference[0:space_pos].upper()
+			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
+			check_slip_obj = self.pool['tbvip.check.line']
+			check_slip_id = check_slip_obj.search(cr, uid, [('code', '=',check_code),('no', '=',check_no)])
+			check_slip = check_slip_obj.browse(cr, uid, check_slip_id)		
+			if check_slip:
+				check_slip_obj.write(cr, uid, check_slip_id, {
+					'effective_date': account_voucher_data.date,	
+				})
+		return result
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -205,8 +306,7 @@ class account_voucher(osv.osv):
 		'check_maturity_date': fields.date(string='Giro Maturity Date',	readonly=True, states={'draft': [('readonly', False)]}),
 		'bank_id': fields.many2one('res.partner.bank', 'Supplier Bank Account'),
 		'is_ready': fields.function(_is_ready, type="boolean", string="Is Ready", store=True),
-		'reference': fields.char('Ref #', readonly=False, states={},
-			help="Transaction reference number.", copy=False),
+		'reference': fields.char('Ref #', readonly=False, states={}, help="Transaction reference number.", copy=False),
 		'amount': fields.float('Total Paid', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'selected_amount': fields.function(_selected_amount, type="float", string="Total Amount"),
 		'kontra' : fields.boolean('Kontra'),
@@ -214,6 +314,7 @@ class account_voucher(osv.osv):
 
 		'state':fields.selection(
 			[('draft','Draft'),
+			 ('ready','Ready'),
 			 ('paid','Paid'),
 			 ('cancel','Cancelled'),
 			 ('proforma','Pro-forma'),

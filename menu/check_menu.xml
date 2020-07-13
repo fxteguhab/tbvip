@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+		<record id="tbvip_action_tbvip_check_book" model="ir.actions.act_window">
+			<field name="name">Check Book</field>
+			<field name="res_model">tbvip.check.book</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+			<field name="context">{}</field>
+		</record>
+		<menuitem sequence="30" id="tbvip_menu_tbvip_check_book" parent="account.menu_finance_payables" action="tbvip_action_tbvip_check_book"/>
+	</data>
+</openerp>
