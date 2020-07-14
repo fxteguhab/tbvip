@@ -283,6 +283,7 @@ class account_voucher(osv.osv):
 
 	def proforma_voucher(self, cr, uid, ids, context=None):
 		result = super(account_voucher, self).proforma_voucher(cr, uid, ids, context=context)	
+		'''
 		#isi giro
 		check_no = ''
 		account_voucher_data = self.browse(cr, uid, ids, context=context)
@@ -297,6 +298,7 @@ class account_voucher(osv.osv):
 				check_slip_obj.write(cr, uid, check_slip_id, {
 					'effective_date': account_voucher_data.date,	
 				})
+		'''
 		return result
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
