@@ -283,11 +283,11 @@ class account_voucher(osv.osv):
 
 	def proforma_voucher(self, cr, uid, ids, context=None):
 		result = super(account_voucher, self).proforma_voucher(cr, uid, ids, context=context)	
-		'''
-		#isi giro
-		check_no = ''
+		
+		#isi giro		
 		account_voucher_data = self.browse(cr, uid, ids, context=context)
-		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+		if (account_voucher_data.type == 'payment') and (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+			check_no = ''
 			space_pos = account_voucher_data.reference.find(" ")
 			check_code = account_voucher_data.reference[0:space_pos].upper()
 			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
@@ -298,7 +298,7 @@ class account_voucher(osv.osv):
 				check_slip_obj.write(cr, uid, check_slip_id, {
 					'effective_date': account_voucher_data.date,	
 				})
-		'''
+		
 		return result
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
