@@ -1,7 +1,7 @@
 <openerp>
 	<data>
 
-		<record model="ir.ui.view" id="bon_book_tree">
+		<record model="ir.ui.view" id="check_book_tree">
 			<field name="name">tbvip.check.book.tree</field>
 			<field name="model">tbvip.check.book</field>
 			<field name="arch" type="xml">
@@ -17,7 +17,7 @@
 			</field>
 		</record>
 
-		<record model="ir.ui.view" id="bon_book_form">
+		<record model="ir.ui.view" id="check_book_form">
 			<field name="name">tbvip.check.book.form</field>
 			<field name="model">tbvip.check.book</field>
 			<field name="arch" type="xml">
@@ -42,7 +42,7 @@
 		</record>
 
 
-		<record model="ir.ui.view" id="bon_line_tree">
+		<record model="ir.ui.view" id="check_line_tree">
 			<field name="name">tbvip.check.line.tree</field>
 			<field name="model">tbvip.check.line</field>
 			<field name="arch" type="xml">
@@ -60,7 +60,7 @@
 			</field>
 		</record>
 
-		<record model="ir.ui.view" id="bon_line_form">
+		<record model="ir.ui.view" id="check_line_form">
 			<field name="name">tbvip.check.line.form</field>
 			<field name="model">tbvip.check.line</field>
 			<field name="arch" type="xml">
