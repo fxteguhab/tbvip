@@ -9,9 +9,11 @@
 				<xpath expr="//field[@name='address_home_id']" position="replace">
 					<field name="address"/>
 				</xpath>
+				<!--
 				<xpath expr="//field[@name='active']" position="attributes">
 					<attribute name="string">Misc</attribute>
 				</xpath>
+				-->
 				<xpath expr="//field[@name='active']" position="before">
 					<field name="fingerprint_id"/>
 					<field name="is_spg"/>

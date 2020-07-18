@@ -426,18 +426,21 @@ class stock_sublocation(osv.osv):
 			iter_location = sublocation
 			full_name = iter_location.name
 			while iter_location.parent_id.id is not False and name_count < self._MAX_GET_NAME_COUNT:
+				branch = iter_location.branch_id.name
 				iter_location = iter_location.parent_id
-				full_name = iter_location.name + ' / ' + full_name
+				full_name = str(branch) + ' / '+iter_location.name + ' / ' + full_name
 				name_count += 1
 			result[sublocation.id] = full_name
 		return result
 	
 	_columns = {
+		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 		'name': fields.char('Name'),
 		'full_name': fields.function(_full_name, type='char', string='Full Name'),
 		'parent_id': fields.many2one('stock.sublocation', 'Parent Sublocation'),
 		'child_ids': fields.one2many('stock.sublocation', 'parent_id', 'Child Sublocations'),
-		'type': fields.selection([('view', 'View'), ('physical', 'Physical')], 'Type')
+		#'type': fields.selection([('view', 'View'), ('physical', 'Physical')], 'Type')
+		'pic': fields.many2one('hr.employee', 'PiC'),
 	}
 	
 	# OVERRIDES -------------------------------------------------------------------------------------------------------------

@@ -137,6 +137,10 @@
 				<field name="product_manager" position="after">
 					<field name="brand_id" />
 				</field>
+
+				<field name="product_manager" position="attributes">
+					<attribute name="string">Product PiC</attribute>
+				</field>
 				<field name="uom_id" position="after">
 					<label for="product_current_stock"/>
 					<div>
@@ -150,6 +154,7 @@
 							<tree editable="bottom">
 								<field name="branch_id"/>
 								<field name="sublocation_id"/>
+								<field name="pic"/>
 							</tree>
 						</field>
 					</page>

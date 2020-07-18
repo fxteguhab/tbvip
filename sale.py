@@ -64,9 +64,10 @@ class sale_order(osv.osv):
 		'is_paid': fields.boolean('Paid ?'),
 		'return_amount' : fields.float('Return Amount'),
 		'return_id': fields.many2one('account.invoice', "Return", readonly=True),
-		'amount_residual':fields.function(_default_amount_residual,type='float',string='Balance'),
+		'amount_residual':fields.function(_default_amount_residual,type='float',string='Residual'),
 		'total_margin' : fields.float('Margin', readonly=True),
 		'date_due': fields.date('Due Date'),
+		'kecamatan' : fields.many2one('tbvip.kecamatan', 'Kecamatan'),
 		#'total_margin' : fields.function(_calculate_margin_total, type="float", string="Margin", store=True),
 	}
 

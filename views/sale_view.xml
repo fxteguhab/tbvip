@@ -37,7 +37,6 @@
 					<attribute name="options">{'no_create': True}</attribute>
 				</field>
 				<field name="client_order_ref" position="replace"/>
-				<!--<field name="customer_address" position="replace"/>-->
 				<field name="shipped_or_taken" position="before">
 					<field name="date_order" on_change="onchange_bon_number(bon_number, date_order)"/>
 					<field name="date_due"/>
@@ -53,6 +52,9 @@
 				</field>
 				<field name="currency_id" position="attributes">
 					<attribute name="invisible">True</attribute>
+				</field>
+				<field name="customer_address" position="after">
+					<field name="kecamatan"  options="{'no_create': 1}" attrs="{'invisible': [('shipped_or_taken','!=','shipped')]}"/>
 				</field>
 				<!--
 				<field name="line_discounts" position="attributes">
@@ -176,21 +178,21 @@
 			<field name="inherit_id" ref="sale.view_order_tree"/>
 			<field name="arch" type="xml">
 				<field name="date_order" position="after">
-					<field name="branch_id"/>
-					<field name="client_order_ref"/>
+					<field name="branch_id"/>					
 				</field>
 				<field name="amount_total" position="before">
 					<field name="employee_id"/>
 					<field name="commission_total"/>
-					<field name ="amount_residual"/>
+					<field name ="amount_residual" string="Residual"/>
 				</field>
-				<field name="employee_id" position="after">
+				<!--<field name="employee_id" position="after">
 					<field name="branch_id"/>
-				</field>
-				<field name="amount_total" position="after">
+				</field>-->
+				<field name="state" position="before">
 					<field name="shipped_or_taken"/>
-					<field name="return_id"/>
 					<field name="total_margin" groups="tbvip.group_management_central"/>
+					<field name="client_order_ref"/>
+					<field name="return_id"/>
 				</field>
 				<field name="user_id" position="attributes">
 					<attribute name="string">Cashier</attribute>

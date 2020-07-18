@@ -56,11 +56,11 @@ class canvassing_canvas(osv.osv):
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'branch_id': fields.many2one('tbvip.branch', 'Branch', required=True),
-		'total_distance': fields.float('Total Distance', readonly=True),
-		'is_recalculated': fields.boolean('Is Recalculated?', search=False),
-		'interbranch_move_ids': fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
-		'max_load_time' : fields.function(_max_load_time, type='char',string='Max Load Time'), 
+		'branch_id'				: fields.many2one('tbvip.branch', 'Branch', required=True),
+		'total_distance'		: fields.float('Total Distance', readonly=True),
+		'is_recalculated'		: fields.boolean('Is Recalculated?', search=False),
+		'interbranch_move_ids'	: fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
+		'max_load_time' 		: fields.function(_max_load_time, type='char',string='Max Load Time'), 
 	}
 
 	_defaults = {
@@ -532,3 +532,14 @@ class canvassing_canvas_interbranch_line(osv.Model):
 			'context': {'simple_view': 1},
 			'target': 'new',
 		}
+
+class tbvip_kecamatan(osv.Model):
+	_name = 'tbvip.kecamatan'
+	_description = 'Kecamatan di Bandung'
+
+	_columns = {
+		'kecamatan'		: fields.char('Kecamatan'),
+		'distance' 		: fields.integer('Distance'),
+		'delivery_fee'	: fields.integer('Delivery Fee'),
+	}
+

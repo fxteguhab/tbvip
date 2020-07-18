@@ -363,9 +363,10 @@ class product_product_branch_sublocation(osv.osv):
 	# COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
-		'product_id': fields.many2one('product.product', 'Product'),
+		'product_id': fields.many2one('product.template', 'Product'),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch'),
 		'sublocation_id': fields.many2one('stock.sublocation', 'Sublocation'),
+		'pic' : fields.related('sublocation_id', 'pic','name', type="char", string="PiC" ,readonly = True),
 	}
 
 # ==========================================================================================================================
