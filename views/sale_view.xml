@@ -54,7 +54,7 @@
 					<attribute name="invisible">True</attribute>
 				</field>
 				<field name="customer_address" position="after">
-					<field name="kecamatan"  options="{'no_create': 1}" attrs="{'invisible': [('shipped_or_taken','!=','shipped')]}"/>
+					<field name="kecamatan"  options="{'no_create': 1}" attrs="{'invisible': [('shipped_or_taken','!=','shipped')],'required': [('shipped_or_taken','=','shipped')] }"/>
 				</field>
 				<!--
 				<field name="line_discounts" position="attributes">

@@ -6,6 +6,7 @@ import json
 import requests
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, date, timedelta
+from openerp import api
 
 
 # ==========================================================================================================================
@@ -367,10 +368,24 @@ class canvasssing_canvas_stock_line(osv.Model):
 				result[line.id] = '00:00:00'
 		return result
 
+	def _kecamatan(self, cr, uid, ids, field_name, arg, context=None):
+		result = {}
+		for line in self.browse(cr, uid, ids, context=context):
+			if line.stock_picking_id:
+				sale_order_obj = self.pool('sale.order')
+				sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
+				if len(sale_order_id) > 0:
+					sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
+					result[line.id] = sale_order.kecamatan.name	
+		return result
+
 	_columns = {
 		'sales_order_id': fields.function(_sales_order_id, type='many2one', relation='sale.order',string='Sales Order'),
 		'purchase_order_id': fields.function(_purchase_order_id, type='many2one', relation='purchase.order',string='Purchase Order'),
 		'load_time' :fields.function(_load_time, type='char',string='Load Time'),
+		'kecamatan' : fields.function(_kecamatan, type='char',string='Kecamatan', store=True),
+		'vehicle_id' : fields.char(related = "canvas_id.fleet_vehicle_id.name",string="Vehicle"),
+		'driver1_id' : fields.char(related = "canvas_id.driver1_id.name",string="Driver"),
 	}
 
 	def action_open_sales_order(self, cr, uid, ids, context={}):
@@ -408,8 +423,6 @@ class canvasssing_canvas_stock_line(osv.Model):
 			'context': {'simple_view': 1},
 			'target': 'new',
 			}
-
-		
 
 
 """
@@ -538,8 +551,18 @@ class tbvip_kecamatan(osv.Model):
 	_description = 'Kecamatan di Bandung'
 
 	_columns = {
-		'kecamatan'		: fields.char('Kecamatan'),
-		'distance' 		: fields.integer('Distance'),
+		'name'		: fields.char('Kecamatan', required=True),
+		'distance' 		: fields.float('Distance'),
 		'delivery_fee'	: fields.integer('Delivery Fee'),
+		'poin'			:  fields.integer('Poin'),
 	}
 
+	@api.multi
+	def name_get(self):
+		res = []
+		for record in self:
+			name = record.name
+			if record.name :
+				name = record.name + ' (' + '{:,}'.format(record.delivery_fee) +')'
+			res.append((record.id,name))
+		return res

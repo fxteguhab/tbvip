@@ -25,5 +25,34 @@
 		<menuitem id="menu_tbvip_branch" parent="base.menu_config"
 				sequence="1" action="action_tbvip_branch"/>
 
+
+		<record id="tbvip_action_tbvip_kecamatan" model="ir.actions.act_window">
+			<field name="name">Data Kecamatan</field>
+			<field name="res_model">tbvip.kecamatan</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="30" id="tbvip_menu_tbvip_kecamatan" parent="canvassing.canvassing_menu" action="tbvip_action_tbvip_kecamatan"/>
+
+		<record id="tbvip_action_tbvip_kecamatan" model="ir.actions.act_window">
+			<field name="name">Data Kecamatan</field>
+			<field name="res_model">tbvip.kecamatan</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="30" id="tbvip_menu_tbvip_kecamatan" parent="canvassing.canvassing_menu" action="tbvip_action_tbvip_kecamatan"/>
+
+		<record id="tbvip_action_canvassing_line" model="ir.actions.act_window">
+			<field name="name">Delivery Lines</field>
+			<field name="res_model">canvassing.canvas.stock.line</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="30" id="tbvip_menu_canvassing_line" parent="canvassing.canvassing_menu" action="tbvip_action_canvassing_line"/>
+
+
 	</data>
 </openerp>

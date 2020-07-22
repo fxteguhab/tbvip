@@ -46,6 +46,9 @@
 					<field name ="load_time"/>
 					<button name="action_open_sales_order" string="⇒ Detail" type="object" class="oe_link" attrs="{'invisible': [('stock_picking_id','=',False)]}" />
 				</xpath>
+				<xpath expr="//notebook/page[@string='Stock Pickings']/field[@name='stock_line_ids']/tree/field[@name='is_executed']" position="before">
+					<field name ="kecamatan"/>
+				</xpath>
 				<page string="Stock Pickings" position="attributes">
 					<attribute name="string">External</attribute>
 				</page>
@@ -112,7 +115,62 @@
 			</field>
 		</record>
 
+		<record model="ir.ui.view" id="tbvip_kecamatan_tree">
+			<field name="name">tbvip.kecamatan.tree</field>
+			<field name="model">tbvip.kecamatan</field>
+			<field name="arch" type="xml">
+				<tree string = "Data Kecamatan" version="7.0" editable="bottom">
+					<field name="name"/>
+					<field name="distance"/>
+					<field name="delivery_fee"/>
+					<field name="poin"/>
+				</tree>
+			</field>
+		</record>
 
+		<record model="ir.ui.view" id="tbvip_canvassing_canvas_stock_line_tree">
+			<field name="name">canvassing.canvas.stock.line.tree</field>
+			<field name="model">canvassing.canvas.stock.line</field>
+			<field name="inherit_id" ref="canvassing.canvassing_canvas_stock_line_tree"/>
+			<field name="arch" type="xml">
+				<field name ="stock_picking_id" position="before">
+					<field name="create_date"/>
+				</field>
+				<field name ="address" position="after">
+					<field name="kecamatan"/>
+					<field name="vehicle_id"/>
+				</field>
+				<field name ="delivery_amount" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+				<field name ="is_executed" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</field>
+			</field>
+		</record>
+
+		<record id="canvassing_canvas_stock_line_search" model="ir.ui.view">
+			<field name="name">canvassing.canvas.stock.line.search</field>
+			<field name="model">canvassing.canvas.stock.line</field>
+			<field name="type">search</field>
+			<field name="arch" type="xml">
+				<search string="Search Canvassing Lines">
+					<group string="Timeline">
+						<filter string="Year"  name="filter_canvas_line_year" context="{'group_by':'create_date:year'}"/>
+						<filter string="Month"  name="filter_canvas_line_month" context="{'group_by':'create_date:month'}"/>
+						<filter string="Week"  name="filter_canvas_line_week" context="{'group_by':'create_date:week'}"/>
+						<filter string="Day"  name="filter_canvas_line_date" context="{'group_by':'create_date:day'}"/>
+						<filter string="Today" domain="[('create_date', '&gt;=', datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')),('create_date', '&lt;=', datetime.datetime.now().strftime('%Y-%m-%d 23:23:59'))]"/>						
+					</group>
+					<group string="Group by">
+						<filter string="Stock Pickings"  name="filter_canvas_line_stock_pickings" context="{'group_by':'stock_picking_id'}"/>
+						<filter string="Kecamatan"  name="filter_canvas_line_kecamatan" context="{'group_by':'kecamatan'}"/>
+						<filter string="Address"  name="filter_canvas_line_address" context="{'group_by':'address'}"/>
+						<filter string="Vehicle"  name="filter_canvas_line_vehicle" context="{'group_by':'vehicle_id'}"/>
+					</group>
+				</search>
+			</field>
+		</record>
 
 	</data>
 </openerp>
