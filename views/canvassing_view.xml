@@ -49,6 +49,9 @@
 				<xpath expr="//notebook/page[@string='Stock Pickings']/field[@name='stock_line_ids']/tree/field[@name='is_executed']" position="before">
 					<field name ="kecamatan"/>
 				</xpath>
+				<xpath expr="//notebook/page[@string='Stock Pickings']/field[@name='stock_line_ids']/tree/field[@name='address']" position="before">
+					<field name ="partner_id"/>
+				</xpath>
 				<page string="Stock Pickings" position="attributes">
 					<attribute name="string">External</attribute>
 				</page>
@@ -139,6 +142,9 @@
 				<field name ="address" position="after">
 					<field name="kecamatan"/>
 					<field name="vehicle_id"/>
+				</field>
+				<field name ="address" position="before">
+					<field name="partner_id"/>
 				</field>
 				<field name ="delivery_amount" position="attributes">
 					<attribute name="invisible">True</attribute>
