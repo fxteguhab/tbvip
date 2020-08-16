@@ -189,5 +189,20 @@
 			<field name="view_id" ref="view_invoice_line_product_tree"/>
 		</record>
 
+<!--
+		<record id="act_bad_debt" model="workflow.activity">
+			<field name="wkf_id" ref="wkf"/>
+			<field name="name">bad_debt</field>
+			<field name="flow_stop">True</field>
+			<field name="action">action_bad_debt() write({'state':'bad_debt'})</field>
+			<field name="kind">function</field>
+		</record>
+
+		<record id="t_open_to_cancel" model="workflow.transition">
+			<field name="act_from" ref="act_open"/>
+			<field name="act_to" ref="act_bad_debt"/>
+			<field name="signal">invoice_cancel</field>
+		</record>
+-->
 	</data>
 </openerp>

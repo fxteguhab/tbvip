@@ -1,3 +1,4 @@
+import res_users
 import product
 import res_partner
 import stock
@@ -14,7 +15,6 @@ import commission_utility
 import bon
 import demand
 import account
-import res_users
 #import stock_opname
 import fleet
 import canvassing

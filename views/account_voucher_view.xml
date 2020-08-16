@@ -37,6 +37,9 @@
 				<field name="date" position="before">
 					<field name ="create_date" readonly = "1"/>
 				</field>
+				<field name="date" position="attributes">
+					<attribute name="attrs">{'invisible': [('state', 'not in', ['paid', 'posted'])]}</attribute>
+				</field>
 				<field name="reference" position="after">					
 					<field name="bank_id" domain="[('partner_id','=',partner_id)]" />
 					<field name="is_ready" readonly="1" invisible="1" />
@@ -44,7 +47,7 @@
 					<!--<field name ="kontra" />-->
 				</field>
 				<field name="create_date" position="after">
-					<field name="paid_date"/>
+					<field name="paid_date" attrs="{'invisible': [('state', 'not in', ['paid', 'posted'])]}"/>
 					<field name="check_maturity_date"/>
 				</field>
 				<field name="amount" position="before">
