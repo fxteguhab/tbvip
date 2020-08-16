@@ -16,8 +16,8 @@
 		"sale_multiple_payment", "canvassing", "hr_point_payroll", "product_custom_conversion", "product_production",
 		"account_simplified_journal", "wallet",
 		"product_by_supplier","product_variant_supplierinfo","purchase_add_product_supplierinfo",
-		"web_export_view",
-		#"blue_backend_theme_v8","odoo_web_login",		
+		"web_export_view","product_margin",
+		"blue_backend_theme_v8","odoo_web_login","letsencrypt",		
 		#tbvip_point_payroll sekalian dicek update
 	],	
 	'sequence': 150,
