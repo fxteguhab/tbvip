@@ -18,11 +18,11 @@
 							<field name="default_incoming_location_id" options="{'no_create': 1}"/>
 							<field name="default_outgoing_location_id" options="{'no_create': 1}"/>
 						</group>
-						<group string="Accounting-Purchase">
+						<group string="Accounting-Account">
 							<field name="default_account_cash" options="{'no_create': 1}"/>
 							<field name="default_account_bank" options="{'no_create': 1}"/>
 						</group>
-						<group string="Accounting-Sale">
+						<group string="Accounting-Journal">
 							<field name="default_journal_sales_cash" options="{'no_create': 1}"/>
 							<field name="default_journal_sales_bank" options="{'no_create': 1}"/>	
 						</group>
