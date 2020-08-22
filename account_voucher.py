@@ -7,7 +7,7 @@ import openerp.addons.decimal_precision as dp
 # ==========================================================================================================================
 _PAYMENT_METHOD = [
 	('cash', 'CASH'),
-	('giro', 'GIRO'),
+	('giro', 'GIRO / CHEQUE'),
 	('transfer', 'TRANSFER'),
 ]
 
@@ -88,34 +88,116 @@ class account_voucher(osv.osv):
 		res['value']['account_id'] = self._get_account_id(cr, uid, ttype, uid, context)[0]
 		return res
 	
-	def onchange_journal(self, cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context=None):
+	def onchange_payment(self, cr, uid, ids,payment_method, context=None):
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+		voucher_data = self.pool['account.voucher'].browse(cr, uid, ids)
+		journal_id = False
+		if (payment_method == 'cash'):
+			if user_data.branch_id.default_journal_sales_cash:
+				journal_id = user_data.branch_id.default_journal_sales_cash.id
+		if (payment_method == 'giro') or (payment_method == 'transfer'):
+			if user_data.branch_id.default_journal_sales_bank:
+				journal_id = user_data.branch_id.default_journal_sales_bank.id
+
+		line_ids = voucher_data.line_ids
+		tax_id = voucher_data.tax_id.id
+		partner_id = voucher_data.partner_id.id
+		date = voucher_data.date
+		amount = voucher_data.amount
+		ttype = voucher_data.type
+		company_id = voucher_data.company_id.id
+		result = self.onchange_journal(cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context)				
+		
+		cash_account_id, bank_account_id = self._get_account_id(cr, uid, ttype, uid, context)
+		account_id = False
+		reference=''
+		acc_journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
+		
+		if acc_journal.type == 'cash':
+			reference = 'CASH'
+			account_id = cash_account_id
+		elif acc_journal.type == 'bank':
+			account_id = bank_account_id
+			if (payment_method == 'giro'):
+				reference = ''
+			elif (payment_method == 'transfer'):
+				reference = 'TRANSFER'	
+
+		if result:
+			if 'value' in result:
+				result['value']['account_id'] = account_id
+				result['value']['journal_id'] = journal_id
+				result['value']['reference'] = reference
+				if (payment_method):
+					result['value']['payment_method'] = payment_method
+			else:
+				result['value'] = {'account_id': account_id}
+				result['value'] = {'journal_id': journal_id}
+				result['value'] = {'reference': reference}
+				if (payment_method):
+					result['value'] = {'payment_method': payment_method}
+
+		else:
+			result = {'value': {'account_id': account_id}}
+			result = {'value': {'journal_id': journal_id}}
+			result = {'value': {'reference': reference}}
+			if (payment_method):
+					result = {'value': {'payment_method': payment_method}}
+		
+		return result
+	
+	
+	'''
+	def onchange_journal(self, cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context):
+		print "masuk onchange"
+		print "payment_method dari header:"+str(context)
 		result = super(account_voucher, self).onchange_journal(
 			cr, uid, ids, journal_id, line_ids, tax_id, partner_id, date, amount, ttype, company_id, context)
 		
+		payment_method = context.get('payment_method',False)		
+		print "journal_id_journal:" +str(journal_id)
 		if journal_id:
-		# ambil default account buat payment. default sesuai yang diset di user atau cabang
+			# ambil default account buat payment. default sesuai yang diset di user atau cabang
 			cash_account_id, bank_account_id = self._get_account_id(cr, uid, ttype, uid, context)
 			account_id = False
+			reference=''
 			acc_journal = self.pool.get('account.journal').browse(cr, uid, journal_id, context=context)
+			
 			if acc_journal.type == 'cash':
-				account_id = cash_account_id
 				reference = 'CASH'
+				account_id = cash_account_id
 			elif acc_journal.type == 'bank':
 				account_id = bank_account_id
-				reference = ''
+				print "payment_method:"+str(payment_method)
+				if (payment_method == 'giro'):
+					reference = ''
+				elif (payment_method == 'transfer'):
+					reference = 'TRANSFER'	
+			print "reference : "+str(reference)			
 			if result:
 				if 'value' in result:
 					result['value']['account_id'] = account_id
+					result['value']['journal_id'] = journal_id
 					result['value']['reference'] = reference
+					if (payment_method):
+						result['value']['payment_method'] = payment_method
 				else:
 					result['value'] = {'account_id': account_id}
+					result['value'] = {'journal_id': journal_id}
 					result['value'] = {'reference': reference}
+					if (payment_method):
+						result['value'] = {'payment_method': payment_method}
+
 			else:
 				result = {'value': {'account_id': account_id}}
+				result = {'value': {'journal_id': journal_id}}
 				result = {'value': {'reference': reference}}
-				
+				if (payment_method):
+					result = {'value': {'payment_method': payment_method}}
+			
 		return result
-	
+	'''
+
 	def recompute_voucher_lines(self, cr, uid, ids, partner_id, journal_id, price, currency_id, ttype, date, context=None):
 	# cegah dari otomatis mencentang line-line invoice bila ada perubahan paid amount
 	# dengan ini, pemilihan invoice yang mau dibayar harus totally manual
@@ -187,7 +269,7 @@ class account_voucher(osv.osv):
 		#isi giro
 		check_no = ''
 		account_voucher_data = self.browse(cr, uid, ids, context=context)
-		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ) and (account_voucher_data.reference != 'TRANSFER'):
 			space_pos = account_voucher_data.reference.find(" ")
 			check_code = account_voucher_data.reference[0:space_pos].upper()
 			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
@@ -226,7 +308,7 @@ class account_voucher(osv.osv):
 		#isi giro
 		check_no = ''
 		account_voucher_data = self.browse(cr, uid, ids, context=context)
-		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ) and (account_voucher_data.reference != 'TRANSFER'):
 			space_pos = account_voucher_data.reference.find(" ")
 			check_code = account_voucher_data.reference[0:space_pos].upper()
 			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
@@ -249,7 +331,7 @@ class account_voucher(osv.osv):
 		#hapus isi giro
 		check_no = ''
 		account_voucher_data = self.browse(cr, uid, ids, context=context)
-		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+		if (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ) and (account_voucher_data.reference != 'TRANSFER'):
 			space_pos = account_voucher_data.reference.find(" ")
 			check_code = account_voucher_data.reference[0:space_pos]
 			check_no = account_voucher_data.reference[space_pos+1:len(account_voucher_data.reference)]
@@ -277,8 +359,24 @@ class account_voucher(osv.osv):
 	
 	def write(self, cr, uid, ids, vals, context={}):
 		result = super(account_voucher, self).write(cr, uid, ids, vals, context=context)	
+		if (vals.get('payment_method',False) == 'cash'):
+			self.write(cr, uid, ids, {'reference': 'CASH',})
+		elif (vals.get('payment_method',False) == 'transfer'):
+			self.write(cr, uid, ids, {'reference': 'TRANSFER',})	
+		elif (vals.get('payment_method',False) == 'giro'):
+			self.write(cr, uid, ids, {'reference': '',})
 		if any(field in vals.keys() for field in ['reference']):		
 			self.message_post(cr, uid, ids,body=_("Reference Updated"))
+		return result
+
+	def create(self, cr, uid, vals, context={}):
+		result = super(account_voucher, self).create(cr, uid, vals, context=context)	
+		if (vals.get('payment_method',False) == 'cash'):
+			self.write(cr, uid, result, {'reference': 'CASH',})
+		elif (vals.get('payment_method',False) == 'transfer'):
+			self.write(cr, uid, result, {'reference': 'TRANSFER',})	
+		elif (vals.get('payment_method',False) == 'giro'):
+			self.write(cr, uid, result, {'reference': '',})	
 		return result
 
 	def proforma_voucher(self, cr, uid, ids, context=None):
@@ -286,7 +384,7 @@ class account_voucher(osv.osv):
 		
 		#isi giro		
 		account_voucher_data = self.browse(cr, uid, ids, context=context)
-		if (account_voucher_data.type == 'payment') and (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ):
+		if (account_voucher_data.type == 'payment') and (account_voucher_data.reference) and (account_voucher_data.reference != 'CASH' ) and (account_voucher_data.reference != 'TRANSFER'):
 			check_no = ''
 			space_pos = account_voucher_data.reference.find(" ")
 			check_code = account_voucher_data.reference[0:space_pos].upper()
@@ -312,7 +410,7 @@ class account_voucher(osv.osv):
 		'amount': fields.float('Total Paid', digits_compute=dp.get_precision('Account'), required=True, readonly=True, states={'draft':[('readonly',False)]}),
 		'selected_amount': fields.function(_selected_amount, type="float", string="Total Amount"),
 		'kontra' : fields.boolean('Kontra'),
-		#'payment_method' : fields.selection(_PAYMENT_METHOD, 'Payment Method', required=True),
+		'payment_method' : fields.selection(_PAYMENT_METHOD, 'Payment Method', required=True),
 
 		'state':fields.selection(
 			[('draft','Draft'),
@@ -336,7 +434,7 @@ class account_voucher(osv.osv):
 		'comment': _('Rounding'),
 		'payment_option' : 'with_writeoff',
 		'kontra' : False,
-		#'payment_method' : 'giro',
+		'payment_method' : 'cash',
 	}
 	
 	# PRINTS ----------------------------------------------------------------------------------------------------------------

@@ -22,7 +22,7 @@
 			<field name="view_mode">tree,form</field>
 		</record>
 
-		<menuitem id="menu_tbvip_branch" parent="base.menu_config"
+		<menuitem id="menu_tbvip_branch" parent="base.menu_res_company_global"
 				sequence="1" action="action_tbvip_branch"/>
 
 
