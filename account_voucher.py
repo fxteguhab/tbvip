@@ -363,8 +363,8 @@ class account_voucher(osv.osv):
 			self.write(cr, uid, ids, {'reference': 'CASH',})
 		elif (vals.get('payment_method',False) == 'transfer'):
 			self.write(cr, uid, ids, {'reference': 'TRANSFER',})	
-		elif (vals.get('payment_method',False) == 'giro'):
-			self.write(cr, uid, ids, {'reference': '',})
+		#elif (vals.get('payment_method',False) == 'giro'):
+		#	self.write(cr, uid, ids, {'reference': '',})
 		if any(field in vals.keys() for field in ['reference']):		
 			self.message_post(cr, uid, ids,body=_("Reference Updated"))
 		return result
@@ -375,8 +375,8 @@ class account_voucher(osv.osv):
 			self.write(cr, uid, result, {'reference': 'CASH',})
 		elif (vals.get('payment_method',False) == 'transfer'):
 			self.write(cr, uid, result, {'reference': 'TRANSFER',})	
-		elif (vals.get('payment_method',False) == 'giro'):
-			self.write(cr, uid, result, {'reference': '',})	
+		#elif (vals.get('payment_method',False) == 'giro'):
+		#	self.write(cr, uid, result, {'reference': '',})	
 		return result
 
 	def proforma_voucher(self, cr, uid, ids, context=None):
