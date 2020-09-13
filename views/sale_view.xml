@@ -25,7 +25,10 @@
 					<attribute name="icon">gtk-apply</attribute>
 				</button>
 				<button name="action_customer_pay" position="replace">
-					<button name="action_additional_payment" type="object"  String ="Add Payment" attrs="{'invisible': [('state','!=','progress')]}" icon="/tbvip/static/src/img/fa-money.png"/>
+					<button name="action_additional_payment" type="object"  String ="Add Payment" attrs="{'invisible': [('state','!=','progress')]}" icon="/tbvip/static/src/img/gtk-coin.png"/>
+				</button>
+				<button name="action_additional_payment" position="after">
+					<button name="action_invoice_cancel" type="object"  String ="Bad Debt Sales" attrs="{'invisible': [('state','!=','progress')]}" icon="gtk-no"/>
 				</button>
 				<field name="date_order" position="replace"/>
 				<field name="partner_id" position="before">
