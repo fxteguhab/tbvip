@@ -120,7 +120,18 @@
 				</ul>
 			</field>
 		</record>
-	-->
+		-->
+		<record model="ir.ui.view" id="product_template_product_form_inherit">
+			<field name="name">product.template.product.form.inherit</field>
+			<field name="model">product.template</field>
+			<field name="priority">18</field>
+			<field name="inherit_id" ref="product.product_template_only_form_view"/>
+			<field name="arch" type="xml">
+				<page name="variants" position="attributes">
+					<attribute name="invisible">True</attribute>
+				</page>
+			</field>
+		</record>
 
 		<record model="ir.ui.view" id="product_product_form_inherit">
 			<field name="name">product.product.form.inherit</field>
@@ -137,10 +148,11 @@
 				<field name="product_manager" position="after">
 					<field name="brand_id" />
 				</field>
-
+				<!--
 				<field name="product_manager" position="attributes">
-					<attribute name="string">Product PiC</attribute>
+					<attribute name="string">Product Manager</attribute>
 				</field>
+				-->
 				<field name="uom_id" position="after">
 					<label for="product_current_stock"/>
 					<div>
@@ -171,6 +183,7 @@
 						<field name="commission"/>
 					</div>
 				</group>
+				<!--
 				<group name="sale_condition" position="inside">
 					<label for="last_sale"/>
 					<div>
@@ -181,9 +194,10 @@
 						<field name="last_sale_delta" readonly="1" class="oe_inline" style="vertical-align:baseline"/> days
 					</div>
 				</group>
+				-->
 				<field name="sale_delay" position="attributes">
 					<attribute name="invisible">True</attribute>
-				</field>
+				</field>			
 			</field>
 		</record>
 

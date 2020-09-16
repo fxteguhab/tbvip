@@ -8,6 +8,11 @@ _RETUR_STATE = [
 	('done', 'Done'),
 ]
 
+_RETUR_METHOD = [
+	('cash', 'CASH'),
+	('transfer', 'TRANSFER'),
+]
+
 class sale_retur(osv.osv):
 
 	_name = 'sale.retur'
@@ -41,6 +46,8 @@ class sale_retur(osv.osv):
 
 		'employee_id_old_sales': fields.many2one('hr.employee', 'Sell by'),
 		'bon_number_old_sales': fields.char('Sale Invoice No'),
+
+		'retur_method' : fields.selection(_RETUR_METHOD, 'Retur Method', required=True),
 	}
 
 	def onchange_old_bon_number(self, cr, uid, ids, bon_number, date_order, context=None):
@@ -198,6 +205,7 @@ class sale_retur(osv.osv):
 		'partner_id': _default_partner_id,
 		'state': 'draft',
 		'refund_journal_id': _get_journal,
+		'retur_method' : 'cash',
 	}
 
 	def button_retur(self, cr, uid, ids, context=None):		
@@ -206,6 +214,7 @@ class sale_retur(osv.osv):
 		user_obj = self.pool.get('res.users')
 		cashier = user_obj.browse(cr, uid, uid)
 		company = cashier.company_id
+		default_account_bank = cashier.branch_id.default_account_bank.id
 
 		retur = self.browse(cr,uid,ids)
 		journal_retur = retur.payment_sale_retur_journal
@@ -237,12 +246,15 @@ class sale_retur(osv.osv):
 		#print "branch:"+str(vals.get('branch_id'))
 		#print "journal_retur_id: "+str(journal_retur.id)
 		#print "default_debit_account_id: "+str(journal_retur.default_debit_account_id)
-
+		if (retur.retur_method == 'cash'):
+			credit_account = journal_retur.default_credit_account_id.id
+		else: 
+			credit_account = default_account_bank
 		entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
 		entry_data['line_id'] = [
 			[0,False,{
 				'name': name, 
-				'account_id': journal_retur.default_credit_account_id.id, 
+				'account_id': credit_account, #journal_retur.default_credit_account_id.id, 
 				'credit': amount, #vals.get('amount', 0),
 				'debit': 0,
 				'partner_id' : cashier.partner_id.id,

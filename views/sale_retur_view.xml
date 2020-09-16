@@ -15,6 +15,7 @@
 							<field name="journal_date" />
 							<field name="branch_id" required="True" options="{'no_create': 1}" readonly = "True"/>
 							<field name ="payment_sale_retur_journal" readonly="True" invisible ="True"/>
+							<field name ="retur_method" />
 							<label for="amount"/>
 							<div>
 								<field name="amount" class="oe_inline"/>
