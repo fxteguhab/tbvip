@@ -220,7 +220,7 @@ class product_template(osv.osv):
 		'codex_id': fields.integer('MySQL Product ID'),
 		'purchase_order_line_ids': fields.function(_purchase_order_line_ids, method=True, type="one2many",
 			string="Last Purchase", relation="purchase.order.line"),
-		'is_sup_bonus' : fields.boolean('Is Supplier Bonus'),
+		'is_sup_bonus' : fields.boolean('Product Bonus'),
 		#TEGUH@20180414 : ganti jenis field commision
 		'commission': fields.function(_product_commission, string="Commission", type='text', store=False),
 		#'commission': fields.char('Commission'),

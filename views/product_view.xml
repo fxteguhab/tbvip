@@ -145,6 +145,9 @@
 					<!--<field name="stock_unit_id"/>-->
 					<field name="categ_id" />
 				</field>
+				<field name="type" position="after">
+					<field name="is_sup_bonus"/>
+				</field>
 				<field name="product_manager" position="after">
 					<field name="brand_id" />
 				</field>
@@ -171,12 +174,14 @@
 						</field>
 					</page>
 				</notebook>
+				<!--
 				<div name="options" position="inside">
 					<div>
 						<field name="is_sup_bonus" class="oe_inline"/>
 						<label for="is_sup_bonus" string="Bonus Product"/>
 					</div>
 				</div>
+				-->
 				<group name="sale_condition" position="inside">
 					<label for="commission"/>
 					<div>
