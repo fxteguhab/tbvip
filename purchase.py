@@ -760,4 +760,10 @@ class procurement_order(osv.osv):
 	 	
 	 	return qty, current_price
 
+	def cron_auto_cancel_exception_procurements(self, cr, uid,context={}):
+	 	procurement_ids = self.search(cr, uid, [('state', '=', 'exception')], context=context)
+	 	self.write(cr, uid, procurement_ids, {
+		'state': 'cancel',
+		}, context=context)
+
 

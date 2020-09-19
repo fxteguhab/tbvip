@@ -66,8 +66,10 @@
 			<field name="inherit_id" ref="stock.view_template_property_form"/>
 			<field name="arch" type="xml">
 				<field name="virtual_available" position="after">
-					<field name ="min_qty" />
-					<field name ="max_qty" />
+					<group string="Stock Quantity Recommendation">
+							<field name ="min_qty" />
+							<field name ="max_qty" />
+					</group>			
 				</field>
 			</field>
 		</record>
@@ -199,10 +201,11 @@
 						<field name="last_sale_delta" readonly="1" class="oe_inline" style="vertical-align:baseline"/> days
 					</div>
 				</group>
-				-->
+				
 				<field name="sale_delay" position="attributes">
 					<attribute name="invisible">True</attribute>
-				</field>			
+				</field>
+				-->			
 			</field>
 		</record>
 
