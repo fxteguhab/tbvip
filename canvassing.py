@@ -62,6 +62,9 @@ class canvassing_canvas(osv.osv):
 		'is_recalculated'		: fields.boolean('Is Recalculated?', search=False),
 		'interbranch_move_ids'	: fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
 		'max_load_time' 		: fields.function(_max_load_time, type='char',string='Max Load Time'), 
+
+		'date_depart': fields.datetime('Date Depart'),
+		'date_delivered': fields.datetime('Date Delivered'),
 	}
 
 	_defaults = {
@@ -378,6 +381,23 @@ class canvasssing_canvas_stock_line(osv.Model):
 					sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
 					result[line.id] = sale_order.kecamatan.name	
 		return result
+
+	def _fill_partner_id(self, cr, uid, context=None):
+		line_ids = self.search(cr, uid, [('partner_id','=',False)])
+		for line in self.browse(cr, uid, line_ids, context=context):
+			if line.stock_picking_id:
+				sale_order_obj = self.pool('sale.order')
+				sale_order_id = sale_order_obj.search(cr,uid,[('name', '=', line.stock_picking_id.origin)], limit=1)
+				if len(sale_order_id) > 0:
+					sale_order = sale_order_obj.browse(cr, uid, sale_order_id[0])
+					partner_id = sale_order.partner_id.id
+					if partner_id:
+						self.write(cr, uid, [line.id], {
+						'partner_id': partner_id,
+						})
+
+					
+
 
 	_columns = {
 		'sales_order_id': fields.function(_sales_order_id, type='many2one', relation='sale.order',string='Sales Order'),

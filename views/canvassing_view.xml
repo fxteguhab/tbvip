@@ -171,6 +171,7 @@
 					<group string="Group by">
 						<filter string="Stock Pickings"  name="filter_canvas_line_stock_pickings" context="{'group_by':'stock_picking_id'}"/>
 						<filter string="Kecamatan"  name="filter_canvas_line_kecamatan" context="{'group_by':'kecamatan'}"/>
+						<filter string="Partner"  name="filter_canvas_line_kecamatan" context="{'group_by':'partner_id'}"/>
 						<filter string="Address"  name="filter_canvas_line_address" context="{'group_by':'address'}"/>
 						<filter string="Vehicle"  name="filter_canvas_line_vehicle" context="{'group_by':'vehicle_id'}"/>
 					</group>
