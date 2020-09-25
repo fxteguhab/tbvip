@@ -63,8 +63,8 @@ class canvassing_canvas(osv.osv):
 		'interbranch_move_ids'	: fields.one2many('canvassing.canvas.interbranch.line', 'canvas_id', 'Interbranch Canvas Lines'),
 		'max_load_time' 		: fields.function(_max_load_time, type='char',string='Max Load Time'), 
 
-		'date_depart': fields.datetime('Date Depart'),
-		'date_delivered': fields.datetime('Date Delivered'),
+		'date_depart'			: fields.datetime('Date Depart'),
+		'date_delivered'		: fields.datetime('Date Delivered'),
 	}
 
 	_defaults = {
