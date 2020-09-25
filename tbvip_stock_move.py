@@ -8,8 +8,8 @@ from openerp import SUPERUSER_ID, api
 # TEGUH@20180329 : Tambah state otw,delivered
 _INTERBRANCH_STATE = [
 	('draft', 'Draft'),
-	('request', 'Request'),
-	('ready','Ready'),
+	('request', 'Request Transfer'),
+	('ready','Ready To Transfer'),
 	('otw', 'OnTheWay'),
 	('delivered', 'Delivered'),
 	('accepted', 'Accepted'),
