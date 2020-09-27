@@ -192,6 +192,7 @@ class purchase_order(osv.osv):
 		"""
 		#return result
 	
+	'''
 	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
 	# supaya kalau sudah set partner lalu set payment term, bila lalu ganti partner lagi
 	# payment term supaya tetap (jangan diganti)
@@ -205,6 +206,7 @@ class purchase_order(osv.osv):
 			if not payment_term_id:
 				values.pop('payment_term_id')
 		return result
+	'''
 	
 	#TEGUH20180409 : override merge method, 
 	#sebelumnya error 'nyangkut' di price list type id
