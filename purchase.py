@@ -192,7 +192,7 @@ class purchase_order(osv.osv):
 		"""
 		#return result
 	
-	'''
+	
 	def onchange_partner_id(self, cr, uid, ids, partner_id, context=None):
 	# supaya kalau sudah set partner lalu set payment term, bila lalu ganti partner lagi
 	# payment term supaya tetap (jangan diganti)
@@ -200,13 +200,21 @@ class purchase_order(osv.osv):
 	# di atas)
 		if not partner_id: return {}
 		result = super(purchase_order, self).onchange_partner_id(cr, uid, ids, partner_id, context)
+		#print("result:")+str(result)
+		warning = result.get('warning',False)
+		if warning: 
+			result['value']['fiscal_position'] = False
+			#print("new result:")+str(result)
+			return result
 		values = result.get('value', False)
 		if values:
+			#print("values:")+str(values)
 			payment_term_id = values.get('payment_term_id', False)
+			#print "payment_term_id:"+str(payment_term_id)
 			if not payment_term_id:
 				values.pop('payment_term_id')
 		return result
-	'''
+	
 	
 	#TEGUH20180409 : override merge method, 
 	#sebelumnya error 'nyangkut' di price list type id
@@ -735,6 +743,7 @@ class procurement_order(osv.osv):
 
 	 	data_obj = self.pool.get('ir.model.data')
 		price_type_id = data_obj.get_object(cr, uid, 'tbvip', 'tbvip_normal_price_buy').id
+		#print "product_name:"+str(procurement.product_id.name_template)
 		current_discount = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="disc", context=context)	
 		current_price = self.pool.get('product.current.price').get_current(cr, uid, product_id, price_type_id, uom_id, partner_id=partner_id, field="price", context=context)
 
