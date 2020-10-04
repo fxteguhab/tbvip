@@ -1,6 +1,7 @@
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
 from datetime import datetime, timedelta
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from openerp import api
 
 # ==========================================================================================================================
@@ -501,6 +502,19 @@ class stock_inventory(osv.osv):
 			'target': 'self',
 		}
 
+	def cron_autocancel_expired_stock_opname(self, cr, uid, context=None):
+		"""
+		Autocancel expired stock inventory based on expiration_date and today's time
+		"""
+		today = datetime.now().strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+	# Pool every stock.inventory with draft or confirmed state
+		stock_inventory_ids = self.search(cr, uid, [
+			('state', 'in', ['draft', 'confirm']),  # draft or in progress
+			('expiration_date', '<', today),
+			('is_override', '=', False),
+		])
+		self.action_cancel_inventory(cr, uid, stock_inventory_ids, context)
+
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
@@ -512,12 +526,32 @@ class stock_picking(osv.osv):
 	
 	_inherit = 'stock.picking'
 	
+
+	def _default_wh_dest_id(self, cr, uid, context={}):
+		branch_obj = self.pool.get('tbvip.branch')
+		user_data = self.pool['res.users'].browse(cr, uid, uid)
+
+		location_id =  branch_obj.browse(cr, uid, user_data.branch_id.id)[0].default_incoming_location_id.id or None
+		return location_id
+
+	def onchange_wh_dest_id(self, cr, uid, ids, wh_dest_id, context=None):
+		for picking in self.browse(cr, uid, ids, context=context):
+			for move in picking.move_lines:
+				move.location_dest_id = wh_dest_id
+		return
+
 # COLUMNS ---------------------------------------------------------------------------------------------------------------
 	
 	_columns = {
 		'related_sales_bon_number': fields.char("Nomor Bon", readonly=True),
 		'interbranch_move_id': fields.many2one('tbvip.interbranch.stock.move', 'Related Interbranch Transfer', search=False, ondelete="cascade"),
+		'wh_dest_id':fields.many2one('stock.location', 'Destination Location', states={'done': [('readonly', True)]}, domain=[('usage', '=', 'internal')]),
 	}
+
+	_defaults = {
+		'wh_dest_id': _default_wh_dest_id,
+	}
+
 	
 	@api.model
 	def name_search(self, name, args=None, operator='ilike', limit=100):

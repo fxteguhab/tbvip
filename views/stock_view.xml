@@ -61,6 +61,9 @@
 				<field name="state" position="attributes">
 					<attribute name = "statusbar_visible">"draft,assigned,done"</attribute>
 				</field>
+				<field name="partner_id" position="after">
+					<field name ="wh_dest_id" on_change="onchange_wh_dest_id(wh_dest_id)" options="{'no_create': 1}"/>
+				</field>
 			</field>
 		</record>
 
