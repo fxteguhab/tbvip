@@ -151,7 +151,13 @@
 					<filter name="group_by_journal_id" string="Journal" domain="[]" context="{'group_by':'journal_id'}"/>
 				</filter>
 				<xpath expr="//filter[@string='Due Month']" position="replace" />
+				<xpath expr="//filter[@string='Period']" position="replace" />
 				<xpath expr="//group[@string='Group By']" position="after">
+					<group string="Invoice Date">
+						<filter string="Month" context="{'group_by':'date_invoice:month'}" />
+						<filter string="Week" context="{'group_by':'date_invoice:week'}" />
+						<filter string="Day" context="{'group_by':'date_invoice:day'}" />
+					</group>
 					<group string="Due Date">
 						<filter string="Month" context="{'group_by':'date_due:month'}" />
 						<filter string="Week" context="{'group_by':'date_due:week'}" />
