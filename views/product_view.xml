@@ -411,7 +411,7 @@
 				</xpath>
 				<field name="name" position="after">
 					<field name = "product_current_stock" />
-					<field name = "rank" />
+					<field name = "ranking" />
 				</field>
 			</field>
 		</record>

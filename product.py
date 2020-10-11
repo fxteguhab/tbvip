@@ -240,6 +240,7 @@ class product_template(osv.osv):
 		'max_qty': fields.float("Max Qty", group_operator="avg"),
 		'is_stock_exhausted' : fields.boolean(compute = '_get_is_stock_exhausted', string="Stock Exhausted", store=True),
 		'is_stock_overstock' : fields.boolean(compute = '_get_is_stock_overstock', string="Over Stock", store=True),
+		'ranking': fields.integer('Rank'),
 	}
 
 	_sql_constraints = [
@@ -283,6 +284,7 @@ class product_product(osv.osv):
 			})	
 
 	def cron_product_rank(self, cr, uid, context={}):
+		
 		sale_order_obj = self.pool.get('sale.order')
 		config_param_obj = self.pool.get('ir.config_parameter')
 		
@@ -313,9 +315,27 @@ class product_product(osv.osv):
 		rank = 1
 		for product in product_array_sorted:
 			self.write(cr, uid, product['product_id'], {
-				'rank': rank,
+				'ranking': rank,
 			}, context=context)
 			rank += 1
+		'''
+		config_param_obj = self.pool.get('ir.config_parameter')
+		today = datetime.now() 
+		purchase_needs_latest_sale_days = int(config_param_obj.get_param(cr, uid, 'product_rank_days', '30'))
+		last_sale_date = today + timedelta(days=-purchase_needs_latest_sale_days)
+		
+		cr.execute("""
+					SELECT product_id, SUM(product_uos_qty) as sales 
+					FROM sale_order_line 
+					WHERE create_date BETWEEN '%s' AND  '%s'
+					GROUP BY product_id
+					ORDER BY sales DESC
+					""" % (last_sale_date.strftime('%Y-%m-%d'),today.strftime('%Y-%m-%d')))		
+		product_ids = []
+		for row in cr.dictfetchall():
+			product_ids.append(row['product_id'])	
+		product_product = product_product_obj.browse(cr, uid, product_ids)
+		'''
 		return True
 
 	def _invoice_count(self, cr, uid, ids, field_name, arg, context=None):
@@ -351,7 +371,7 @@ class product_product(osv.osv):
 
 	_columns = {
 		'variant_codex_id': fields.integer('MySQL Variant Product ID'),
-		'rank': fields.integer('Rank'),
+		'ranking': fields.integer('Rank'),
 		'invoice_count': fields.function(_invoice_count, string='# Invoices', type='integer'),
 		'stock_opname_count': fields.function(_stock_opname_count, string='# Stock Opname', type='integer'),
 	}
@@ -384,7 +404,7 @@ class ProductSupplierinfo(osv.osv):
 	_inherit = 'product.supplierinfo'
 
 	_columns = {
-			'rank' : fields.integer(related = "product_tmpl_id.product_variant_ids.rank", string ="Rank", store= True),
+			'ranking' : fields.integer(related = "product_tmpl_id.product_variant_ids.ranking", string ="Rank", store= True),
 			'product_current_stock' : fields.text(related = "product_tmpl_id.product_current_stock", string ="Stock", store= True),
 			#'sales_count' : fields.integer(related = "product_tmpl_id.product_current_stock", string ="Stock", store= True),
 		}
