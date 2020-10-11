@@ -407,7 +407,7 @@
 			<field name="inherit_id" ref="product_by_supplier.view_product_supplierinfo_tree1"/>
 			<field name="arch" type="xml">
 				<xpath expr="//tree[1]" position="attributes">
-					<attribute name="context">{'default_order':'rank desc'} </attribute>
+					<attribute name="context">{'default_order':'ranking desc'} </attribute>
 				</xpath>
 				<field name="name" position="after">
 					<field name = "product_current_stock" />
