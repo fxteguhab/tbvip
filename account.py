@@ -148,6 +148,7 @@ class account_invoice(osv.osv):
 					active_campaign.current_achievement = 0
 					for target in targets:
 						if (remainder >= target.target_amount):
+							if target.target_amount == 0 : target.target_amount = 1
 							target.achievement_counter =  remainder // target.target_amount
 							active_campaign.current_achievement += target.achievement_counter 
 							remainder = remainder % target.target_amount	
