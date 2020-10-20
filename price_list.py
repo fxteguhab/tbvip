@@ -250,7 +250,7 @@ class price_list_line_product(osv.osv):
 class price_list_line_category(osv.osv):
 	_inherit = 'price.list.line.category'
 
-	_max_discount = 3
+	_max_discount = 5
 	
 	_columns = {
 		'disc_1':fields.char('Disc 1'),
@@ -310,7 +310,7 @@ class price_list_line_category(osv.osv):
 class product_current_price(osv.osv):
 	_inherit = 'product.current.price'
 
-	_max_discount = 3
+	_max_discount = 5
 
 	_columns = {
 		'disc_1':fields.char('Disc 1'),
