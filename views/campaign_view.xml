@@ -74,6 +74,43 @@
 			</field>
 		</record>
 		
+		<record id="tbvip_campaign_search" model="ir.ui.view">
+			<field name="name">tbvip.campaign.search</field>
+			<field name="model">tbvip.campaign</field>
+			<field name="arch" type="xml">
+				<search>
+					<group string="Group by">
+						<filter string="Partner" name="partner" domain="[]"
+								context="{'group_by': 'partner_id'}"/>
+						<filter string="State" name="state" domain="[]"
+								context="{'group_by': 'state'}"/>
+					</group>
+
+					<group string="Filter by Start Date">
+						<filter string="Year" name="start_date_year" domain="[]"
+								context="{'group_by': 'date_start:year'}"/>
+						<filter string="Month" name="start_date_month" domain="[]"
+								context="{'group_by': 'date_start:month'}"/>
+						<filter string="Week" name="start_date_week" domain="[]"
+								context="{'group_by': 'date_start:week'}"/>
+						<filter string="Day" name="start_date_day" domain="[]"
+								context="{'group_by': 'date_start:day'}"/>
+					</group>
+					
+					<group string="Filter by End Date">
+						<filter string="Year" name="end_date_year" domain="[]"
+								context="{'group_by': 'date_end:year'}"/>
+						<filter string="Month" name="end_date_month" domain="[]"
+								context="{'group_by': 'date_end:month'}"/>
+						<filter string="Week" name="end_date_week" domain="[]"
+								context="{'group_by': 'date_end:week'}"/>
+						<filter string="Day" name="end_date_day" domain="[]"
+								context="{'group_by': 'date_end:day'}"/>
+					</group>
+				</search>
+			</field>		
+		</record>
+
 		<record model="ir.ui.view" id="tbvip_campaign_category_line_tree">
 			<field name="name">tbvip.campaign.category.line.tree</field>
 			<field name="model">tbvip.campaign.category.line</field>
@@ -109,6 +146,7 @@
 					<field name="reward_type"/>
 					<field name="reward_amount"/>
 					<field name="reward_desc"/>
+					<field name="required_amount"/>
 					<field name="achievement_counter" readonly="True"/>
 				</tree>
 			</field>
@@ -122,14 +160,15 @@
 					<field name="invoice_id"/>
 					<field name="invoice_date"/>
 					<field name="invoice_origin"/>
-					<field name="qty"/>
+					<field name="price_unit"/>
 					<field name="discount_string"/>
+					<field name="price_unit_nett"/>
+					<field name="qty"/>
 					<field name="invoice_ref"/>
 					<field name="amount"/>
 				</tree>
 			</field>
 		</record>
-
 
 	</data>
 </openerp>

@@ -155,6 +155,7 @@ class tbvip_campign(osv.osv):
 			invoice_id = campaign_invoice_line.invoice_id.id
 			product_id = campaign_invoice_line.product_id.id
 			price_unit = campaign_invoice_line.price_unit
+			price_unit_nett = campaign_invoice_line.price_unit_nett
 			invoice_date = campaign_invoice_line.write_date
 			product_name = campaign_invoice_line.name
 			invoice_number = campaign_invoice_line.origin
@@ -184,7 +185,7 @@ class tbvip_campign(osv.osv):
 					#weight = product_category.tonnage
 
 			current_amount = 0
-			if active_campaign.measure == 'value': current_amount = (qty * price_unit)
+			if active_campaign.measure == 'value': current_amount = (qty * price_unit_nett)
 			elif active_campaign.measure == 'poin': current_amount = ((qty // min_qty) * poin)
 			elif active_campaign.measure == 'tonase': current_amount = (qty * weight)
 			elif active_campaign.measure == 'qty': current_amount = qty
@@ -198,6 +199,8 @@ class tbvip_campign(osv.osv):
 						target.achievement_counter += remainder // target.target_amount
 						active_campaign.current_achievement += remainder // target.target_amount
 						remainder = remainder % target.target_amount
+					else:
+						target.required_amount = target.target_amount - remainder
 
 			invoice_line_id.create(cr, uid, {
 				'campaign_id': campaign_id,
@@ -205,6 +208,8 @@ class tbvip_campign(osv.osv):
 				'invoice_date': invoice_date,
 				'invoice_origin':invoice_number,
 				'discount_string':discount_string,
+				'price_unit' : price_unit,
+				'price_unit_nett' : price_unit_nett,
 				'qty':qty,
 				'invoice_ref': product_name,
 				'amount': current_amount,
@@ -218,6 +223,8 @@ class tbvip_campign(osv.osv):
 					target.achievement_counter =  remainder // target.target_amount
 					active_campaign.current_achievement += target.achievement_counter 
 					remainder = remainder % target.target_amount
+				else:
+					target.required_amount = target.target_amount - remainder
 
 		active_campaign.residual = remainder
 
@@ -262,6 +269,7 @@ class tbvip_campign_target_line(osv.osv):
 	_columns = {
 		'campaign_id': fields.many2one('tbvip.campaign', 'Campaign', required=True, ondelete="cascade"),
 		'target_amount': fields.float('Target Amount', required=True), 
+		'required_amount': fields.float('Required Amount'), 
 		'reward_type': fields.selection(_REWARD_TYPE_, 'Reward Type', required=True),
 		'reward_amount' : fields.char('Reward Amount', required=True), 
 		'reward_desc':fields.char('Reward Desc'),
@@ -278,6 +286,8 @@ class tbvip_campign_invoice_line(osv.osv):
 		'invoice_id': fields.many2one('account.invoice', 'Invoice(s)', required=True, ondelete='restrict'),
 		'invoice_date' : fields.date('Invoice Date', required=True),
 		'invoice_origin':fields.char('Origin'),
+		'price_unit': fields.float(string = 'Unit Price'),
+		'price_unit_nett': fields.float(string = 'Unit Price (Nett)'),
 		'qty' : fields.float('Qty'),
 		'discount_string' : fields.char('Discount'),
 		'invoice_ref' : fields.char('Product'),
