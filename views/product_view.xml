@@ -165,7 +165,7 @@
 					<label for="product_current_stock"/>
 					<div>
 						<field name="product_current_stock" class="oe_inline" readonly="1"/>
-						<button name="332" string="⇒ Update" type="action" class="oe_link"/>
+						<button name="%(stock.action_view_change_product_quantity)d" string="⇒ Update" type="action" class="oe_link"/>
 					</div>
 				</field>
 				<notebook position="inside">
@@ -400,13 +400,14 @@
 			<field name="view_id" ref="stock_opname_list"/>
 		</record>
 
+		<!--
 		<record id="view_product_supplierinfo_tree1_inherit" model="ir.ui.view">
 			<field name="name">product.supplierinfo.tree1.inherit</field>
 			<field name="model">product.supplierinfo</field>
 			<field name="priority">90</field>
 			<field name="inherit_id" ref="product_by_supplier.view_product_supplierinfo_tree1"/>
 			<field name="arch" type="xml">
-				<xpath expr="//tree[1]" position="attributes">
+				xpath expr="//tree[1]" position="attributes">
 					<attribute name="context">{'default_order':'ranking desc'} </attribute>
 				</xpath>
 				<field name="name" position="after">
@@ -415,6 +416,7 @@
 				</field>
 			</field>
 		</record>
+		-->
 
 		<record id="view_stock_product_tree_inherit3" model="ir.ui.view">
 			<field name="name">product.stock.tree.inherit3</field>
