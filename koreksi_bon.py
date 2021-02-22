@@ -85,7 +85,7 @@ class koreksi_bon(osv.osv_memory):
 			}
 		return
 	
-	def _refund_invoice(self, cr, uid, invoice_ids, context=None):
+	def _refund_invoice(self, cr, uid, invoice_ids, cash_payment,edc_payment,transfer_payment,context=None):
 		"""
 		 Fungsi ini didapat dari account_invoice_refund dan dimodifikasi
 		 Fungsi ini menggunakan filter_refund = 'cancel'
@@ -145,14 +145,18 @@ class koreksi_bon(osv.osv_memory):
 					writeoff_acc_id=inv.account_id.id
 				)
 
+			inv_obj.write(cr, uid, invoice_ids, {
+				'state': 'cancel'
+			}, context=context)
+
 			#### revoke journal untuk kas laci#######################################################################
 			journal_entry_obj = self.pool.get('account.move')
 			journal_obj = self.pool.get('account.journal')
 			user_obj = self.pool.get('res.users')
 			cashier = user_obj.browse(cr, uid, uid)
 
-			branch_id = cashier.branch_id.id
-			branch_data = self.pool['tbvip.branch'].browse(cr,uid,branch_id)
+			branch_id = cashier.branch_id
+			branch_data = self.pool['tbvip.branch'].browse(cr,uid,branch_id.id)
 			branch_employee = branch_data.employee_list
 			journal_retur_id = None
 			for employee in branch_employee:
@@ -165,32 +169,80 @@ class koreksi_bon(osv.osv_memory):
 				journal_retur_id = cashier.branch_id.default_journal_sales_retur.id
 			'''
 
-			journal_retur =  journal_obj.browse(cr, uid, journal_retur_id, context=context)
-			name = 'REVOKE '+inv.name
-			entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
-			entry_data['line_id'] = [
-				[0,False,{
-					'name': name, 
-					'account_id': journal_retur.default_credit_account_id.id,
-					'credit': inv.amount_total, #vals.get('amount', 0),
-					'debit': 0,
-					'partner_id' : cashier.partner_id.id,
-				}],
-				[0,False,{
-					'name': name, 
-					'account_id': journal_retur.default_debit_account_id.id, 
-					'debit': inv.amount_total, 
-					'credit': 0,
-					'partner_id' : inv.commercial_partner_id.id,
-				}],
-			]
+			if (cash_payment > 0):
+				journal_retur =  journal_obj.browse(cr, uid, journal_retur_id, context=context)
+				name = 'REVOKE '+inv.name
+				entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
+				entry_data['line_id'] = [
+					[0,False,{
+						'name': name, 
+						'account_id': journal_retur.default_credit_account_id.id,
+						'credit': cash_payment, #inv.amount_total, #vals.get('amount', 0),
+						'debit': 0,
+						'partner_id' : cashier.partner_id.id,
+					}],
+					[0,False,{
+						'name': name, 
+						'account_id': journal_retur.default_debit_account_id.id, 
+						'debit': cash_payment, #inv.amount_total, 
+						'credit': 0,
+						'partner_id' : inv.commercial_partner_id.id,
+					}],
+				]
 
-			new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
-			journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
+				new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+				journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
+
+
+			if (edc_payment > 0):
+				journal_retur =  journal_obj.browse(cr, uid, journal_retur_id, context=context)
+				name = 'REVOKE '+inv.name
+				entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
+				entry_data['line_id'] = [
+					[0,False,{
+						'name': name, 
+						'account_id': branch_id.default_account_bank.id,
+						'credit': edc_payment, #vals.get('amount', 0),
+						'debit': 0,
+						'partner_id' : cashier.partner_id.id,
+					}],
+					[0,False,{
+						'name': name, 
+						'account_id': journal_retur.default_debit_account_id.id, 
+						'debit': edc_payment, 
+						'credit': 0,
+						'partner_id' : inv.commercial_partner_id.id,
+					}],
+				]
+
+				new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+				journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
+
+
+			if (transfer_payment > 0):
+				journal_retur =  journal_obj.browse(cr, uid, journal_retur_id, context=context)
+				name = 'REVOKE '+inv.name
+				entry_data = journal_entry_obj.account_move_prepare(cr, uid, journal_retur.id, date=date, ref=name)
+				entry_data['line_id'] = [
+					[0,False,{
+						'name': name, 
+						'account_id': branch_id.default_account_bank.id,
+						'credit': transfer_payment, #vals.get('amount', 0),
+						'debit': 0,
+						'partner_id' : cashier.partner_id.id,
+					}],
+					[0,False,{
+						'name': name, 
+						'account_id': journal_retur.default_debit_account_id.id, 
+						'debit': transfer_payment, 
+						'credit': 0,
+						'partner_id' : inv.commercial_partner_id.id,
+					}],
+				]
+				new_entry_id = journal_entry_obj.create(cr, uid, entry_data, context=context)
+				journal_entry_obj.post(cr, uid, [new_entry_id], context=context)
 			
-			inv_obj.write(cr, uid, invoice_ids, {
-				'state': 'cancel'
-			}, context=context)
+			
 			return
 	
 	def action_save_koreksi_bon(self, cr, uid, ids, context=None):
@@ -226,7 +278,7 @@ class koreksi_bon(osv.osv_memory):
 			if total_paid==0:
 				account_invoice_cancel_obj.invoice_cancel(cr, uid, [], context={'active_ids':sale_order.invoice_ids.ids})
 			else:
-				self._refund_invoice(cr, uid, sale_order.invoice_ids.ids, context)
+				self._refund_invoice(cr, uid, sale_order.invoice_ids.ids,  sale_order.payment_cash_amount, sale_order.payment_receivable_amount,sale_order.payment_transfer_amount,context)
 			
 			# cancel picking
 			# action_cancel cannot be used because stock picking state is done, instead create return stock picking
