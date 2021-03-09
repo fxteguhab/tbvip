@@ -18,6 +18,7 @@
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_5']" position="replace" />
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='price_type_id']" position="after">
 					<field name="start_date" />
+					<field name="last_buy" />
 				</xpath>
 				<xpath expr="//field[@name='buy_prices']/tree/field[@name='uom_id_1']" position="before">
 					<field name="disc_1" />

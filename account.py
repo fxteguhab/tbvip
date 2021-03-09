@@ -176,6 +176,10 @@ class account_invoice(osv.osv):
 		invoice_id = context.get('invoice_id',0)
 		invoice_type = context.get('type',0)
 		price_unit = context.get('price_unit',0)
+		discount_string = context.get('discount_string','0')
+		partner_id = context.get('partner_id','')
+		uom_id = context.get('product_uom',0)
+		price_type_id = context.get('price_type_id',0)
 
 		if (price_unit_nett_old > 0) and (round(price_unit_nett_old) != round(price_unit_nett)):
 			account_invoice_obj = self.pool.get('account.invoice')
@@ -186,6 +190,8 @@ class account_invoice(osv.osv):
 				self.pool.get('product.product')._set_price(cr,uid,product_id,price_unit_nett,'standard_price') #catet last buy di standard_buy
 			if (invoice_type == 'out_invoice'): #sell
 				self.pool.get('product.product')._set_price(cr,uid,product_id,price_unit,'list_price')#catet last sell di list_price
+
+		self.pool.get('product.current.price').update_current(cr, uid, product_id, price_type_id, uom_id, partner_id, datetime.now(), price_unit,discount_string, context={})
 
 	def invoice_validate(self, cr, uid, ids, context=None):
 		result = super(account_invoice, self).invoice_validate(cr, uid, ids, context=context)

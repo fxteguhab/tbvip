@@ -327,8 +327,14 @@ class product_current_price(osv.osv):
 		#TEGUH@20180804 : tambah field categ_id
 		#'categ_id' : fields.char(related = "product_id.categ_id.name",string="Category",store=True)
 		'categ_id' : fields.char('Category', compute="_compute_category"),
+		'last_buy': fields.datetime('Last Buy'),
 	}
 	
+	
+	#_defaults = {
+	#	'last_buy': (datetime.now()).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+	#}
+
 	# METHODS ---------------------------------------------------------------------------------------------------------------	
 	@api.one
 	@api.depends('product_id')
@@ -399,7 +405,54 @@ class product_current_price(osv.osv):
 			self.pool.get('product.product')._set_price(cr,uid,product_id.id,nett_1,field)
 
 		return new_id
-	
+
+	def update_current(self, cr, uid, product_id, price_type_id, uom_id, partner_id, last_buy, price_1,disc_1, context={}):
+		if product_id and price_type_id and uom_id and partner_id and last_buy:
+			domain = [
+				('product_id', '=', product_id),
+				('price_type_id', '=', price_type_id),
+				('partner_id', '=', partner_id),
+				('uom_id_1', '=', uom_id),
+				('price_1', '=', price_1),
+				('disc_1', '=', disc_1),
+			]
+
+			product_current_price_ids = self.search(cr, uid, domain, 
+			#	order='start_date DESC',
+				order='id DESC', #last created price
+				context=context)
+			current_price = 0
+			if len(product_current_price_ids) > 0:
+				self.write(cr, uid, product_current_price_ids[0], {
+					'last_buy': last_buy,	
+				})
+'''
+	def update_all_last_buy(self, cr, uid, context):
+		#first time init only
+		invoice_lines_obj = self.pool.get('account.invoice.line')
+		for current_price in self:
+			invoice_line_ids = invoice_lines_obj.search(cr,uid, [
+				('product_id','=',current_price.product_id),
+				('partner_id','=',current_price.partner_id),
+				('uos_id','=',current_price.uom_id_1),
+				('price_type_id', '=', current_price.price_type_id),
+
+
+				],order='create_date DESC',context=context)
+			if len(invoice_line_ids) > 0:
+			invoice_line_id = invoice_lines_obj.browse(cr, uid, invoice_line_ids[0])
+
+			self.write(cr, uid, current_price.id, {
+					'last_buy': invoice_line_id.create_date,	
+					'price_1': invoice_line_id.price_unit,	
+					'disc_1'	: invoice_line_id.discount_string,
+				})
+'''
+
+
+				
+
+
 # OVERRIDE ------------------------------------------------------------------------------------------------------------------
 class product_template(osv.osv):
 	_inherit = 'product.template'
