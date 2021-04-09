@@ -121,6 +121,10 @@
 					<attribute name="invisible">context.get('simple_view', False)</attribute>
 				</xpath>
 
+				<field name="date_invoice" position="before">
+					<field name="create_date"/>
+				</field>
+
 			</field>
 		</record>
 
@@ -164,6 +168,12 @@
 						<filter string="Month" context="{'group_by':'date_due:month'}" />
 						<filter string="Week" context="{'group_by':'date_due:week'}" />
 						<filter string="Day" context="{'group_by':'date_due:day'}" />
+					</group>
+					<group string="Create Date">
+						<filter string="Year" context="{'group_by':'create_date:year'}" />
+						<filter string="Month" context="{'group_by':'create_date:month'}" />
+						<filter string="Week" context="{'group_by':'create_date:week'}" />
+						<filter string="Day" context="{'group_by':'create_date:day'}" />
 					</group>
 				</xpath>
 			</field>

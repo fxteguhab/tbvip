@@ -224,10 +224,15 @@ class account_invoice(osv.osv):
 			partner_id =  invoice_line.invoice_id.partner_id.id
 			origin = invoice_line.origin
 			quantity = invoice_line.quantity
+			qty_available = invoice_line.product_id.qty_available
 			invoice_date = invoice_line.write_date
 
 			invoice_type = invoice.type
 			invoice_number = ''
+
+			product_tmpl_id = invoice_line.product_id.product_tmpl_id.id
+
+
 			if invoice.type in ['in_invoice']: #if "buy"
 				#invoice_type = 'in_invoice'
 				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
@@ -258,6 +263,8 @@ class account_invoice(osv.osv):
 				'qty' : quantity,
 				'invoice_date' : invoice_date,
 				'bon_number' : bon_number,
+				'product_tmpl_id' : product_tmpl_id,
+				'qty_available' : qty_available,
 				}
 
 				#check for changes and send notif
