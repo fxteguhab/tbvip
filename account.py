@@ -231,7 +231,7 @@ class account_invoice(osv.osv):
 			invoice_number = ''
 
 			product_tmpl_id = invoice_line.product_id.product_tmpl_id.id
-
+			product_sku = invoice_line.product_id.product_tmpl_id.sku
 
 			if invoice.type in ['in_invoice']: #if "buy"
 				#invoice_type = 'in_invoice'
@@ -265,6 +265,7 @@ class account_invoice(osv.osv):
 				'bon_number' : bon_number,
 				'product_tmpl_id' : product_tmpl_id,
 				'qty_available' : qty_available,
+				'product_sku' : product_sku,
 				}
 
 				#check for changes and send notif
