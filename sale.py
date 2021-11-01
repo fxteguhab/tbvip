@@ -623,41 +623,56 @@ class sale_order_line(osv.osv):
 	
 # OVERRIDES ----------------------------------------------------------------------------------------------------------------
 	
-	#def create(self, cr, uid, vals, context={}):
-		#new_id = super(sale_order_line, self).create(cr, uid, vals, context)
-		#new_data = self.browse(cr, uid, new_id)
-		#product_obj = self.pool.get('product.current.commission')
-		#current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
-		#vals['commission'] = current_commission
-		#vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
-		#TEGUH@20180502 : tambah field disc
-		#disc = ''
-		#if vals.get('product_id', False) and vals.get('price_unit', False) and \
-		#	vals.get('price_type_id', False) and vals.get('product_uom', False):
-		#	self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-		#		vals['price_type_id'], vals['product_id'], vals['product_uom'], vals['price_unit'], disc,
-		#		partner_id=new_data.order_id.partner_id.id)
-
-		#return new_id
-	
-	#def write(self, cr, uid, ids, vals, context=None):
-	#	for id in ids:
-	#		vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
-		#for so_line in self.browse(cr, uid, ids):
-		#	product_id = so_line.product_id.id
-		#	price_type_id = so_line.price_type_id.id
-		#	product_uom = so_line.product_uom.id
-		#	price_unit = so_line.price_unit
+	def create(self, cr, uid, vals, context={}):
+		new_store_mode = self.pool.get('ir.config_parameter').get_param(cr, uid, 'new_store_mode','0')
+		if (new_store_mode == '1') and not vals.get('product_id',False):		
+			#product_obj = self.pool.get('product.current.commission')
+			#current_commission = product_obj.get_current_commission(cr, uid, vals['product_id'])
+			#vals['commission'] = current_commission
+			#vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, None)
 			#TEGUH@20180502 : tambah field disc
-			#disc = ''
-			#if vals.get('product_id', False): product_id = vals['product_id']
-			#if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
-			#if vals.get('product_uom', False): product_uom = vals['product_uom']
-			#if vals.get('price_unit', False): price_unit = vals['price_unit']
-			#self.pool.get('price.list')._create_product_current_price_if_none(
-			#	cr, uid, price_type_id, product_id, product_uom, price_unit, disc,
-			#	partner_id=so_line.order_id.partner_id.id)
-	#	return super(sale_order_line, self).write(cr, uid, ids, vals, context)
+
+			#create new product
+			product_name = vals.get('name','')
+			product_id = self.pool.get('product.template').create(cr, uid, {'name' : product_name },context=context)
+			vals['product_id'] = product_id + 1
+
+			new_id = super(sale_order_line, self).create(cr, uid, vals, context)
+			new_data = self.browse(cr, uid, new_id)
+			
+			#new price
+			disc = ''
+			if vals.get('product_id', False) and vals.get('price_unit', False) and \
+				vals.get('price_type_id', False) and vals.get('product_uom', False):
+				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+					vals['price_type_id'], product_id, vals['product_uom'], vals['price_unit'], disc,
+					partner_id=new_data.order_id.partner_id.id)
+
+			return new_id
+		else : super(sale_order_line, self).create(cr, uid, vals, context)
+	'''
+	def write(self, cr, uid, ids, vals, context=None):
+		new_store_mode = self.pool.get('ir.config_parameter').get_param(cr, uid, 'new_store_mode','0')
+		if (new_store_mode == '1') and not vals.get('product_id',False):	
+		#	for id in ids:
+		#		vals['commission_amount'] = self._calculate_commission_amount(cr, uid, vals, id)
+			for so_line in self.browse(cr, uid, ids):
+				product_id = so_line.product_id.id
+				price_type_id = so_line.price_type_id.id
+				product_uom = so_line.product_uom.id
+				price_unit = so_line.price_unit
+				#TEGUH@20180502 : tambah field disc
+				disc = ''
+				if vals.get('product_id', False): product_id = vals['product_id']
+				if vals.get('price_type_id', False): price_type_id = vals['price_type_id']
+				if vals.get('product_uom', False): product_uom = vals['product_uom']
+				if vals.get('price_unit', False): price_unit = vals['price_unit']
+				self.pool.get('price.list')._create_product_current_price_if_none(
+					cr, uid, price_type_id, product_id, product_uom, price_unit, disc,
+					partner_id=so_line.order_id.partner_id.id)
+		
+		return super(sale_order_line, self).write(cr, uid, ids, vals, context)
+	'''
 	
 	def unlink(self, cr, uid, ids, context=None):
 		result = super(sale_order_line, self).unlink(cr, uid, ids, context)
@@ -917,6 +932,9 @@ class sale_report(osv.osv):
 		'user_id': fields.many2one('res.users', 'Kasir', readonly=True),
 		'employee_id': fields.many2one('hr.employee', 'Employee', readonly=True),
 		'branch_id': fields.many2one('tbvip.branch', 'Branch', readonly=True),
+
+		#'cost_total': fields.float('Total Cost', readonly=True),
+		#'margin_total': fields.float('Total Margin', readonly=True),
 	}
 
 
