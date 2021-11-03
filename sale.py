@@ -634,22 +634,31 @@ class sale_order_line(osv.osv):
 
 			#create new product
 			product_name = vals.get('name','')
-			product_id = self.pool.get('product.template').create(cr, uid, {'name' : product_name },context=context)
-			vals['product_id'] = product_id + 1
-
-			new_id = super(sale_order_line, self).create(cr, uid, vals, context)
-			new_data = self.browse(cr, uid, new_id)
+			template_id = self.pool.get('product.template').create(cr, uid, {'name' : product_name },context = context)
+			print"template_id:"+str(template_id)
+			product_id = self.pool.get('product.product').search(cr, uid, [('product_tmpl_id','=',template_id)],limit = 1,context=context)[0]
 			
-			#new price
-			disc = ''
-			if vals.get('product_id', False) and vals.get('price_unit', False) and \
-				vals.get('price_type_id', False) and vals.get('product_uom', False):
-				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
-					vals['price_type_id'], product_id, vals['product_uom'], vals['price_unit'], disc,
-					partner_id=new_data.order_id.partner_id.id)
+			if (product_id):
+				print "product_id:"+str(product_id)
+				vals.update({
+					'product_id' : product_id,
+					})
+				
+				print "vals:"+str(vals)
 
+				new_id = super(sale_order_line, self).create(cr, uid, vals, context)
+				new_data = self.browse(cr, uid, new_id)
+				
+				#new price
+				disc = ''
+				if vals.get('product_id', False) and vals.get('price_unit', False) and \
+					vals.get('price_type_id', False) and vals.get('product_uom', False):
+					self.pool.get('price.list')._create_product_current_price_if_none(cr, uid,
+						vals['price_type_id'], product_id, vals['product_uom'], vals['price_unit'], disc,
+						partner_id=new_data.order_id.partner_id.id)
 			return new_id
-		else : super(sale_order_line, self).create(cr, uid, vals, context)
+		else: 
+			return super(sale_order_line, self).create(cr, uid, vals, context)
 	'''
 	def write(self, cr, uid, ids, vals, context=None):
 		new_store_mode = self.pool.get('ir.config_parameter').get_param(cr, uid, 'new_store_mode','0')
