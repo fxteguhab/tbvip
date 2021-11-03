@@ -47,7 +47,7 @@ class account_invoice(osv.osv):
 			"now and 50% in one month, but if you want to force a due date, make sure that the payment "
 			"term is not set on the invoice. If you keep the payment term and the due date empty, it "
 			"means direct payment."),
-		'supplier_invoice_number' : fields.char(string='Supplier Invoice Number', required=True,
+		'supplier_invoice_number' : fields.char(string='Supplier Invoice Number',
 			help="The reference of this invoice as provided by the supplier."),
 			#readonly=True, states={'draft': [('readonly', False)]})
 	}
@@ -235,11 +235,13 @@ class account_invoice(osv.osv):
 
 			if invoice.type in ['in_invoice']: #if "buy"
 				#invoice_type = 'in_invoice'
-				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
+				if (product_id):
+					self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=partner_id)
 
 			elif invoice.type in ['out_invoice']:	
 				#invoice_type = 'out_invoice'
-				self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=general_customer_id)
+				if (product_id):
+					self.pool.get('price.list')._create_product_current_price_if_none(cr, uid, price_type_id, product_id, product_uom, price_unit, discount_string,partner_id=general_customer_id)
 
 			ctx = {
 				'price_unit_nett_old' : price_unit_nett_old,

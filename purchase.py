@@ -762,7 +762,10 @@ class procurement_order(osv.osv):
 	 	qty = result[0]
 
 	 	data_obj = self.pool.get('ir.model.data')
-	 	partner_id = po_line.order_id.partner_id.id
+	 	if (po_line.order_id):
+	 		partner_id = po_line.order_id.partner_id.id
+	 	else:
+	 		partner_id = 0
 	 	product_id = procurement.product_id.id
 		uom_id = procurement.product_id.uom_po_id.id
 
