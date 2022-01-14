@@ -757,7 +757,44 @@ class procurement_order(osv.osv):
 	 	return result
 
 	def _calc_new_qty_price(self, cr, uid, procurement, po_line=None, cancel=False, context=None):
-	 	result = super(procurement_order, self)._calc_new_qty_price(cr, uid, procurement, po_line, cancel, context)
+		#ORIGINAL SECTION
+		if not po_line:
+			po_line = procurement.purchase_line_id
+
+		uom_obj = self.pool.get('product.uom')
+		qty = uom_obj._compute_qty(cr, uid, procurement.product_uom.id, procurement.product_qty,
+			procurement.product_id.uom_po_id.id)
+		if cancel:
+			qty = -qty
+
+		# Make sure we use the minimum quantity of the partner corresponding to the PO
+		# This does not apply in case of dropshipping
+		supplierinfo_min_qty = 0.0
+		if po_line.order_id.location_id.usage != 'customer':
+			if po_line.product_id.seller_id.id == po_line.order_id.partner_id.id:
+				supplierinfo_min_qty = po_line.product_id.seller_qty
+			else:
+				supplierinfo_obj = self.pool.get('product.supplierinfo')
+				supplierinfo_ids = supplierinfo_obj.search(cr, uid, [('name', '=', po_line.order_id.partner_id.id), ('product_tmpl_id', '=', po_line.product_id.product_tmpl_id.id)], limit = 1)
+				supplierinfo_min_qty = supplierinfo_obj.browse(cr, uid, supplierinfo_ids).min_qty
+
+		if supplierinfo_min_qty == 0.0:
+			qty += po_line.product_qty
+		else:
+			# Recompute quantity by adding existing running procurements.
+			for proc in po_line.procurement_ids:
+				qty += uom_obj._compute_qty(cr, uid, proc.product_uom.id, proc.product_qty,
+					proc.product_id.uom_po_id.id) if proc.state == 'running' else 0.0
+			qty = max(qty, supplierinfo_min_qty) if qty > 0.0 else 0.0
+
+		price = po_line.price_unit
+		if qty != po_line.product_qty:
+			pricelist_obj = self.pool.get('product.pricelist')
+			pricelist_id = po_line.order_id.partner_id.property_product_pricelist_purchase.id
+			price = pricelist_obj.price_get(cr, uid, [pricelist_id], procurement.product_id.id, qty, po_line.order_id.partner_id.id, {'uom': procurement.product_id.uom_po_id.id})[pricelist_id]
+
+		
+		#EDIT TAMBAHAN DI BAWAH INI 14012022
 	 	
 	 	qty = result[0]
 
