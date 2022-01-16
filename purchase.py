@@ -787,17 +787,15 @@ class procurement_order(osv.osv):
 					proc.product_id.uom_po_id.id) if proc.state == 'running' else 0.0
 			qty = max(qty, supplierinfo_min_qty) if qty > 0.0 else 0.0
 
+		'''
 		price = po_line.price_unit
 		if qty != po_line.product_qty:
 			pricelist_obj = self.pool.get('product.pricelist')
 			pricelist_id = po_line.order_id.partner_id.property_product_pricelist_purchase.id
 			price = pricelist_obj.price_get(cr, uid, [pricelist_id], procurement.product_id.id, qty, po_line.order_id.partner_id.id, {'uom': procurement.product_id.uom_po_id.id})[pricelist_id]
-
+		'''
 		
 		#EDIT TAMBAHAN DI BAWAH INI 14012022
-	 	
-	 	qty = result[0]
-
 	 	data_obj = self.pool.get('ir.model.data')
 	 	if (po_line.order_id):
 	 		partner_id = po_line.order_id.partner_id.id
