@@ -319,9 +319,29 @@ class sale_order(osv.osv):
 
 	def action_button_confirm(self, cr, uid, ids, context=None):
 
+		############################################################################################################
+		#
+		#            ORIGINAL TBVIP SALE PART 
+		#
+		############################################################################################################
 		invoice_obj = self.pool.get('account.invoice')
 		picking_obj = self.pool.get('stock.picking')
+
+		##################################################################################################
+		#
+		#
+		#tambahan dari account receivable limit
+		partner_obj = self.pool.get('res.partner')
+
+		##################################################################################################
+		#
+		# 	TAMBAHAN DARI TBVIP POINT PAYROL
+		# input points
+		employee_point_obj = self.pool.get('hr.point.employee.point')
+		employee_obj = self.pool.get('hr.employee')
+
 		result = super(sale_order, self).action_button_confirm(cr, uid, ids, context)
+
 		for sale in self.browse(cr, uid, ids):
 			if sale.bon_number and sale.date_order:
 				self._update_bon_book(cr, uid, sale.bon_number, sale.date_order)
@@ -338,18 +358,63 @@ class sale_order(osv.osv):
 					picking_obj.write(cr, uid,stock_picking_id, {'min_date': sale.delivery_date})
 				# Make invoice open
 				invoice_obj.signal_workflow(cr, uid, sale.invoice_ids.ids, 'invoice_open', context)
-				order = sale
+				#order = sale
 
 				#sale_discount = float(order.sale_discount)
-				self._make_payment(cr, uid, order.partner_id, order.payment_transfer_amount, 'transfer', order.invoice_ids[0].id, journal_id=order.payment_transfer_journal.id)
-				self._make_payment(cr, uid, order.partner_id, order.payment_cash_amount, 'cash', order.invoice_ids[0].id, journal_id=order.payment_cash_journal.id)
-				self._make_payment(cr, uid, order.partner_id, order.payment_receivable_amount, 'receivable', order.invoice_ids[0].id, journal_id=order.payment_receivable_journal.id)
-				self._make_payment(cr, uid, order.partner_id, order.payment_giro_amount, 'giro', order.invoice_ids[0].id, journal_id=order.payment_giro_journal.id)
+				self._make_payment(cr, uid, sale.partner_id, sale.payment_transfer_amount, 'transfer', sale.invoice_ids[0].id, journal_id=sale.payment_transfer_journal.id)
+				self._make_payment(cr, uid, sale.partner_id, sale.payment_cash_amount, 'cash', sale.invoice_ids[0].id, journal_id=sale.payment_cash_journal.id)
+				self._make_payment(cr, uid, sale.partner_id, sale.payment_receivable_amount, 'receivable', sale.invoice_ids[0].id, journal_id=sale.payment_receivable_journal.id)
+				self._make_payment(cr, uid, sale.partner_id, sale.payment_giro_amount, 'giro', sale.invoice_ids[0].id, journal_id=sale.payment_giro_journal.id)
 			else:
 				raise osv.except_orm(_('Invoice No Empty'), _('You must fill Invoice No.'))
 			
 			if not sale.employee_id:
 				raise osv.except_orm(_('Employee Empty'), _('Employee Name Error'))	
+
+			################################################################################################
+			#
+			#		TAMBAHAN dari ACCOUNT RECEIVABLE LIMIT
+			#
+			###############################################################################################
+			if partner_obj.is_credit_overlimit(cr, uid, sale.partner_id.id, sale.amount_total, context):
+				if sale.partner_id.is_overlimit_enabled:
+					self.write(cr, uid, [sale.id], {
+						'is_receivable_overlimit': True,
+						})
+				else:
+					raise osv.except_osv(_('Warning!'), _('Credit is / will be over-limit.'))
+
+			################################################################################################
+			#
+			#		TAMBAHAN dari TBVIP PAINT PAYROLL
+			#
+			###############################################################################################
+			value = sale.amount_total
+			row_count = len(sale.order_line)
+			qty_sum = 0
+			#TEGUH @20180330 : tambah variable branch_id
+			branch = sale.branch_id.name
+			#TEGUH @20180330 : tambah variable cust_name untuk factor CUSTOMER_NAME, spy bisa add point berdasarkan (nama)customer
+			cust_name = sale.partner_id.display_name
+			for line in sale.order_line:
+				qty_sum += line.product_uom_qty
+			
+			# sales confirm (who confirm and employee responsible for the sales)
+			employee_point_obj.input_point(cr, uid,
+				event_date=sale.date_order,
+				activity_code='SALES',
+				roles={
+					'ADM': [employee_obj.get_employee_id_from_user(cr, uid, uid, context=context)],
+					'EMP': [sale.employee_id.id],
+				},
+				required_parameters={
+					'BON_VALUE': value,
+					'BON_QTY_SUM': qty_sum,
+					'BON_ROW_COUNT': row_count,
+					'CUSTOMER_NAME' : cust_name,
+				},
+				reference='Sales Order - {}'.format(sale.name),
+				context=context)
 			
 		return result
 
